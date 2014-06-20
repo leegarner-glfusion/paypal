@@ -1,4 +1,5 @@
 <?php
+//  $Id: currency.class.php 7511 2014-06-10 21:28:44Z lgarner $
 /**
 *   Class to handle currency display
 *
@@ -267,7 +268,6 @@ class ppCurrency
             $from_Currency = urlencode($fromCurrency);
             $to_Currency = urlencode($toCurrency);
 
-            //$url = "http://www.google.com/finance/converter?a=1from=$from_Currency&to=$to_Currency";
             $url = "http://download.finance.yahoo.com/d/quotes.csv?s={$from_Currency}{$to_Currency}=X&f=l1";
             $timeout = 0;
             $ch = curl_init();
@@ -276,12 +276,8 @@ class ppCurrency
             curl_setopt ($ch, CURLOPT_USERAGENT,
                  "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)");
             curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-            //$rawdata = curl_exec($ch);
             $data = curl_exec($ch);
             curl_close($ch);
-            //$data = explode('bld>', $rawdata);
-            //$data = explode($to_Currency, $data[1]);
-            //        return round($data[0], 2);
             if (!isset($rates[$fromCurrency])) $rates[$fromCurrency] = array();
             $rates[$fromCurrency][$toCurrency] = trim($data);
         }

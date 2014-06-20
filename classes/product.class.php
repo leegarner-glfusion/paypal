@@ -602,9 +602,6 @@ class Product
 
         $T->set_var(array(
             'post_options'  => $post_options,
-            //'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
-            'gltoken_name'  => CSRF_TOKEN,
-            'gltoken'       => SEC_createToken(),
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
             'category'      => $this->cat_id,
             'short_description' => htmlspecialchars($this->short_description, ENT_QUOTES, COM_getEncodingt()),
