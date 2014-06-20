@@ -1,37 +1,7 @@
 {# begin {templatelocation} #}
-<script type="text/javascript">
-window.addEvent('load',function() {
-  PP_changeProdType('{prod_type}');
-});
-
-function PP_changeProdType(value)
-{
-  switch(value) {
-  case '0':
-    //document.getElementById('type_download').style.display = 'none';
-    document.getElementById('type_physical').style.display = '';
-    break;
-  case '1':
-    //document.getElementById('type_download').style.display = '';
-    document.getElementById('type_physical').style.display = 'none';
-    break;
-  }
-}
-
-function PP_changeShippingType(value)
-{
-  switch(value) {
-  case '0':     // No Shipping
-  case '1':     // Paypal Profile
-    document.getElementById('shipping_amount').style.display = 'none';
-    break;
-  case '2':     // Fixed amount
-    document.getElementById('shipping_amount').style.display = '';
-    break;
-  }
-}
-
-</script>
+{!if show_htmleditor}
+{wysiwyg}
+{!endif}
 
 <form action="{pi_admin_url}/index.php" method="post" 
     class="pluginPaypalProductForm"
@@ -47,7 +17,7 @@ function PP_changeShippingType(value)
     <p>
       <label><font color="red">*</font>{$LANG_PP['product']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="name" value="{name}" size="40" 
         maxlength="255" />
@@ -56,7 +26,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['category']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="categories">
         <option value="0">({$LANG_PP['none']})</option>
@@ -67,7 +37,7 @@ function PP_changeShippingType(value)
     <p>
       <label><font color="red">*</font>{$LANG_PP['short_description']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="short_description" value="{short_description}" 
           size="40" maxlength="255" />
@@ -81,11 +51,11 @@ function PP_changeShippingType(value)
     </p>-->
 
     <p id="html_editarea">
-      <label>{$LANG_PP['description']}:
+      <!--<label>{$LANG_PP['description']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
-      </label>
-      <textarea id="html_content" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+      </label>-->
+      <textarea id="description" 
           name="description" cols="35" rows="10" 
           style="width:70%">{description}</textarea>
     </p>
@@ -93,7 +63,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['keywords']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_keywords', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="keywords" value="{keywords}" size="40"
             maxlength="40" />
@@ -102,23 +72,22 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['price']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="price" value="{price}" size="20" 
         maxlength="20" />&nbsp;{currency}
     </p>
 
-    <p>
+    <div>
       <label>{$LANG_PP['images']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-      <span>
-        <table border=0>
+      <table border=0>
           <!-- BEGIN PhotoRow -->
           <tr>
             <td align="left">
-              <a href="{img_url}" rel="slimbox[ad]"">
+              <a href="{img_url}" rel="slimbox[paypal]">
                 <img src="{thumb_url}" />
               </a>
             </td>
@@ -134,14 +103,13 @@ function PP_changeShippingType(value)
             </td>
           </tr>
           <!-- END UploadFld -->
-        </table>
-      </span>
-    </p>
+      </table>
+    </div>
 
     <p>
       <label>{$LANG_PP['enabled']}?
         <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="enabled" value="1" {ena_chk} />
     </p>
@@ -149,7 +117,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['taxable']}?
         <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="taxable" value="1" {tax_chk} />
     </p>
@@ -157,18 +125,18 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['txt_buttons']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_buttons', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <!-- BEGIN BtnRow -->
-        <input type="checkbox" name="buttons[]" value="{btn_type}" 
-            {btn_chk} />{btn_name}&nbsp;
+        <input type="radio" name="buttons" value="{btn_type}" {btn_chk} />{btn_name}&nbsp;
       <!-- END BtnRow -->
+        <input type="radio" name="buttons" value="" {none_chk} /> {$LANG_PP['none']}
     </p>
 
     <p>
       <label>{$LANG_PP['incl_blocks']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_incl_blocks', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="show_random" value="1" 
         {show_random_chk} />{$LANG_PP['random_product']}&nbsp;&nbsp;
@@ -181,7 +149,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['comments']}:
        <a href="#" onclick="popupWindow('{doc_url}#desc_comments', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="comments_enabled">
         <option value="0" {sel_comment_0}>{$LANG_PP['enabled']}</option>
@@ -193,7 +161,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['ratings_enabled']}?
         <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="rating_enabled" value="1" 
         {rating_chk} />
@@ -207,7 +175,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['prod_type']}?:
         <a href="#" onclick="popupWindow('{doc_url}#desc_prod_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <!-- BEGIN ProdTypeRadio -->
         <input type="radio" name="prod_type" value="{type_val}" {type_sel}
@@ -216,11 +184,11 @@ function PP_changeShippingType(value)
       <!-- END ProdTypeRadio -->
     </p>
 
-    <!--<div id="type_download">-->
+    <div id="type_download">
     <p>
       <label>{$LANG_PP['select_file']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_select_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" i
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="file">
         <option value="">-- {$LANG_PP['select_file']} --</option>
@@ -231,7 +199,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['or_upload_new']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_upload_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="file" name="uploadfile" />
     </p>
@@ -239,19 +207,19 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['exp_time_days']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="expiration" value="{expiration}" 
         size="20" maxlength="20" />
     </p>
 
-    <!--</div>-->
+    </div>
 
     <div id="type_physical">
     <p>
       <label>{$LANG_PP['weight']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_weight', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="weight" value="{weight}" />
     </p>
@@ -259,7 +227,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['shipping_type']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_shipping_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="shipping_type" 
             onchange="PP_changeShippingType(this.value);">
@@ -276,7 +244,7 @@ function PP_changeShippingType(value)
     <p>
       <label>{$LANG_PP['track_onhand']}
        <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['chk_help']}" /></a>
+            alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="track_onhand" value="1" {trk_onhand_chk} />&nbsp;&nbsp;{$LANG_PP['onhand']}: <input type="text" name="onhand" value="{onhand}" />
     </p>
@@ -298,4 +266,45 @@ function PP_changeShippingType(value)
   </div>
 
 </form>
+
+<script type="text/javascript">
+window.addEvent('load',function() {
+  PP_changeProdType('{prod_type}');
+  PP_changeShippingType('{shipping_type}');
+});
+
+function PP_changeProdType(value)
+{
+  switch(value) {
+  case '1':
+    document.getElementById('type_download').style.display = 'none';
+    document.getElementById('type_physical').style.display = '';
+    break;
+  case '2':
+  case '4':
+    document.getElementById('type_download').style.display = '';
+    document.getElementById('type_physical').style.display = 'none';
+    break;
+  case '3':     // physical and downloadable (2 parts)
+    document.getElementById('type_download').style.display = '';
+    document.getElementById('type_physical').style.display = '';
+    break;
+  }
+}
+
+function PP_changeShippingType(value)
+{
+  switch(value) {
+  case '0':     // No Shipping
+  case '1':     // Paypal Profile
+    document.getElementById('shipping_amount').style.display = 'none';
+    break;
+  case '2':     // Fixed amount
+    document.getElementById('shipping_amount').style.display = '';
+    break;
+  }
+}
+
+</script>
+
 {# end {templatelocation} #}

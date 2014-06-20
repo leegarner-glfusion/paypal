@@ -236,6 +236,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `purch_grp` int(11) unsigned DEFAULT '1',
   `track_onhand` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `onhand` int(10) unsigned DEFAULT '0',
+  `sale_price` DECIMAL(15,4),
   PRIMARY KEY  (`id`),
   KEY `products_name` (`name`),
   KEY `products_price` (`price`)
@@ -341,7 +342,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `tax` decimal(5,2) unsigned DEFAULT NULL,
   `shipping` decimal(5,2) unsigned DEFAULT NULL,
   `handling` decimal(5,2) unsigned DEFAULT NULL,
-  `status` tinyint(1) DEFAULT '0',
+  `status` varchar(25) DEFAULT 'pending',
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`order_id`)
@@ -443,7 +444,9 @@ $_PP_SAMPLEDATA = array(
             (1, 10, 1, 'pending', 0),
             (2, 20, 1, 'processing', 0),
             (3, 30, 1, 'paid', 0),
-            (4, 40, 1, 'shipped', 0)",
+            (4, 40, 1, 'shipped', 0),
+            (5, 50, 1, 'closed', 0),
+            (6, 60, 1, 'refunded', 0)",
     $PP_UPGRADE['0.5.4'][1],
 );
 
@@ -580,7 +583,7 @@ $PP_UPGRADE['0.5.0'] = array(
       `tax` decimal(5,2) unsigned DEFAULT NULL,
       `shipping` decimal(5,2) unsigned DEFAULT NULL,
       `handling` decimal(5,2) unsigned DEFAULT NULL,
-      `status` tinyint(1) DEFAULT '0',
+      `status` varchar(25) DEFAULT 'pending',
       `pmt_method` varchar(20) DEFAULT NULL,
       `pmt_txn_id` varchar(255) DEFAULT NULL,
       PRIMARY KEY (`order_id`) )",
@@ -656,7 +659,7 @@ $PP_UPGRADE['0.5.0'] = array(
 $PP_UPGRADE['0.5.2'] = array(
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD buyer_email varchar(255) not null default '' after phone,
-        CHANGE status status varchar(10) not null default ''",
+        CHANGE status status varchar(25) not null default 'pending'",
     "UPDATE {$_TABLES['paypal.orders']} SET status='paid'",
     "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
         `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -686,5 +689,7 @@ $PP_UPGRADE['0.5.2'] = array(
         ADD track_onhand TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
         ADD onhand INT(10) NOT NULL DEFAULT '0'",
 );
+
+$PP_UPGRADE['0.5.5'] = array();
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 /**
-*   IPN processor for Amazon SimplePay notifications.
+*   IPN processor for Authorize.Net notifications.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
@@ -20,10 +20,6 @@ USES_paypal_class_ipn('authorizenetsim');
 if ($_PP_CONF['debug_ipn'] == 1) {
     // Get the complete IPN message prior to any processing
     COM_errorLog(var_export($_POST, true));
-}
-
-if (GVERSION < '1.3.0') {
-    $_POST = LGLIB_stripslashes($_POST);
 }
 
 $ipn = new AuthorizeNetIPN($_POST);

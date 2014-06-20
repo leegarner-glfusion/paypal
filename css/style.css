@@ -283,7 +283,11 @@
     font-size: 1.2em;
 }
 
-.pluginPaypalProductDetail #paypalProductThumb {
+.pluginPaypalProductDetail .paypalProductThumbWrapper {
+    clear: both;
+}
+
+.pluginPaypalProductDetail .paypalProductThumb {
     float: left;
 }
 

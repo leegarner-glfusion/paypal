@@ -29,5 +29,4 @@
   <td>Purchase Total:</td><td align="right">{payment_gross}</td>
 </tr>
 </table>
-<p />
 

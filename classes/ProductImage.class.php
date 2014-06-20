@@ -24,10 +24,6 @@ class ProductImage extends upload
      *  @var string */
     var $pathImage;
 
-    /** Path to image thumbnail (without filename)
-     *  @var string */
-    var $pathThumb;
-
     /** ID of the current ad
      *  @var string */
     var $product_id;
@@ -55,7 +51,6 @@ class ProductImage extends upload
         }
         $this->product_id = trim($product_id);
         $this->pathImage = $_PP_CONF['image_dir'];
-        $this->pathThumb = $this->pathImage . '/thumbs';
         $this->setAllowedMimeTypes(array(
                 'image/pjpeg' => '.jpg,.jpeg',
                 'image/jpeg'  => '.jpg,.jpeg',
@@ -76,12 +71,14 @@ class ProductImage extends upload
     }
 
 
-    function uploadFiles()
+    public function uploadFiles()
     {
         global $_TABLES;
 
+        // Perform the actual upload
         parent::uploadFiles();
 
+        // Seed image cache with thumbnails
         $this->MakeThumbs();
 
         foreach ($this->goodfiles as $filename) {
@@ -93,7 +90,7 @@ class ProductImage extends upload
                 )";
             $result = DB_query($sql);
             if (!$result) {
-                $this->addError("MakeThumbs() : Failed to insert {$filename}");
+                $this->addError("uploadFiles() : Failed to insert {$filename}");
             }
         }
  
@@ -104,6 +101,7 @@ class ProductImage extends upload
     *   Calculate the new dimensions needed to keep the image within
     *   the provided width & height while preserving the aspect ratio.
     *
+    *   @deprecated
     *   @param string  $srcfile     Source filepath/name
     *   @param integer $width       New width, in pixels
     *   @param integer $height      New height, in pixels
@@ -134,13 +132,12 @@ class ProductImage extends upload
     }
 
     /**
-     *  Resize an image to the specified dimensions, placing the resulting
-     *  image in the specified location.  At least one of $newWidth or
-     *  $newHeight must be specified.
-     *
-     *  @return string      Blank if successful, error message otherwise.
-     */
-    function MakeThumbs()
+    *   Seed the image cache with the product image thumbnails.
+    *
+    *   @uses   LGLIB_ImageUrl()
+    *   @return string      Blank, error messages are now in parent::_errors
+    */
+    private function MakeThumbs()
     {
         global $_PP_CONF;
 
@@ -152,36 +149,13 @@ class ProductImage extends upload
 
         foreach ($this->_fileNames as $filename) {
             $src = "{$this->pathImage}/{$filename}";
-            $dst = "{$this->pathThumb}/{$filename}";
-
-            // If  parent::upload() dropped the file due to some restriction,
-            // then the source won't be there even though the file info is.
-            if (!file_exists($src))
-                continue;
-
-            // Calculate the new dimensions
-            list($dWidth,$dHeight) = 
-                $this->reDim($src, $thumbsize, $thumbsize);
-
-            if ($dWidth == 0 || $dHeight == 0) {
-                $this->_addError("MakeThumbs() $filename could not get dimensions");
-
-                return '';
-            }
-
-            // Returns an array, with [0] either true/false and [1] 
-            // containing a message.  For older versions of glFusion,
-            // we call Media Gallery's _mg_resizeImage() as a backup.  This
-            // won't work if MG isn't enabled.
-            list($retval, $msg) = IMG_resizeImage($src, $dst,  
-                                $dHeight, $dWidth, "image/jpeg", 0);
-
-            if ($retval != true)
-                $this->_addError("MakeThumbs() : $filename - $msg");
-            else
+            $url = LGLIB_ImageUrl($src, $thumbsize, $thumbsize, true);
+            if (!empty($url)) {
                 $this->goodfiles[] = $filename;
+            } else {
+                $this->_addError("MakeThumbs() : $filename - $msg");
+            }
         }
-
         return '';
 
     }   // function MakeThumbs()
@@ -191,7 +165,7 @@ class ProductImage extends upload
      *  Delete an image from disk.  Called by Entry::Delete if disk
      *  deletion is requested.
      */
-    function Delete()
+    public function Delete()
     {
         // If we're deleting from disk also, get the filename and 
         // delete it and its thumbnail from disk.
@@ -200,7 +174,6 @@ class ProductImage extends upload
         }
 
         $this->_deleteOneImage($this->pathImage);
-        $this->_deleteOneImage($this->pathThumb);
     }
 
     /**
@@ -215,6 +188,7 @@ class ProductImage extends upload
     }
 
     /**
+    *   @deprecated
      *  Handles the physical file upload and storage.
      *  If the image isn't validated, the upload doesn't happen.
      *  @param array $file $_FILES array
@@ -244,6 +218,7 @@ class ProductImage extends upload
 
 
     /**
+    *   @deprecated
      *  Validate the uploaded image, checking for size constraints and other errors
      *  @param array $file $_FILES array
      *  @return boolean True if valid, False otherwise

@@ -10,6 +10,7 @@ Attached to this email are the files you purchased.  If you were logged into {si
 {dl_links}
 {!endif}
 
+<p>Order Status: {status}</p>
 {!if pending}
 <p>
 Your payment is pending.  Once your payment is received, you will receive

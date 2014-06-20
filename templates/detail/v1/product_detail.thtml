@@ -31,15 +31,19 @@
 
   <div id="paypalProductDesc">
     {description}
+  </div>
 
+  <div class="paypalProductThumbWrapper">
     <!-- BEGIN Thumbnail -->
-    <div id="paypalProductThumb" style="width:{img_cell_width}px;">
+    <div class="paypalProductThumb" style="width:{img_cell_width}px;">
+      {!if thumb_url}
       <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
-        <img src="{img_url}/thumbs/{img_file}" border="0" 
+        <img src="{thumb_url}" border="0"
             alt="{$LANG_PP[click_to_enlarge]}" 
             title="{$LANG_PP[click_to_enlarge]}"
             class="gl_mootip" />
       </a>
+      {!endif}
     </div>
     <!-- END Thumbnail -->
   </div>

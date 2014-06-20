@@ -32,12 +32,6 @@ USES_paypal_functions();
 USES_lib_admin();
 USES_paypal_class_product();
 
-// Clean $_POST and $_GET, in case magic_quotes_gpc is set
-if (GVERSION < '1.3.0') {
-    $_POST = LGLIB_stripslashes($_POST);
-    $_GET = LGLIB_stripslashes($_GET);
-}
-
 $content = '';
 
 // Get the message to the admin, if any
@@ -92,7 +86,7 @@ case 'deletecatimage':
         $view = 'editcat';
         $_REQUEST['id'] = $id;
     } else {
-        $view = 'categories';
+        $view = 'catlist';
     }
     break;
 
@@ -116,8 +110,8 @@ case 'delete_img':
 case 'saveproduct':    
     $P = new Product($_POST['id']);
     if (!$P->Save($_POST)) {
-            $content .= PAYPAL_errMsg($P->PrintErrors());
-            $view = 'editproduct';
+        $content .= PAYPAL_errMsg($P->PrintErrors());
+        $view = 'editproduct';
     }
     break;
 

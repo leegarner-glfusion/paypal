@@ -18,8 +18,7 @@ follow:
 <!-- END ItemList -->
 </table>
 <table border="0" cellpadding="2">
-<tr>
-  <td>Total Items:</td><td align="right">{payment_items}</td>
+<tr>  <td>Total Items:</td><td align="right">{payment_items}</td>
 </tr>
 <tr>
   <td>Tax</td><td align="right">{tax}</td>
@@ -34,8 +33,8 @@ follow:
   <td>Purchase Total:</td><td align="right">{payment_gross}</td>
 </tr>
 </table>
-<p />
-Payment was made via {gateway_name} on {payment_date}
+<p>Order Status: {status}</p>
+<p>Payment was made via {gateway_name} on {payment_date}</p>
 
 {!if files}
 <p />

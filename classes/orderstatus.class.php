@@ -91,7 +91,8 @@ class ppOrderStatus extends ppWorkflow
                 'selected' => $key == $selected ?
                                 'selected="selected"' : '',
                 'stat_key' => $key,
-                'stat_descr' => $LANG_PP['orderstatus'][$key],
+                'stat_descr' => isset($LANG_PP['orderstatus'][$key]) ?
+                        $LANG_PP['orderstatus'][$key] : $key,
             ) );
             $T->parse('Sel', 'StatusSelect', true);
         }

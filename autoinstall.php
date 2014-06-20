@@ -110,6 +110,10 @@ $INSTALL_plugin['paypal'] = array(
             'table' => $_TABLES['paypal.order_log'], 
             'sql' => $_SQL['paypal.order_log']),
 
+    array(  'type' => 'table', 
+            'table' => $_TABLES['paypal.currency'], 
+            'sql' => $_SQL['paypal.currency']),
+
     array(  'type' => 'group', 
             'group' => 'paypal Admin', 
             'desc' => 'Users in this group can administer the PayPal plugin',

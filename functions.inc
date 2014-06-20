@@ -301,6 +301,7 @@ function plugin_upgrade_paypal()
         return '05';
     }
 
+    CTL_clearCache($_PP_CONF['pi_name']);
     COM_errorLog("Succesfully updated the $pi_name Plugin!",1);
     return true;
 
@@ -778,12 +779,6 @@ function plugin_getheaderjs_paypal()
         PAYPAL_PI_PATH . '/js/toggleEnabled.js',
     );
 
-    // If the slimbox JS hasn't been loaded by another plugin, load ours
-/*    if (!defined('HAVE_SLIMBOX_JS')) {
-        $files[] = PAYPAL_PI_PATH . '/js/slimbox.js';
-        define('HAVE_SLIMBOX_JS', 1);
-    }
-*/
     return $files;
 }
 
@@ -799,16 +794,10 @@ function plugin_getheadercss_paypal()
     global $_CONF, $_PP_CONF;
 
     $styles = array();
-    $files = array('style.css');
-
-    // If the slimbox CSS hasn't been loaded by another plugin, load ours
-/*    if (!defined('HAVE_SLIMBOX_CSS')) {
-        $files[] = 'slimbox.css';
-        define('HAVE_SLIMBOX_CSS', 1);
-    }
-*/
     $pi_css = PAYPAL_PI_PATH . '/css/';
     $layout_css = "{$_CONF['path_layout']}plugins/{$_PP_CONF['pi_name']}/";
+
+    $files = array('style.css');
 
     foreach ($files as $file) {
         $styles[] = $pi_css . $file;
@@ -888,22 +877,24 @@ function plugin_autouninstall_paypal ()
     $out = array (
         // Give the name of the tables, without $_TABLES[]
         'tables' => array(
-                'paypal.ipnlog', 
-                'paypal.products',
-                'paypal.purchases',
-                'paypal.images',
-                'paypal.categories',
-                'paypal.orders',
-                'paypal.gateways',
-                'paypal.workflows',
                 'paypal.address',
                 'paypal.buttons',
-                'paypal.prod_attr',
-                'paypal.userinfo',
                 'paypal.cart',
-                'paypal.order',
-                'paypal.orderstatus',
+                'paypal.categories',
+                'paypal.currency',
+                'paypal.gateways',
+                'paypal.images',
+                'paypal.ipnlog', 
+                'paypal.order_items',
                 'paypal.order_log',
+                'paypal.orderstatus',
+                'paypal.orders',
+                'paypal.prod_attr',
+                'paypal.products',
+                'paypal.purchases',
+                'paypal.specials',
+                'paypal.userinfo',
+                'paypal.workflows',
         ),
         // Give the full name of the group, as in the db
         'groups' => array('paypal Admin'),
@@ -1369,8 +1360,7 @@ function PAYPAL_phpblock_product($sql)
             $img = DB_getItem($_TABLES['paypal.images'], 'filename', 
                     "product_id='{$A['id']}'");
             if ($img != '') {
-                $T->set_var('img_url', 
-                        PAYPAL_URL . '/images/products/thumbs/' . $img);
+                $T->set_var('img_url', PAYPAL_ImageUrl($img));
             } else {
                 $T->set_var('img_url', '');
             }
@@ -1513,6 +1503,24 @@ function PAYPAL_is_plugin_item($item_number)
     } else {
         return false;
     }
+}
+
+
+/**
+*   Helper function to get image urls from LGLIB_ImageUrl()
+*
+*   @param  string  $imgname    Image name, no path
+*   @param  integer $width      Optional width, assume thumbnail
+*   @param  integer $height     Optional height, assume thumbnail
+*   @return string      URL to resized image
+*/
+function PAYPAL_ImageUrl($imgname, $width=0, $height=0)
+{
+    global $_PP_CONF;
+
+    $width = $width == 0 ? $_PP_CONF['max_thumb_size'] : (int)$width;
+    $height = $height == 0 ? $_PP_CONF['max_thumb_size'] : (int)$height;
+    return LGLIB_ImageUrl($_PP_CONF['image_dir'] . '/' . $imgname, $width, $height);
 }
 
 

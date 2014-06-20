@@ -22,11 +22,6 @@ if ($_PP_CONF['debug_ipn'] == 1) {
     COM_errorLog(print_r($_POST, true));
 }
 
-if (GVERSION < '1.3.0') {
-    $_POST = LGLIB_stripslashes($_POST);
-}
-//COM_errorLog(var_export($_POST, true));
-
 $ipn = new AmazonIPN($_POST);
 $ipn->Process();
 

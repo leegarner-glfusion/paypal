@@ -226,8 +226,13 @@ class Category
         if (is_uploaded_file($_FILES['imagefile']['tmp_name'])) {
             $img_filename =  rand(100,999) .  "_" . 
                      COM_sanitizeFilename($_FILES['imagefile']['name'], true);
-            if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
-                            $_PP_CONF['catimgpath']."/$img_filename")) {
+            $status = IMG_resizeImage($_FILES['imagefile']['tmp_name'],
+                    $_PP_CONF['catimgpath']."/$img_filename",
+                    $_PP_CONF['max_thumb_size'], $_PP_CONF['max_thumb_size'],
+                    '', true);
+            //if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
+            //                $_PP_CONF['catimgpath']."/$img_filename")) {
+            if ($status[0] == false) {
                 $this->AddError('Error Moving Image');
             } else {
                 // If a new image was uploaded, and this is an existing category,

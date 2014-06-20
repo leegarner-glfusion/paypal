@@ -93,6 +93,7 @@ window.addEvent('load',function() {
 </div>
 
 <div style="clear:both;margin-top:20px;"></div>
+{!if main_img}
 <div class="pluginPaypalProductDetail" id="product-image"
    style="position:relative;float:left;margin-left:10px;">
   <a id="lg_img" href="{img_url}/{main_img}" rel="slimbox">
@@ -100,18 +101,21 @@ window.addEvent('load',function() {
   </a>
   <div class="additional-images" style="clear:both;">
     <!-- BEGIN Thumbnail -->
-    <div id="paypalProductThumb" >
+    <div class="paypalProductThumb" >
+      {!if thumb_url}
       <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
-        <img src="{img_url}/thumbs/{img_file}" border="0" 
+        <img src="{thumb_url}" border="0" 
               alt="{$LANG_PP[click_to_enlarge]}" 
               onmouseover="javascript:PPupdateImage('{img_file}');"
               title="{$LANG_PP[click_to_enlarge]}"
               class="gl_mootip" />
       </a>
+      {!endif}
     </div>
     <!-- END Thumbnail -->
   </div>
 </div>
+{!endif}
 
 <div style="float:left;">
   <form id="add_cart" action="{site_url}/paypal/index.php" method="post">

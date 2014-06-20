@@ -39,7 +39,7 @@
         <input type="file" name="imagefile" />
         {!if img_url}
           <img src="{img_url}" border="0" />
-          <a href="{action_url}/index.php?action=deletecatimage&cat_id={cat_id}">
+          <a href="{action_url}/index.php?deletecatimage=x&cat_id={cat_id}">
             {$LANG_PP['delete_image']}
           </a>
         {!endif}

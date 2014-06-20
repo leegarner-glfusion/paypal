@@ -36,12 +36,6 @@ USES_paypal_functions();
 USES_paypal_class_cart();
 $ppGCart = new ppCart();
 
-// Clean $_POST and $_GET, in case magic_quotes_gpc is set
-if (GVERSION < '1.3.0') {
-    $_POST = LGLIB_stripslashes($_POST);
-    $_GET = LGLIB_stripslashes($_GET);
-}
-
 // First try to get the SEO-friendly arguments.  A single "action" and "id"
 // will probably be the most common anyway.  If that fails, go through all
 // the possibilies for actions that might come from submit buttons, etc.

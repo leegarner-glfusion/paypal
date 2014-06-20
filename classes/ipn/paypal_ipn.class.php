@@ -138,7 +138,6 @@ class PaypalIPN extends BaseIPN
 
         // re-encode the transaction variables to be verified
         foreach ($this->ipn_data as $key => $value) {
-            //$value = urlencode(stripslashes($value));
             $value = urlencode($value);
             $req .= "&$key=$value";
         }

@@ -88,7 +88,7 @@ class Dataproxy_paypal extends DataproxyDriver
 
         $entries = array();
 
-        if ($this->uid == 1 $this->isLoginRequired() === true) {
+        if ($this->uid == 1 && $this->isLoginRequired() === true) {
             return $entries;
         }
 

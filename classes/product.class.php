@@ -5,7 +5,7 @@
  *  @author     Lee Garner <lee@leegarner.com>
  *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
  *  @package    paypal
- *  @version    0.5.0
+ *  @version    0.5.5
  *  @license    http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  *  @filesource
@@ -48,7 +48,7 @@ class Product
      *
      *  @param integer $id Optional type ID
      */
-    function __construct($id=0)
+    public function __construct($id=0)
     {
         global $_PP_CONF;
 
@@ -66,7 +66,7 @@ class Product
             $this->short_description = '';
             $this->description = '';
             $this->price = 0;
-            $this->prod_type = 0;
+            $this->prod_type = PP_PROD_VIRTUAL;
             $this->weight = 0;
             $this->file = '';
             $this->expiration = $_PP_CONF['def_expiration'];
@@ -102,7 +102,7 @@ class Product
     *   @param  string  $var    Name of property to set.
     *   @param  mixed   $value  New value for property.
     */
-    function __set($var, $value)
+    public function __set($var, $value)
     {
         switch ($var) {
         case 'id':
@@ -158,7 +158,8 @@ class Product
             break;
 
         default:
-            // Undefined values (do nothing)
+            // Other value types (array?). Save it as-is.
+            $this->properties[$var] = $value;
             break;
         }
     }
@@ -166,12 +167,11 @@ class Product
 
     /**
     *   Get the value of a property.
-    *   Emulates the behaviour of __get() function in PHP 5.
     *
     *   @param  string  $var    Name of property to retrieve.
     *   @return mixed           Value of property, NULL if undefined.
     */
-    function __get($var)
+    public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
             return $this->properties[$var];
@@ -187,7 +187,7 @@ class Product
      *  @param  array   $row        Array of values, from DB or $_POST
      *  @param  boolean $fromDB     True if read from DB, false if from $_POST
      */
-    function SetVars($row, $fromDB=false)
+    public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
 
@@ -241,7 +241,7 @@ class Product
      *  @param  integer $id Optional ID.  Current ID is used if zero.
      *  @return boolean     True if a record was read, False on failure
      */
-    function Read($id = 0)
+    public function Read($id = 0)
     {
         global $_TABLES;
 
@@ -296,7 +296,7 @@ class Product
      *  @param  array   $A      Optional array of values from $_POST
      *  @return boolean         True if no errors, False otherwise
      */
-    function Save($A = '')
+    public function Save($A = '')
     {
         global $_TABLES;
         USES_paypal_class_productimage();
@@ -384,7 +384,6 @@ class Product
             // Handle image uploads.  This is done last because we need
             // the product id to name the images filenames.
             if (!empty($_FILES['images'])) {
-                //$U = new ProductImage($prod_id, 'images');
                 $U = new ProductImage($this->id, 'images');
                 $U->uploadFiles();
 
@@ -420,27 +419,28 @@ class Product
     /**
     *   Delete the current product record from the database.
     *   Deletes the item, item attributes, images and buttons. Does not
-    *   update the purchases or IPN log at all.
+    *   update the purchases or IPN log at all. Does not delete an item
+    *   that has orders associated with it.
     *
     *   @uses   DeleteImage()
     *   @uses   DeleteButtons()
     *   @return boolean     True when deleted, False if invalid ID
     */
-    function Delete()
+    public function Delete()
     {
         global $_TABLES, $_PP_CONF;
 
-        if ($this->id <= 0)
+        if ($this->id <= 0 || $this->isUsed())
             return false;
 
         // Locate and delete photos
-        $sql = "SELECT img_id
+        $sql = "SELECT img_id, filename
             FROM {$_TABLES['paypal.images']}
             WHERE product_id='". $this->id . "'";
         //echo $sql;
         $photo= DB_query($sql, 1);
         while ($prow = DB_fetchArray($photo, false)) {
-            $this->DeleteImage($prow['img_id']);
+            self::DeleteImage($prow['img_id'], $prow['filename']);
         }
  
         DB_delete($_TABLES['paypal.products'], 'id', $this->id);
@@ -458,7 +458,7 @@ class Product
     *
     *   @param  integer $item_id    Product ID to delete
     */
-    function DeleteButtons($item_id)
+    private static function DeleteButtons($item_id)
     {
         global $_TABLES;
 
@@ -472,22 +472,22 @@ class Product
     *   standalone function.
     *
     *   @param  integer $img_id     DB ID of image to delete
+    *   @param  string  $filename   Filename, if known
     */
-    function DeleteImage($img_id)
+    public static function DeleteImage($img_id, $filename='')
     {
         global $_TABLES, $_PP_CONF;
 
         $img_id = (int)$img_id;
         if ($img_id < 1) return;
 
-        $filename = DB_getItem($_TABLES['paypal.images'], 'filename',
+        if ($filename == '') {
+            $filename = DB_getItem($_TABLES['paypal.images'], 'filename',
                 "img_id=$img_id");
+        }
 
         if (file_exists("{$_PP_CONF['image_dir']}/{$filename}"))
                 unlink("{$_PP_CONF['image_dir']}/{$filename}");
-
-        if (file_exists("{$_PP_CONF['image_dir']}/thumbs/{$filename}"))
-                unlink("{$_PP_CONF['image_dir']}/thumbs/{$filename}");
 
         DB_delete($_TABLES['paypal.images'], 'img_id', $img_id);
     }
@@ -500,9 +500,10 @@ class Product
     *   Accumulates all error messages in the Errors array.
     *   As of version 0.5.0, the category is allowed to be empty.
     *
+    *   @deprecated
     *   @return boolean     True if ok, False when first test fails.
     */
-    function isValidRecord()
+    private function isValidRecord()
     {
         global $LANG_PP;
 
@@ -553,7 +554,7 @@ class Product
     *   @param  integer $id     Optional ID, current record used if zero
     *   @return string          HTML for edit form
     */
-    function showForm($id = 0)
+    public function showForm($id = 0)
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $LANG24, $LANG_postmodes;
 
@@ -567,30 +568,27 @@ class Product
         $id = $this->id;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T->set_file(array('product' => "product_form.thtml"));
 
-        if (isset($_CONF['advanced_editor']) && 
-                $_CONF['advanced_editor'] == 1) {
-            $editor_type = '_advanced';
-            $postmode_adv = 'selected="selected"';
-            $postmode_html = '';
-        } else {
-            $editor_type = '';
-            $postmode_adv = '';
-            $postmode_html = 'selected="selected"';
+        // Set up the wysiwyg editor, if available
+        switch (PLG_getEditorType()) {
+        case 'ckeditor':
+            $T->set_var('show_htmleditor', true);
+            PLG_requestEditor('paypal','paypal_entry','ckeditor_paypal.thtml');
+            PLG_templateSetVars('paypal_entry', $T);
+            break;
+        case 'tinymce' :
+            $T->set_var('show_htmleditor',true);
+            PLG_requestEditor('paypal','paypal_entry','tinymce_paypal.thtml');
+            PLG_templateSetVars('paypal_entry', $T);
+            break;
+        default :
+            // don't support others right now
+            $T->set_var('show_htmleditor', false);
+            break;
         }
 
-        $T->set_file(array('product' => "product_form{$editor_type}.thtml"));
-        $action_url = PAYPAL_ADMIN_URL . '/index.php';
-        if ($editor_type == '_advanced') {
-            $T->set_var('show_adveditor','');
-            $T->set_var('show_htmleditor','none');
-        } else {
-            $T->set_var('show_adveditor','none');
-            $T->set_var('show_htmleditor','');
-        }
-        $post_options = "<option value=\"html\" $postmode_html>{$LANG_postmodes['html']}</option>";
-        $post_options .= "<option value=\"adveditor\" $postmode_adv>{$LANG24[86]}</option>";
-
+        // Add the current product ID to the form if it's an existing product.
         if ($id > 0) {
             $T->set_var('id', '<input type="hidden" name="id" value="' . 
                         $this->id .'" />');
@@ -603,10 +601,8 @@ class Product
         }
 
         $T->set_var(array(
-            //'lang_postmode' => $LANG24[4],
             'post_options'  => $post_options,
-            //'change_editormode' => 'onchange="change_editmode(this);"',
-            'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
+            //'glfusionStyleBasePath' => $_CONF['site_url']. '/fckeditor',
             'gltoken_name'  => CSRF_TOKEN,
             'gltoken'       => SEC_createToken(),
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
@@ -646,8 +642,18 @@ class Product
             'onhand'        => $this->onhand,
         ) );
 
+        // Create the button type selections. New products get the default
+        // button selected, existing products get the saved button selected
+        // or "none" if there is no button.
         $T->set_block('product', 'BtnRow', 'BRow');
+        $have_chk = false;
         foreach ($_PP_CONF['buttons'] as $key=>$checked) {
+            if ($key == $this->btn_type || ($this->isNew && $checked)) {
+                $btn_chk = 'checked="checked"';
+                $have_chk = true;
+            } else {
+                $btn_chk = '';
+            }
             $T->set_var(array(
                 'btn_type'  => $key,
                 'btn_chk'   => $key == $this->btn_type || 
@@ -656,6 +662,8 @@ class Product
             ));
             $T->parse('BRow', 'BtnRow', true);
         }
+        // Set the "none" selection if nothing was already selected
+        $T->set_var('none_chk', $have_chk ? '' : 'checked="checked"');
 
         $T->set_block('product', 'ProdTypeRadio', 'ProdType');
         foreach ($LANG_PP['prod_types'] as $value=>$text) {
@@ -720,10 +728,8 @@ class Product
                 $i++;
                 $T->set_var('img_url', 
                     PAYPAL_URL . "/images/products/{$prow['filename']}");
-                $T->set_var('thumb_url', 
-                    PAYPAL_URL . "/images/products/thumbs/{$prow['filename']}");
+                $T->set_var('thumb_url', PAYPAL_ImageUrl($prow['filename']));
                 $T->set_var('seq_no', $i);
-                $T->set_var('ad_id', $A['ad_id']);
                 $T->set_var('del_img_url', PAYPAL_ADMIN_URL . '/index.php' .
                         '?delete_img=x' .
                         '&img_id=' . $prow['img_id'] .
@@ -757,11 +763,11 @@ class Product
 
         $retval .= $T->parse('output', 'product');
 
-        @setcookie($_CONF['cookie_name'].'fckeditor', 
+        /*@setcookie($_CONF['cookie_name'].'fckeditor', 
                 SEC_createTokenGeneral('advancededitor'),
                 time() + 1200, $_CONF['cookie_path'],
                 $_CONF['cookiedomain'], $_CONF['cookiesecure']);
-
+        */
         $retval .= COM_endBlock();
         return $retval;
 
@@ -776,7 +782,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    function _toggle($oldvalue, $varname, $id=0)
+    private function _toggle($oldvalue, $varname, $id=0)
     {
         global $_TABLES;
 
@@ -815,7 +821,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    function toggleEnabled($oldvalue, $id=0)
+    public function toggleEnabled($oldvalue, $id=0)
     {
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
@@ -837,7 +843,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    function toggleFeatured($oldvalue, $id=0)
+    public function toggleFeatured($oldvalue, $id=0)
     {
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
@@ -860,7 +866,7 @@ class Product
     *
     *   @return boolean True if used, False if not
     */
-    function isUsed($item_id = 0)
+    public function isUsed($item_id = 0)
     {
         global $_TABLES;
 
@@ -882,7 +888,7 @@ class Product
     *
     *   @return string      HTML for the product page.
     */
-    function Detail()
+    public function Detail()
     {
         global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
 
@@ -895,7 +901,9 @@ class Product
 
         $retval = COM_startBlock();
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/detail');
+        // Set the template dir based on the configured template version
+        $T = new Template(PAYPAL_PI_PATH . '/templates/detail' .
+                $_PP_CONF['tpl_ver_detail']);
         if ($this->hasAttributes()) {
             $detail_template = 'product_detail_attrib.thtml';
         } else {
@@ -951,6 +959,7 @@ class Product
                     $T->set_block('product', 'Thumbnail', 'PBlock');
                     $T->set_var('img_file', $prow['filename']);
                     $T->set_var('img_url', PAYPAL_URL.'/images/products');
+                    $T->set_var('thumb_url', PAYPAL_ImageUrl($prow['filename']));
                     $T->parse('PBlock', 'Thumbnail', true);
                     $T->set_var('have_photo', 'true');
                 }
@@ -1065,7 +1074,7 @@ class Product
     *
     *   @return string      HTML for file selection dialog options
     */
-    function FileSelector()
+    public function FileSelector()
     {
         global $_PP_CONF;
 
@@ -1094,7 +1103,7 @@ class Product
     *
     *   @return string      Formatted error messages.
     */
-    function PrintErrors()
+    public function PrintErrors()
     {
         $retval = '';
         foreach($this->Errors as $key=>$msg) {
@@ -1110,7 +1119,7 @@ class Product
     *
     *   @return array   Array of buttons as name=>html.
     */
-    function PurchaseLinks()
+    public function PurchaseLinks()
     {
         global $_CONF, $_USER, $_PP_CONF, $_TABLES;
 
@@ -1190,7 +1199,7 @@ class Product
     *
     *   @return boolean     True if attributes exist, False if not.
     */
-    function hasAttributes()
+    public function hasAttributes()
     {
         return empty($this->options) ? false : true;
     }
@@ -1202,7 +1211,7 @@ class Product
     *   @param  array   $options    Array of integer option values
     *   @return float       Product price, including options
     */
-    function getPrice($options = array())
+    public function getPrice($options = array())
     {
         $price = $this->price;
         // future: return sale price if on sale, otherwise base price
@@ -1222,7 +1231,7 @@ class Product
     *   @param  array   $options    Array of integer option values
     *   @return string      Comma-separate list of text values, or empty
     */
-    function getOptionDesc($options = array())
+    public function getOptionDesc($options = array())
     {
         $opts = array();
         foreach ($options as $key) {

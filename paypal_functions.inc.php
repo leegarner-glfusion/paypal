@@ -604,9 +604,8 @@ function PAYPAL_ProductList($cat=0, $search='')
         $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
                 "product_id = '{$A['id']}'");
         if ($pic_filename) {
-            $product->set_var('small_pic', 
-                    PAYPAL_URL . '/images/products/thumbs/' . $pic_filename);
-        } else {
+            $product->set_var('small_pic', PAYPAL_ImageUrl($pic_filename));
+         } else {
             $product->set_var('small_pic', '');
         }
 
