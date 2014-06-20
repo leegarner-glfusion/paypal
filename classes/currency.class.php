@@ -180,18 +180,18 @@ class ppCurrency
         }
 
         $key = "{$code}{$amount}";
-        if (isset($formatted[$key])) return $formatted[$key];
-        
-        $currency = $this->Load($code);
+        if (!isset($formatted[$key])) {
+            $currency = $this->Load($code);
 
-        // Format the price as a number.
-        $price = number_format($this->currencyRound(abs($amount), $currency), 
+            // Format the price as a number.
+            $price = number_format($this->currencyRound(abs($amount), $currency), 
                     $currency['decimals'], 
                     $currency['decimal_sep'],
                     $currency['thousands_sep']);
 
-        $negative = $amount < 0 ? '-' : '';
-        $formatted[$key] = array($this->Pre($code), $negative.$price, $this->Post($code));
+            $negative = $amount < 0 ? '-' : '';
+            $formatted[$key] = array($this->Pre($code), $negative.$price, $this->Post($code));
+        }
         return $formatted[$key];
     }
 
@@ -298,6 +298,7 @@ class ppCurrency
 
         static $currencies = NULL;
         if ($currencies === NULL) {
+            $currencies = array();
             $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}");
             while ($A = DB_fetchArray($res, false)) {
                 $currencies[$A['code']] = $A;
