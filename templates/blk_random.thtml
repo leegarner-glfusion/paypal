@@ -1,0 +1,16 @@
+{# begin {templatelocation} #}
+{!if rec_num}
+  <hr />
+{!endif}
+<p><b><a href="{item_url}">{name}</b>
+{!if img_url}
+  <br /><img src="{img_url}">
+{!endif}
+</a>
+</p>
+<p>{descrip}</p>
+{!if price}
+  <p>{$LANG_PP['price']}: {price} {currency}</p>
+{!endif}
+<p>{button}</p>
+{# end {templatelocation} #}

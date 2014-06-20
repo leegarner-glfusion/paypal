@@ -1,0 +1,150 @@
+{# begin {templatelocation} #}
+<noscript>
+  <span class="alert">{$LANG_PP['no_javascript']}</span>
+</noscript>
+<script type="text/javascript">
+function PPupdateImage(filename)
+{
+    document.getElementById("disp_img").src = "{img_url}/" + filename;
+    document.getElementById("lg_img").href = "{img_url}/" + filename;
+}
+</script>
+<script type="text/javascript" language="JavaScript">
+var emsg = "";
+
+function isValidField(obj)
+{
+    if (null == obj) {
+        return false;
+    }
+    if ("undefined" == typeof(obj)) {
+        return false;
+    }
+    return true;
+}
+
+function ProcessForm(frm) {
+    var rec,i,j;
+    var price, frm;
+    var on_elem, os_elem;
+
+    emsg="";
+    frm = document.getElementById("add_cart");
+    if (frm === null) return;
+    price = {price};
+    options = frm.elements['options[]'];
+
+    // If there's only one option selection, then 'options' will be an array
+    // of all it's option items.  We need to handle them differently than if
+    // there are multiple option selections.
+    if (typeof(options.value) === "undefined") {
+        for (i = 0; i < options.length; i++) {
+            if (!isValidField(options[i])) {
+                break;
+            }
+
+            // Expecting value as "id|desc|price"
+            rec = options[i].value.split("|");
+            if (typeof(rec[2]) != "undefined") {
+                price = (price * 1) + (rec[2]*1);
+            }
+            //frm["os"+i].value = rec[0];
+        }
+    } else {
+        rec = options.value.split("|");
+        if (typeof(rec[2]) != "undefined") {
+            price = (price * 1) + (rec[2]*1);
+        }
+    }
+
+    price = price.toFixed({cur_decimals});
+    frm.amount.value = price;
+    document.getElementById('price').innerHTML = price;
+    return;
+}
+
+function checkForJavascript()
+{
+    e = document.getElementById('add_cart');
+    if (e !== null)
+        e.style.display = "inline";
+}
+
+window.addEvent('load',function() {
+    checkForJavascript();
+    ProcessForm();
+});
+ 
+</script>
+
+
+<div id="paypalShortDesc">
+  <h1>{short_description}
+  {!if can_edit}
+  <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
+    <img src="{layout_url}/images/admin/edit.png" />
+  </a>
+  {!endif}
+  </h1>
+  {name}&nbsp;&nbsp;{edit_icon}
+  <div id="paypalProductDesc">
+    {description}
+  </div>
+</div>
+
+<div style="clear:both;margin-top:20px;"></div>
+<div class="pluginPaypalProductDetail" id="product-image"
+   style="position:relative;float:left;margin-left:10px;">
+  <a id="lg_img" href="{img_url}/{main_img}" rel="slimbox">
+    <img id="disp_img" style="max-width:450px;" src="{img_url}/{main_img}" />
+  </a>
+  <div class="additional-images" style="clear:both;">
+    <!-- BEGIN Thumbnail -->
+    <div id="paypalProductThumb" >
+      <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
+        <img src="{img_url}/thumbs/{img_file}" border="0" 
+              alt="{$LANG_PP[click_to_enlarge]}" 
+              onmouseover="javascript:PPupdateImage('{img_file}');"
+              title="{$LANG_PP[click_to_enlarge]}"
+              class="gl_mootip" />
+      </a>
+    </div>
+    <!-- END Thumbnail -->
+  </div>
+</div>
+
+<div style="float:left;">
+  <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
+    <div>
+      <!--<b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>-->
+      {!if on_sale}
+      <span class="paypalPrice was">{orig_price}</span>
+      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      {!else}
+      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{price}</span><span class="paypalPrice normal">{price_postfix}</span>
+      {!endif}
+      {!if rating_bar}
+        {rating_bar}<br />
+      {!endif}
+    </div>
+
+    <div id="paypalProductAttrib">
+      {attributes}
+      <!-- BEGIN BtnBlock -->
+        {button}<br />
+      <!-- END BtnBlock -->
+    </div>
+
+    {!if onhand}
+    <div id="paypalOnhand">
+      {onhand} {$LANG_PP['available']}
+    </div>
+    {!endif}
+
+  </form>
+</div>
+<div class="pluginPaypalComments">
+  {usercomments}
+</div>
+
+{# end {templatelocation} #}

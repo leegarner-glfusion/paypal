@@ -1,0 +1,26 @@
+Thank you for your purchase from {site_name}.  Details of your purchase
+follow: 
+<p />
+{purchase_details}
+<p />
+{!if files}
+<p />
+Attached to this email are the files you purchased.  If you were logged into {site_name} when you made your purchase, you can also download your files from the following links:
+<p />
+{dl_links}
+{!endif}
+
+{!if pending}
+<p>
+Your payment is pending.  Once your payment is received, you will receive
+another email message confirming your payment.
+</p>
+{!endif}
+{!if gw_msg}
+<p>{gw_msg}</p>
+{!endif}
+<p />
+Thanks,<br />
+{site_name}<br />
+{site_url}<p />
+

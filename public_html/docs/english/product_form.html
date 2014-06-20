@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>PayPal Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1><a name="advt_plugin" id="advt_plugin">PayPal Plugin</a></h1>
+
+<div class="level1">
+<h1><a name="paypal_plugin_product_form" id="paypal_plugin_product_form">PayPal Plugin - Product Information Form Help</a></h1>
+
+<table class="inline">
+  <tbody>
+    <tr>
+      <th class="col0 leftalign" colspan="2">Main Product Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_name"></a>Product Name</td>
+      <td class="col1 leftalign">This is the short product name or item number.  This will be submitted to Paypal and shown on the customer's receipt.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_category"></a>Category</td>
+      <td class="col1 leftalign">Select the category for this product.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_short_descrip"></a>Short Description</td>
+      <td class="col1 leftalign">Enter a short description for this product.  This will be displayed under the product name in the product lists.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_description"></a>Description</td>
+      <td class="col1 leftalign">Enter the full description for this product.  This will be displayed on the product detail screen.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_keywords"></a>Keywords</td>
+      <td class="col1 leftalign">Enter any additional search terms for this product.  The name, short description and full description are already searched, so this field should contain words that do not appear in any of the other fields.<p />
+These words will not appear anywhere with the product.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_price"></a>Price</td>
+      <td class="col1 leftalign">Enter the unit price for this product.  Only numbers should be entered here- no commas or currency symbols.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_images"></a>Images</td>
+      <td class="col1 leftalign">You may upload one or more images, up to the maximum number and size set in the Paypal configuration.  You may also delete existing images by clicking the "Delete" link next to the image thumbnail.<p />
+These images will be shown as thumbnails, and can be expanded using the Slimbox viewer.  You can also use the advanced editor to incorporate images directly into your product description.<p />
+You might want to have at least one image to serve as a product thumbnail.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_enabled"></a>Enabled?</td>
+      <td class="col1 leftalign">This checkbox allows you to easily enable or disable products.  A product that is disabled will not appear in the catalog or search results.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_taxable"></a>Taxable?</td>
+      <td class="col1 leftalign">Select whether this product is subject to sales tax.  The default is "true", which means that sales tax will be applied according to your Gateway account configuration.  If you have not configured the gateway to automatically apply sales tax, then this checkbox has no effect.<p>
+The primary purpose for this checkbox is to make certain items non-taxable.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_buttons"></a>Buttons</td>
+      <td class="col1 leftalign">Select the button types that will be available for this product.  To improve performance, especially if encrypted buttons are used, the buttons are created and stored with the product record each time is it updated.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_incl_blocks"></a>Include in Blocks</td>
+      <td class="col1 leftalign">Select which blocks should include this product.  Checking one or more of the checkboxes will cause this product to appear in the associated block, subject to the block's configuration.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_comments"></a>Comments</td>
+      <td class="col1 leftalign">Select the comment option for this specific product.  Comments will only be shown at all if the global configuration allows it; this field allows special handling per product.<p />
+<dt>Yes</dt><dd>Comments will be shown and users can add comments.</dd>
+<dt>No</dt><dd>No comments will be shown.</dd>
+<dt>Closed</dt><dd>Comments will be shown, but no additional comments will be accepted.</dd>
+</td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Delivery Information</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_prod_type"></a>Product Type</td>
+      <td class="col1 leftalign">Select the type of product being sold.  The current options are<br /><ul>
+<li><i>Downloadable</i> : A downloadable product such as a piece of software.  This type may be priced at zero (free), or may have a price value.  It must be associated with a downloadable file.</li>
+<li><i>Physical</i> : A physical product that will be shipped to the customer.  Physical products must have a non-zero price.</li>
+<li><i>Other Virtual</i>: Some other type of product.  This product type may or may not have a price associated with it; if it is zero then the buyer will be able to enter their own price into the payment gateway.  This product type could be used for donations, for example.  This product type may optionally be associated with a downloadable file.</li>
+</ul></td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_select_file"></a>Select File<br /><i>(Download Only)</i></td>
+      <td class="col1 leftalign">Select an existing file to be downloaded.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_upload_file"></a>Upload a new file<br /><i>(Download Only)</i></td>
+      <td class="col1 leftalign">Select and upload a new file for a downloadable product.  In the event that you select an existing file <b>and</b> upload a new one, the new file will take precedence.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_weight"></a>Weight<br /><i>(Physical only)</i></td>
+      <td class="col1 leftalign">This field is used to determine shipping charges, if you've set up a shipping schedule in your gateway account setup.  Enter the weight, using the unit of measure that you use in Paypal.  If the weight is set to zero, then no shipping charge will be calculated.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_shipping_type"></a>Shipping<br /><i>(Physical only)</i></td>
+      <td class="col1 leftalign">Select the type of shipping charge to be applied to the item.  The options are:
+<ul><li><i>No Shipping</i>: No shipping charge will be added.</li>
+<li><i>Use Gateway Profile</i>: Shipping will be calculated by the gateway using the shipping charges set up in your business profile.</li>
+<li><i>Fixed Amount</i>: Enter a fixed amount per item to be added to the purchase.</li>
+</ul>
+</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_expiration"></a>Expiration Time<br /><i>(Downloadable, Virtual Only)</i></td>
+      <td class="col1 leftalign">Enter the number of days after which a purchase will expire.  This is normally used for downloadable products to allow a buyer to download the item only within a certain period.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_track_onhand"></a>Track Quantity On Hand<br /><i>(Physical Only)</i></td>
+      <td class="col1 leftalign">Check the checkbox to indicate that you wish to track the quantity on hand of an item, and enter the current quantity on hand in the space provided. The quantity on hand can be updated at any time.</td>
+    </tr>
+
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

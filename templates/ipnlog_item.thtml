@@ -1,0 +1,11 @@
+{# begin {templatelocation} #}
+ <tr>
+  <td><a href="{site_url}/admin/plugins/paypal/ipnlog.php?op=single&id={id}">{id}</a></td>
+  <td>{ip_addr}</td>
+  <td>{time}</td>
+  <td>{verified}</td>
+  <td><a href="{site_url}/admin/plugins/paypal/purchase_history.php?txn_id={txn_id}">{txn_id}</a></td>
+  <td>{status}</td>
+  <td><a href="{site_url}/users.php?mode=profile&uid={purchaser}">{purchaser}</a></td>
+ </tr>
+{# end {templatelocation} #}

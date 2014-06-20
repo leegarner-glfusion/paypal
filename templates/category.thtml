@@ -1,0 +1,5 @@
+{# begin {templatelocation} #}
+  <td class="{curr}" width="{width}%">
+    <a href="{category_link}">{category_name}</a>
+  </td>
+{# end {templatelocation} #}

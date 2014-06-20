@@ -1,0 +1,6 @@
+{# begin {templatelocation} #}
+<a href="{pi_url}/detail.php?id={id}" class="pluginPaypalButton orange">
+  {$LANG_PP['customize']}
+</a>
+<div style="clear:both;"></div>
+{# end {templatelocation} #}

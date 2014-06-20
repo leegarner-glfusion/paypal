@@ -1,0 +1,10 @@
+{# begin {templatelocation} #}
+<form style="display:inline;" class="frm_donation"
+    action="{action_url}" method="post">
+  {gateway_vars}
+  <input type="hidden" name="gateway" value="{gw_name}" />
+  <input type="image" src="https://content.authorize.net/images/donate-blue.gif"
+    name="submit" alt="{$LANG_PP['donate']}"
+    title="{$LANG_PP['donate']}" />
+</form>
+{# end {templatelocation} #}

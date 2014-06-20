@@ -1,0 +1,124 @@
+{# begin {templatelocation} #}
+<noscript>
+  <span class="alert">{$LANG_PP['no_javascript']}</span>
+</noscript>
+
+<div class="pluginPaypalProductDetail">
+  <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
+    <div id="paypalShortDesc">
+      <h1>{short_description}
+      {!if can_edit}
+        <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
+          <img src="{layout_url}/images/admin/edit.png" />
+        </a>
+      {!endif}
+      </h1>
+      {name}&nbsp;&nbsp;{edit_icon}
+      <p />
+      <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>
+      <span id="price" name="price">{price}</span> {currency}
+      {!if rating_bar}
+        {rating_bar}<br />
+      {!endif}
+    </div>
+
+    <div id="paypalProductAttrib">
+      {attributes}
+      {$LANG_PP['quantity']}:
+        <input type="text" name="quantity" size="3" maxlength="5" 
+            value="1" />&nbsp;&nbsp;
+      <!-- BEGIN BtnBlock -->
+        {button}<br />
+      <!-- END BtnBlock -->
+    </div>
+
+    <div id="paypalProductDesc">
+      {description}
+
+      <!-- BEGIN Thumbnail -->
+      <div id="paypalProductThumb" style="width:{img_cell_width}px;">
+        <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
+          <img src="{img_url}/thumbs/{img_file}" border="0" 
+              alt="{$LANG_PP[click_to_enlarge]}" 
+              title="{$LANG_PP[click_to_enlarge]}"
+              class="gl_mootip" />
+        </a>
+      </div>
+      <!-- END Thumbnail -->
+    </div>
+
+  </form>
+</div>
+<div class="pluginPaypalComments">
+  {usercomments}
+</div>
+
+<script type="text/javascript" language="JavaScript">
+var emsg = "";
+
+function isValidField(obj)
+{
+    if (null == obj) {
+        return false;
+    }
+    if ("undefined" == typeof(obj)) {
+        return false;
+    }
+    return true;
+}
+
+function ProcessForm() {
+    var rec,i,j;
+    var price, frm;
+    var on_elem, os_elem;
+
+    emsg="";
+    frm = document.getElementById("add_cart");
+    if (frm === null) return;
+    price = {price};
+    options = frm.elements['options[]'];
+
+    // If there's only one option selection, then 'options' will be an array
+    // of all it's option items.  We need to handle them differently than if
+    // there are multiple option selections.
+    if (typeof(options.value) === "undefined") {
+        for (i = 0; i < options.length; i++) {
+            if (!isValidField(options[i])) {
+                break;
+            }
+
+            // Expecting value as "id|desc|price"
+            rec = options[i].value.split("|");
+            if (typeof(rec[2]) != "undefined") {
+                price = (price * 1) + (rec[2]*1);
+            }
+            //frm["os"+i].value = rec[0];
+        }
+    } else {
+        rec = options.value.split("|");
+        if (typeof(rec[2]) != "undefined") {
+            price = (price * 1) + (rec[2]*1);
+        }
+    }
+
+    price = price.toFixed(2);
+    frm.amount.value = price;
+    document.getElementById('price').innerHTML = price;
+    return;
+}
+
+function checkForJavascript()
+{
+    e = document.getElementById('add_cart');
+    if (e !== null)
+        e.style.display = "inline";
+}
+
+window.addEvent('load',function() {
+    checkForJavascript();
+    ProcessForm();
+});
+ 
+</script>
+
+{# end {templatelocation} #}

@@ -1,0 +1,11 @@
+{# begin {templatelocation} #}
+<form style="display:inline;" class="frm_buy_now"
+    action="{action_url}" method="post">
+  {gateway_vars}
+  <input type="hidden" name="gateway" value="{gw_name}" />
+  <input type="image"
+    src="https://content.authorize.net/images/buy-now-blue.gif"
+    name="submit" alt="{$LANG_PP['buy_now']}"
+    title="{$LANG_PP['buy_now']}" />
+</form>
+{# end {templatelocation} #}

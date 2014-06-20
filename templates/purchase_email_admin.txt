@@ -1,0 +1,15 @@
+Dear Site Administrator;
+<p />
+You have received a new order via your web site.  Check the purchase
+information at <a href="{pi_admin_url}/index.php?ipnlog=x&op=single&txn_id={txn_id}">
+{pi_admin_url}/index.php?ipnlog=x&op=single&txn_id={txn_id}
+</a>
+ for any action that you may need to take.
+<p />
+Details of the purchase follow: 
+<p />
+Buyer: {payer_name} (ID {buyer_uid}, {user_name})<br />
+{payer_email}
+<p />
+{purchase_details}
+

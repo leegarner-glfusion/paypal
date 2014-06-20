@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>PayPal Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1><a name="advt_plugin" id="advt_plugin">PayPal Plugin</a></h1>
+
+<div class="level1">
+<h1><a name="paypal_plugin_product_form" id="paypal_plugin_product_form">PayPal Plugin - Attribute Form Help</a></h1>
+
+<table class="inline">
+  <tbody>
+    <tr>
+      <th class="col0 leftalign" colspan="2">Attribute Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_item_id"></a>Product Name</td>
+      <td class="col1 leftalign">
+        Select the product to which this attribute will apply.  The product must exist before you can apply attributes to it.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_attr_name"></a>Attribute Name</td>
+      <td class="col1 leftalign">
+        This is the name of the attribute: Size, Color, Capacity, etc.  You can select an existing name, or enter a new name in the text box.  Note that the names must match exactly for the attribute to be shown properly in the selection list.  For example, entering "Color" for one attribute and "color" for another will result in two selections when there should probably be only one.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_attr_value"></a>Attribute Value</td>
+      <td class="col1 leftalign">
+        The "Attribute Value" is the specific value of the attribute.  For example, if the Attribute Name is "Color", an Attribute Value might be "Blue."
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_attr_price"></a>Attribute Price</td>
+      <td class="col1 leftalign">
+        Enter the <i>incremental</i> price for this specific attribute.  This is the extra charge that will be applied to the product if this attribute is selected.<p />
+        This value may be negative if a discount is given for this attribute.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_orderby"></a>Order</td>
+      <td class="col1 leftalign">The Order value indicates the order in which this Attribute Value will be displayed in the selection list.  Values are automatically sequenced by multiples of 10 (10, 20, 30, etc.), so to insert a new value between two existing ones you could enter something like "25".<p />
+The attribute with the lowest order value is displayed first in the selection list, and becomes the default.  You might want to make sure that an attribute with a zero price is the default.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_enabled"></a>Enabled?</td>
+      <td class="col1 leftalign">
+        Check this box if this attribute value is enabled.  You might want to disable a value if it is temporarily out of stock, for example.
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

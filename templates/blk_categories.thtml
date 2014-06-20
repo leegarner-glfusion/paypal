@@ -1,0 +1,7 @@
+{# begin {templatelocation} #}
+<ul>
+  <!-- BEGIN row -->
+  <li><a href="{url}">{category}</a> ({count})</li>
+  <!-- END row -->
+</ul>
+{# end {templatelocation} #}

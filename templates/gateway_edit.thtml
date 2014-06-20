@@ -1,0 +1,50 @@
+{# begin {templatelocation} #}
+<h2>{gw_description}</h2>
+<form action="{pi_admin_url}/index.php" method="post">
+  <input type="hidden" name="gw_id" value="{gw_id}" />
+  <table border="0">
+    <!-- BEGIN ItemRow -->
+    <tr>
+      <td class="admin-list-field">{param_name} {other_label}</td>
+      <td class="admin-list-field">
+        <a href="#" onclick="popupWindow('{doc_url}#desc_{field_name}', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+        {param_field}
+      </td>
+    </tr>
+    <!-- END ItemRow -->
+    <tr>
+      <td class="admin-list-field">{$LANG_PP['enabled']}</td>
+      <td class="admin-list-field">
+        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+        <input type="checkbox" name="enabled" value="1" {enabled_chk} />
+      </td>
+    </tr>
+    <tr>
+      <td class="admin-list-field">{$LANG_PP['txt_buttons']}</td>
+      <td class="admin-list-field">
+        <a href="#" onclick="popupWindow('{doc_url}#desc_services', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+        {svc_checkboxes}
+      </td>
+    </tr>
+    <tr>
+      <td class="admin-list-field">{$LANG_PP['orderby']}</td>
+      <td class="admin-list-field">
+        <a href="#" onclick="popupWindow('{doc_url}#desc_order', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+        <input type="text" size="3" name="orderby" value="{orderby}" />
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" name="gwsave" value="{$LANG_ADMIN['save']}" />
+        <input type="reset" name="reset" value="{$LANG_PP['clearform']}" />
+        <input type="submit" name="gwadmin" value="{$LANG_ADMIN['cancel']}" />
+      </td>
+    </tr>
+  </table>
+</form>
+{# end {templatelocation} #}

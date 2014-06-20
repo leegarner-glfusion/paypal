@@ -1,0 +1,24 @@
+{# begin {templatelocation} #}
+  <h2>
+    {$LANG_PP['product_categories']}
+  </h2>
+
+<div style="float:left; width:55px;">
+  {!if catimg_url}
+    <img src="{catimg_url}" width="48" height="48" />
+  {!else}
+    &nbsp;
+  {!endif}
+</div>
+
+<div style="width:90%; float:left;">
+  {!if breadcrumbs}
+    {breadcrumbs}<br />
+  {!endif}
+  <table class="categories" width="100%">
+    {categories}
+  </table>
+
+</div>
+<div style="clear:both;"></div>
+{# end {templatelocation} #}

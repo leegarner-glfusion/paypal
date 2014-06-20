@@ -1,0 +1,11 @@
+{# begin {templatelocation} #}
+<form style="display:inline;" class="frm_buy_now"
+    action="{paypal_url}/cgi-bin/webscr" method="post">
+  {gateway_vars}
+  <input type="hidden" name="rm" value="2" />
+  <input type="image"
+    src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_SM.gif"
+    name="submit"
+    alt="{btn_text}" title="{$LANG_PP['buy_now']}" />
+</form>
+{# end {templatelocation} #}

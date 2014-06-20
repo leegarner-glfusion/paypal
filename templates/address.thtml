@@ -1,0 +1,210 @@
+{# begin {templatelocation} #}
+<script type="text/javascript">
+function updateForm(id)
+{
+    if (id == 0) {
+        document.getElementById("name").value = "";
+        document.getElementById("company").value = "";
+        document.getElementById("address1").value = "";
+        document.getElementById("address2").value = "";
+        document.getElementById("city").value = "";
+        document.getElementById("zip").value = "";
+        document.getElementById("countryDefault").value = "";
+        document.getElementById("stateDefault").value = "";
+        document.getElementById("addr_id").value = id;
+    } else {    
+        document.getElementById("name").value = document.getElementById("ad_name["+id+"]").value;
+        document.getElementById("company").value = document.getElementById("ad_company["+id+"]").value;
+        document.getElementById("address1").value = document.getElementById("ad_addr_1["+id+"]").value;
+        document.getElementById("address2").value = document.getElementById("ad_addr_2["+id+"]").value;
+        document.getElementById("city").value = document.getElementById("ad_city["+id+"]").value;
+        document.getElementById("zip").value = document.getElementById("ad_zip["+id+"]").value;
+        document.getElementById("countryDefault").value = document.getElementById("ad_country["+id+"]").value;
+        document.getElementById("stateDefault").value = document.getElementById("ad_state["+id+"]").value;
+        document.getElementById("addr_id").value = id;
+    }
+    initCountry();
+}
+
+function removeAddress(id)
+{
+    if (confirm("Are you sure")) {
+
+        var xmlHttp = null;
+        if (window.XMLHttpRequest) {
+            xmlHttp = new XMLHttpRequest();
+        } else if (window.ActiveXObject) {
+            xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        if (xmlHttp == null) return false;
+
+        url = "{pi_url}/ajax.php?action=delAddress&id=" + id;
+        xmlHttp.open("GET", url, true);
+        xmlHttp.send(null);
+
+        var el = document.getElementById("use_addr"+id);
+        var p = el.parentNode;
+        p.removeChild(el);
+        return true;
+    } else {
+        return false;
+    }
+}
+</script>
+
+<h2>{addr_type}</h2>
+<form action="{pi_url}/index.php" method="post" class="pluginPaypalForm">
+  <input type="hidden" name="order_id" value="{order_id}" />
+  {# This is recruited for the country and State Field #}
+  <input type="hidden" value="countrySelect" name="cs_config_country_field" id="cs_config_country_field">
+  <input type="hidden" value="stateSelect"   name="cs_config_state_field"   id="cs_config_state_field">
+  <input type="hidden" value="countryDefault" name="cs_config_country_default" id="cs_config_country_default">
+  <input type="hidden" value="stateDefault"   name="cs_config_state_default"   id="cs_config_state_default">
+  <input type="hidden" value="{country}" name="countryDefault" id="countryDefault">
+  <input type="hidden" value="{state}" name="stateDefault"   id="stateDefault">
+  <SCRIPT type="text/javascript" SRC="{pi_url}/js/country_state.js"></SCRIPT>
+
+{!if have_addresses}
+  <div class="pluginPaypalContent">
+    <p>{sel_addr_text}</p>
+    <div class="pluginPaypalSavedAddress" id="use_addr0">
+      <input type="radio" name="useaddress" value="0" {none_chk} 
+       onclick="updateForm(0);" /><i>{$LANG_PP['new_address']}</i>
+    </div>
+  <!-- BEGIN SavedAddress -->
+  <div class="pluginPaypalSavedAddress" id="use_addr{id}">
+    <input type="radio" name="useaddress" value="{id}" {ad_checked} 
+       onclick="updateForm({id});"
+        />{ad_name},
+    {!if ad_company}
+    {ad_company},
+    {!endif}
+    {ad_addr_1},
+    {!if ad_addr_2}
+    {ad_addr_2},
+    {!endif}
+    {ad_city}, {ad_state} {ad_zip}
+    <img src="{layout_url}/images/admin/delete.png" 
+        onclick="removeAddress({id});" />
+    <input type="hidden" name="ad_name[{id}]" id="ad_name[{id}]" value="{ad_name}" />
+    <input type="hidden" name="ad_company[{id}]" id="ad_company[{id}]" value="{ad_company}" />
+    <input type="hidden" name="ad_addr_1[{id}]" id="ad_addr_1[{id}]" value="{ad_addr_1}" />
+    <input type="hidden" name="ad_addr_2[{id}]" id="ad_addr_2[{id}]" value="{ad_addr_2}" />
+    <input type="hidden" name="ad_city[{id}]" id="ad_city[{id}]" value="{ad_city}" />
+    <input type="hidden" name="ad_state[{id}]" id="ad_state[{id}]" value="{ad_state}" />
+    <input type="hidden" name="ad_zip[{id}]" id="ad_zip[{id}]" value="{ad_zip}" />
+    <input type="hidden" name="ad_country[{id}]" id="ad_country[{id}]" value="{ad_country}" />
+    <br />
+  </div>
+  <!-- END SavedAddress -->
+  <!--<input type="submit" name="savestored" value="Use Address" />-->
+  </div>
+  <p>&nbsp;</p>
+{!endif}
+
+  <input type="hidden" name="addr_id" id="addr_id" value="{addr_id}" />
+
+  <div>
+    <p>
+      <label for="name">{$LANG_PP['fullname']}</label>
+      <input type="text" id="name" name="name" size="60" value="{name}" />
+      <font color="red">{$LANG_PP['name_or_company']} {$LANG_PP['required']}</font>
+    </p>
+    <p>
+      <label for="company">{$LANG_PP['company']}</label>
+      <input type="text" id="company" name="company" size="60" value="{company}" />
+    </p>
+
+    {!if get_street}
+    <p>
+      <label for="address1">{$LANG_PP['address1']}</label>
+      <input type="text" id="address1" name="address1" size="60" value="{address1}" />
+      {!if req_street}
+      <font color="red">{$LANG_PP['required']}</font>
+      {!endif}
+    </p>
+    <p>
+      <label for="address2">{$LANG_PP['address2']}</label>
+      <input type="text" id="address2" name="address2" size="60" value="{address2}" />
+    </p>
+    <p>
+    {!else}
+      <input type="hidden" id="address1" name="address1" value="" />
+      <input type="hidden" id="address2" name="address2" value="" />
+    {!endif}
+
+    {!if get_country}
+    <p>
+      <label for="country">{$LANG_PP['country']}</label>
+      <select id="countrySelect" name="country" 
+            onchange='updateState(this.id)' class="pluginPaypalStateSelect">
+      </select>
+      {!if req_country}
+      <font color="red">{$LANG_PP['required']}</font>
+      {!endif}
+    </p>
+    {!else}
+      <input type="hidden" id="country" name="country" value="" />
+    {!endif}
+
+    {!if get_city}
+    <p>
+      <label for="city">{$LANG_PP['city']}</label>
+      <input type="text" id="city" name="city" size="60" value="{city}" />
+      {!if req_city}
+      <font color="red">{$LANG_PP['required']}</font>
+      {!endif}
+    </p>
+    {!else}
+      <input type="hidden" id="city" name="city" value="" />
+    {!endif}
+
+    {!if get_state}
+    <p>
+      <label for="state">{$LANG_PP['state']}</label>
+      <div style="display:inline;">
+        <select id="stateSelect" name="state" class="pluginPaypalStateSelect"">
+        </select>
+      </div>
+      {!if req_state}
+      <font color="red">{$LANG_PP['required']}</font>
+      {!endif}
+    </p>
+    {!else}
+      <input type="hidden" id="state" name="state" value="" />
+    {!endif}
+
+    {!if get_postal}
+    <p>
+      <label for="zip">{$LANG_PP['zip']}</label>
+      <input type="text" id="zip" name="zip" size="60" value="{zip}" />
+      {!if req_postal}
+      <font color="red">{$LANG_PP['required']}</font>
+      {!endif}
+    </p>
+    {!else}
+      <input type="hidden" id="zip" name="zip" value="" />
+    {!endif}
+
+    {!if allow_default}
+    <p>
+      <label>&nbsp;</label>
+      <input type="checkbox" name="is_default" value="1" {def_checked} />
+      {$LANG_PP['make_def_addr']}
+    </p>
+    {!endif}
+
+    <p>
+      {hiddenvars}
+      <input type="submit" name="{action}" value="Submit" /> 
+      <input type="reset" value="Reset" /> 
+    </p>
+  </div>    
+</form>
+<script type="text/javascript">
+    {!if addr_id}
+        updateForm({addr_id});
+    {!endif}
+    initCountry();
+</script>
+ {# begin {templatelocation} #}

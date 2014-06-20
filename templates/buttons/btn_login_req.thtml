@@ -1,0 +1,5 @@
+{# begin {templatelocation} #}
+<a href="{site_url}/users.php" rel="nofollow">{$LANG_LOGIN[3]}</a> {$LANG_PP['or']}
+<br />
+<a href="{site_url}/users.php?mode=new" rel="nofollow">{$LANG_PP['purch_signup']}</a>
+{# end {templatelocation} #}

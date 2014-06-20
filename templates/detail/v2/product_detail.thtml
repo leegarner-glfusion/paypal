@@ -1,0 +1,73 @@
+{# begin {templatelocation} #}
+<noscript> 
+  <span class="alert">{$LANG_PP['no_javascript']}</span> 
+</noscript> 
+<script type="text/javascript"> 
+function PPupdateImage(filename) 
+{ 
+    document.getElementById("disp_img").src = "{img_url}/" + filename; 
+    document.getElementById("lg_img").href = "{img_url}/" + filename; 
+} 
+</script>
+
+<div id="paypalShortDesc">
+  <h1>{short_description}
+  {!if can_edit}
+  <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
+    <img src="{layout_url}/images/admin/edit.png" />
+  </a>
+  {!endif}
+  </h1>
+  {name}&nbsp;&nbsp;{edit_icon}
+  <div id="paypalProductDesc">
+    {description}
+  </div>
+</div>
+
+<div style="clear:both;margin-top:20px;"></div>
+<div class="pluginPaypalProductDetail" id="product-image"
+   style="position:relative;float:left;margin-left:10px;">
+  <a id="lg_img" href="{img_url}/{main_img}" rel="slimbox">
+    <img id="disp_img" style="max-width:450px;" src="{img_url}/{main_img}" />
+  </a>
+  <div class="additional-images" style="clear:both;">
+    <!-- BEGIN Thumbnail -->
+    <div id="paypalProductThumb" >
+      <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
+        <img src="{img_url}/thumbs/{img_file}" border="0"
+              alt="{$LANG_PP[click_to_enlarge]}"
+              onmouseover="javascript:PPupdateImage('{img_file}');"
+              title="{$LANG_PP[click_to_enlarge]}"
+              class="gl_mootip" />
+      </a>
+    </div>
+    <!-- END Thumbnail -->
+  </div>
+</div>
+
+<div style="float:left;">
+  <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>
+  <span id="price" name="price">{price}</span> {currency}
+
+  {!if rating_bar}
+  {rating_bar}<br />
+  {!endif}
+
+  <div id="paypalProductAttrib">
+    <!-- BEGIN BtnBlock -->
+    {button}<br />
+    <!-- END BtnBlock -->
+  </div>
+
+  {!if onhand}
+  <div id="paypalOnhand">
+    {onhand} {$LANG_PP['available']}
+  </div>
+  {!endif}
+
+</div>
+
+<div class="pluginPaypalComments">
+  {usercomments}
+</div>
+{# end {templatelocation} #}

@@ -1,0 +1,18 @@
+{# begin {templatelocation} #}
+<table border="0">
+  <tr><td><b>{$LANG_PP['ipnlog_id']}:</b></td><td>{id}</td></tr>
+  <tr><td><b>{$LANG_PP['ip_addr']}:</b></td><td>{ip_addr}<br/ ></td></tr>
+  <tr><td><b>{$LANG_PP['datetime']}:</b></td><td>{time}<br /></td></tr>
+  <tr><td><b>{$LANG_PP['trans_id']}:</b></td><td>{txn_id}<br /></td></tr>
+  <tr><td><b>{$LANG_PP['gateway']}:</b></td><td>{gateway}<br /></td></tr>
+  <!-- BEGIN DataBlock -->
+  <tr><td><b>{prompt}:</b></td><td>{value}</td></tr>
+  <!-- END DataBlock -->
+</table>
+
+<hr />
+<b>{$LANG_PP['ipn_data']}:</b>
+<p>
+ {raw}
+</p>
+{# end {templatelocation} #}

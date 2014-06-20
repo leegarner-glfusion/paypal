@@ -1,0 +1,5 @@
+{# begin {templatelocation} #}
+<!-- BEGIN ServiceCheckbox -->
+<span class="nowrap"><input type="checkbox" name="service[{name}]" value="1" {checked} />&nbsp;{text}</span>&nbsp;&nbsp;
+<!-- END ServiceCheckbox -->
+{# end {templatelocation} #}

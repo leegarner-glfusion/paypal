@@ -1,0 +1,4 @@
+{# begin {templatelocation} #}
+<h2>{title}</h2>
+{todo}
+{# end {templatelocation} #}

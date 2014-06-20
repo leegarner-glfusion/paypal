@@ -1,0 +1,301 @@
+{# begin {templatelocation} #}
+<script type="text/javascript">
+window.addEvent('load',function() {
+  PP_changeProdType('{prod_type}');
+});
+
+function PP_changeProdType(value)
+{
+  switch(value) {
+  case '0':
+    //document.getElementById('type_download').style.display = 'none';
+    document.getElementById('type_physical').style.display = '';
+    break;
+  case '1':
+    //document.getElementById('type_download').style.display = '';
+    document.getElementById('type_physical').style.display = 'none';
+    break;
+  }
+}
+
+function PP_changeShippingType(value)
+{
+  switch(value) {
+  case '0':     // No Shipping
+  case '1':     // Paypal Profile
+    document.getElementById('shipping_amount').style.display = 'none';
+    break;
+  case '2':     // Fixed amount
+    document.getElementById('shipping_amount').style.display = '';
+    break;
+  }
+}
+
+</script>
+
+<form action="{pi_admin_url}/index.php" method="post" 
+    class="pluginPaypalProductForm"
+    enctype="multipart/form-data" onsubmit='set_postcontent();'>
+
+  {!if product_id}
+    <input type="hidden" name="id" value="{product_id}" />
+  {!endif}
+
+  <fieldset>
+    <legend>{$LANG_PP['product_info']}</legend>
+
+    <p>
+      <label><font color="red">*</font>{$LANG_PP['product']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="name" value="{name}" size="40" 
+        maxlength="255" />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['category']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <select name="categories">
+        <option value="0">({$LANG_PP['none']})</option>
+        {cat_select}
+      </select>
+    </p>
+
+    <p>
+      <label><font color="red">*</font>{$LANG_PP['short_description']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="short_description" value="{short_description}" 
+          size="40" maxlength="255" />
+    </p>
+
+    <!--<p>
+      <label>{$LANG24[4]}:</label>
+      <select id="sel_editmode" name="postmode" {change_editormode}>
+        {post_options}
+      </select>
+    </p>-->
+
+    <p id="html_editarea">
+      <label>{$LANG_PP['description']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <textarea id="html_content" 
+          name="description" cols="35" rows="10" 
+          style="width:70%">{description}</textarea>
+    </p>
+
+    <p>
+      <label>{$LANG_PP['keywords']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_keywords', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="keywords" value="{keywords}" size="40"
+            maxlength="40" />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['price']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="price" value="{price}" size="20" 
+        maxlength="20" />&nbsp;{currency}
+    </p>
+
+    <p>
+      <label>{$LANG_PP['images']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <span>
+        <table border=0>
+          <!-- BEGIN PhotoRow -->
+          <tr>
+            <td align="left">
+              <a href="{img_url}" rel="slimbox[ad]"">
+                <img src="{thumb_url}" />
+              </a>
+            </td>
+            <td align="left">
+              <a href="{del_img_url}">{$LANG_PP['delete_image']}</a><br>
+            </td>
+          </tr>
+          <!-- END PhotoRow -->
+          <!-- BEGIN UploadFld -->
+          <tr>
+            <td align="left">
+              <input type="file" name="images[]" /><br />
+            </td>
+          </tr>
+          <!-- END UploadFld -->
+        </table>
+      </span>
+    </p>
+
+    <p>
+      <label>{$LANG_PP['enabled']}?
+        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="checkbox" name="enabled" value="1" {ena_chk} />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['taxable']}?
+        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="checkbox" name="taxable" value="1" {tax_chk} />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['txt_buttons']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_buttons', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <!-- BEGIN BtnRow -->
+        <input type="checkbox" name="buttons[]" value="{btn_type}" 
+            {btn_chk} />{btn_name}&nbsp;
+      <!-- END BtnRow -->
+    </p>
+
+    <p>
+      <label>{$LANG_PP['incl_blocks']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_incl_blocks', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="checkbox" name="show_random" value="1" 
+        {show_random_chk} />{$LANG_PP['random_product']}&nbsp;&nbsp;
+      <input type="checkbox" name="show_popular" value="1" 
+        {show_popular_chk} />{$LANG_PP['popular_product']}&nbsp;&nbsp;
+      <input type="checkbox" name="featured" value="1" 
+        {feat_chk} />{$LANG_PP['featured_product']}&nbsp;&nbsp;
+    </p>
+
+    <p>
+      <label>{$LANG_PP['comments']}:
+       <a href="#" onclick="popupWindow('{doc_url}#desc_comments', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <select name="comments_enabled">
+        <option value="0" {sel_comment_0}>{$LANG_PP['enabled']}</option>
+        <option value="2" {sel_comment_2}>{$LANG_PP['disabled']}</option>
+        <option value="1" {sel_comment_1}>{$LANG_PP['closed']}</option>
+      </select>
+    </p>
+
+    <p>
+      <label>{$LANG_PP['ratings_enabled']}?
+        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="checkbox" name="rating_enabled" value="1" 
+        {rating_chk} />
+    </p>
+
+  </fieldset>
+
+  <fieldset>
+    <legend>{$LANG_PP['delivery_info']}</legend>
+
+    <p>
+      <label>{$LANG_PP['prod_type']}?:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_prod_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <!-- BEGIN ProdTypeRadio -->
+        <input type="radio" name="prod_type" value="{type_val}" {type_sel}
+            onclick="PP_changeProdType(this.value)"
+        />&nbsp;{type_txt}&nbsp;&nbsp;
+      <!-- END ProdTypeRadio -->
+    </p>
+
+    <!--<div id="type_download">-->
+    <p>
+      <label>{$LANG_PP['select_file']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_select_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" i
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <select name="file">
+        <option value="">-- {$LANG_PP['select_file']} --</option>
+        {file_selection}
+      </select>
+    </p>
+
+    <p>
+      <label>{$LANG_PP['or_upload_new']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_upload_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="file" name="uploadfile" />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['exp_time_days']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="expiration" value="{expiration}" 
+        size="20" maxlength="20" />
+    </p>
+
+    <!--</div>-->
+
+    <div id="type_physical">
+    <p>
+      <label>{$LANG_PP['weight']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_weight', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="text" name="weight" value="{weight}" />
+    </p>
+
+    <p>
+      <label>{$LANG_PP['shipping_type']}:
+        <a href="#" onclick="popupWindow('{doc_url}#desc_shipping_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <select name="shipping_type" 
+            onchange="PP_changeShippingType(this.value);">
+        <option value="0" {ship_sel_0}>{$LANG_PP['no_shipping']}</option>
+        <option value="1" {ship_sel_1}>{$LANG_PP['pp_profile']}</option>
+        <option value="2" {ship_sel_2}>{$LANG_PP['fixed']}</option>
+      </select>
+      <span id="shipping_amount">
+        &nbsp;&nbsp;{$LANG_PP['shipping_amt']} ({$LANG_PP['per_item']}):
+        <input type="text" name="shipping_amt" value="{shipping_amt}" />
+      </span>
+    </p>
+
+    <p>
+      <label>{$LANG_PP['track_onhand']}
+       <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['chk_help']}" /></a>
+      </label>
+      <input type="checkbox" name="track_onhand" value="1" {trk_onhand_chk} />&nbsp;&nbsp;{$LANG_PP['onhand']}: <input type="text" name="onhand" value="{onhand}" />
+    </p>
+
+    </div>
+
+  </fieldset>
+  <font color="red">*</font>{$LANG_PP['indicate_req_fld']}
+
+  <div align="center">
+    <input type="submit" name="saveproduct" value="{$LANG_PP['saveproduct']}" />
+    <input type="reset" value="{$LANG_PP['clearform']}" />
+    {!if candelete}
+      <input type="submit" name="deleteproduct" 
+        value="{$LANG_PP['deleteproduct']}" 
+        onclick="return confirm('{$LANG_PP['q_del_item']}');" />
+    {!endif}
+    <input type="submit" name="cancel" value="{$LANG_ADMIN['cancel']}" />
+  </div>
+
+</form>
+{# end {templatelocation} #}

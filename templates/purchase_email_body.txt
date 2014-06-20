@@ -1,0 +1,33 @@
+<table border="1" cellpadding="2">
+<tr>
+  <th>Qty.</th><th>Item</th><th>Price</th><th>Extension</th>
+</tr>
+
+<!-- BEGIN ItemList -->
+<tr>
+  <td>{qty}</td>
+  <td style="width:275px;">{name}</td>
+  <td style="width:80px; text-align:right;">{price}</td>
+  <td style="width:80px; text-align:right;">{ext}</td>
+</tr>
+<!-- END ItemList -->
+</table>
+<table border="0" cellpadding="2">
+<tr>
+  <td>Total Items:</td><td align="right">{payment_items}</td>
+</tr>
+<tr>
+  <td>Tax</td><td align="right">{tax}</td>
+</tr>
+<tr>
+  <td>Shipping</td><td align="right">{shipping}</td>
+</tr>
+<tr>
+  <td>Handling</td><td align="right">{handling}</td>
+</tr>
+<tr>
+  <td>Purchase Total:</td><td align="right">{payment_gross}</td>
+</tr>
+</table>
+<p />
+

@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>PayPal Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1>Gateway Configuration<br />
+PayPal Website Payments Standard</h1>
+<div class="level1">
+<h1><a name="paypal_gwhelp_paypal" id="paypal_gwhelp_paypal">PayPal Gateway Configuration Options</a></h1>
+
+<style type="text/css">
+td {
+    vertical-align:top;
+}
+</style>
+<table class="inline">
+  <tbody>
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_bus_prod_email"></a>Main Business Email</td>
+      <td class="col1 leftalign">This is the &quot;Regular&quot; account e-mail for PayPal.  If you have only one account, this must contain it even if it is a &quot;micro-payment&quot; account.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_micro_prod_email"></a>Production Micro-Payment Email</td>
+      <td class="col1 leftalign">This is your Production &quot;Micro-payment&quot; account e-mail, if you have one. If you don't have a micro-payment account, this should contain you regular account email.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_bus_test_email"></a>Sandbox Business Email</td>
+      <td class="col1 leftalign">This is the &quot;Regular Sandbox&quot; account e-mail with PayPal. This is used for testing.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_micro_test_email"></a>Sandbox Micro-Payment Email</td>
+      <td class="col1 leftalign">This is your Sandbox &quot;Micro-payment&quot; account e-mail, if you have one. If you don't have a micro-payment account, this should contain you regular account email. This is used for testing.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_test_mode"></a>Testing (Sandbox) Mode?</td>
+      <td class="col1 leftalign">Check this box during testing.  The Sandbox URL will be used instead of the Production URL.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_micro_threshold"></a>Micro-Payment Threshold</td>
+      <td class="col1 leftalign">Enter the threshold amount for micro-payments.  Order amounts <b>below</b> this amount will be charged using your micro-payment account e-mail, orders totaling this amount or higher are charged using your regular e-mail.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_encrypt"></a>Encrypt PayPal Buttons?</td>
+      <td class="col1 leftalign">Check this box if you have set up the necessary certificates to use PayPal Encrypted Buttons.
+&quot;Buy Now&quot; buttons are encrypted and cached with the product; checkout buttons are encrypted on the fly.
+If encryption fails, regular HTML buttons are used.  Encryption requires several steps to set up, so consult PayPal's documentation.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_pp_cert"></a>Paypal Certificate File
+      </td>
+      <td class="col1 leftalign">
+        Enter the complete path to the public SSL certificate file that you've downloaded from Paypal.  This file <b>must</b> be readable by your web server.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_pp_cert_id"></a>Paypal Certificate ID
+      </td>
+      <td class="col1 leftalign">
+        Enter the certificate ID created by PayPal and assigned to your public key.  This is required so that PayPal can decrypt your encrypted button data.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_micro_cert_id"></a>Micro-Payment Certificate ID
+      </td>
+      <td class="col1 leftalign">
+        If you use micro-payments, you must upload your public certificate to <b>both</b> accounts.  Enter the certificate ID created by PayPal for your micro-payment account.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_sandbox_main_cert"></a>Sandbox Certificate ID
+      </td>
+      <td class="col1 leftalign">
+        Enter the certificate ID created by PayPal and assigned to your public key <b>for your Main Sandbox account</b>.  This is required so that PayPal can decrypt your encrypted button data.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_sandbox_micro_cert"></a>Sandbox Micro-Payment Certificate ID
+      </td>
+      <td class="col1 leftalign">
+        If you use micro-payments, you must upload your public certificate to <b>both</b> accounts.  Enter the certificate ID created by PayPal for your <b>Sandbox</b> micro-paymanet account.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_prv_key"></a>Private Key File
+      </td>
+      <td class="col1 leftalign">
+        Enter the complete path to your private SSL key file.  This file <b>must</b> be readable by your web server and should <b>not</b> be placed in a publically-accessible directory.  The security of your encrypted PayPal buttons depends upon this key remaining private.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top">
+        <a name="desc_pub_key"></a>Public Key File
+      </td>
+      <td class="col1 leftalign">
+        Enter the complete path to the public SSL key file that you've provided to Paypal.  This file <b>must</b> be readable by your web server and should <b>not</b> be placed in a publically-accessible directory, despite its name.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_prod_url"></a>PayPal URL- Production</td>
+      <td class="col1 leftalign">Enter the production PayPal URL, e.g. &quot;https://www.paypal.com&quot;</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_sandbox_url"></a>PayPal URL- Sandbox</td>
+      <td class="col1 leftalign">Enter the PayPal Sandbox URL, e.g. &quot;https://www.sandbox.paypal.com&quot;</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_enabled"></a>Enabled</td>
+      <td class="col1 leftalign">Check this box to indicate that this gateway is enabled for use.  If not checked, the PayPal gateway will not be used.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_services"></a>Buttons</td>
+      <td class="col1 leftalign">Select the buttons that are supported by this gateway. This is primarily meant to reduce clutter in blocks and product lists, where you may want only one gateway handling immediate purchases.
+<p>In some cases, a gateway may not be able to handle a type of service, such as donations.</p>
+<p>If this is the only gateway in use, then all button types should be checked.</p>
+</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign" valign="top"><a name="desc_order"></a>Order</td>
+      <td class="col1 leftalign">Enter a number to represent the priority of this gateway (lower number means higher priority).</td>
+    </tr>
+
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{# begin {templatelocation} #}
+<div class="pluginPaypalProductListItem">
+  <div class="pluginPaypalProductListItemImage">
+    {!if small_pic}
+      <div style="width:{img_cell_width}px;">
+      {!if item_url}
+        <a href="{item_url}">
+      {!endif}
+        <img src="{small_pic}" alt="{name}" />
+      {!if item_url}
+        </a>
+      {!endif}
+      </div>
+    {!else}
+        &nbsp;
+   {!endif}
+  </div>
+
+  <div class="pluginPaypalProductListItemUrl">
+    {!if item_url}
+      <a class="itemname" href="{item_url}">{name}</a>
+    {!else}
+      <span class="itemname">{name}</span>
+    {!endif}
+    <div class="shortdescription">{short_description}</div>
+    {!if rating_bar}
+      <div class="ratingbar">{rating_bar}</div>
+    {!endif}
+    <p />
+  </div>
+
+  <div class="pluginPaypalProductListItemButtons">
+    {!if price}
+      <div><span class="paypalPrice normal">{price}</span></div><br />
+    {!endif}
+    <!-- BEGIN BtnBlock -->
+      {button}<br />
+    <!-- END BtnBlock -->
+  </div>
+</div>
+<div class="pluginPaypalListSeparator">
+  <hr width="85%" />
+</div>
+{# end {templatelocation} #}

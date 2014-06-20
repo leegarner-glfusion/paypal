@@ -1,0 +1,102 @@
+{# begin {templatelocation} #}
+<form action="{action_url}/index.php" method="post" 
+    enctype="multipart/form-data">
+
+  {!if cat_id}
+    <input type="hidden" name="cat_id" value="{cat_id}" />
+  {!endif}
+
+  <table>
+    <tr>
+      <td><font color="red">*</font>&nbsp;{$LANG_PP['cat_name']}:</td>
+      <td>
+        <input type="text" name="cat_name" value="{cat_name}" 
+            size="40" maxlength="255" />
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_PP['parent_cat']}:</td>
+      <td>
+        <select name="parent_id">
+          <option value="0">{$LANG_PP['top_cat']}</option>
+          {parent_sel}
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_PP['description']}:</td>
+      <td>
+        <input type="text" name="description" value="{description}" 
+            size="40" maxlength="255" />
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_PP['cat_image']}:</td>
+      <td>
+        <input type="file" name="imagefile" />
+        {!if img_url}
+          <img src="{img_url}" border="0" />
+          <a href="{action_url}/index.php?action=deletecatimage&cat_id={cat_id}">
+            {$LANG_PP['delete_image']}
+          </a>
+        {!endif}
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_PP['enabled']}?</td>
+      <td>
+        <input type="checkbox" name="enabled" value="1" {ena_chk} />
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_ACCESS['owner']}:</td>
+      <td><select name="owner_id">{owner_sel}</select></td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_ACCESS['group']}:</td>
+      <td>{group_sel}</td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_ACCESS['permissions']}</td>
+      <td>{permissions_editor}</td>
+    </tr>
+
+    <!--<tr>
+      <td>{$LANG_PP['buttons']}:</td>
+      <td>
+        <!-- BEGIN BtnRow -->
+        <input type="checkbox" name="buttons[]" value="{btn_type}" 
+            {btn_chk} />{btn_name}&nbsp;
+        <!-- END BtnRow -->
+      </td>
+    </tr>-->
+
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" name="savecat" value="{$LANG_PP['savecat']}" />
+        <input type="reset" name="reset" value="{$LANG_PP['clearform']}" />
+        {!if can_delete}
+        <input type="submit" name="deletecat" value="{$LANG_PP['deletecat']}"
+            onclick="return confirm('{$LANG_PP['q_del_item']}');" />
+        {!endif}
+        <input type="submit" name="catlist" value="{$LANG_ADMIN['cancel']}" />
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <font color="red">*</font>&nbsp;{$LANG_PP['ind_req_fld']}
+      </td>
+    </tr>
+  </table>
+
+</form>
+{# end {templatelocation} #}

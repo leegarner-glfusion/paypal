@@ -1,0 +1,466 @@
+.pluginPaypalSavedAddress {
+    text-align: left;
+}
+
+.pluginPaypalForm label {
+    width: 8em;
+    float: left;
+    text-align: right;
+    margin-right: 0.5em;
+    display: block;
+}
+
+.pluginPaypalProductForm label {
+    /*color: #781351;*/
+    width: 16em;
+    float: left;
+    text-align: right;
+    vertical-align: bottom;
+    margin-right: 0.5em;
+    display: block;
+}
+
+.pluginPaypalProductForm p {
+    line-height: 1px;
+    margin-top: 0px;
+}
+
+.pluginPaypalProductForm form div {
+    clear: left;
+    display: block;
+    /*  width: 354px; */
+    height: expression('1%');
+    margin: 5px 0 0 0;
+    padding: 1px 3px;
+}
+
+/*a.pp_itemlist {
+    text-decoration:none;
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+.pp_itemlistname {
+    text-decoration:none;
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+.pp_itemlist div {
+    position:relative;
+    float:left;
+    margin:2px;
+}*/
+
+
+/* Star Rating System */
+.paypal-ratingbar {
+	display:block;
+	padding-bottom:0px;
+	margin-bottom:0px;
+	padding-top:2px;
+	margin-top:2px;
+	text-align:left;
+}
+.rater_loading {
+	height: 30px;
+	background: url('images/working.gif') 50% 50% no-repeat;
+}
+.rater_loadingsm {
+	height: 10px;
+	line-height:10px;
+	padding:0;
+	margin:0;
+	background: url('images/working.gif') 50% 50% no-repeat;
+}
+.paypal-rating-unit { /* the UL */
+	list-style:none;
+	margin: 0px;
+	padding:0px;
+	height: 30px;
+	position: relative;
+	background: url('images/starrating.png') top left repeat-x;
+}
+.paypal-rating-unit li{
+    text-indent: -90000px;
+	padding:0px;
+	margin:0px;
+	/*\*/
+	float: left;
+	/* */
+}
+.paypal-rating-unit li a {
+	outline: none;
+	display:block;
+	width:30px;
+	height: 30px;
+	text-decoration: none;
+	text-indent: -9000px;
+ 	z-index: 20;
+	position: absolute;
+	padding: 0px;
+}
+.paypal-rating-unit li a:hover{
+	background: url('images/starrating.png') left center;
+	z-index: 2;
+	left: 0px;
+}
+.paypal-rating-unit a.r1-unit{left: 0px;}
+.paypal-rating-unit a.r1-unit:hover{width:30px;}
+.paypal-rating-unit a.r2-unit{left:30px;}
+.paypal-rating-unit a.r2-unit:hover{width: 60px;}
+.paypal-rating-unit a.r3-unit{left: 60px;}
+.paypal-rating-unit a.r3-unit:hover{width: 90px;}
+.paypal-rating-unit a.r4-unit{left: 90px;}
+.paypal-rating-unit a.r4-unit:hover{width: 120px;}
+.paypal-rating-unit a.r5-unit{left: 120px;}
+.paypal-rating-unit a.r5-unit:hover{width: 150px;}
+.paypal-rating-unit a.r6-unit{left: 150px;}
+.paypal-rating-unit a.r6-unit:hover{width: 180px;}
+.paypal-rating-unit a.r7-unit{left: 180px;}
+.paypal-rating-unit a.r7-unit:hover{width: 210px;}
+.paypal-rating-unit a.r8-unit{left: 210px;}
+.paypal-rating-unit a.r8-unit:hover{width: 240px;}
+.paypal-rating-unit a.r9-unit{left: 240px;}
+.paypal-rating-unit a.r9-unit:hover{width: 270px;}
+.paypal-rating-unit a.r10-unit{left: 270px;}
+.paypal-rating-unit a.r10-unit:hover{width: 300px;}
+.paypal-rating-unit li.current-rating {
+	background: url('images/starrating.png') left bottom;
+	position: absolute;
+	height: 30px;
+	display: block;
+	text-indent: -9000px;
+	z-index: 1;
+	left:0px;
+}
+
+/* small star rater */
+.paypal-small-rating-unit { /* the UL */
+	list-style:none;
+	padding:0px;
+	height: 15px;
+	position: relative;
+	background: url('images/star_small.png') top left repeat-x;
+	margin:0;
+}
+.paypal-small-rating-unit li{
+    text-indent: -30000px;
+	padding:0px;
+	margin:0px;
+	/*\*/
+	float: left;
+	/* */
+}
+.paypal-small-rating-unit li a {
+	outline: none;
+	display:block;
+	width:15px;
+	height: 15px;
+	text-decoration: none;
+	text-indent: -3000px;
+	z-index: 20;
+	position: absolute;
+	padding: 0px;
+}
+.paypal-small-rating-unit li a:hover{
+	background: url('images/star_small.png') left center;
+	z-index: 2;
+	left: 0px;
+	line-height:15px
+}
+.paypal-small-rating-unit a.r1-unit{left: 0px;}
+.paypal-small-rating-unit a.r1-unit:hover{width:15px;}
+.paypal-small-rating-unit a.r2-unit{left:15px;}
+.paypal-small-rating-unit a.r2-unit:hover{width: 30px;}
+.paypal-small-rating-unit a.r3-unit{left: 30px;}
+.paypal-small-rating-unit a.r3-unit:hover{width: 45px;}
+.paypal-small-rating-unit a.r4-unit{left: 45px;}
+.paypal-small-rating-unit a.r4-unit:hover{width: 60px;}
+.paypal-small-rating-unit a.r5-unit{left: 60px;}
+.paypal-small-rating-unit a.r5-unit:hover{width: 75px;}
+.paypal-small-rating-unit a.r6-unit{left: 75px;}
+.paypal-small-rating-unit a.r6-unit:hover{width: 90px;}
+.paypal-small-rating-unit a.r7-unit{left: 90px;}
+.paypal-small-rating-unit a.r7-unit:hover{width: 105px;}
+.paypal-small-rating-unit a.r8-unit{left: 105px;}
+.paypal-small-rating-unit a.r8-unit:hover{width: 123px;}
+.paypal-small-rating-unit a.r9-unit{left: 120px;}
+.paypal-small-rating-unit a.r9-unit:hover{width: 135px;}
+.paypal-small-rating-unit a.r10-unit{left: 135px;}
+.paypal-small-rating-unit a.r10-unit:hover{width: 150px;}
+.paypal-small-rating-unit li.current-rating {
+	background: url('images/star_small.png') left bottom;
+	position: absolute;
+	height: 15px;
+	display: block;
+	text-indent: -3000px;
+	z-index: 1;
+	left:0px;
+	padding:0;
+	line-height:15px;
+}
+/* end of small stuff */
+
+/* end of Star rating system */
+
+.pluginPaypalButton {
+    padding: 3px 6px;
+    display: inline;
+    background: #777777 url(paypal/images/button.png) repeat-x bottom;
+    border: none;
+    color: #FFFFFF !important;
+    cursor: pointer;
+    /*font-weight: bold;*/
+    font-size: small;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    text-shadow: 1px 1px #666666;
+    text-decoration:none;
+}
+
+.pluginPaypalButton:hover {
+    background-position: 0 center;
+}
+
+.pluginPaypalButton:active {
+    background-position: 0 top;
+    position: relative;
+    top: 1px;
+    /*padding: 4px 7px 4px;*/
+}
+
+/*.pluginPaypalButton.red { background-color: #e50000; }*/
+.pluginPaypalButton.red { background-color: #CC6666; }
+.pluginPaypalButton.purple { background-color: #9400BF; }
+/*.button.green { background-color: #58aa00; }*/
+.pluginPaypalButton.green { background-color: #7AB61D; }
+.pluginPaypalButton.orange { background-color: #FF9C00; }
+.pluginPaypalButton.blue { background-color: #2C6DA0; }
+.pluginPaypalButton.black { background-color: #333333; }
+.pluginPaypalButton.white {
+    background-color: #FFFFFF; color: #000000; text-shadow: 1px 1px #fff;
+}
+.pluginPaypalButton.small { font-size: 75%; padding: 3px 7px; }
+.pluginPaypalButton.small:active {
+    padding: 4px 7px 2px;
+    background-position: 0 top;
+}
+.pluginPaypalButton.large { font-size: 125%; padding: 7px 12px; }
+.pluginPaypalButton.large:active {
+    padding: 8px 12px 6px;
+    background-position: 0 top;
+}
+
+.pluginPaypalContent {
+    background: none repeat scroll 0 0 #F7F7F7;
+    border: 1px solid #DDDDDD;
+    margin-bottom:10px;
+    margin-top:3px;
+    padding:10px;
+}
+
+.pluginPaypalProductDetail {
+    clear: right;
+    margin: 0px 40px 0px 40px;
+}
+
+.pluginPaypalProductDetail #paypalShortDesc {
+    float: left;
+}
+
+.pluginPaypalProductDetail #paypalProductAttrib {
+    float: right;
+    text-align: right;
+    margin-right: 30px;
+    clear: right;
+}
+
+.pluginPaypalProductDetail #paypalProductDesc p {
+    clear: both;
+    margin-bottom: 1em;
+    font-size: 1.2em;
+}
+
+.pluginPaypalProductDetail #paypalProductThumb {
+    float: left;
+}
+
+.pluginPaypalProductListItem {
+    position: relative;
+    padding: 5px;
+    clear: both;
+    text-decoration: none;
+}
+
+.pluginPaypalProductListItem itemname {
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+div.pluginPaypalProductListItemImage {
+    float: left;
+    width: 110px;
+    text-decoration: none;
+    border: none;
+}
+
+div.pluginPaypalProductListItemUrl {
+    float: left;
+    width: 60%;
+    font-weight: bold;
+}
+
+.pluginPaypalProductListItemButtons {
+    float:right;
+    width:150px;
+    text-align:right;
+}
+
+.pluginPaypalComments {
+    clear: both;
+}
+
+.pluginPaypalListSeparator {
+    clear: both;
+    border-bottom: 3px;
+    padding-top: .5em;
+}
+
+.pluginPaypalOrderContainer {
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pluginPayPalOrder {
+    text-align: center;
+    clear:both;
+}
+
+.pluginPaypalOrder #paypalBilling {
+    float: left;
+    margin-left: 0;
+    margin-bottom: 1em;
+}
+
+.pluginPaypalOrder #paypalShipping {
+    float: left;
+    margin-left: 20%;
+    margin-bottom: 1em;
+}
+
+.pluginPaypalOrder #paypalOrderNumber {
+    clear: both;
+    text-align: left;
+    padding: 1em 0 1em 0;
+}
+
+.pluginPaypalOrderItems {
+    clear: both;
+    text-align: left;
+}
+
+.pluginPaypalOrderItems table {
+    width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pluginPaypalOrderItems td {
+    vertical-align: top;
+}
+
+.pluginPaypalOrderButtons {
+    position: relative;
+    float: right;
+    margin-right: 50px;
+    clear: right;
+}
+
+.pluginPaypalStateSelect {
+    width: 264px;
+}
+
+.pluginPaypalCheckoutButton {
+    display: inline;
+    margin-right: 20px;
+    vertical-align: top;
+}
+
+.pluginPaypalAlertText {
+    color: red;
+    font-weight: bold;
+}
+
+.pluginPaypalBlock #CartTotal {
+    font-weight: bold;
+}
+
+.pluginPaypalBlock #CartTotalAmount {
+    float: right;
+}
+
+.pluginPaypalBlock div.ItemOptions {
+    font-size: smaller;
+    padding-left: 2em;
+}
+
+.pluginPaypalBlock div.CartItem {
+    padding-bottom: .5em;
+}
+
+.pluginPaypalCategorySelectRoot {
+    /*background-color: lightblue;*/
+    font-weight: bold;
+}
+
+.pluginPaypalErrorMsg p {
+    font-weight: bold;
+}
+
+#orderPaymentMethod {
+    padding-top: 2em;
+}
+
+#pluginPaypalOrderLog th {
+    text-align: center;
+}
+
+#pluginPaypalOrderLog td {
+    padding-right: 1em;
+    padding-left: 1em;
+}
+
+/*#price {
+    color: #FF0000;
+}*/
+
+.paypalPrice {
+    font-weight:bold;
+}
+
+.paypalPrice.was {
+    color:#666666;
+    text-decoration:line-through;
+}
+
+.paypalPrice.normal {
+    color: #666666;
+    font-size:120%;
+}
+
+.paypalPrice.sale {
+    color: #FF0000;
+    font-size:150%;
+    font-style:italic;
+}
+
+#paypalOnhand {
+    margin-top: 1em;
+    color: #666666;
+    font-size: 120%;
+    font-style:italic;
+}
+

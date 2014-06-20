@@ -1,0 +1,111 @@
+Instructions for installation and removal of the PayPal plugin for glFusion
+
+IMPORTANT
+===========
+1. Back-up your database.
+    * visit http://{site_url}/admin/database.php
+
+
+AUTOMATIC INSTALLATION
+======================
+This plugin supports the automatic installation method for glFusion 1.1.2
+and higher.  Simply upload the plugin via the plugin administration
+interface and install it.
+
+If this will not work for you (due to filesystem permissions, for example),
+then you may manually install the plugin.
+
+
+MANUAL INSTALLATION
+===================
+1. Uncompress the plugin tar file into <private_dir>/plugins
+    # cd <private_dir>/plugins
+    # tar xzvf </path/to/paypal_xxx_xxx.tar.gz>
+
+2. Move the admin and public_html directories to locations in the glFusion
+   HTML directory.  <public_html>/admin/plugins/paypal and 
+   <public_html>/paypal respecitivly.
+    # mv <private_dir>/plugins/paypal/admin <public_html>/admin/plugins/paypal
+    # mv <private_dir>/plugins/paypal/public_html <public_html>/paypal
+
+3. Create a paypal_downloads.log file in your glFusion logs directory and set
+   the necessary permissions.  There are two methods to create the file and one
+   required step to set the necessary permissions:
+    a. # touch <private_dir>/logs/paypal_downloads.log
+    --or--
+    b. * FTP an empty file named paypal_downloads.log to <private_dir>/logs/.
+
+    # chmod 666 <private_dir>/logs/paypal_downloads.log
+
+3a. Create a temporary working directory.  The default location is
+    <private_dir>/data/paypal, but you may put it anywhere the web server
+    can read, write and create files.  This is used when creating encrypted
+    PayPal buttons.  (If you change the default, you'll need to configure the
+    plugin to use the new location.)
+
+4. If you are upgrading from version 0.3.2 or earlier, rename your config.php
+   file to config.old.php.  Starting with version 0.4.0 all configuration
+   is done through the online configuration system.
+
+5. As one of your site's Root users, run the paypal installation program.
+    * visit http://{site_url}/admin/plugins/paypal/install.php
+    * click on the 'install' button
+
+6. If the installation completed successfully you can skip to the next step.
+   Otherwise, check the glFusion error.log for errors.
+
+7. Configure the plugin.  Be sure to set your primary PayPal business email
+   address as Receiver Address #0.
+
+
+PAYPAL ACCOUNT
+==============
+A paypal business account is required in order for this plugin to operate
+correctly.  In addition, there are several items in your paypal account that
+must be set up correctly in order purchcases to be logged.
+
+1. Create a PayPal business account (note: you can update an existing account
+   to a business account by logging into the paypal account and clicking on
+   "Upgrade Account")
+    * visit https://www.paypal.com/cgi-bin/webscr?cmd=_registration-run
+
+2. Verify your account.  This is needed to transfer money out of your paypal
+   account and into a bank account.  You can do this from your paypal account.
+
+3. Update seller preferences.  From the "My Account" tab or your Paypal account,
+   select the "Profile" sub-tab.  Click on "Instant Payment Notification
+   Preferences".  Edit the preferences.  You want to ENABLE instant payment
+   notification.  In the box provided for a URL, enter:
+    * http://{site_url}/paypal/ipn.php
+
+4. Update *optional* seller preferences.  From the "My Account" tab or your 
+   Paypal account, select the "Profile" sub-tab.  You may want to consider 
+   entering information for the following date:
+    * Sales Tax
+    * Shipping Calculations
+    * Payment Receiving Preferences
+    * Reputation
+    * Website Payment Preferences
+    * Custom Payment Pages
+    * Invoice Templates
+    * Language Encoding
+
+
+REMOVAL
+=======
+1. Back-up your site database, just in case.
+    * visit http://{site_url}/admin/database.php
+ 
+2. Visit the plugin administration area of your site.  Edit the PayPal plugin
+   and select "Delete".
+
+3. Delete the directories and files created during the plugins installation.
+    Note that your downloadable product files are normally kept in
+    <private_dir>/plugins/paypal/files.  If you wish to keep those files,
+    you'll need to back them up before deleting the plugin directory.
+
+    # rm -rf <public_html>/paypal
+    # rm -rf <public_html>/admin/plugins/paypal
+    # rm -rf <private_dir>/plugins/paypal
+    # rm -rf <private_dir>/data/paypal
+
