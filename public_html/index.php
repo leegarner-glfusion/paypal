@@ -322,14 +322,16 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
+    // Need to create an order or save the cart, so IPN class
+    // can access the data. For now, use the cart.
     /*USES_paypal_class_order();
     if (empty($_SESSION[PP_CART_VAR]['invoice'])) {
         $Ord = new ppOrder();
         $Ord->CreateFromCart($ppGCart);
     } else {
         $Ord = new ppOrder($_SESSION[PP_CART_VAR]['invoice']);
-    }
-var_dump($Ord);die;*/
+    }*/
+    $ppGCart->Save();   // make sure it's saved to the DB
     $content .= $ppGCart->View(true);
     break;
 

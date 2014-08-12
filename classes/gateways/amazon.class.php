@@ -286,10 +286,15 @@ class amazon extends PaymentGw
                 $total_amount += (float)$item['shipping'];
             $items[] = implode(';', $item);
         }
-        $description = implode('::', $items);
         
         $this->AddCustom('transtype', $btn_type);
         $custom = $this->PrepareCustom();
+
+        // description can't be over 100 chars, so put $custom in its
+        // place for cart purchases
+        $description = implode('::', $items);
+        if (strlen($description > 100))
+            $description = $custom;
 
         $vars = array(
             'accessKey'         => $this->access_key,

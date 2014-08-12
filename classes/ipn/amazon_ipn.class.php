@@ -75,10 +75,18 @@ class AmazonIPN extends BaseIPN
             $this->pp_data['custom'][$name] = $value;
         }
 
-        $items = explode('::', $A['paymentReason']);
-        foreach ($items as $item) {
-            list($itm_id, $price, $qty) = explode(';', $item);
-            $this->AddItem($itm_id, $qty, $price);
+        if ($this->pp_data['custom']['transtype'] == 'cart') {
+            USES_paypal_class_cart();
+            $cart = new ppCart($this->pp_data['custom']['cart_id']);
+            foreach ($cart->Cart() as $itm_id=>$data) {
+                $this->AddItem($itm_id, $data['quantity'], $data['price']);
+            }
+        } else {
+            $items = explode('::', $A['paymentReason']);
+            foreach ($items as $item) {
+                list($itm_id, $price, $qty) = explode(';', $item);
+                $this->AddItem($itm_id, $qty, $price);
+            }
         }
     }
 
@@ -141,27 +149,6 @@ class AmazonIPN extends BaseIPN
         if (empty($this->ipn_data['referenceId'])) {
             $this->Error('Missing Order or Item ID');
             return AMAZON_FAILURE_UNKNOWN;
-        }
-
-        //switch ($this->prod_type) {
-        switch ($this->pp_data['custom']['transtype']) {
-        case 'ext':
-            // deprecated
-            $this->AddItem($this->prod_id, 1, $this->pp_data['pmt_gross']);
-            break;
-        case 'item':
-        case 'buy_now':
-            break;
-        case 'cart':
-            // A submitted order.  Get all the item prices.
-            $cart_id = $this->pp_data['custom']['cart_id'];
-            USES_paypal_class_cart();
-            $cart = new ppCart($cart_id);
-            if (!$cart->hasItems()) {
-                $this->Error('Error retrieving cart ' . $cart_id);
-                return AMAZON_FAILURE_UNKNOWN;
-            }
-            break;
         }
 
         if (!$this->isSufficientFunds()) {
