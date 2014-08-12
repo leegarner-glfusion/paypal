@@ -1,13 +1,15 @@
-Thank you for your purchase from {site_name}.  Details of your purchase
-follow: 
-<p />
+<p>Thank you for your purchase from {site_name}.  Details of your purchase
+follow:</p> 
+<p>
 {purchase_details}
-<p />
+</p>
 {!if files}
-<p />
+<p>
 Attached to this email are the files you purchased.  If you were logged into {site_name} when you made your purchase, you can also download your files from the following links:
-<p />
+</p>
+<p>
 {dl_links}
+</p>
 {!endif}
 
 <p>Order Status: {status}</p>
@@ -20,8 +22,8 @@ another email message confirming your payment.
 {!if gw_msg}
 <p>{gw_msg}</p>
 {!endif}
-<p />
+<p>
 Thanks,<br />
 {site_name}<br />
-{site_url}<p />
-
+{site_url}
+</p>
