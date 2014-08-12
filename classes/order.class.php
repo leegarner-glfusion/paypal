@@ -45,7 +45,6 @@ class ppOrder
         $this->uid = $_USER['uid'];
         $this->buyer_email = $_USER['email'];
         $this->order_date = $_PP_CONF['now'];
-        $this->order_id = COM_makeSid();
         if (!empty($id)) {
             $this->order_id = $id;
             if (!$this->Load($id)) {
@@ -54,6 +53,9 @@ class ppOrder
             } else {
                 $this->isNew = false;
             }
+        }
+        if ($this->isNew) {
+            $this->order_id = COM_makeSid();
         }
     }
 
@@ -620,7 +622,7 @@ class ppOrder
     */
     public function Notify($status='', $gw_msg='')
     {
-        global $_CONF, $_PP_CONF;
+        global $_CONF, $_PP_CONF, $_TABLES;
 
         // Check if we're supposed to send a notification
         if ( ($this->uid != 1 &&
@@ -694,11 +696,15 @@ class ppOrder
                 $message->parse('List', 'ItemList', true);
 
             }
-            if (!empty($files))
+            if (!empty($files)) {
                 $message->set_var('files', 'true');
-
+            }
             $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
+            if ($this->billto_name == '') {
+                $this->billto_name = COM_getDisplayName($this->uid);
+            }
+
             $message->set_var(array(
                 //'payment_gross'     => sprintf('%6.2f',
                 //                    $this->pp_data['pmt_gross']),
@@ -709,13 +715,15 @@ class ppOrder
                 'handling'          => sprintf($num_format, $this->handling),
                 'payment_date'      => $this->order_date,
                 'payer_email'       => $this->buyer_email,
-                'payer_name'        => $this->billto_naem,
+                'payer_name'        => $this->billto_name,
                 'site_name'         => $_CONF['site_name'],
                 'txn_id'            => $this->pmt_txn_id,
                 'pi_url'            => PAYPAL_URL,
                 'pi_admin_url'      => PAYPAL_ADMIN_URL,
                 'dl_links'          => $dl_links,
                 'buyer_uid'         => $this->uid,
+                'user_name'         => DB_getItem($_TABLES['users'],'username',
+                            "uid = {$this->uid}"),
                 'gateway_name'      => $this->pmt_method,
                 'pending'       => $this->status == 'pending' ? 'true' : '',
                 'gw_msg'        => $gw_msg,
