@@ -566,6 +566,31 @@ function plugin_user_delete_paypal($uid) {
     DB_query($sql);
 }
 
+/**
+*   Support merging local accounts into remote accounts
+*
+*   @param  integer $origUID    Original (remote) user ID
+*   @param  integer $destUID    Merged (local) user ID
+*/
+function plugin_user_move_paypal($origUID, $destUID)
+{
+    global $_TABLES;
+
+    $origUID = (int)$origUID;
+    $destUID = (int)$destUID;
+
+    DB_query("UPDATE {$_TABLES['paypal.purchases']}
+            SET user_id = $destUID WHERE user_id = $origUID", 1);
+    DB_query("UPDATE {$_TABLES['paypal.address']}
+            SET uid = $destUID WHERE uid = $origUID", 1);
+    DB_query("UPDATE {$_TABLES['paypal.orders']}
+            SET uid = $destUID WHERE uid = $origUID", 1);
+    DB_query("UPDATE {$_TABLES['paypal.userinfo']}
+            SET uid = $destUID WHERE uid = $origUID", 1);
+    DB_query("UPDATE {$_TABLES['paypal.cart']}
+            SET cart_uid = $destUID WHERE cart_uid = $origUID", 1);
+}
+
 
 /**
 *   Implements the [paypal:] autotag.
