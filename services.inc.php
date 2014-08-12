@@ -68,7 +68,6 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
 
     // Now create an add-to-cart button, if requested.
     if (isset($args['add_cart']) && $_PP_CONF['ena_cart'] == 1) {
-        $tpl_add_cart = 'btn_add_cart.thtml';
         if (!isset($args['item_type'])) $args['item_type'] = PP_PROD_VIRTUAL;
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('cart', 'buttons/btn_add_cart.thtml');
@@ -81,13 +80,12 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 'item_type'     => $args['item_type'],
                 'have_tax'      => isset($args['tax']) ? 'true' : '',
                 'tax'           => isset($args['tax']) ? $args['tax'] : 0,
+                'quantity'      => isset($args['quantity']) ? $args['quantity'] : '',
         ) );
 
         $output['add_cart'] = $T->parse('', 'cart');
     }
-
-    $retval = PLG_RET_OK;
-    return $retval;
+    return PLG_RET_OK;
 }
 
 
@@ -133,6 +131,9 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
                     '/index.php?ipnlog=x&op=single&txn_id=' . $id;
         }
         break;
+    case 'checkout':
+        $url = PAYPAL_URL . '/index.php?checkout=x';
+        break;
     }
 
     if (!empty($url)) {
@@ -145,5 +146,63 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
 
 }
 
+
+/**
+*   Allow a plugin to push an item into the cart
+*
+*   @param  array   $args   Array of item information
+*   @param  mixed   &$output    Output data
+*   @param  mixed   &$svc_msg   Service message
+*   @return integer     Status code
+*/
+function service_addCartItem_paypal($args, &$output, &$svc_msg)
+{
+    global $ppGCart;
+
+    USES_paypal_class_cart();
+    $ppGCart = new ppCart();
+
+    $qty = isset($args['quantity']) ? (float)$args['quantity'] : 1;
+    if (!isset($args['item_number']) || empty($args['item_number'])) {
+        return PLG_RET_ERROR;
+    }
+    $item_name = isset($args['item_name']) ? $args['item_name'] : '';
+    $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
+    $descrip = isset($args['item_descr']) ? $args['item_descr'] : '';
+    $options = isset($args['options']) ? $args['options'] : array();
+    $extras = isset($args['extras']) ? $args['extras'] : '';
+
+    // Option to add an item only if it is not currently in the cart.
+    // Cart::addItem will be called to increment the quantity if the
+    // unique flag is not set.
+    if (isset($args['unique'])) {
+        if ($ppGCart->Contains($args['item_number'])) return PLG_RET_OK;
+    }
+
+    $ppGCart->addItem($args['item_number'], $item_name,
+                $descrip, $qty, $amount, $options, $extras);
+    return PLG_RET_OK;
+}
+
+
+/**
+*   Return a simple "checkout" button.
+*   Take optional "text" and "color" arguments.
+*
+*   @param  array   $args       Array of options.
+*   @param  mixed   &$output    Output data
+*   @param  mixed   &$svc_msg   Service message
+*   @return integer     Status code
+*/
+function service_btnCheckout_paypal($args, &$output, &$svc_msg)
+{
+    global $LANG_PP;
+
+    $text = isset($args['text']) ? $args['text'] : $LANG_PP['checkout'];
+    $color = isset($args['color']) ? $args['color'] : 'green';
+    $output = '<a href="' . PAYPAL_URL . '/index.php?checkout=x"><button type=button id="ppcheckout" class="pluginPaypalButton ' . $color . '">'
+        . $text . '</button></a>';
+    return PLG_RET_OK;
+}
 
 ?>
