@@ -902,11 +902,7 @@ function PAYPAL_mailAttachment(
     }
     $mail->WordWrap = 76;
     $mail->IsHTML($html);
-    if ( $html ) {
-        $mail->Body = COM_filterHTML($message);
-    } else {
-        $mail->Body = $message;
-    }
+    $mail->Body = ($message);
 
     if ( $altBody != '' ) {
         $mail->AltBody = $altBody;

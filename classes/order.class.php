@@ -571,7 +571,7 @@ class ppOrder
         }
 
         if ($_PP_CONF['orderstatus'][$newstatus]['notify_buyer'] == 1) {
-            $this->Notify();
+            $this->Notify($newstatus);
         }
         return true;
     }
@@ -727,6 +727,7 @@ class ppOrder
                 'gateway_name'      => $this->pmt_method,
                 'pending'       => $this->status == 'pending' ? 'true' : '',
                 'gw_msg'        => $gw_msg,
+                'status'            => $this->status,
             ) );
 
             // parse templates for subject/text
@@ -737,29 +738,33 @@ class ppOrder
             $admin_text = $message->parse('admin_out', 'msg_admin');
 
             if ($this->buyer_email != '') {
-            // if specified to mail attachment, do so, otherwise skip attachment
-            if ( (( is_numeric($this->uid) &&
+                // if specified to mail attachment, do so, otherwise skip 
+                // attachment
+                if ( (( is_numeric($this->uid) &&
                         $this->uid != 1 &&
                         $_PP_CONF['purch_email_user_attach'] ) ||
-                ( (!is_numeric($this->uid) ||
+                    ( (!is_numeric($this->uid) ||
                         $this->uid == 1) &&
                         $_PP_CONF['purch_email_anon_attach'] )) &&
-                    count($files) > 0  ) {
+                        count($files) > 0  ) {
 
-                // Make sure plugin functions are available
-                USES_paypal_functions();
-                PAYPAL_mailAttachment($this->buyer_email,
+                    // Make sure plugin functions are available
+                    USES_paypal_functions();
+                    PAYPAL_mailAttachment($this->buyer_email,
                                     $subject,
                                     $user_text,
                                     $_CONF['site_email'],
                                     true,
                                     0, '', '', $files);
-            } else {
-                COM_mail($this->buyer_email,
-                            $subject, $user_text,
-                            $_CONF['site_email'],
-                            true);
-            }
+                } else {
+                    // Otherwise send a standard notification
+                    COM_emailNotification(array(
+                        'to' => array($this->buyer_email),
+                        'from' => $_CONF['site_mail'],
+                        'htmlmessage' => $user_text,
+                        'subject' => $subject,
+                    ) );
+                }
             }
 
             // Send a notification to the administrator, new purchases only
@@ -769,8 +774,12 @@ class ppOrder
                     PAYPAL_debug('Sending email to Admin');
                     $email_addr = empty($_PP_CONF['admin_email_addr']) ?
                             $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
-                    COM_mail($email_addr, $subject, $admin_text,
-                            '', true);
+                    COM_emailNotification(array(
+                        'to' => array($email_addr),
+                        'from' => $_CONF['site_mail'],
+                        'htmlmessage' => $admin_text,
+                            'subject' => $subject,
+                    ) );
                 }
             }
         }
