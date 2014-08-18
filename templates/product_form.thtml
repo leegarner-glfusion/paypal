@@ -28,7 +28,7 @@
         <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-      <select name="categories">
+      <select name="cat_id">
         <option value="0">({$LANG_PP['none']})</option>
         {cat_select}
       </select>
