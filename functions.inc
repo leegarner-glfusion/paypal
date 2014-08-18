@@ -1127,6 +1127,8 @@ function phpblock_paypal_featured($cat='')
 
 /**
 *   Create a category-list block.
+*   Returns HTML for a list of category names and the number of
+*   products under each one.
 *
 *   @return     HTML for the block
 */
@@ -1143,32 +1145,30 @@ function phpblock_paypal_categories()
             AND c.parent_id = 0
             " . COM_getPermSQL('AND', 0, 2, 'c') . "
             GROUP BY c.cat_id
-                HAVING cnt > 0
             ORDER BY c.cat_name";
+                //HAVING cnt > 0
+    //echo $sql;die;
     $result = DB_query($sql);
     if (!$result || DB_numRows($result) == 0)
         return '';
-
-    /*if (isset($_REQUEST['category']) && (int)$_REQUEST['category'] > 0) {
-        $req_cat = (int)$_REQUEST['category'];
-    } else {
-        $req_cat = -1;
-    }*/
 
     $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file(array('blk_category' => 'blk_categories.thtml'));
 
     while ($A = DB_fetchArray($result, false)) {
+        $cnt = (int)$A['cnt'];
+        $cnt += PAYPAL_child_cat_product_count($A['cat_id']);
+        if ($cnt == 0) continue;
         $T->set_block('blk_category', 'row', 'ItemRow');
         $T->set_var(array(
             'category'  => $A['cat_name'],
-            'count'     => $A['cnt'],
+            'count'     => $cnt,
             'url'       => PAYPAL_URL . '/index.php?category=' . $A['cat_id'],
         ) );
         $T->parse('ItemRow', 'row', true);
     }
     $retval .= $T->parse('output', 'blk_category');
-        
+  
     return $retval;
 
 }
@@ -1592,6 +1592,41 @@ function plugin_configmanager_select_currency_paypal()
         $A["{$code} - {$data['name']}"] = $code;
     }
     return $A;
+}
+
+
+/**
+*   Get all parent categories and a product count.
+*   Recurses through all child categories.
+*
+*   @param  integer $parent_cat Parent category ID to check
+*   @return integer             Product count for all child categories
+*/
+function PAYPAL_child_cat_product_count($parent_cat)
+{
+    global $_TABLES;
+
+    $parent_total = 0;
+
+    $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt 
+            FROM {$_TABLES['paypal.products']} p
+            LEFT JOIN {$_TABLES['paypal.categories']} c
+                ON p.cat_id = c.cat_id
+            WHERE c.cat_id > 0 
+            AND c.enabled = 1
+            AND c.parent_id = $parent_cat
+            " . COM_getPermSQL('AND', 0, 2, 'c') . "
+            GROUP BY c.cat_id
+            ORDER BY c.cat_name";
+    //echo $sql;die;
+    $result = DB_query($sql);
+    while ($A = DB_fetchArray($result, false)) {
+        // Add the total products in the child category
+        $parent_total += (int)$A['cnt'];
+        // And call again to get the child's children
+        $parent_total += PAYPAL_child_cat_product_count($A['cat_id']);
+    }
+    return $parent_total;
 }
 
 
