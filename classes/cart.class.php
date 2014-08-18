@@ -274,7 +274,7 @@ class ppCart
     *   @param  float   $quantity   Quantity
     *   @param  float   $price      Unit Price
     *   @param  array   $options    Product options (size, color, etc).
-    *   @return array               Current cart contents
+    *   @return integer             Current item quantity
     */
     public function addItem($item_id, $name, $descrip='', $quantity=1,
             $price=0, $options='')
@@ -316,7 +316,7 @@ class ppCart
         }
 
         $this->Save();
-        return $this->m_cart;
+        return $this->m_cart[$item_id]['quantity'];
     }
 
 
