@@ -234,10 +234,15 @@ class BaseIPN
 
                 // Split the item number into component parts.  It could
                 // be just a single string, depending on the plugin's needs.
+                // pi_info[0] will be the plugin name, pi_info[1] is most
+                // likely a product ID which will be decoded by the plugin
+                // handler.
                 if (stristr($item['item_number'], ':')) {
+                    // received "plugin_name:sku..."
                     $pi_info = explode(':', $item['item_number']);
                 } else {
-                    $pi_info = array($items['item_number']);
+                    // received just "plugin_name" as complete item number
+                    $pi_info = array($item['item_number']);
                 }
 
                 // Try to call the plugin's function to get product info.
@@ -248,6 +253,7 @@ class BaseIPN
                     // we don't get the product name with the IPN, add it here
                     $this->items[$id]['name'] = $A['name'];
                 } else {
+                    // probably an invalid product ID
                     $price = 0;
                 }
 
@@ -284,6 +290,9 @@ class BaseIPN
     *   Send the customer an email notification.
     *   This function is also responsible for sending purchased files as
     *   attachments.
+    *
+    *   @deprecated
+    *   @see Order::Notify()
     */
     protected function sendNotification()
     {
@@ -431,7 +440,7 @@ class BaseIPN
     *   Handles the item purchases.
     *   The purchase should already have been validated; this function simply
     *   records the purchases.  Purchased files will be emailed to the
-    *   customer by sendNotification().
+    *   customer by Order::Notify().
     *
     *   @uses   CreateOrder()
     */
@@ -449,7 +458,7 @@ class BaseIPN
 
         $prod_types = 0;
 
-        // For each item purchased, record purchase in purchase table
+        // For each item purchased, create an order item
         foreach ($this->items as $id=>$item) {
 
             // If the item number is numeric, assume it's an
