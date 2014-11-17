@@ -405,6 +405,13 @@ function PAYPAL_do_upgrade($current_ver)
         if ($error) {
             return $error;
         }
+
+        // Add new product defaults for onhand tracking
+        $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
+                'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
+        $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
+                'select', 0, 30, 0, 60, true, $_PP_CONF['pi_name']);
+
     }
 
     return $error;

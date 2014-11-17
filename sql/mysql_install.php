@@ -237,6 +237,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `track_onhand` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `onhand` int(10) unsigned DEFAULT '0',
   `sale_price` DECIMAL(15,4),
+  `oversell` tinyint(1) NOT NULL DEFAULT 0",
   PRIMARY KEY  (`id`),
   KEY `products_name` (`name`),
   KEY `products_price` (`price`)
@@ -690,6 +691,9 @@ $PP_UPGRADE['0.5.2'] = array(
         ADD onhand INT(10) NOT NULL DEFAULT '0'",
 );
 
-$PP_UPGRADE['0.5.5'] = array();
+$PP_UPGRADE['0.5.5'] = array(
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        ADD oversell tinyint(1) not null default 0",
+);
 
 ?>

@@ -85,6 +85,8 @@ class Product
             $this->comments_enabled = $_PP_CONF['ena_comments'] == 1 ?
                     PP_COMMENTS_ENABLED : PP_COMMENTS_DISABLED;
             $this->rating_enabled = $_PP_CONF['ena_ratings'] == 1 ? 1 : 0;
+            $this->track_onhand = $_PP_CONF['def_track_onhand'];
+            $this->oversell = $_PP_CONF['def_oversell'];
         } else {
             $this->id = $id;
             if (!$this->Read()) {
@@ -115,6 +117,7 @@ class Product
         case 'shipping_type':
         case 'comments_enabled':
         case 'onhand':
+        case 'oversell':
             // Integer values
             $this->properties[$var] = (int)$value;
             break;
@@ -216,6 +219,7 @@ class Product
         $this->show_popular = $row['show_popular'];
         $this->track_onhand = $row['track_onhand'];
         $this->onhand = $row['onhand'];
+        $this->oversell = $row['oversell'];
 
         if (isset($row['categories'])) {
             $this->categories = $row['categories'];
@@ -364,6 +368,7 @@ class Product
                 show_popular='" . (int)$this->show_popular . "',
                 onhand='{$this->onhand}',
                 track_onhand='{$this->track_onhand}',
+                oversell = '{$this->oversell}',
                 options='$options',
                 sale_price={$this->sale_price},
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
@@ -378,7 +383,7 @@ class Product
             COM_errorLog("Paypal- SQL error in Product::Save: $sql");
             $status = false;
         }
-        
+
         PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {
             // Handle image uploads.  This is done last because we need
@@ -629,6 +634,7 @@ class Product
                                     'checked="checked"' : '',
             'ship_sel_' . $this->shipping_type => 'selected="selected"',
             'shipping_type' => $this->shipping_type,
+            'track_onhand'  => $this->track_onhand,
             'shipping_amt'  => sprintf('%.2f', $this->shipping_amt),
             'sel_comment_' . $this->comments_enabled => 
                                     'selected="selected"',
@@ -637,6 +643,7 @@ class Product
             'trk_onhand_chk' => $this->track_onhand== 1 ?
                                     'checked="checked"' : '',
             'onhand'        => $this->onhand,
+            "oversell_sel{$this->oversell}" => 'selected="selected"',
         ) );
 
         // Create the button type selections. New products get the default
@@ -1122,33 +1129,42 @@ class Product
 
         $buttons = array();
 
-        $exptime = DB_getItem($_TABLES['paypal.purchases'], 
-                'MAX(UNIX_TIMESTAMP(expiration))',
-                "user_id = {$_USER['uid']} AND product_id = '" .
-                DB_escapeString($this->id) . "'");
-
         // Indicate that an "add to cart" button should be returned along with
         // the "buy now" button.  If the product has already been purchased
         // and is available for immediate download, this will be turned off.
         $add_cart = $_PP_CONF['ena_cart'] == 1 ? true : false;
 
-        if ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
+        // Get the free download button, if this is a downloadable product
+        // already purchased and not expired
+        $exptime = DB_getItem($_TABLES['paypal.purchases'], 
+                'MAX(UNIX_TIMESTAMP(expiration))',
+                "user_id = {$_USER['uid']} AND product_id = '" .
+                DB_escapeString($this->id) . "'");
+
+        if ($this->prod_type == PP_PROD_DOWNLOAD && 
+            ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) ) 
+            ) {
+                // Free, or unexpired downloads for non-anymous
+                $T = new Template(PAYPAL_PI_PATH . '/templates');
+                $T->set_file('download', 'buttons/btn_download.thtml');
+                $T->set_var('pi_url', PAYPAL_URL);
+                $T->set_var('id', $this->id);
+                $buttons['download'] = $T->parse('', 'download');
+                $add_cart = false;
+
+        } elseif ($this->track_onhand == 1 && $this->onhand < 1 &&
+                $this->oversell == 1) {
+            // Do nothing but show the download link (see above).
+            // Make sure the add_cart button isn't shown, either.
+            $add_cart = false;
+
+        } elseif ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
                 !$this->hasAttributes() && $this->price > 0) {
             // Requires login before purchasing
             $T = new Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('login_req', 'buttons/btn_login_req.thtml');
             $buttons['login'] = $T->parse('', 'login_req');
-            //$buttons['login'] = "login";
-        } elseif ($this->prod_type == PP_PROD_DOWNLOAD && 
-            ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) ) 
-            ) {
-            // Free, or unexpired downloads for non-anymous
-            $T = new Template(PAYPAL_PI_PATH . '/templates');
-            $T->set_file('download', 'buttons/btn_download.thtml');
-            $T->set_var('pi_url', PAYPAL_URL);
-            $T->set_var('id', $this->id);
-            $buttons['download'] = $T->parse('', 'download');
-            $add_cart = false;
+
         } else {
             // Normal buttons for everyone else
             if (!$this->hasAttributes() && $this->btn_type != '') {

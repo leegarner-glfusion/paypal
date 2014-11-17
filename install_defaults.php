@@ -159,6 +159,9 @@ $_PP_DEFAULTS['shop_name'] = $_CONF['site_name'];
 $_PP_DEFAULTS['shop_addr'] = '';
 $_PP_DEFAULTS['centerblock'] = 0;   // Enable centerblock?
 
+$_PP_DEFAULTS['track_onhand'] = 0;  // Track qty onhand?
+$_PP_DEFAULTS['oversell'] = 0;      // Allow over-selling
+
 /**
  *  Initialize Paypal plugin configuration
  *
@@ -264,6 +267,10 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 30, 2, 30, true, $_PP_CONF['pi_name']);
         $c->add('def_expiration', $_PP_DEFAULTS['def_expiration'],
                 'text', 0, 30, 0, 40, true, $_PP_CONF['pi_name']);
+        $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
+                'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
+        $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
+                'select', 0, 30, 0, 60, true, $_PP_CONF['pi_name']);
 
         $c->add('fs_blocks', NULL, 'fieldset', 0, 40, NULL, 0, true, 
                 $_PP_CONF['pi_name']);

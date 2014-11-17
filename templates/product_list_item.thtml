@@ -31,7 +31,11 @@
 
   <div class="pluginPaypalProductListItemButtons">
     {!if price}
-      <div><span class="paypalPrice normal">{price}</span></div><br />
+      <div><span class="paypalPrice normal">
+        {!if track_onhand}
+        ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
+        {!endif}
+        {price}</span></div><br />
     {!endif}
     <!-- BEGIN BtnBlock -->
       {button}<br />

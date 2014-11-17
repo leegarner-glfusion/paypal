@@ -348,7 +348,8 @@ function PAYPAL_ProductList($cat=0, $search='')
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
-            WHERE cat.enabled = '1' AND cat.parent_id = '$cat' " .
+            WHERE cat.enabled = '1' AND cat.parent_id = '$cat' 
+                AND prod.enabled = '1' " .
             COM_getPermSQL('AND', 0, 2, 'cat') .
             " GROUP BY cat.cat_id
             ORDER BY cat.cat_name";
@@ -442,7 +443,8 @@ function PAYPAL_ProductList($cat=0, $search='')
     $sortby = $_PP_CONF['order'];
     $sortdir = 'ASC';
 
-    // Get products from database
+    // Get products from database. "c.enabled is null" is to allow products
+    // with no category defined
     $sql = " FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
@@ -450,6 +452,9 @@ function PAYPAL_ProductList($cat=0, $search='')
             AND (
                 (c.enabled=1 " . COM_getPermSQL('AND', 0, 2, 'c') . ")
                 OR c.enabled IS NULL
+                )
+            AND (
+                p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
                 )";
 
     $pagenav_args = array();
@@ -575,16 +580,18 @@ function PAYPAL_ProductList($cat=0, $search='')
         }
 
         $product->set_var(array(
-                'id'        => $A['id'],
-                'name'      => $P->name,
-                //'name'      => $A['name'],
-                //'short_description' => PLG_replacetags($A['short_description']),
-                'short_description' => PLG_replacetags($P->short_description),
-                'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
-                'encrypted' => '',
-                'item_url'  => COM_buildURL(PAYPAL_URL . 
-                        '/detail.php?id='. $A['id']),
-                'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
+            'id'        => $A['id'],
+            'name'      => $P->name,
+            //'name'      => $A['name'],
+            //'short_description' => PLG_replacetags($A['short_description']),
+            'short_description' => PLG_replacetags($P->short_description),
+            'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
+            'encrypted' => '',
+            'item_url'  => COM_buildURL(PAYPAL_URL . 
+                    '/detail.php?id='. $A['id']),
+            'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
+            'track_onhand' => $P->track_onhand ? 'true' : '',
+            'qty_onhand' => $P->onhand,
         ) );
 
         if ($P->price > 0) {

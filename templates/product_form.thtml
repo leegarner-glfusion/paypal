@@ -241,15 +241,28 @@
       </span>
     </p>
 
+    </div>
+
     <p>
       <label>{$LANG_PP['track_onhand']}
        <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-      <input type="checkbox" name="track_onhand" value="1" {trk_onhand_chk} />&nbsp;&nbsp;{$LANG_PP['onhand']}: <input type="text" name="onhand" value="{onhand}" />
+      <input type="checkbox" name="track_onhand" value="1" {trk_onhand_chk} 
+        onclick="PP_showOversell(this.checked);"/>&nbsp;&nbsp;{$LANG_PP['onhand']}: <input type="text" name="onhand" value="{onhand}" />
     </p>
 
-    </div>
+    <p id="oversell" style="display:none;">
+      <label>{$LANG_PP['oversell_action']}
+       <a href="#" onclick="popupWindow('{doc_url}#desc_oversell', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+      </label>
+      <select name="oversell">
+        <option value="0" {oversell_sel0} >{$LANG_PP['oversell_allow']}</option>
+        <option value="1" {oversell_sel1} >{$LANG_PP['oversell_deny']}</option>
+        <option value="2" {oversell_sel2} >{$LANG_PP['oversell_hide']}</option>
+      </select>
+    </p>
 
   </fieldset>
   <font color="red">*</font>{$LANG_PP['indicate_req_fld']}
@@ -271,7 +284,17 @@
 window.addEvent('load',function() {
   PP_changeProdType('{prod_type}');
   PP_changeShippingType('{shipping_type}');
+  PP_showOversell({track_onhand});
 });
+
+function PP_showOversell(show)
+{
+  if (show) {
+    document.getElementById('oversell').style.display = '';
+  } else {
+    document.getElementById('oversell').style.display = 'none';
+  }
+}
 
 function PP_changeProdType(value)
 {
