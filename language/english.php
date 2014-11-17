@@ -244,6 +244,10 @@ $LANG_PP = array (
 'pmt_error' => 'There was an error processing your payment.',
 'pmt_made_via' => 'Payment was made via %s on %s.',
 'new_option' => 'Add a new option',
+'oversell_action' => 'Allow overselling/backordering?',
+'oversell_allow' => 'Allow, display product and accept orders',
+'oversell_deny' => 'Deny, display product but prevent ordering',
+'oversell_hide' => 'Hide product from catalog',
 );
 
 
@@ -292,6 +296,8 @@ $LANG_confignames['paypal'] = array(
     'def_enabled'   => 'Product Enabled?',
     'def_featured'  => 'Product Featured?',
     'def_taxable'   => 'Product is Taxable?',
+    'def_track_onhand' => 'Track Qty On Hand?',
+    'def_oversell'  => 'Action when Qty On Hand = 0',
     'blk_random_limit' => 'Number of products in Random block',
     'blk_featured_limit' => 'Number of products in Featured block',
     'blk_popular_limit' => 'Number of products in Popular block',
@@ -365,6 +371,9 @@ $LANG_configselects['paypal'] = array(
     13 => array('None' => 0, 'Left' => 1, 'Right' => 2, 'Both' => 3),
     14 => array('Not Available' => 0, 'Optional' => 1, 'Required' => 2),
     15 => array('Pounds' => 'lbs', 'Kilograms' => 'kgs'),
+    16 => array('Allow Backordering' => 0,
+            'Keep in Catalog, Prevent Sales' => 2,
+            'Hide from Catalog' => 2),
 );
 
 
