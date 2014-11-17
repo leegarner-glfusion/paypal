@@ -229,6 +229,9 @@ You should disable the *_attach options below if you are distributing large file
     <tr>
       <th class="col0 leftalign" colspan="2">New Product Defaults</th>
     </tr>
+    <tr>
+      <td class="col0 leftalign" colspan="2">These options set the default values for new products and can be overridden for each product.</td>
+    </tr>
 
     <tr class="row0">
       <th class="col0 leftalign">Option </th>
@@ -260,6 +263,37 @@ You should disable the *_attach options below if you are distributing large file
       <td class="col1 leftalign">
         If "Yes", then the "Featured" checkbox will be checked automatically for new products.
       </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_track_onhand"></a>Track Qty On Hand?
+      </td>
+      <td class="col1 leftalign">
+        Select &quot;Yes&quot; to have the plugin track the quantity on hand of an item, by default. The administrator can update the quantity by editing the product, and the quantity will be reduced as purchases are made (to a minimum of zero).
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_oversell"></a>Action when Qty On Hand = 0
+      </td>
+      <td class="col1 leftalign">
+        Select the action to be taken when the quantity on hand reaches zero. Options are:
+<ul><li><b>Allow Backordering:</b> Continue to allow sales of the product.</li>
+<li><b>Hide from Catalog:</b> Hide the product from the catalog so it cannot be seen or purchased.</li>
+<li><b>Keep in Catalog, Prevent Sales:</b> Continue to display the product in the catalog but remove the purchase links.</li>
+</ul>
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Block Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
     </tr>
 
     <tr class="row0">
