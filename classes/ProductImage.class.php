@@ -64,13 +64,19 @@ class ProductImage extends upload
         $this->setFieldName($varname);
 
         $filenames = array();
-        for ($i = 0; $i < count($_FILES[$varname]['name']); $i++) {
+        for ($i = 0; $i < $this->numFiles(); $i++) {
             $filenames[] = $this->product_id . '_' . rand(100,999) . '.jpg';
         }
         $this->setFileNames($filenames);
     }
 
 
+    /**
+    *   Perform the file upload
+    *
+    *   Calls the parent function to upload the files, then calls
+    *   MakeThumbs() to create thumbnails.
+    */
     public function uploadFiles()
     {
         global $_TABLES;
