@@ -1261,15 +1261,38 @@ class Product
     }
 
 
+    /**
+    *   Handle the purchase of this item.
+    *   1. Update qty on hand if track_onhand is set (min. value 0)
+    *
+    *   @param  integer $qty        Quantity ordered
+    *   @param  string  $order_id   Optional order ID (not used yet)
+    *   @return integer     Zero or error value
+    */
     function handlePurchase($qty, $order_id='')
     {
+        global $_TABLES;
+
+        $status = 0;
+        $qty = (int)$qty;
+
+        // update the qty on hand, if tracking and not already zero
+        if ($this->track_onhand && $this->onhand > 0) {
+            $sql = "UPDATE {$_TABLES['paypal.products']} SET
+                    onhand = GREATEST(0, onhand - $qty)
+                    WHERE id = '{$this->id}'";
+            DB_query($sql, 1);
+            if (DB_error()) $status = 1;
+        }
+
+        return $status;
     }
+
 
     function cancelPurchase($qty, $order_id='')
     {
     }
 
 }   // class Product
-
 
 ?>

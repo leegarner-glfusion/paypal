@@ -473,10 +473,11 @@ class BaseIPN
                 // Split the item number into component parts.  It could
                 // be just a single string, depending on the plugin's needs.
                 if (strstr($item['item_number'], ':')) {
-                    $pi_info = split(':', $item['item_number']);
+                    $pi_info = explode(':', $item['item_number']);
                 } else {
                     $pi_info = array($item['item_number']);
                 }
+                PAYPAL_debug('BaseIPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
 
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
                         $pi_info, $product_info, $svc_msg);
@@ -487,7 +488,7 @@ class BaseIPN
                 if (!empty($product_info)) {
                     $this->items[$id]['name'] = $product_info['name'];
                 }
-                PAYPAL_debug("Got name " . $this->items[$id]['name']);
+                PAYPAL_debug("BaseIPN::handlePurchase() Got name " . $this->items[$id]['name']);
                 $vars = array(
                         'item' => $item,
                         'ipn_data' => $this->pp_data,
@@ -523,6 +524,8 @@ class BaseIPN
 
                 // Mark what type of product this is
                 $prod_types |= $P->prod_type;
+
+                $P->handlePurchase($item['quantity']);
             }
 
             // An invalid item number, or nothing returned for a plugin
@@ -703,11 +706,11 @@ class BaseIPN
                     }
                     $item['name'] .= $opt_str;
                 }
-                $sql = "UPDATE {$_TABLES['paypal.products']} SET
+                /*$sql = "UPDATE {$_TABLES['paypal.products']} SET
                         onhand = GREATEST(0, onhand - " . 
                             (int)$item['quantity'] . ") 
                         WHERE id = '" . (int)$item['item_number'] .
-                        "' AND track_onhand > 0";
+                        "' AND track_onhand > 0";*/
                 //COM_errorLog($sql);
                 DB_query($sql, 1);
             }
