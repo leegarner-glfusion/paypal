@@ -270,7 +270,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
                 'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
         $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
-                'select', 0, 30, 0, 60, true, $_PP_CONF['pi_name']);
+                'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
 
         $c->add('fs_blocks', NULL, 'fieldset', 0, 40, NULL, 0, true, 
                 $_PP_CONF['pi_name']);
