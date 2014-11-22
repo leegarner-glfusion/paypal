@@ -299,14 +299,17 @@ function PP_showOversell(show)
 function PP_changeProdType(value)
 {
   switch(value) {
-  case '1':
+  case '1':     // physical
     document.getElementById('type_download').style.display = 'none';
     document.getElementById('type_physical').style.display = '';
     break;
-  case '2':
-  case '4':
+  case '2':     // downloadable
     document.getElementById('type_download').style.display = '';
     document.getElementById('type_physical').style.display = 'none';
+    break;
+  case '4':     // other virtual
+    document.getElementById('type_physical').style.display = 'none';
+    document.getElementById('type_download').style.display = 'none';
     break;
   case '3':     // physical and downloadable (2 parts)
     document.getElementById('type_download').style.display = '';
