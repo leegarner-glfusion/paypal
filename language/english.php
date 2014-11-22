@@ -42,7 +42,7 @@ $LANG_PP = array (
 'quantity'          => 'Quantity',
 'item_total'        => 'Item Total',
 'total'             => 'Total',
-'cart_empty'        => '<span class="info">Your cart is empty.</span>',
+'cart_empty'        => 'Your cart is empty.',
 'purchase_history'  => 'Purchase History',
 'ipnlog'            => 'IPN Log',
 'new_product'       => 'New Product',
