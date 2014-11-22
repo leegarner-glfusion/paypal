@@ -31,7 +31,19 @@ case 'getAddress':
     $A = DB_fetchArray($res, false);
     //if (!empty($A)) {
     break;
-        
+case 'addcartitem':
+    USES_paypal_class_cart();
+    $ppGCart = new ppCart();
+    $view = 'list';
+    $qty = isset($_GET['quantity']) ? (float)$_GET['quantity'] : 1;
+    $opts = isset($_GET['options']) ? $_GET['options'] : '';
+    $price = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
+    public function addItem($item_id, $name, $descrip='', $quantity=1,
+            $price=0, $options='')
+    $new_qty = $ppGCart->addItem($_GET['item_number'], $_GET['item_name'],
+                $_GET['item_descr'], $qty, $price, $opts);
+    echo json_encode(array('qty' => $new_qty));
+    break;
 }
 
 ?>
