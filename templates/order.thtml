@@ -133,6 +133,8 @@
       <input class="pluginPaypalButton blue" type="submit" name="viewcart"
         value="{$LANG_PP['update_cart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';" />
+  <input type="submit" class="pluginPaypalButton red" name="emptycart"
+        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
     </div>
     <div class="pluginPaypalOrderButtons">
       {gateway_vars}
