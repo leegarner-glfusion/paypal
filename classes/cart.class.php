@@ -613,7 +613,6 @@ class ppCart
     }
 
 
-
     /**
     *   Create the cart ID.
     *   Since it's transmitted in cleartext, it'd be a good idea to

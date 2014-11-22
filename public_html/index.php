@@ -173,8 +173,9 @@ case 'updatecart':
     break;
 
 case 'emptycart':
-    $view = 'cart';
+    $view = 'productlist';
     $ppGCart->Clear();
+    LGLIB_storeMessage($LANG_PP['cart_empty']);
     break;
 
 case 'thanks':
@@ -318,7 +319,11 @@ case 'detail':
 case 'cart':
 case 'viewcart':
     $menu_opt = $LANG_PP['viewcart'];
-    $content .= $ppGCart->View();
+    if ($ppGCart->hasItems()) {
+        $content .= $ppGCart->View();
+    } else {
+        $content .= '<span class="info">' . $LANG_PP['cart_empty'] . '</span>';
+    }
     break;
 
 case 'checkoutcart':
