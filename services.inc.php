@@ -175,7 +175,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     // Option to add an item only if it is not currently in the cart.
     // Cart::addItem will be called to increment the quantity if the
     // unique flag is not set.
-    if (isset($args['unique'])) {
+    if (isset($args['unique']) && $args['unique']) {
         if ($ppGCart->Contains($args['item_number'])) return PLG_RET_OK;
     }
 
