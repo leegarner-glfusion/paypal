@@ -277,7 +277,7 @@
     clear: right;
 }
 
-.pluginPaypalProductDetail #paypalProductDesc p {
+.pluginPaypalProductDetail #paypalProductDesc {
     clear: both;
     margin-bottom: 1em;
     font-size: 1.2em;
