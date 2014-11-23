@@ -153,7 +153,7 @@ $INSTALL_plugin['paypal'] = array(
 
     array(  'type' => 'block', 
             'name' => 'paypal_random', 
-            'title' => $LANG_PP['random_product'],
+            'title' => 'Random Product',
             'phpblockfn' => 'phpblock_paypal_random', 
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
@@ -161,7 +161,7 @@ $INSTALL_plugin['paypal'] = array(
 
     array(  'type' => 'block', 
             'name' => 'paypal_categories', 
-            'title' => $LANG_PP['product_categories'],
+            'title' => 'Product Categories',
             'phpblockfn' => 'phpblock_paypal_categories', 
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
@@ -169,7 +169,7 @@ $INSTALL_plugin['paypal'] = array(
 
     array(  'type' => 'block', 
             'name' => 'paypal_featured', 
-            'title' => $LANG_PP['featured_product'],
+            'title' => 'Featured Products',
             'phpblockfn' => 'phpblock_paypal_featured', 
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
@@ -177,7 +177,7 @@ $INSTALL_plugin['paypal'] = array(
 
     array(  'type' => 'block', 
             'name' => 'paypal_popular', 
-            'title' => $LANG_PP['popular_product'],
+            'title' => 'Popular',
             'phpblockfn' => 'phpblock_paypal_popular', 
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
@@ -185,7 +185,7 @@ $INSTALL_plugin['paypal'] = array(
 
     array(  'type' => 'block', 
             'name' => 'paypal_cart', 
-            'title' => $LANG_PP['cart_blocktitle'],
+            'title' => 'Shopping Cart',
             'phpblockfn' => 'phpblock_paypal_cart', 
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
