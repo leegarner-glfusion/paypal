@@ -385,23 +385,23 @@ function PAYPAL_do_upgrade($current_ver)
         }
     }
 
-    if ($current_ver < '0.5.5') {
+    if ($current_ver < '0.5.6') {
         // SQL updates in 0.5.4 weren't included in new installation, so check
         // if they're done and add them to the upgrade process if not.
         $res = DB_query("SHOW TABLES LIKE '{$_TABLES['paypal.currency']}'",1);
         if (!$res || DB_numRows($res) < 1) {
             // Add the table
-            $PP_UPGRADE['0.5.5'][] = $PP_UPGRADE['0.5.4'][0];
+            $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][0];
             // Populate with data
-            $PP_UPGRADE['0.5.5'][] = $PP_UPGRADE['0.5.4'][1];
+            $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][1];
         }
-        $res = DB_query("SHOW COLUMNS FROM '{$_TABLES['paypal.products']}
+        $res = DB_query("SHOW COLUMNS FROM {$_TABLES['paypal.products']}
                         LIKE 'sale_price'", 1);
         if (!$res || DB_numRows($res) < 1) {
             // Add the field to the products table
-            $PP_UPGRADE['0.5.5'][] = $PP_UPGRADE['0.5.4'][2];
+            $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][2];
         }
-        $error = PAYPAL_do_upgrade_sql('0.5.5');
+        $error = PAYPAL_do_upgrade_sql('0.5.6');
         if ($error) {
             return $error;
         }
@@ -410,8 +410,7 @@ function PAYPAL_do_upgrade($current_ver)
         $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
                 'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
         $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
-                'select', 0, 30, 0, 60, true, $_PP_CONF['pi_name']);
-
+                'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
     }
 
     return $error;

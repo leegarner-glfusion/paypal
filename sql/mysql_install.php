@@ -691,7 +691,7 @@ $PP_UPGRADE['0.5.2'] = array(
         ADD onhand INT(10) NOT NULL DEFAULT '0'",
 );
 
-$PP_UPGRADE['0.5.5'] = array(
+$PP_UPGRADE['0.5.6'] = array(
     "ALTER TABLE {$_TABLES['paypal.products']}
         ADD oversell tinyint(1) not null default 0",
 );
