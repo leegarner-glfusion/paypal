@@ -647,6 +647,9 @@ function PAYPAL_ProductList($cat=0, $search='')
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
     if ($page == 1 && empty($cat_list)) {
+        // Get the currency class for formatting prices
+        USES_paypal_class_currency();
+        $Cur = new ppCurrency($_PP_CONF['currency']);
         $product->clear_var('rating_bar');  // no ratings for plugins (yet)
         foreach ($_PLUGINS as $pi_name) {
             $status = LGLIB_invokeService($pi_name, 'getproducts',
@@ -665,9 +668,10 @@ function PAYPAL_ProductList($cat=0, $search='')
                     'small_pic' => '',
                     'encrypted' => '',
                     'item_url'  => $A['url'],
+                    'track_onhand' => '',   // not available for plugins
                 ) );
                 if ($A['price'] > 0) {
-                    $product->set_var('price', COM_numberFormat($A['price'], 2));
+                    $product->set_var('price', $Cur->Format($A['price']));
                 } else {
                     $product->clear_var('price');
                 }
