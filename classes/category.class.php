@@ -42,27 +42,28 @@ class Category
      *
      *  @param integer $id Optional type ID
      */
-    function __construct($id=0)
+    public function __construct($id=0)
     {
+        global $_USER, $_VARS;
+
         $this->properties = array();
         $this->isNew = true;
 
-        $id = (int)$id;
-        if ($id < 1) {
-            $this->cat_id = 0;
-            $this->parent_id = 0;
-            $this->cat_name = '';
-            $this->description = '';
-            $this->group_id = '';
-            $this->owner_id = 0;
-            $this->perm_owner = 3;
-            $this->perm_group = 3;
-            $this->perm_members = 2;
-            $this->perm_anon = 2;
-            $this->image = '';
-            $this->enabled = 1;
-        } else {
-            $this->cat_id = $id;
+        $this->cat_id = $id;
+        $this->parent_id = 0;
+        $this->cat_name = '';
+        $this->description = '';
+        $this->group_id = isset($_VARS['paypal_gid']) ? 
+                    $_VARS['paypal_gid'] : 1;
+        $this->owner_id = $_USER['uid'];
+        $this->perm_owner = 3;
+        $this->perm_group = 3;
+        $this->perm_members = 2;
+        $this->perm_anon = 2;
+        $this->image = '';
+        $this->enabled = 1;
+
+        if ($this->cat_id > 0) {
             if (!$this->Read()) {
                 $this->cat_id = 0;
             }
@@ -78,7 +79,7 @@ class Category
     *   @param  string  $var    Name of property to set.
     *   @param  mixed   $value  New value for property.
     */
-    function __set($var, $value)
+    public function __set($var, $value)
     {
         switch ($var) {
         case 'cat_id':
@@ -118,7 +119,7 @@ class Category
     *   @param  string  $var    Name of property to retrieve.
     *   @return mixed           Value of property, NULL if undefined.
     */
-    function __get($var)
+    public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
             return $this->properties[$var];
@@ -134,7 +135,7 @@ class Category
     *   @param  array   $row    Array of values, from DB or $_POST
     *   @param  boolean $fromDB True if read from DB, false if from form
     */
-    function SetVars($row, $fromDB=false)
+    public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
 
@@ -173,7 +174,7 @@ class Category
      *  @param  integer $id Optional ID.  Current ID is used if zero.
      *  @return boolean     True if a record was read, False on failure
      */
-    function Read($id = 0)
+    public function Read($id = 0)
     {
         global $_TABLES;
 
@@ -204,7 +205,7 @@ class Category
      *  @param  array   $A      Optional array of values from $_POST
      *  @return boolean         True if no errors, False otherwise
      */
-    function Save($A = array())
+    public function Save($A = array())
     {
         global $_TABLES, $_PP_CONF;
 
@@ -290,7 +291,7 @@ class Category
     /**
      *  Delete the current category record from the database
      */
-    function Delete()
+    public function Delete()
     {
         global $_TABLES, $_PP_CONF;
 
@@ -313,7 +314,7 @@ class Category
     *
     *   @param  integer $img_id     DB ID of image to delete
     */
-    function DeleteImage()
+    public function DeleteImage()
     {
         global $_TABLES, $_PP_CONF;
 
@@ -334,7 +335,7 @@ class Category
      *
      *  @return boolean     True if ok, False when first test fails.
      */
-    function isValidRecord()
+    public function isValidRecord()
     {
         // Check that basic required fields are filled in
         if ($this->cat_name == '') {
@@ -351,7 +352,7 @@ class Category
      *  @param  integer $id Optional ID, current record used if zero
      *  @return string      HTML for edit form
      */
-    function showForm()
+    public function showForm()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
 

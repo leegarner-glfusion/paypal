@@ -938,7 +938,7 @@ function plugin_autouninstall_paypal ()
                 'phpblock_paypal_cart',
         ),
         // List all vars by name
-        'vars'=> array()
+        'vars'=> array('paypal_gid'),
     );
     return $out;
 }

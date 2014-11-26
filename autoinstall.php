@@ -243,7 +243,7 @@ function plugin_load_configuration_paypal()
 */
 function plugin_postinstall_paypal()
 {
-    global $_CONF, $_PP_CONF, $_PP_DEFAULTS, $_PP_SAMPLEDATA;
+    global $_CONF, $_PP_CONF, $_PP_DEFAULTS, $_PP_SAMPLEDATA, $_TABLES;
 
     // Create the working directory.  Under private/data by default
     // 0.5.0 - download path moved under tmpdir, so both are created
@@ -292,6 +292,15 @@ function plugin_postinstall_paypal()
             }
         }
     }
+
+    // Set the paypal Admin ID
+    $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id', 
+            "grp_name='{$_PP_CONF['pi_name']} Admin'");
+    if ($gid < 1)
+        $gid = 1;        // default to Root if paypal group not found
+    DB_query("INSERT INTO {$_TABLES['vars']}
+                SET name='paypal_gid', value=$gid");
+
 }
 
 

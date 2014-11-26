@@ -413,6 +413,15 @@ function PAYPAL_do_upgrade($current_ver)
                 'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
     }
 
+    if ($current_ver < '0.5.7') {
+        $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id', 
+            "grp_name='{$_PP_CONF['pi_name']} Admin'");
+        if ($gid < 1)
+            $gid = 1;        // default to Root if paypal group not found
+        DB_query("INSERT INTO {$_TABLES['vars']}
+                SET name='paypal_gid', value=$gid");
+    }
+
     return $error;
 
 }
