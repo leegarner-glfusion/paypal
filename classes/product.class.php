@@ -1028,8 +1028,8 @@ class Product
                 $mode = $this->comments_enabled;
             }
             $T->set_var('usercomments',
-                CMT_userComments($prod_id, $this->name, 'paypal', '',
-                    '', 0, 1, false, false, $mode));
+                CMT_userComments($prod_id, $this->short_description, 'paypal',
+                    '', '', 0, 1, false, false, $mode));
         }
 
         if ($this->rating_enabled == 1) {
