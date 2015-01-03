@@ -149,11 +149,15 @@ case 'saveshipto':
 case 'addcartitem':
 case 'addcartitem_x':   // using the image submit button, such as Paypal's
     USES_paypal_class_cart();
-    $view = 'list';
+    $view = 'productlist';
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
                 $_POST['item_descr'], $qty, 
                 $_POST['amount'], $_POST['options'], $_POST['extras']);
+    if (isset($_POST['_ret_url'])) {
+        COM_refresh($_POST['_ret_url']);
+        exit;
+    }
     break;
 
 case 'delcartitem':
