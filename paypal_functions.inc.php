@@ -527,6 +527,9 @@ function PAYPAL_ProductList($cat=0, $search='')
                 'btn_details' => 'buttons/btn_details.thtml',
     ));
 
+    if ($nrows == 0 && COM_isAnonUser()) {
+        $product->set_var('anon_and_empty', 'true');
+    }
     $product->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'user_id'       => $_USER['uid'],
@@ -555,6 +558,7 @@ function PAYPAL_ProductList($cat=0, $search='')
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds('paypal');
     }
+
     // Display each product
     while ($A = DB_fetchArray($res, false)) {
 

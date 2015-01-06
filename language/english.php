@@ -248,6 +248,7 @@ $LANG_PP = array (
 'oversell_allow' => 'Allow, display product and accept orders',
 'oversell_deny' => 'Deny, display product but prevent ordering',
 'oversell_hide' => 'Hide product from catalog',
+'anon_and_empty' => 'There are no products available for purchase by anonymous users. Try logging into the site to view the catalog.',
 );
 
 

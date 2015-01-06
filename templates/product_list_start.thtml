@@ -11,4 +11,7 @@
   </select>
 </div>#}
 <div>
+{!if anon_and_empty}
+<span class="info">No products</span>
+{!endif}
 {# end {templatelocation} #}
