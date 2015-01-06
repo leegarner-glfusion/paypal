@@ -12,6 +12,6 @@
 </div>#}
 <div>
 {!if anon_and_empty}
-<span class="info">No products</span>
+<span class="info">{$LANG_PP['anon_and_empty']}</span>
 {!endif}
 {# end {templatelocation} #}
