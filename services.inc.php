@@ -167,9 +167,10 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     if (!isset($args['item_number']) || empty($args['item_number'])) {
         return PLG_RET_ERROR;
     }
+
     $item_name = isset($args['item_name']) ? $args['item_name'] : '';
     $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
-    $descrip = isset($args['item_descr']) ? $args['item_descr'] : '';
+    $descrip = isset($args['short_description']) ? $args['short_description'] : '';
     $options = isset($args['options']) ? $args['options'] : array();
     $extras = isset($args['extras']) ? $args['extras'] : '';
 

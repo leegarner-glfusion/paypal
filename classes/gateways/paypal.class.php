@@ -229,7 +229,7 @@ class paypal extends PaymentGw
             $fields['quantity_' . $i] = $item['quantity'];
             $total_amount += $item['price'];
 
-            if (isset($item['shipping']) && $item['shipping'] > 0) {
+            if (isset($item['shipping'])) {
                 $fields['shipping_' . $i] = $item['shipping'];
                 $shipping += $item['shipping'];
             }

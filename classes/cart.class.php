@@ -274,10 +274,11 @@ class ppCart
     *   @param  float   $quantity   Quantity
     *   @param  float   $price      Unit Price
     *   @param  array   $options    Product options (size, color, etc).
+    *   @param  array   $extras     Extra cart items (shipping, etc.)
     *   @return integer             Current item quantity
     */
     public function addItem($item_id, $name, $descrip='', $quantity=1,
-            $price=0, $options='')
+            $price=0, $options=array(), $extras=array())
     {
         $quantity = (float)$quantity;
         $item_id = trim($item_id);
@@ -312,6 +313,7 @@ class ppCart
                 'descrip'   => $descrip, 
                 'price'     => sprintf("%.2f", $price),
                 'options'   => $options,
+                'extras'    => $extras,
             );
         }
 
@@ -498,6 +500,10 @@ class ppCart
             } else {
                 // A plugin item, it's not something we can look up
                 $item_price = (float)$item['price'];
+                if (isset($item['extras']['shipping'])) {
+                    $shipping += (float)$item['extras']['shipping'];
+                    $this->m_cart[$id]['shipping'] = $item['extras']['shipping'];
+                }
             }
             $item_total = $item_price * $item['quantity'];
 
