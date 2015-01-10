@@ -19,7 +19,7 @@ USES_paypal_class_ipn('amazon');
 
 if ($_PP_CONF['debug_ipn'] == 1) {
     // Get the complete IPN message prior to any processing
-    COM_errorLog(print_r($_POST, true));
+    COM_errorLog(var_export($_POST, true));
 }
 
 $ipn = new AmazonIPN($_POST);
