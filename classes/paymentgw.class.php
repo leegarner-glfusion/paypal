@@ -615,6 +615,11 @@ abstract class PaymentGw
                 // Initialize item info array to be used later
                 $A = array();
 
+                // Split the item number into component parts.  It could
+                // be just a single string, depending on the plugin's needs.
+                $pi_info = explode(':', $item['item_number']);
+                PAYPAL_debug('Paymentgw::handlePurchase() pi_info: ' . print_r($pi_info,true));
+
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
                         array($item_number, $item_opts),
                         $product_info, $svc_msg);
@@ -625,7 +630,7 @@ abstract class PaymentGw
                 if (!empty($product_info)) {
                     $items[$id]['name'] = $product_info['name'];
                 }
-                PAYPAL_debug("Got name " . $items[$id]['name']);
+                PAYPAL_debug("Paymentgw::handlePurchase() Got name " . $items[$id]['name']);
                 $vars = array(
                         'item' => $item,
                         'ipn_data' => array(),
