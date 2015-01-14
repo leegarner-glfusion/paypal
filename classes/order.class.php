@@ -366,6 +366,9 @@ class ppOrder
         if ($this->isNew) {
             // Shouldn't have an empty order ID, but double-check
             if ($this->order_id == '') $this->order_id = COM_makeSid();
+            if ($this->billto_name == '') {
+                $this->billto_name = COM_getDisplayName($this->uid);
+            }
             $_SESSION[PP_CART_VAR]['order_id'] = $this->order_id;
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET 
                     order_id='{$this->order_id}', 
@@ -704,6 +707,7 @@ class ppOrder
             if ($this->billto_name == '') {
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
+            $user_name = COM_getDisplayName($this->uid);
 
             $message->set_var(array(
                 //'payment_gross'     => sprintf('%6.2f',
@@ -722,8 +726,7 @@ class ppOrder
                 'pi_admin_url'      => PAYPAL_ADMIN_URL,
                 'dl_links'          => $dl_links,
                 'buyer_uid'         => $this->uid,
-                'user_name'         => DB_getItem($_TABLES['users'],'username',
-                            "uid = {$this->uid}"),
+                'user_name'         => $user_name,
                 'gateway_name'      => $this->pmt_method,
                 'pending'       => $this->status == 'pending' ? 'true' : '',
                 'gw_msg'        => $gw_msg,
