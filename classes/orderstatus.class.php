@@ -51,7 +51,9 @@ class ppOrderStatus extends ppWorkflow
         //echo $sql;die;
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $_PP_CONF['orderstatus'][$A['name']] = $A['notify_buyer'];
+            $_PP_CONF['orderstatus'][$A['name']] = array(
+                'notify_buyer' => $A['notify_buyer'],
+            );
         }
     }
 
