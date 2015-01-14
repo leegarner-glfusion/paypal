@@ -460,7 +460,6 @@ class BaseIPN
 
         // For each item purchased, create an order item
         foreach ($this->items as $id=>$item) {
-
             // If the item number is numeric, assume it's an
             // inventory item.  Otherwise, it should be a plugin-supplied
             // item with the item number like pi_name:item_number:options
@@ -480,13 +479,14 @@ class BaseIPN
                 PAYPAL_debug('BaseIPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
 
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
-                        $pi_info, $product_info, $svc_msg);
+                        $pi_info, $A, $svc_msg);
+
                 if ($status != PLG_RET_OK) {
-                    $product_info = array();
+                    $A = array();
                 }
 
-                if (!empty($product_info)) {
-                    $this->items[$id]['name'] = $product_info['name'];
+                if (!empty($A)) {
+                    $this->items[$id]['name'] = $A['name'];
                 }
                 PAYPAL_debug("BaseIPN::handlePurchase() Got name " . $this->items[$id]['name']);
                 $vars = array(
