@@ -704,10 +704,10 @@ class ppOrder
             }
             $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
-            if ($this->billto_name == '') {
-                $this->billto_name = COM_getDisplayName($this->uid);
-            }
             $user_name = COM_getDisplayName($this->uid);
+            if ($this->billto_name == '') {
+                $this->billto_name = $user_name;
+            }
 
             $message->set_var(array(
                 //'payment_gross'     => sprintf('%6.2f',

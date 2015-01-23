@@ -95,8 +95,8 @@ function PAYPAL_orders($admin = false, $uid = '')
         );
 
     $text_arr = array(
-        'has_extras' => $admin ? true : false,
-        'form_url' => $base_url . '/index.php?orderhist=x',
+        //'has_extras' => $admin ? true : false,
+        //'form_url' => $base_url . '/index.php?orderhist=x',
     );
 
     if (!isset($_REQUEST['query_limit']))
