@@ -119,7 +119,9 @@ function service_getCurrency_paypal($args, &$output, &$svc_msg)
 */
 function service_getUrl_paypal($args, &$output, &$svc_msg)
 {
-    if (!is_array($args)) return PLG_RET_ERROR;
+    if (!is_array($args)) {
+        $args = array('type' => $args);
+    }
 
     $type = isset($args['type']) ? $args['type'] : '';
     $url = '';
@@ -204,6 +206,18 @@ function service_btnCheckout_paypal($args, &$output, &$svc_msg)
     $color = isset($args['color']) ? $args['color'] : 'green';
     $output = '<a href="' . PAYPAL_URL . '/index.php?checkout=x"><button type="button" id="ppcheckout" class="pluginPaypalButton ' . $color . '">'
         . $text . '</button></a>';
+    return PLG_RET_OK;
+}
+
+function service_formatAmount_paypal($args, &$output, &$svc_msg)
+{
+    global $_PP_CONF;
+
+    if (!is_array($args)) $args = array($args);
+    $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
+    USES_paypal_class_currency();
+    $Cur = new ppCurrency($_PP_CONF['currency']);
+    $output = $Cur->Format($amount);
     return PLG_RET_OK;
 }
 
