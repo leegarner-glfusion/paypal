@@ -779,7 +779,7 @@ class ppOrder
                             $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
                     COM_emailNotification(array(
                         'to' => array($email_addr),
-                        'from' => $_CONF['site_mail'],
+                        'from' => $_CONF['noreply_mail'],
                         'htmlmessage' => $admin_text,
                             'subject' => $subject,
                     ) );
