@@ -7,7 +7,7 @@
     <tr>
       <td class="admin-list-field">{param_name} {other_label}</td>
       <td class="admin-list-field">
-        <a href="#" onclick="popupWindow('{doc_url}#desc_{field_name}', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_{field_name}', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
         {param_field}
       </td>
@@ -16,7 +16,7 @@
     <tr>
       <td class="admin-list-field">{$LANG_PP['enabled']}</td>
       <td class="admin-list-field">
-        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
         <input type="checkbox" name="enabled" value="1" {enabled_chk} />
       </td>
@@ -24,7 +24,7 @@
     <tr>
       <td class="admin-list-field">{$LANG_PP['txt_buttons']}</td>
       <td class="admin-list-field">
-        <a href="#" onclick="popupWindow('{doc_url}#desc_services', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_services', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
         {svc_checkboxes}
       </td>
@@ -32,7 +32,7 @@
     <tr>
       <td class="admin-list-field">{$LANG_PP['orderby']}</td>
       <td class="admin-list-field">
-        <a href="#" onclick="popupWindow('{doc_url}#desc_order', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_order', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
         <input type="text" size="3" name="orderby" value="{orderby}" />
       </td>

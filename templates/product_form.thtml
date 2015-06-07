@@ -16,7 +16,7 @@
 
     <p>
       <label><font color="red">*</font>{$LANG_PP['product']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="name" value="{name}" size="40" 
@@ -25,7 +25,7 @@
 
     <p>
       <label>{$LANG_PP['category']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="cat_id">
@@ -36,7 +36,7 @@
 
     <p>
       <label><font color="red">*</font>{$LANG_PP['short_description']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="short_description" value="{short_description}" 
@@ -52,7 +52,7 @@
 
     <p id="html_editarea">
       <!--<label>{$LANG_PP['description']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>-->
       <textarea id="description" 
@@ -62,7 +62,7 @@
 
     <p>
       <label>{$LANG_PP['keywords']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_keywords', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_keywords', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="keywords" value="{keywords}" size="40"
@@ -71,7 +71,7 @@
 
     <p>
       <label>{$LANG_PP['price']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="price" value="{price}" size="20" 
@@ -80,7 +80,7 @@
 
     <div>
       <label>{$LANG_PP['images']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <table border=0>
@@ -108,7 +108,7 @@
 
     <p>
       <label>{$LANG_PP['enabled']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="enabled" value="1" {ena_chk} />
@@ -116,7 +116,7 @@
 
     <p>
       <label>{$LANG_PP['taxable']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="taxable" value="1" {tax_chk} />
@@ -124,7 +124,7 @@
 
     <p>
       <label>{$LANG_PP['txt_buttons']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_buttons', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_buttons', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <!-- BEGIN BtnRow -->
@@ -135,7 +135,7 @@
 
     <p>
       <label>{$LANG_PP['incl_blocks']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_incl_blocks', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_incl_blocks', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="show_random" value="1" 
@@ -148,7 +148,7 @@
 
     <p>
       <label>{$LANG_PP['comments']}:
-       <a href="#" onclick="popupWindow('{doc_url}#desc_comments', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+       <a href="#" onclick="popupWindow('{doc_url}#desc_comments', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="comments_enabled">
@@ -160,7 +160,7 @@
 
     <p>
       <label>{$LANG_PP['ratings_enabled']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="rating_enabled" value="1" 
@@ -174,7 +174,7 @@
 
     <p>
       <label>{$LANG_PP['prod_type']}?:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_prod_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_prod_type', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <!-- BEGIN ProdTypeRadio -->
@@ -187,7 +187,7 @@
     <div id="type_download">
     <p>
       <label>{$LANG_PP['select_file']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_select_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" i
+        <a href="#" onclick="popupWindow('{doc_url}#desc_select_file', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" i
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="file">
@@ -198,7 +198,7 @@
 
     <p>
       <label>{$LANG_PP['or_upload_new']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_upload_file', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_upload_file', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="file" name="uploadfile" />
@@ -206,7 +206,7 @@
 
     <p>
       <label>{$LANG_PP['exp_time_days']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="expiration" value="{expiration}" 
@@ -218,7 +218,7 @@
     <div id="type_physical">
     <p>
       <label>{$LANG_PP['weight']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_weight', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_weight', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="weight" value="{weight}" />
@@ -226,7 +226,7 @@
 
     <p>
       <label>{$LANG_PP['shipping_type']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_shipping_type', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+        <a href="#" onclick="popupWindow('{doc_url}#desc_shipping_type', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="shipping_type" 
@@ -245,7 +245,7 @@
 
     <p>
       <label>{$LANG_PP['track_onhand']}
-       <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+       <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="checkbox" name="track_onhand" value="1" {trk_onhand_chk} 
@@ -254,7 +254,7 @@
 
     <p id="oversell" style="display:none;">
       <label>{$LANG_PP['oversell_action']}
-       <a href="#" onclick="popupWindow('{doc_url}#desc_oversell', 'Help', 640, 480, 1)" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+       <a href="#" onclick="popupWindow('{doc_url}#desc_oversell', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <select name="oversell">
