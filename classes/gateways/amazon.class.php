@@ -140,7 +140,7 @@ class amazon extends PaymentGw
     {
         global $_PP_CONF, $_USER;
 
-        if (!$this->Supports('checkout')) {
+        if (!$this->_Supports('checkout')) {
             return '';
         }
 

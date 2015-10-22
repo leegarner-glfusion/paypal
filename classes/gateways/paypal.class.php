@@ -155,7 +155,7 @@ class paypal extends PaymentGw
     /**
     *   Get the form variables for the purchase button.
     *
-    *   @uses   PaymentGw::Supports()
+    *   @uses   PaymentGw::_Supports()
     *   @uses   _encButton()
     *   @uses   getActionUrl()
     *   @return string      HTML for purchase button
@@ -164,7 +164,7 @@ class paypal extends PaymentGw
     {
         global $_PP_CONF, $_USER, $_TABLES;
 
-        if (!$this->Supports('checkout')) {
+        if (!$this->_Supports('checkout')) {
             return '';
         }
 

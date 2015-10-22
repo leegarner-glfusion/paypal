@@ -512,16 +512,34 @@ abstract class PaymentGw
     *   @param  array   $gw_info    Array from $_PP_CONF, empty to check current
     *   @return boolean             True if the button is supported
     */
-    public function Supports($btn_type, $gw_info = '')
+    protected function _Supports($btn_type)
     {
+        $arr_parms = array(
+            'enabled' => $this->enabled,
+            'services' => $this->services,
+        );
+        return self::Supports($btn_type, $arr_parms);
+    }
+
+
+    /**
+    *   Check if a gateway from the $_PP_CONF array supports a button type.
+    *   The $gw_info parameter should be the array of info for a single gateway
+    *   if only that gateway is to be checked.
+    *
+    *   @param  string  $btn_type   Button type to check
+    *   @param  array   $gw_info    Array from $_PP_CONF, empty to check current
+    *   @return boolean             True if the button is supported
+    */
+    public static function Supports($btn_type, $gw_info = '')
+    {
+        $retval = false;
         if (is_array($gw_info)) {
             // if an array is passed in, check it for the button type
             if ($gw_info['enabled'] == 1 &&
                     isset($gw_info['services'][$btn_type]))
-                return true;
-            else
-                return false;
-        } elseif (is_object($this)) {
+                $retval = true;
+        /*} elseif (is_object($this)) {
             // Otherwise, if this is an object, check its own services array
             if ($this->enabled == 0 || 
                     !isset($this->services[$btn_type]) ||
@@ -530,7 +548,9 @@ abstract class PaymentGw
             } else {
                 return true;
             }
+        */
         }
+        return $retval;
     }
 
 
