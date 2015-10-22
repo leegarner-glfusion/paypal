@@ -161,6 +161,7 @@ $_PP_DEFAULTS['centerblock'] = 0;   // Enable centerblock?
 
 $_PP_DEFAULTS['track_onhand'] = 0;  // Track qty onhand?
 $_PP_DEFAULTS['oversell'] = 0;      // Allow over-selling
+$_PP_DEFAULTS['product_tpl_ver'] = '/v1';   // default product detail template
 
 /**
  *  Initialize Paypal plugin configuration
@@ -271,6 +272,8 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
         $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
                 'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
+        $c->add('product_tpl_ver', $_PP_DEFAULTS['product_tpl_ver'],
+                'select', 0, 30, 0, 70, true, $_PP_CONF['pi_name']);
 
         $c->add('fs_blocks', NULL, 'fieldset', 0, 40, NULL, 0, true, 
                 $_PP_CONF['pi_name']);

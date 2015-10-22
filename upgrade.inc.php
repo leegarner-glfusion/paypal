@@ -420,6 +420,8 @@ function PAYPAL_do_upgrade($current_ver)
             $gid = 1;        // default to Root if paypal group not found
         DB_query("INSERT INTO {$_TABLES['vars']}
                 SET name='paypal_gid', value=$gid");
+        $c->add('product_tpl_ver', $_PP_DEFAULTS['product_tpl_ver'],
+                'select', 0, 30, 2, 70, true, $_PP_CONF['pi_name']);
     }
 
     return $error;

@@ -313,6 +313,7 @@ $LANG_confignames['paypal'] = array(
     'weight_unit' => 'Unit of Weight Measurement',
     'shop_name' => 'Shop Name',
     'shop_addr' => 'Shop Address',
+    'product_tpl_ver' => 'Default Product Template',
 );
 
 /** Language strings for the subgroup names in the config section */

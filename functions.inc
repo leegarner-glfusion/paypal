@@ -1577,6 +1577,18 @@ function PAYPAL_debug($msg, $type = 'debug')
 }
 
 
+function plugin_configmanager_select_product_tpl_ver_paypal()
+{
+    $A = array();
+    $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
+    foreach ($dirs as $dir) {
+        $opt = end(explode('/', $dir));
+        $A[$opt] = '/' . $opt; 
+    }
+    return $A;
+}
+
+
 /**
 *   Create a currency dropdown list for selecting the default currency.
 *

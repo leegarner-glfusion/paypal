@@ -906,13 +906,17 @@ class Product
         $retval = COM_startBlock();
 
         // Set the template dir based on the configured template version
-        $T = new Template(PAYPAL_PI_PATH . '/templates/detail' .
-                $_PP_CONF['tpl_ver_detail']);
+        $tpl_dir = PAYPAL_PI_PATH . '/templates/detail' .
+                $_PP_CONF['product_tpl_ver'];
+        $T = new Template($tpl_dir);
+
         if ($this->hasAttributes()) {
             $detail_template = 'product_detail_attrib.thtml';
         } else {
             $detail_template = 'product_detail.thtml';
         }
+            // TODO: test single template
+            $detail_template = 'product_detail_attrib.thtml';
         $T->set_file('product', $detail_template);
 
         $name = $this->name;
@@ -958,14 +962,28 @@ class Product
                 if ($prow['filename'] != '' && 
                     file_exists("{$_PP_CONF['image_dir']}/{$prow['filename']}")) {
                     if ($i == 0) {
-                        $T->set_var('main_img', $prow['filename']);
+                        $T->set_var('main_img',
+                            PAYPAL_ImageUrl($prow['filename'],
+                                $tpl_config['lg_img_width'] - 20,
+                                $tpl_config['lg_img_height'] - 20
+                            )
+                        );
                     }
                     $T->set_block('product', 'Thumbnail', 'PBlock');
-                    $T->set_var('img_file', $prow['filename']);
-                    $T->set_var('img_url', PAYPAL_URL.'/images/products');
-                    $T->set_var('thumb_url', PAYPAL_ImageUrl($prow['filename']));
+                    $T->set_var(array(
+                        'img_file'      => $prow['filename'],
+                        'disp_img'      => PAYPAL_ImageUrl($prow['filename'],
+                                $tpl_config['lg_img_width'] - 20,
+                                $tpl_config['lg_img_height'] - 20
+                            ),
+                        'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
+                        'img_url'       => PAYPAL_URL.'/images/products',
+                        'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
+                        //'have_photo'    => 'true',
+                        'tn_width'      => $_PP_CONF['max_thumb_size'],
+                        'tn_height'     => $_PP_CONF['max_thumb_size'],
+                    ) );
                     $T->parse('PBlock', 'Thumbnail', true);
-                    $T->set_var('have_photo', 'true');
                 }
             }
         }
@@ -1001,7 +1019,7 @@ class Product
             }
             $attributes .= '<option value="' . $id . '|' . 
                     $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
-                    $Attr['attr_value'] . $attr_str .
+                    $Attr['attr_value'] . $attr_str . 
                     '</option>' . LB;
         }
 
@@ -1191,6 +1209,8 @@ class Product
             } else {
                 $tpl_add_cart = 'btn_add_cart.thtml';
             }
+            // test one template
+                $tpl_add_cart = 'btn_add_cart_attrib.thtml';
 
             $T = new Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('cart', 'buttons/' . $tpl_add_cart);

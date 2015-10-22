@@ -266,6 +266,9 @@
 .pluginPaypalProductDetail #paypalShortDesc {
     float: left;
 }
+.pluginPaypalProductDetail h1 {
+    font-size: 200%;
+}
 
 .pluginPaypalProductDetail #paypalProductAttrib {
     float: right;
@@ -463,5 +466,9 @@ div.pluginPaypalProductListItemUrl {
     color: #666666;
     font-size: 120%;
     font-style:italic;
+}
+
+.additional-images {
+    padding-bottom: 1rem;
 }
 

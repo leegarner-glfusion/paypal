@@ -3,12 +3,13 @@
   <span class="alert">{$LANG_PP['no_javascript']}</span>
 </noscript>
 <script type="text/javascript">
-function PPupdateImage(filename)
+function PPupdateImage(disp_img, lg_img)
 {
-    document.getElementById("disp_img").src = "{img_url}/" + filename;
-    document.getElementById("lg_img").href = "{img_url}/" + filename;
+    document.getElementById("disp_img").src = disp_img;
+    document.getElementById("lg_img").href = lg_img;
 }
 </script>
+{!if attributes}
 <script type="text/javascript" language="JavaScript">
 var emsg = "";
 
@@ -53,7 +54,14 @@ function ProcessForm(frm) {
     } else {
         rec = options.value.split("|");
         if (typeof(rec[2]) != "undefined") {
-            price = (price * 1) + (rec[2]*1);
+            // convert to a number
+            adjustment = rec[2] * 1
+            // look for an "=" sign for fixed prices
+            if (typeof(rec[3]) != "undefined" && rec[3] == "=") {
+                price = adjustment
+            } else {
+                price = (price * 1) + (rec[2]*1);
+            }
         }
     }
 
@@ -76,9 +84,9 @@ window.addEvent('load',function() {
 });
  
 </script>
+{!endif}
 
-
-<div id="paypalShortDesc">
+<div class="pluginPaypalProductDetail" id="paypalShortDesc">
   <h1>{short_description}
   {!if can_edit}
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
@@ -86,27 +94,26 @@ window.addEvent('load',function() {
   </a>
   {!endif}
   </h1>
-  {name}&nbsp;&nbsp;{edit_icon}
-  <div id="paypalProductDesc">
-    {description}
-  </div>
+  {# {name}&nbsp;&nbsp;{edit_icon} #}
 </div>
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
 <div class="pluginPaypalProductDetail" id="product-image"
    style="position:relative;float:left;margin-left:10px;">
-  <a id="lg_img" href="{img_url}/{main_img}" rel="slimbox">
-    <img id="disp_img" style="max-width:450px;" src="{img_url}/{main_img}" />
-  </a>
+  <div class="paypalProductLgImg" style="width:460px; height:400px;" >
+    <a id="lg_img" href="{main_img}" rel="slimbox">
+      <img id="disp_img" style="max-width:460px;" src="{main_img}"/>
+    </a>
+  </div>
   <div class="additional-images" style="clear:both;">
     <!-- BEGIN Thumbnail -->
-    <div class="paypalProductThumb" >
+    <div class="paypalProductThumb" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
       <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
         <img src="{thumb_url}" border="0" 
               alt="{$LANG_PP[click_to_enlarge]}" 
-              onmouseover="javascript:PPupdateImage('{img_file}');"
+              onmouseover="javascript:PPupdateImage('{disp_img}','{lg_img}');"
               title="{$LANG_PP[click_to_enlarge]}"
               class="gl_mootip" />
       </a>
@@ -115,12 +122,14 @@ window.addEvent('load',function() {
     <!-- END Thumbnail -->
   </div>
 </div>
+{!else}
+<div class="pluginPaypalProductDetail" id="product-image"
+   style="position:relative;float:left;margin-left:10px;width:460px;">{description}</div>
 {!endif}
 
 <div style="float:left;">
   <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div>
-      <!--<b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>-->
       {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
       <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{price}</span><span class="paypalPrice sale">{price_postfix}</span>
@@ -133,11 +142,13 @@ window.addEvent('load',function() {
     </div>
 
     <div id="paypalProductAttrib">
+    {!if attributes}
       {attributes}
+    {!endif}
       <!-- BEGIN BtnBlock -->
         {button}<br />
       <!-- END BtnBlock -->
-    </div>
+    </div> 
 
     {!if onhand}
     <div id="paypalOnhand">
@@ -147,6 +158,14 @@ window.addEvent('load',function() {
 
   </form>
 </div>
+
+{!if main_img}
+{# with a main image the description goes below the image and price #}
+<div id="paypalProductDesc" style="clear:both;">
+  {description}
+</div>
+{!endif}
+
 <div class="pluginPaypalComments">
   {usercomments}
 </div>
