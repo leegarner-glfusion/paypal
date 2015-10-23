@@ -314,6 +314,7 @@ $LANG_confignames['paypal'] = array(
     'shop_name' => 'Shop Name',
     'shop_addr' => 'Shop Address',
     'product_tpl_ver' => 'Default Product Template',
+    'cache_max_age' => 'Max file cache age in seconds',
 );
 
 /** Language strings for the subgroup names in the config section */

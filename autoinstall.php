@@ -251,6 +251,7 @@ function plugin_postinstall_paypal()
     $paths = array(
         $_PP_DEFAULTS['tmpdir'],
         $_PP_DEFAULTS['tmpdir'] . 'keys',
+        $_PP_DEFAULTS['tmpdir'] . 'cache',
         $_PP_DEFAULTS['download_path'],
     );
     foreach ($paths as $path) {

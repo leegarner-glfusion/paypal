@@ -1187,7 +1187,7 @@ function phpblock_paypal_popular()
     $limit = (int)$_PP_CONF['blk_popular_limit'];
     if ($limit < 1)
         $limit = 1;
-
+ 
     $sql = "SELECT DISTINCT
                 pr.id,
                 (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu 
@@ -1336,6 +1336,15 @@ function PAYPAL_phpblock_product($sql)
     // By default, return nothing
     $retval = '';
 
+    // Check for a recent cached copy of the block to save DB calls
+    $key = md5($sql);
+    $timeAgo = time() - ((int)$_PP_CONF['cache_max_age'] * 1000);
+    $cachefile = $_PP_CONF['tmpdir'] . "cache/$key";
+	if (file_exists($cachefile) && @filemtime($cachefile) > $timeAgo) {
+        $retval = file_get_contents($cachefile);
+        if (!empty($retval)) return $retval;
+    }
+
     // Loop through all valid responses.  There may be more than one
     // item to show
     $res = DB_query($sql, 1);
@@ -1395,6 +1404,11 @@ function PAYPAL_phpblock_product($sql)
 
     }
 
+    // Write the cache file
+    $f = fopen($cachefile, 'w+');
+    if ($f) {
+        fwrite($f, $retval);
+    }
     return $retval;
 }
 
