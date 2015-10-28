@@ -189,7 +189,7 @@ $LANG_PP = array (
 'by_name'       => 'By Name',
 'search'        => 'Search',
 'any'           => 'Any',
-'customize'     => 'Customize',
+'customize'     => 'Details',
 'fullname'      => 'Name',
 'lastname'      => 'Last Name',
 'company'       => 'Company',
@@ -249,6 +249,7 @@ $LANG_PP = array (
 'oversell_deny' => 'Deny, display product but prevent ordering',
 'oversell_hide' => 'Hide product from catalog',
 'anon_and_empty' => 'There are no products available for purchase by anonymous users. Try logging into the site to view the catalog.',
+'back_to_catalog' => 'Back to Catalog',
 );
 
 

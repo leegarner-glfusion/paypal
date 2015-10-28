@@ -1,6 +1,7 @@
 {# begin {templatelocation} #}
 <div class="pluginPaypalOrderContainer">
   <div class="aligncenter"><h1>{$LANG_PP['order_summary']}</h1></div>
+  <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
   <div class="pluginPaypalOrder">
 
     {!if have_billto}
@@ -82,19 +83,20 @@
     <div class="pluginPaypalOrderItems">
       <table>
         <tr>
-          <th class="aligncenter">{$LANG_PP['description']}</th>
-          <th class="aligncenter">{$LANG_PP['price']}</th>
-          <th class="aligncenter">{$LANG_PP['quantity']}</th>
-          <th class="aligncenter">{$LANG_PP['total']}</th>
+          <th class="alignright">{$LANG_PP['description']}</th>
+          <th class="alignright">{$LANG_PP['price']}</th>
+          <th class="alignright">{$LANG_PP['quantity']}</th>
+          <th class="alignright">{$LANG_PP['total']}</th>
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
           <td>{item_descrip}</td>
           <td class="alignright">{item_price}</td>
-          <td class="aligncenter">{item_quantity}</td>
+          <td class="alignright">{item_quantity}</td>
           <td class="alignright">{item_total}</td>
         </tr>
         <!-- END ItemRow -->
+        <tr><td>&nbsp;</td></tr>
         {!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>

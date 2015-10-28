@@ -190,6 +190,7 @@ function plugin_initconfig_paypal($group_id = 0)
 
     if (!$c->group_exists($_PP_CONF['pi_name'])) {
 
+        // Main configuration, shop email addresses, encrypted button settings
         $c->add('sg_main', NULL, 'subgroup', 0, 0, NULL, 0, true, 
                 $_PP_CONF['pi_name']);
         $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true, 
@@ -236,6 +237,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('weight_unit', $_PP_DEFAULTS['weight_unit'],
                 'select', 0, 0, 15, 230, true, $_PP_CONF['pi_name']);
 
+        // Path and image handling
         $c->add('fs_paths', NULL, 'fieldset', 0, 10, NULL, 0, true, 
                 $_PP_CONF['pi_name']);
         $c->add('max_images', $_PP_DEFAULTS['max_images'],

@@ -17,12 +17,13 @@
   </div>
 
   <div class="pluginPaypalProductListItemUrl">
+    <div class="shortdescription">
     {!if item_url}
-      <a class="itemname" href="{item_url}">{name}</a>
+      <a class="itemname" href="{item_url}">{short_description}</a>
     {!else}
-      <span class="itemname">{name}</span>
+      {short_description}
     {!endif}
-    <div class="shortdescription">{short_description}</div>
+    </div>
     {!if rating_bar}
       <div class="ratingbar">{rating_bar}</div>
     {!endif}

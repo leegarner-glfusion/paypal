@@ -559,7 +559,8 @@ function PAYPAL_adminMenu($view='')
     if ($view == 'catlist') {
         $menu_arr[] = array(
                     'url'  => PAYPAL_ADMIN_URL . '/index.php?editcat=x',
-                    'text' => $LANG_PP['new_category']);
+                    'text' => '<span class="ppNewAdminItem">' .
+                            $LANG_PP['new_category'], '</span>');
     } else {
         $menu_arr[] = array(
                     'url'  => PAYPAL_ADMIN_URL . '/index.php?catlist=x',
@@ -569,7 +570,8 @@ function PAYPAL_adminMenu($view='')
     if ($view == 'productlist') {
         $menu_arr[] = array(
                     'url'  => PAYPAL_ADMIN_URL . '/index.php?editproduct=x',
-                    'text' => $LANG_PP['new_product']);
+                    'text' => '<span class="ppNewAdminItem">' .
+                            $LANG_PP['new_product']. '</span>');
     } else {
         $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php',
                     'text' => $LANG_PP['product_list']);
@@ -578,7 +580,8 @@ function PAYPAL_adminMenu($view='')
     if ($view == 'attributes') {
         $menu_arr[] = array(
                     'url'  => PAYPAL_ADMIN_URL . '/index.php?editattr=x',
-                    'text' => $LANG_PP['new_attr']);
+                    'text' => '<span class="ppNewAdminItem">' .
+                            $LANG_PP['new_attr'] . '</span>');
     } else {
         $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . 
                             '/index.php?attributes=x',

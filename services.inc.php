@@ -202,6 +202,7 @@ function service_btnCheckout_paypal($args, &$output, &$svc_msg)
 {
     global $LANG_PP;
 
+    if (!is_array($args)) $args = array($args);
     $text = isset($args['text']) ? $args['text'] : $LANG_PP['checkout'];
     $color = isset($args['color']) ? $args['color'] : 'green';
     $output = '<a href="' . PAYPAL_URL . '/index.php?checkout=x"><button type="button" id="ppcheckout" class="pluginPaypalButton ' . $color . '">'
@@ -209,11 +210,21 @@ function service_btnCheckout_paypal($args, &$output, &$svc_msg)
     return PLG_RET_OK;
 }
 
+
+/*
+*   Return a formatted amount according to the configured currency
+*   Accepts an array of "amount" => value, or single value as first argument.
+*
+*   @param  array   $args   Array of "amount" => amount value
+*   @param  mixed   &$output    Output data
+*   @param  mixed   &$svc_msg   Service message
+*   @return integer     Status code
+*/
 function service_formatAmount_paypal($args, &$output, &$svc_msg)
 {
     global $_PP_CONF;
 
-    if (!is_array($args)) $args = array($args);
+    if (!is_array($args)) $args = array('amount' => $args);
     $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
     USES_paypal_class_currency();
     $Cur = new ppCurrency($_PP_CONF['currency']);

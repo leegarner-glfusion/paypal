@@ -157,6 +157,17 @@ $_PP_CONF['gateways'] = array();
 /** Store the current SQL-formatted timestamp since it's used often */
 $_PP_CONF['now'] = date('Y-m-d H:i:s');
 
+global $ppGCart;
+$ppGCart = NULL;
+function PAYPAL_setCart()
+{
+    global $ppGCart;
+    if ($ppGCart === NULL) {
+        USES_paypal_class_cart();
+        $ppGCart = new ppCart();
+    }
+}
+
 
 /**
 *   Import a single payment gateway.
@@ -535,6 +546,31 @@ function plugin_getadminoption_paypal()
                     PAYPAL_ADMIN_URL . '/index.php',
                     DB_count($_TABLES['paypal.products']));
     }
+}
+
+
+/**
+*   Returns the user option for this plugin
+*   Adds the plugin to the user menu
+*
+*   @return   array   Array containing (plugin name, plugin user url, 0)
+*/
+function plugin_getuseroption_paypal() 
+{
+    global $LANG_PP, $_TABLES, $ppGCart;
+
+    $retval = array();
+    if (!COM_isAnonUser() &&
+        DB_count($_TABLES['paypal.orders'], 'uid', $_USER['uid']) > 0) {
+        $retval[] = array($LANG_PP['purchase_history'],
+                PAYPAL_URL . '/index.php?view=history');
+    }
+    PAYPAL_setCart();
+    if ($ppGCart->hasItems()) {
+        $retval[] = array($LANG_PP['viewcart'],
+                PAYPAL_URL . '/index.php?view=cart');
+    }
+    return $retval;
 }
 
 
@@ -1337,12 +1373,14 @@ function PAYPAL_phpblock_product($sql)
     $retval = '';
 
     // Check for a recent cached copy of the block to save DB calls
-    $key = md5($sql);
-    $timeAgo = time() - ((int)$_PP_CONF['cache_max_age'] * 1000);
-    $cachefile = $_PP_CONF['tmpdir'] . "cache/$key";
-	if (file_exists($cachefile) && @filemtime($cachefile) > $timeAgo) {
-        $retval = file_get_contents($cachefile);
-        if (!empty($retval)) return $retval;
+    if ((int)$_PP_CONF['cache_max_age'] > 0) {
+        $key = md5($sql);
+        $cachefile = "{$_CONF['path_data']}/layout_cache/{$cachedir}/__paypal__{$key}";
+        if (is_file($cachefile)) {
+            // Get the HTML file, ignore errors. If empty the query will run anyway
+            $retval = @file_get_contents($cachefile);
+            if (!empty($retval)) return $retval;
+        }
     }
 
     // Loop through all valid responses.  There may be more than one
@@ -1378,7 +1416,7 @@ function PAYPAL_phpblock_product($sql)
                 $buttons = $P->PurchaseLinks();
                 $btn_txt = '';
                 foreach ($buttons as $name=>$html) {
-                    $btn_txt .= $html;
+                    $btn_txt .= $html . '<br />';
                 }
                 $T->set_var('button', $btn_txt);
             } else {
@@ -1503,14 +1541,29 @@ function plugin_user_login_paypal($uid)
 */
 function plugin_runScheduledTask_paypal()
 {
-    global $_PP_CONF, $_TABLES;
+    global $_PP_CONF, $_TABLES, $_CONF;
 
     if ($_PP_CONF['ena_cart'] == 1) {
         // Delete old shopping carts, if the cart is enabled
         $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
-            last_update < DATE_SUB(NOW(), INTERVAL 4 DAY)";
+            last_update < DATE_SUB(NOW(), INTERVAL 7 DAY)";
         DB_query($sql, 1);
     }
+
+    // Clean up the HTML cache if used
+    if ((int)$_PP_CONF['cache_max_age'] > 0) {
+        $cachedir = "{$_CONF['path_data']}/layout_cache";
+        $files = glob("$cachedir/__paypal__*");
+        if ($files) {
+            $timeAgo = time() - (int)$_PP_CONF['cache_max_age'];
+            foreach ($files as $file) {
+                if (@filemtime($file) < $timeAgo) {
+                    @unlink($file);
+                }
+            }
+        }
+    }
+
 }
 
 

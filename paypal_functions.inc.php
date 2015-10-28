@@ -355,11 +355,6 @@ function PAYPAL_ProductList($cat=0, $search='')
             ORDER BY cat.cat_name";
             //HAVING cnt > 0
         //echo $sql;die;
-        $CT = new Template(PAYPAL_PI_PATH . '/templates');
-        $CT->set_file(array('table'    => 'category_table.thtml',
-                        'row'      => 'category_row.thtml',
-                        'category' => 'category.thtml'));
-        $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
         if ($breadcrumbs != '') {
             $CT->set_var('breadcrumbs', $breadcrumbs);
         }
@@ -390,31 +385,37 @@ function PAYPAL_ProductList($cat=0, $search='')
 
         $i = 1;
         $nrows = count($A);
-        foreach ($A as $category => $info) {
-            $CT->set_var(array(
-                'category_name' => $info[0],
-                'category_link' => PAYPAL_URL . '/index.php?category=' . 
+        if ($nrows > 0) {
+            $CT = new Template(PAYPAL_PI_PATH . '/templates');
+            $CT->set_file(array('table'    => 'category_table.thtml',
+                        'row'      => 'category_row.thtml',
+                        'category' => 'category.thtml'));
+            $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
+            foreach ($A as $category => $info) {
+                $CT->set_var(array(
+                    'category_name' => $info[0],
+                    'category_link' => PAYPAL_URL . '/index.php?category=' . 
                                     urlencode($category),
-                //'count'         => $info[1],
-            ) );
-            /*if ($category == $cat) {
-                $CT->set_var('curr', 'current');
-                $cat_name = $info[0];
-            } else {
-                $CT->set_var('curr', 'other');
-            }*/
-            $CT->parse('catrow', 'category', true);
-            if ($i % $_PP_CONF['cat_columns'] == 0) {
-                $CT->parse('categories', 'row', true);
-                $CT->set_var('catrow', '');
+                    //'count'         => $info[1],
+                ) );
+                /*if ($category == $cat) {
+                    $CT->set_var('curr', 'current');
+                    $cat_name = $info[0];
+                } else {
+                    $CT->set_var('curr', 'other');
+                }*/
+                $CT->parse('catrow', 'category', true);
+                if ($i % $_PP_CONF['cat_columns'] == 0) {
+                    $CT->parse('categories', 'row', true);
+                    $CT->set_var('catrow', '');
+                }
+                $i++;
             }
-            $i++;
+            if ($nrows % $_PP_CONF['cat_columns'] != 0) {
+                $CT->parse('categories', 'row', true);
+            }
+            $display .= $CT->parse('', 'table');
         }
-        if ($nrows % $_PP_CONF['cat_columns'] != 0) {
-            $CT->parse('categories', 'row', true);
-        }
-        $display .= $CT->parse('', 'table');
-
     }
 
     /*$sortby_opts = array(

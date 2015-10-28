@@ -53,7 +53,8 @@ if (!empty($msg)) {
     $display .= COM_endBlock('blockfooter-message.thtml');
 }
 
-$display .= PAYPAL_userMenu($LANG_PP['product_list']);
+$display .= COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL);
+//$display .= PAYPAL_userMenu($LANG_PP['product_list']);
 
 $content = '';
 if (!empty($id)) {

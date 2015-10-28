@@ -162,12 +162,12 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
 
 case 'delcartitem':
     $ppGCart->Remove($_GET['id']);
-    if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
+    /*if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
         !empty($_SESSION[PP_CART_VAR]['order_id'])) {
         //USES_paypal_class_order();
         //ppOrder::delCartItem($_GET['id'], $_SESSION[PP_CART_VAR]['order_id']);
         $ppGCart->Remove($_GET['id']);
-    }
+    }*/
     $view = 'cart';
     break;
 
@@ -291,6 +291,7 @@ case 'history':
     //$content .= PAYPAL_history();
     $content .= PAYPAL_orders();
     $menu_opt = $LANG_PP['purchase_history'];
+    $page_title = $LANG_PP['purchase_history'];
     break;
 
 case 'billto':
@@ -310,6 +311,7 @@ case 'order':
 case 'vieworder':
     $_SESSION[PP_CART_VAR]['prevpage'] = $view;
     $content .= $ppGCart->View(true);
+    $page_title = $LANG_PP['view_order'];
     break;
 
 case 'detail':
@@ -318,6 +320,7 @@ case 'detail':
     $P = new Product($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
+    $page_title = $LANG_PP['product_detail'];
     break;
 
 case 'cart':
@@ -352,6 +355,7 @@ default:
         $content .= PAYPAL_ProductList();
     }
     $menu_opt = $LANG_PP['product_list'];
+    $page_title = $LANG_PP['main_title'];
     break;
 
 case 'none':
@@ -362,7 +366,7 @@ case 'none':
 $display = PAYPAL_siteHeader();
 $T = new Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
-$T->set_var('title', $LANG_PP['main_title']);
+$T->set_var('title', $page_title);
 $display .= $T->parse('', 'title');
 if (!empty($msg)) {
     //msg block
@@ -371,7 +375,7 @@ if (!empty($msg)) {
     $display .= COM_endBlock('blockfooter-message.thtml');
 }
 $display .= LGLIB_showAllMessages();
-$display .= PAYPAL_userMenu($menu_opt);
+//$display .= PAYPAL_userMenu($menu_opt);
 $display .= $content;
 $display .= PAYPAL_siteFooter();
 echo $display;
