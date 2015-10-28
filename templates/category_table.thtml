@@ -1,8 +1,8 @@
 {# begin {templatelocation} #}
-  <h2>
+<!--  <h2>
     {$LANG_PP['product_categories']}
   </h2>
-
+-->
 <div style="float:left; width:55px;">
   {!if catimg_url}
     <img src="{catimg_url}" width="48" height="48" />
@@ -20,5 +20,5 @@
   </table>
 
 </div>
-<div style="clear:both;"></div>
+<div style="clear:both;padding-bottom:5px;"></div>
 {# end {templatelocation} #}

@@ -1367,7 +1367,7 @@ function PAYPAL_phpblock_product_sql($where, $limit=1)
 */
 function PAYPAL_phpblock_product($sql)
 {
-    global $_PP_CONF, $_TABLES;
+    global $_PP_CONF, $_TABLES, $_CONF;
 
     // By default, return nothing
     $retval = '';
@@ -1442,10 +1442,12 @@ function PAYPAL_phpblock_product($sql)
 
     }
 
-    // Write the cache file
-    $f = fopen($cachefile, 'w+');
-    if ($f) {
-        fwrite($f, $retval);
+    // Write the cache file if used
+    if ((int)$_PP_CONF['cache_max_age'] > 0) {
+        $f = fopen($cachefile, 'w+');
+        if ($f) {
+            fwrite($f, $retval);
+        }
     }
     return $retval;
 }

@@ -8,7 +8,7 @@
 *   @copyright  Copyright (c) 2009-2012 Lee Garner
 *   @copyright  Copyright (C) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.2
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -1260,6 +1260,7 @@ function PAYPAL_clearNextView()
 *   Provides a common menu creation for user-facing files such as index.php
 *   and detail.php
 *
+*   @deprecated 0.5.7
 *   @param  string  $selected   Currently-select menu option text
 *   @return string              HTML for tabbed menu
 */
