@@ -384,8 +384,8 @@ function PAYPAL_ProductList($cat=0, $search='')
         }
 
         $i = 1;
-        $nrows = count($A);
-        if ($nrows > 0) {
+        $catrows = count($A);
+        if ($catrows > 0) {
             $CT = new Template(PAYPAL_PI_PATH . '/templates');
             $CT->set_file(array('table'    => 'category_table.thtml',
                         'row'      => 'category_row.thtml',
@@ -411,7 +411,7 @@ function PAYPAL_ProductList($cat=0, $search='')
                 }
                 $i++;
             }
-            if ($nrows % $_PP_CONF['cat_columns'] != 0) {
+            if ($catrows % $_PP_CONF['cat_columns'] != 0) {
                 $CT->parse('categories', 'row', true);
             }
             $display .= $CT->parse('', 'table');
@@ -528,9 +528,6 @@ function PAYPAL_ProductList($cat=0, $search='')
                 'btn_details' => 'buttons/btn_details.thtml',
     ));
 
-    if ($nrows == 0 && COM_isAnonUser()) {
-        $product->set_var('anon_and_empty', 'true');
-    }
     $product->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'user_id'       => $_USER['uid'],
@@ -561,7 +558,9 @@ function PAYPAL_ProductList($cat=0, $search='')
     }
 
     // Display each product
+    $prodrows = 0;
     while ($A = DB_fetchArray($res, false)) {
+        $prodrows++;
 
         $P->Read($A['id']);
 
@@ -700,12 +699,16 @@ function PAYPAL_ProductList($cat=0, $search='')
                 //$product->set_var('buttons', $buttons);
                 $display .= $product->parse('', 'product');
                 $product->clear_var('Btn');
-
+                $prodrows++;
             }   // foreach plugin_data
 
         }   // foreach $_PLUGINS
 
     }   // if page == 1
+
+    if ($catrows == 0 && COM_isAnonUser()) {
+        $product->set_var('anon_and_empty', 'true');
+    }
 
     $pagenav_args = empty($pagenav_args) ? '' : '?'.implode('&', $pagenav_args);
     // Display pagination
