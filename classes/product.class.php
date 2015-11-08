@@ -932,6 +932,7 @@ class Product
 
         $act_price = $this->sale_price == $this->price ? 
                     $this->price : $this->sale_price;
+
         $T->set_var(array(
             //'has_attrib'        => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
@@ -1215,9 +1216,9 @@ class Product
             $T = new Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('cart', 'buttons/' . $tpl_add_cart);
             $T->set_var(array(
-                'item_name'     => $this->name,
+                'item_name'     => htmlspecialchars($this->name),
                 'item_number'   => $this->id,
-                'short_description' => $this->short_description,
+                'short_description' => htmlspecialchars($this->short_description),
                 'amount'        => $this->price,
                 'pi_url'        => PAYPAL_URL,
                 'form_url'  => $this->hasAttributes() ? '' : 'true',

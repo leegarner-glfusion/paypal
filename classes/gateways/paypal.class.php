@@ -453,8 +453,8 @@ class paypal extends PaymentGw
             $vars['cmd'] = $btn_info['cmd'];
             $this->setReceiver($P->price);
             $vars['business'] = $this->receiver_email;
-            $vars['item_number'] = $P->id;
-            $vars['item_name'] = $P->short_description;
+            $vars['item_number'] = htmlspecialchars($P->id);
+            $vars['item_name'] = htmlspecialchars($P->short_description);
             $vars['currency_code'] = $this->currency_code;
             $vars['custom'] = $this->PrepareCustom();
             $vars['return'] = PAYPAL_URL . '/index.php?thanks=paypal';

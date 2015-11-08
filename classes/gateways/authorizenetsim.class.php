@@ -228,8 +228,8 @@ class authorizenetsim extends PaymentGw
                         $item['price'],
                         $item['quantity'], $item['shipping'], $item['taxable']);*/
         $vars = array(
-            'name'          => $P->name,
-            'descrip'       => $P->short_description,
+            'name'          => htmlspecialchars($P->name),
+            'descrip'       => htmlspecialchars($P->short_description),
             'price'         => $P->price,
             'options'       => array(),
             'weight'        => $P->weight,
