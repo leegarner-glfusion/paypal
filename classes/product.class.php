@@ -1220,6 +1220,7 @@ class Product
                 'short_description' => $this->short_description,
                 'amount'        => $this->price,
                 'pi_url'        => PAYPAL_URL,
+                'form_url'  => $this->hasAttributes() ? '' : 'true',
             ) );
             $buttons[] = $T->parse('', 'cart');
         }
