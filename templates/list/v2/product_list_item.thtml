@@ -10,7 +10,15 @@
   </div>
   <div class="paypalProductListItemUrl2">
     <div class="shortdescription">{short_description}</div>
-    <div class="ratingbar">{rating_bar}</div>
+    {!if price}
+      <div class="paypalPrice normal ver2">
+        {!if track_onhand}
+        ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
+        {!endif}
+        {price}
+      </div>
+    {!endif}
+     <div class="ratingbar">{rating_bar}</div>
   </div>
 
 </div>

@@ -138,11 +138,11 @@
   position:relative;
   float: left;
   font-size: 1em;
-  padding: 1rem .5rem;
-  margin: 1em 0.15em -0.5em 0.15em;
+  padding: 1em .5em;
+  margin: 1em 0.5em -0.5em 0.15em;
   border: 3px outset #ddd;
-  width: 150px;
-  min-height: 200px;
+  width: 12em;
+  min-height: 18em;
 }
 
 .paypalProductListItemUrl2 div.ratingbar {
@@ -185,6 +185,7 @@ div.paypalProductListItemUrl2 {
     float: left;
     font-weight: bold;
     clear: both;
+    font-size: 1rem;
 }
 
 .paypalProductListItemButtons {
@@ -317,6 +318,10 @@ div.paypalProductListItemUrl2 {
 
 .paypalPrice {
     font-weight:bold;
+}
+
+.paypalPrice.ver2 {
+    margin-top: 4px;
 }
 
 .paypalPrice.was {
