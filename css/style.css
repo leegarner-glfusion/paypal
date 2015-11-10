@@ -366,3 +366,10 @@ div.paypalProductListItemUrl2 {
     color: red;
 }
 
+div.paypalProductSort {
+    float: left;
+}
+div.paypalProductSearch {
+    float: right;
+}
+

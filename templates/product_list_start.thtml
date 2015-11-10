@@ -3,17 +3,22 @@
 <div class="paypalListSeparator">
 <hr />
 </div>
-{#<div class="glfform aligncenter">
+<div>
+  <div class="paypalProductSort">
   {$LANG_PP['sortby']}:&nbsp;
-  <select name="sortby" onchange='document.location="{pi_url}/index.php?sortby="+this.value+"&sortdir={sortdir}";'>
+  <select name="sortby" onchange='document.location="{pi_url}/index.php?sortby="+this.value+"";'>
     {sortby_options}
   </select>&nbsp;&nbsp;
-  <select name="sortby" onchange='document.location="{pi_url}/index.php?sortby={sortby}&sortdir="+this.value;'>
-    <option value="ASC" {sortdir_asc_sel}>{$LANG_PP['ascending']}</option>
-    <option value="DESC" {sortdir_desc_sel}>{$LANG_PP['descending']}</option>
-  </select>
-</div>#}
-<div>
+  </div>
+  <div class="paypalProductSearch">
+    <form method="get" action="{pi_url}/index.php">
+    <input type="search" id="query" name="query" value="{search_text}" placeholder="{$LANG_PP['search_catalog']}" />
+    <input type="submit" class="lgButton green" value="{$LANG09[10]}" name="submit" />
+    <input type="submit" class="lgButton grey" value="X" name="clearsearch" />
+  </form>
+  </div>
+</div>
+<div style="clear:both;">
 {!if anon_and_empty}
 <span class="info">{$LANG_PP['anon_and_empty']}</span>
 {!endif}

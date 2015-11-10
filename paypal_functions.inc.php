@@ -309,7 +309,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 function PAYPAL_ProductList($cat=0, $search='')
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS, 
-            $_IMAGE_TYPE, $_GROUPS;
+            $_IMAGE_TYPE, $_GROUPS, $LANG13;
 
     USES_paypal_class_product();
 
@@ -418,31 +418,55 @@ function PAYPAL_ProductList($cat=0, $search='')
         }
     }
 
-    /*$sortby_opts = array(
+    $sortby_opts = array(
         'name' => $LANG_PP['name'],
         'price' => $LANG_PP['price'],
         'dt_add' => $LANG_PP['dt_add'],
+        'rating' => $LANG13['rating'],
     );
-    switch ($_REQUEST['sortby']){
-    case 'name':
+    //$sortdir = $_REQUEST['sortdir'] == 'DESC' ? 'DESC' : 'ASC';
+    //$sql_sortdir = $sortdir;
+    $sortby = isset($_REQUEST['sortby']) ? $_REQUEST['sortby'] : $_PP_CONF['order'];
+    switch ($sortby){
+    case 'price_l2h':   // price, low to high
+        $sql_sortby = 'price';
+        $sql_sortdir = 'ASC';
+        break;
+    case 'price_h2l':
+        $sql_sortby = 'price';
+        $sql_sortdir = 'DESC';
+        break;
+    case 'top_rated':
+        $sql_sortby = 'rating';
+        $sql_sortdir = 'DESC';
+        break;
+    case 'newest':
+        $sql_sortby = 'dt_add';
+        $sql_sortdir = 'DESC';
+        break;
+    /*case 'name':
     case 'price':
     case 'dt_add':
-        $sortby = $_REQUEST['sortby'];
+        $sql_sortby = $sortby;
         break;
+    case 'rating':
+        $sql_sortby = 'rating';
+        break;*/
     default:
         $sortby = $_PP_CONF['order'];
+        $sql_sortby = $sortby;
+        $sql_sortdir = 'ASC';
         break;
     }
     $sortby_options = '';
-    foreach ($sortby_opts as $value=>$text) {
+    //foreach ($sortby_opts as $value=>$text) {
+    foreach ($LANG_PP['list_sort_options'] as $value=>$text) {
         $sel = $value == $sortby ? ' selected="selected"' : '';
         $sortby_options .= "<option value=\"$value\" $sel>$text</option>\n";
     }
 
-    $sortdir = $_REQUEST['sortdir'] == 'DESC' ? 'DESC' : 'ASC';*/
-
-    $sortby = $_PP_CONF['order'];
-    $sortdir = 'ASC';
+    //$sortby = $_PP_CONF['order'];
+    //$sortdir = 'ASC';
 
     // Get products from database. "c.enabled is null" is to allow products
     // with no category defined
@@ -458,6 +482,18 @@ function PAYPAL_ProductList($cat=0, $search='')
                 p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
                 )";
 
+    // Add search query, if any
+    if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && !isset($_REQUEST['clearsearch'])) {
+        $srchitem = DB_escapeString($_REQUEST['query']);
+        $fields = array('p.name', 'c.cat_name', 'p.short_description', 'p.description',
+                'p.keywords');
+        $srches = array();
+        foreach ($fields as $fname) {
+            $srches[] = "$fname like '%$srchitem%'";
+        }
+        $srch = ' AND (' . implode(' OR ', $srches) . ')';
+        $sql .= $srch;
+    }
     $pagenav_args = array();
     // If applicable, limit by category
     if (!empty($_REQUEST['category'])) {
@@ -484,7 +520,8 @@ function PAYPAL_ProductList($cat=0, $search='')
     }
 
     // If applicable, order by
-    $sql .= " ORDER BY $sortby $sortdir";
+    $sql .= " ORDER BY $sql_sortby $sql_sortdir";
+    //echo $sql;die;
 
     // If applicable, handle pagination of query
     if (isset($_PP_CONF['prod_per_page']) && $_PP_CONF['prod_per_page'] > 0) {
@@ -528,12 +565,12 @@ function PAYPAL_ProductList($cat=0, $search='')
                 'login_req' => 'buttons/btn_login_req.thtml',
                 'btn_details' => 'buttons/btn_details.thtml',
     ));
-
     $product->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'user_id'       => $_USER['uid'],
             'currency'      => $_PP_CONF['currency'],
             'breadcrumbs'   => $breadcrumbs,
+            'search_text'   => $srchitem,
     ) );
 
     if (!empty($cat_name)) {
@@ -541,14 +578,14 @@ function PAYPAL_ProductList($cat=0, $search='')
     } else {
         $product->set_var('title', $LANG_PP['blocktitle']);
     }
-    /*$product->set_var('sortby_options', $sortby_options);
-    if ($sortdir == 'DESC') {
+    $product->set_var('sortby_options', $sortby_options);
+    /*if ($sortdir == 'DESC') {
         $product->set_var('sortdir_desc_sel', ' selected="selected"');
     } else {
         $product->set_var('sortdir_asc_sel', ' selected="selected"');
-    }
+    }*/
     $product->set_var('sortby', $sortby);
-    $product->set_var('sortdir', $sortdir);*/
+    //$product->set_var('sortdir', $sortdir);
 
     $display .= $product->parse('', 'start');
 
