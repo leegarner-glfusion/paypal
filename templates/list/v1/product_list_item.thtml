@@ -1,0 +1,49 @@
+{# begin {templatelocation} #}
+<div class="paypalProductListItem">
+  <div class="paypalProductListItemImage">
+    {!if small_pic}
+      <div style="width:{img_cell_width}px;">
+      {!if item_url}
+        <a href="{item_url}">
+      {!endif}
+        <img src="{small_pic}" alt="{name}" />
+      {!if item_url}
+        </a>
+      {!endif}
+      </div>
+    {!else}
+        &nbsp;
+   {!endif}
+  </div>
+
+  <div class="paypalProductListItemUrl">
+    <div class="shortdescription">
+    {!if item_url}
+      <a class="itemname" href="{item_url}">{short_description}</a>
+    {!else}
+      {short_description}
+    {!endif}
+    </div>
+    {!if rating_bar}
+      <div class="ratingbar">{rating_bar}</div>
+    {!endif}
+    <p />
+  </div>
+
+  <div class="paypalProductListItemButtons">
+    {!if price}
+      <div><span class="paypalPrice normal">
+        {!if track_onhand}
+        ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
+        {!endif}
+        {price}</span></div><br />
+    {!endif}
+    <!-- BEGIN BtnBlock -->
+      {button}<br />
+    <!-- END BtnBlock -->
+  </div>
+</div>
+<div class="paypalListSeparator">
+  <hr />
+</div>
+{# end {templatelocation} #}

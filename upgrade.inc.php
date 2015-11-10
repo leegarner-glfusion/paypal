@@ -422,12 +422,19 @@ function PAYPAL_do_upgrade($current_ver)
                 SET name='paypal_gid', value=$gid");
         $c->add('product_tpl_ver', $_PP_DEFAULTS['product_tpl_ver'],
                 'select', 0, 30, 2, 70, true, $_PP_CONF['pi_name']);
+        $c->add('list_tpl_ver', $_PP_DEFAULTS['list_tpl_ver'],
+                'select', 0, 30, 0, 80, true, $_PP_CONF['pi_name']);
         $c->add('cache_max_age', $_PP_DEFAULTS['cache_max_age'],
                 'text', 0, 40, 2, 40, true, $_PP_CONF['pi_name']);
 
         // Create cache directory
         if (!is_dir($_PP_DEFAULTS['tmpdir'] . 'cache')) {
             @mkdir($_PP_DEFAULTS['tmpdir'] . 'cache', '0755', true);
+        }
+
+        $error = PAYPAL_do_upgrade_sql('0.5.7');
+        if ($error) {
+            return $error;
         }
 
     }

@@ -1,0 +1,18 @@
+{# begin {templatelocation} #}
+<a href="{item_url}">
+<div class="paypalProductListItem2">
+  <div class="paypalProductListItemImage2">
+    {!if small_pic}
+        <img src="{small_pic}" alt="{name}" />
+    {!else}
+        &nbsp;
+   {!endif}
+  </div>
+  <div class="paypalProductListItemUrl2">
+    <div class="shortdescription">{short_description}</div>
+    <div class="ratingbar">{rating_bar}</div>
+  </div>
+
+</div>
+</a>
+{# end {templatelocation} #}

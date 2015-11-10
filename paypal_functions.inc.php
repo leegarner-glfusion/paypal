@@ -326,13 +326,13 @@ function PAYPAL_ProductList($cat=0, $search='')
     $img_url = '';
     $display = '';
     if ($cat != 0) {
-        $breadcrumbs = PAYPAL_Breadcrumbs($cat);
         $cat = (int)$cat;
         $A = DB_fetchArray(DB_query("SELECT cat_name, image
                 FROM {$_TABLES['paypal.categories']}
                 WHERE cat_id='$cat' " .
                 COM_getPermSQL('AND')), false);
         if (!empty($A)) {
+            $breadcrumbs = PAYPAL_Breadcrumbs($cat);
             $cat_name = $A['cat_name'];
             if (!empty($A['image']) && 
                 is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
@@ -341,6 +341,7 @@ function PAYPAL_ProductList($cat=0, $search='')
             }
         }
     }
+
     // Display categories
     if (isset($_PP_CONF['cat_columns']) && 
             $_PP_CONF['cat_columns'] > 0) {
@@ -355,12 +356,6 @@ function PAYPAL_ProductList($cat=0, $search='')
             ORDER BY cat.cat_name";
             //HAVING cnt > 0
         //echo $sql;die;
-        if ($breadcrumbs != '') {
-            $CT->set_var('breadcrumbs', $breadcrumbs);
-        }
-        if ($img_url != '') {
-            $CT->set_var('catimg_url', $img_url);
-        }
 
         $res = DB_query($sql);
         $A = array();
@@ -390,6 +385,11 @@ function PAYPAL_ProductList($cat=0, $search='')
             $CT->set_file(array('table'    => 'category_table.thtml',
                         'row'      => 'category_row.thtml',
                         'category' => 'category.thtml'));
+            $CT->set_var('breadcrumbs', $breadcrumbs);
+            if ($img_url != '') {
+                $CT->set_var('catimg_url', $img_url);
+            }
+
             $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
             foreach ($A as $category => $info) {
                 $CT->set_var(array(
@@ -515,11 +515,12 @@ function PAYPAL_ProductList($cat=0, $search='')
     $res = DB_query('SELECT DISTINCT p.id ' . $sql);
 
     // Create product template
+    if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = '/v1';
     $product = new Template(PAYPAL_PI_PATH . '/templates');
     $product->set_file(array(
                 'start'   => 'product_list_start.thtml',
                 'end'     => 'product_list_end.thtml',
-                'product' => 'product_list_item.thtml',
+                'product' => 'list' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
           //    'product' => 'product_list.thtml',
                 //'buy'     => 'buttons/btn_buy_now.thtml',
                 //'cart'    => 'buttons/btn_add_cart.thtml',
@@ -532,6 +533,7 @@ function PAYPAL_ProductList($cat=0, $search='')
             'pi_url'        => PAYPAL_URL,
             'user_id'       => $_USER['uid'],
             'currency'      => $_PP_CONF['currency'],
+            'breadcrumbs'   => $breadcrumbs,
     ) );
 
     if (!empty($cat_name)) {
@@ -565,16 +567,8 @@ function PAYPAL_ProductList($cat=0, $search='')
         $P->Read($A['id']);
 
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
-            if (in_array($A['id'], $PP_ratedIds)) {
-                $static = true;
-                $voted = 1;
-            } elseif (plugin_canuserrate_paypal($A['id'], $_USER['uid'])) {
-                $static = false;
-                $voted = 0;
-            } else {
-                $static = true;
-                $voted = 0;
-            }
+            // can't rate from list page, messes with product links
+            $static = true;
             $rating_box = RATING_ratingBar('paypal', $A['id'], 
                     $P->votes, $P->rating, 
                     $voted, 5, $static, 'sm');
@@ -585,10 +579,10 @@ function PAYPAL_ProductList($cat=0, $search='')
 
         $product->set_var(array(
             'id'        => $A['id'],
-            'name'      => $P->name,
+            'name'      => htmlspecialchars($P->name),
             //'name'      => $A['name'],
             //'short_description' => PLG_replacetags($A['short_description']),
-            'short_description' => PLG_replacetags($P->short_description),
+            'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'encrypted' => '',
             'item_url'  => COM_buildURL(PAYPAL_URL . 
@@ -1015,7 +1009,7 @@ function PAYPAL_popupMsg($msg)
 */
 function PAYPAL_errMsg($msg, $title = '')
 {
-    $retval = '<span class="alert pluginPaypalErrorMsg">' . "\n";
+    $retval = '<span class="alert paypalErrorMsg">' . "\n";
     if (!empty($title))
         $retval .= "<p>$title</p>\n";
 
@@ -1120,7 +1114,7 @@ function PAYPAL_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
     }
 
     if ($A['parent_id'] == 0) {
-        $style = 'class="pluginPaypalCategorySelectRoot"';
+        $style = 'class="paypalCategorySelectRoot"';
     } else {
         $style = '';
     }

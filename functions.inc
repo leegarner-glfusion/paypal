@@ -972,6 +972,7 @@ function plugin_autouninstall_paypal ()
                 'phpblock_paypal_categories',
                 'phpblock_paypal_popular',
                 'phpblock_paypal_cart',
+                'phpblock_paypal_recent',
         ),
         // List all vars by name
         'vars'=> array('paypal_gid'),
@@ -1242,6 +1243,43 @@ function phpblock_paypal_popular()
 
     $retval = PAYPAL_phpblock_product($sql);
 
+    return $retval;
+}
+
+
+/**
+*   Create a "New Products" block.
+*   Shows most recently-added products
+*
+*   @uses   PAYPAL_phpblock_product_sql()
+*   @param  string  $cat    Optional single category
+*   @return string          HTML for the block
+*/
+function phpblock_paypal_recent($cat='')
+{
+    global $_TABLES, $_PP_CONF;
+
+    $limit = (int)$_PP_CONF['blk_popular_limit'];
+    if ($limit < 1)
+        $limit = 1;
+ 
+    $sql = "SELECT DISTINCT
+                pr.id,
+                (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu 
+                    WHERE product_id = pr.id) AS cnt 
+            FROM {$_TABLES['paypal.products']} pr
+            LEFT JOIN {$_TABLES['paypal.categories']} c
+            ON pr.cat_id=c.cat_id
+            WHERE pr.enabled=1 
+            AND (c.enabled=1 OR c.enabled IS NULL)
+            AND pr.show_popular = 1
+            " . COM_getPermSQL('AND', 0, 2, 'c') . "
+            HAVING cnt > 0
+            ORDER BY dt_add DESC
+            LIMIT $limit";
+    //echo $sql;die;
+
+    $retval = PAYPAL_phpblock_product($sql);
     return $retval;
 }
 

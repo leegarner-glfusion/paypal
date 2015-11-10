@@ -53,20 +53,26 @@ if (!empty($msg)) {
     $display .= COM_endBlock('blockfooter-message.thtml');
 }
 
-$display .= COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL);
 //$display .= PAYPAL_userMenu($LANG_PP['product_list']);
 
 $content = '';
+$breadcrumbs = '';
 if (!empty($id)) {
     USES_paypal_class_product();
     $P = new Product($id);
     if ($P->id == $id) {
-        $content = $P->Detail();
+        $breadcrumbs = PAYPAL_breadCrumbs($P->cat_id);
+        $content .= $P->Detail();
     }
 }
 if (empty($content)) {
-    $content = PAYPAL_errorMessage($LANG_PP['invalid_product_id']);
+    $content .= PAYPAL_errorMessage($LANG_PP['invalid_product_id']);
 }
+if (empty($breadcrumbs)) {
+    $breadcrumbs = COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL);
+}
+
+$display .= $breadcrumbs;
 $display .= $content;
 
 $display .= PAYPAL_siteFooter();

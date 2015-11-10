@@ -696,4 +696,14 @@ $PP_UPGRADE['0.5.6'] = array(
         ADD oversell tinyint(1) not null default 0",
 );
 
+$PP_UPGRADE['0.5.7'] = array(
+    "INSERT INTO {$_TABLES['blocks']}
+        (type, name, title, tid, phpblockfn, is_enabled,
+        owner_id, group_id, 
+        perm_owner, perm_group, perm_members, perm_anon)
+    VALUES 
+        ('phpblock', 'paypal_recent', 'Newest Items', 'all', 
+            'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
+);
+ 
 ?>

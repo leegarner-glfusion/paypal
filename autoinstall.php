@@ -184,6 +184,14 @@ $INSTALL_plugin['paypal'] = array(
             'is_enabled' => 0),
 
     array(  'type' => 'block', 
+            'name' => 'paypal_recent', 
+            'title' => 'Newest Items',
+            'phpblockfn' => 'phpblock_paypal_recent', 
+            'block_type' => 'phpblock',
+            'group_id' => 'admin_group_id',
+            'is_enabled' => 0),
+
+    array(  'type' => 'block', 
             'name' => 'paypal_cart', 
             'title' => 'Shopping Cart',
             'phpblockfn' => 'phpblock_paypal_cart', 
