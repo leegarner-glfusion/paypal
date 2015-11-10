@@ -577,7 +577,7 @@ class ppCart
                 }
                 $gw_name = $gw_info['id'];
                 $gateway = new $gw_name();
-                $gateway_vars .= '<div class="pluginPaypalCheckoutButton">' .
+                $gateway_vars .= '<div class="paypalCheckoutButton">' .
                     $gateway->CheckoutButton($this) . '</div>';
             }
         } else {

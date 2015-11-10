@@ -53,7 +53,7 @@ function removeAddress(id)
 </script>
 
 <h2>{addr_type}</h2>
-<form action="{pi_url}/index.php" method="post" class="pluginPaypalForm">
+<form action="{pi_url}/index.php" method="post" class="paypalForm">
   <input type="hidden" name="order_id" value="{order_id}" />
   {# This is recruited for the country and State Field #}
   <input type="hidden" value="countrySelect" name="cs_config_country_field" id="cs_config_country_field">
@@ -67,12 +67,12 @@ function removeAddress(id)
 {!if have_addresses}
   <div class="pluginPaypalContent">
     <p>{sel_addr_text}</p>
-    <div class="pluginPaypalSavedAddress" id="use_addr0">
+    <div class="paypalSavedAddress" id="use_addr0">
       <input type="radio" name="useaddress" value="0" {none_chk} 
        onclick="updateForm(0);" /><i>{$LANG_PP['new_address']}</i>
     </div>
   <!-- BEGIN SavedAddress -->
-  <div class="pluginPaypalSavedAddress" id="use_addr{id}">
+  <div class="paypalSavedAddress" id="use_addr{id}">
     <input type="radio" name="useaddress" value="{id}" {ad_checked} 
        onclick="updateForm({id});"
         />{ad_name},
@@ -137,7 +137,7 @@ function removeAddress(id)
     <p>
       <label for="country">{$LANG_PP['country']}</label>
       <select id="countrySelect" name="country" 
-            onchange='updateState(this.id)' class="pluginPaypalStateSelect">
+            onchange='updateState(this.id)' class="paypalStateSelect">
       </select>
       {!if req_country}
       <font color="red">{$LANG_PP['required']}</font>
@@ -163,7 +163,7 @@ function removeAddress(id)
     <p>
       <label for="state">{$LANG_PP['state']}</label>
       <div style="display:inline;">
-        <select id="stateSelect" name="state" class="pluginPaypalStateSelect"">
+        <select id="stateSelect" name="state" class="paypalStateSelect"">
         </select>
       </div>
       {!if req_state}

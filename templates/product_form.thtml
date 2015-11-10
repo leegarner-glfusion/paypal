@@ -4,7 +4,7 @@
 {!endif}
 
 <form action="{pi_admin_url}/index.php" method="post" 
-    class="pluginPaypalProductForm"
+    class="paypalProductForm"
     enctype="multipart/form-data" onsubmit='set_postcontent();'>
 
   {!if product_id}

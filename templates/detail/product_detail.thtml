@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<div class="pluginPaypalProductDetail">
+<div class="paypalProductDetail">
   <div id="paypalShortDesc">
       <h1>{short_description}
       {!if can_edit}
@@ -49,7 +49,7 @@
   </div>
 
 </div>
-<div class="pluginPaypalComments">
+<div class="paypalComments">
   {usercomments}
 </div>
 {# end {templatelocation} #}

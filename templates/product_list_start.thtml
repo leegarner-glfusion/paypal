@@ -1,5 +1,8 @@
 {# begin {templatelocation} #}
-<!--<h2>{title}</h2>-->
+{breadcrumbs}
+<div class="paypalListSeparator">
+<hr />
+</div>
 {#<div class="glfform aligncenter">
   {$LANG_PP['sortby']}:&nbsp;
   <select name="sortby" onchange='document.location="{pi_url}/index.php?sortby="+this.value+"&sortdir={sortdir}";'>

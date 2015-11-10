@@ -1,8 +1,8 @@
 {# begin {templatelocation} #}
-<div class="pluginPaypalOrderContainer">
+<div class="paypalOrderContainer">
   <div class="aligncenter"><h1>{$LANG_PP['order_summary']}</h1></div>
   <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
-  <div class="pluginPaypalOrder">
+  <div class="paypalOrder">
 
     {!if have_billto}
     <div id="paypalBilling">
@@ -80,7 +80,7 @@
     </div>
     {!endif}
 
-    <div class="pluginPaypalOrderItems">
+    <div class="paypalOrderItems">
       <table>
         <tr>
           <th class="alignright">{$LANG_PP['description']}</th>
@@ -138,7 +138,7 @@
   <input type="submit" class="pluginPaypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
     </div>
-    <div class="pluginPaypalOrderButtons">
+    <div class="paypalOrderButtons">
       {gateway_vars}
     </div>
   {!else}
@@ -146,7 +146,7 @@
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: <a href="{site_url}/users.php?mode=profile&uid={purch_uid}">{purch_name} ({purch_uid})</a></p>
   <p>{$LANG_PP['status']}: {stat_update}</p>
   <p>
-    <table id="pluginPaypalOrderLog">
+    <table id="paypalOrderLog">
     <tr>
       <th>{$LANG_PP['timestamp']}</th>
       <th>{$LANG_PP['username']}</th>

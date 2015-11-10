@@ -3,7 +3,7 @@
   <span class="alert">{$LANG_PP['no_javascript']}</span>
 </noscript>
 
-<div class="pluginPaypalProductDetail">
+<div class="paypalProductDetail">
   <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div id="paypalShortDesc">
       <h1>{short_description}
@@ -49,7 +49,7 @@
 
   </form>
 </div>
-<div class="pluginPaypalComments">
+<div class="paypalComments">
   {usercomments}
 </div>
 

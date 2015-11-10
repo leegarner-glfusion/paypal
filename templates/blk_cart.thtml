@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<div class="pluginPaypalBlock">
+<div class="paypalBlock">
 <!-- BEGIN CartRow -->
   <div class="CartItem">
     {quantity} x

@@ -86,7 +86,7 @@ window.addEvent('load',function() {
 </script>
 {!endif}
 
-<div class="pluginPaypalProductDetail" id="paypalShortDesc">
+<div class="paypalProductDetail" id="paypalShortDesc">
   <h1>{short_description}
   {!if can_edit}
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
@@ -99,7 +99,7 @@ window.addEvent('load',function() {
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
-<div class="pluginPaypalProductDetail" id="product-image"
+<div class="paypalProductDetail" id="product-image"
    style="position:relative;float:left;margin-left:10px;">
   <div class="paypalProductLgImg" style="width:460px; height:410px;" >
     <a id="lg_img" href="{main_img}" rel="slimbox">
@@ -123,7 +123,7 @@ window.addEvent('load',function() {
   </div>
 </div>
 {!else}
-<div class="pluginPaypalProductDetail" id="product-image"
+<div class="paypalProductDetail" id="product-image"
    style="position:relative;float:left;margin-left:10px;width:460px;">{description}</div>
 {!endif}
 
@@ -166,7 +166,7 @@ window.addEvent('load',function() {
 </div>
 {!endif}
 
-<div class="pluginPaypalComments">
+<div class="paypalComments">
   {usercomments}
 </div>
 

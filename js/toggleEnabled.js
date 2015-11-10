@@ -100,7 +100,7 @@ function PPorderStatusChanged()
             log_ts = xmlDoc.getElementsByTagName("log_ts")[0].childNodes[0].nodeValue;
             log_msg = xmlDoc.getElementsByTagName("log_msg")[0].childNodes[0].nodeValue;
 
-            var tbl = document.getElementById("pluginPaypalOrderLog");
+            var tbl = document.getElementById("paypalOrderLog");
             if (tbl) {
                 var lastRow = tbl.rows.length;
                 var iteration = lastRow;

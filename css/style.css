@@ -1,8 +1,8 @@
-.pluginPaypalSavedAddress {
+.paypalSavedAddress {
     text-align: left;
 }
 
-.pluginPaypalForm label {
+.paypalForm label {
     width: 8em;
     float: left;
     text-align: right;
@@ -10,7 +10,7 @@
     display: block;
 }
 
-.pluginPaypalProductForm label {
+.paypalProductForm label {
     /*color: #781351;*/
     width: 16em;
     float: left;
@@ -20,12 +20,12 @@
     display: block;
 }
 
-.pluginPaypalProductForm p {
+.paypalProductForm p {
     line-height: 1px;
     margin-top: 0px;
 }
 
-.pluginPaypalProductForm form div {
+.paypalProductForm form div {
     clear: left;
     display: block;
     /*  width: 354px; */
@@ -33,173 +33,6 @@
     margin: 5px 0 0 0;
     padding: 1px 3px;
 }
-
-/*a.pp_itemlist {
-    text-decoration:none;
-    font-size:1.2em;
-    font-weight:bold;
-}
-
-.pp_itemlistname {
-    text-decoration:none;
-    font-size:1.2em;
-    font-weight:bold;
-}
-
-.pp_itemlist div {
-    position:relative;
-    float:left;
-    margin:2px;
-}*/
-
-
-/* Star Rating System */
-/*.paypal-ratingbar {
-	display:block;
-	padding-bottom:0px;
-	margin-bottom:0px;
-	padding-top:2px;
-	margin-top:2px;
-	text-align:left;
-}
-.rater_loading {
-	height: 30px;
-	background: url('images/working.gif') 50% 50% no-repeat;
-}
-.rater_loadingsm {
-	height: 10px;
-	line-height:10px;
-	padding:0;
-	margin:0;
-	background: url('images/working.gif') 50% 50% no-repeat;
-}
-.paypal-rating-unit {
-	list-style:none;
-	margin: 0px;
-	padding:0px;
-	height: 30px;
-	position: relative;
-	background: url('images/starrating.png') top left repeat-x;
-}
-.paypal-rating-unit li{
-    text-indent: -90000px;
-	padding:0px;
-	margin:0px;
-	float: left;
-}
-.paypal-rating-unit li a {
-	outline: none;
-	display:block;
-	width:30px;
-	height: 30px;
-	text-decoration: none;
-	text-indent: -9000px;
- 	z-index: 20;
-	position: absolute;
-	padding: 0px;
-}
-.paypal-rating-unit li a:hover{
-	background: url('images/starrating.png') left center;
-	z-index: 2;
-	left: 0px;
-}
-.paypal-rating-unit a.r1-unit{left: 0px;}
-.paypal-rating-unit a.r1-unit:hover{width:30px;}
-.paypal-rating-unit a.r2-unit{left:30px;}
-.paypal-rating-unit a.r2-unit:hover{width: 60px;}
-.paypal-rating-unit a.r3-unit{left: 60px;}
-.paypal-rating-unit a.r3-unit:hover{width: 90px;}
-.paypal-rating-unit a.r4-unit{left: 90px;}
-.paypal-rating-unit a.r4-unit:hover{width: 120px;}
-.paypal-rating-unit a.r5-unit{left: 120px;}
-.paypal-rating-unit a.r5-unit:hover{width: 150px;}
-.paypal-rating-unit a.r6-unit{left: 150px;}
-.paypal-rating-unit a.r6-unit:hover{width: 180px;}
-.paypal-rating-unit a.r7-unit{left: 180px;}
-.paypal-rating-unit a.r7-unit:hover{width: 210px;}
-.paypal-rating-unit a.r8-unit{left: 210px;}
-.paypal-rating-unit a.r8-unit:hover{width: 240px;}
-.paypal-rating-unit a.r9-unit{left: 240px;}
-.paypal-rating-unit a.r9-unit:hover{width: 270px;}
-.paypal-rating-unit a.r10-unit{left: 270px;}
-.paypal-rating-unit a.r10-unit:hover{width: 300px;}
-.paypal-rating-unit li.current-rating {
-	background: url('images/starrating.png') left bottom;
-	position: absolute;
-	height: 30px;
-	display: block;
-	text-indent: -9000px;
-	z-index: 1;
-	left:0px;
-}
-*/
-
-/* small star rater */
-/*.paypal-small-rating-unit {
-	list-style:none;
-	padding:0px;
-	height: 15px;
-	position: relative;
-	background: url('images/star_small.png') top left repeat-x;
-	margin:0;
-}
-.paypal-small-rating-unit li{
-    text-indent: -30000px;
-	padding:0px;
-	margin:0px;
-	float: left;
-}
-.paypal-small-rating-unit li a {
-	outline: none;
-	display:block;
-	width:15px;
-	height: 15px;
-	text-decoration: none;
-	text-indent: -3000px;
-	z-index: 20;
-	position: absolute;
-	padding: 0px;
-}
-.paypal-small-rating-unit li a:hover{
-	background: url('images/star_small.png') left center;
-	z-index: 2;
-	left: 0px;
-	line-height:15px
-}
-.paypal-small-rating-unit a.r1-unit{left: 0px;}
-.paypal-small-rating-unit a.r1-unit:hover{width:15px;}
-.paypal-small-rating-unit a.r2-unit{left:15px;}
-.paypal-small-rating-unit a.r2-unit:hover{width: 30px;}
-.paypal-small-rating-unit a.r3-unit{left: 30px;}
-.paypal-small-rating-unit a.r3-unit:hover{width: 45px;}
-.paypal-small-rating-unit a.r4-unit{left: 45px;}
-.paypal-small-rating-unit a.r4-unit:hover{width: 60px;}
-.paypal-small-rating-unit a.r5-unit{left: 60px;}
-.paypal-small-rating-unit a.r5-unit:hover{width: 75px;}
-.paypal-small-rating-unit a.r6-unit{left: 75px;}
-.paypal-small-rating-unit a.r6-unit:hover{width: 90px;}
-.paypal-small-rating-unit a.r7-unit{left: 90px;}
-.paypal-small-rating-unit a.r7-unit:hover{width: 105px;}
-.paypal-small-rating-unit a.r8-unit{left: 105px;}
-.paypal-small-rating-unit a.r8-unit:hover{width: 123px;}
-.paypal-small-rating-unit a.r9-unit{left: 120px;}
-.paypal-small-rating-unit a.r9-unit:hover{width: 135px;}
-.paypal-small-rating-unit a.r10-unit{left: 135px;}
-.paypal-small-rating-unit a.r10-unit:hover{width: 150px;}
-.paypal-small-rating-unit li.current-rating {
-	background: url('images/star_small.png') left bottom;
-	position: absolute;
-	height: 15px;
-	display: block;
-	text-indent: -3000px;
-	z-index: 1;
-	left:0px;
-	padding:0;
-	line-height:15px;
-}
-/* end of small stuff */
-
-/* end of Star rating system */
 
 .pluginPaypalButton {
     padding: 3px 6px;
@@ -260,169 +93,208 @@
     padding:10px;
 }
 
-.pluginPaypalProductDetail {
+.paypalProductDetail {
     clear: right;
     margin: 0px 40px 0px 40px;
 }
 
-.pluginPaypalProductDetail #paypalShortDesc {
+.paypalProductDetail #paypalShortDesc {
     float: left;
 }
-.pluginPaypalProductDetail h1 {
+.paypalProductDetail h1 {
     font-size: 200%;
 }
 
-.pluginPaypalProductDetail #paypalProductAttrib {
+.paypalProductDetail #paypalProductAttrib {
     float: right;
     text-align: right;
     margin-right: 30px;
     clear: right;
 }
 
-.pluginPaypalProductDetail #paypalProductDesc {
+.paypalProductDetail #paypalProductDesc {
     clear: both;
     margin-bottom: 1em;
     font-size: 1.2em;
 }
 
-.pluginPaypalProductDetail .paypalProductThumbWrapper {
+.paypalProductDetail .paypalProductThumbWrapper {
     clear: both;
 }
 
-.pluginPaypalProductDetail .paypalProductThumb {
+.paypalProductDetail .paypalProductThumb {
     float: left;
 }
 
-.pluginPaypalProductListItem {
+.paypalProductListItem {
     position: relative;
     padding: 5px;
     clear: both;
     text-decoration: none;
 }
 
-.pluginPaypalProductListItem itemname {
+.paypalProductListItem2 {
+  cursor: pointer;
+  position:relative;
+  float: left;
+  font-size: 1em;
+  padding: 1rem .5rem;
+  margin: 1em 0.15em -0.5em 0.15em;
+  border: 3px outset #ddd;
+  width: 150px;
+  min-height: 200px;
+}
+
+.paypalProductListItemUrl2 div.ratingbar {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 4px;
+}
+
+
+.paypalProductListItem itemname {
     font-size:1.2em;
     font-weight:bold;
 }
 
-div.pluginPaypalProductListItemImage {
+div.paypalProductListItemImage {
     float: left;
     width: 110px;
     text-decoration: none;
     border: none;
+    margin-bottom: 10px;
+    text-align: center;
+    margin: 0px 10px;
 }
 
-div.pluginPaypalProductListItemUrl {
+div.paypalProductListItemImage2 {
+    text-decoration: none;
+    border: 5px;
+    text-align: center;
+    margin: auto;
+}
+
+div.paypalProductListItemUrl {
     float: left;
     width: 60%;
     font-weight: bold;
 }
 
-.pluginPaypalProductListItemButtons {
+div.paypalProductListItemUrl2 {
+    margin-top: 10px;
+    float: left;
+    font-weight: bold;
+    clear: both;
+}
+
+.paypalProductListItemButtons {
     float:right;
     /*width:200px;*/
     text-align:right;
 }
 
-.pluginPaypalComments {
+.paypalComments {
     clear: both;
 }
 
-.pluginPaypalListSeparator {
+.paypalListSeparator {
     clear: both;
     border-bottom: 3px;
     padding-top: .5em;
 }
+.paypalListSeparator hr {
+    width: 85%;
+}
 
-.pluginPaypalOrderContainer {
+.paypalOrderContainer {
     width: 600px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.pluginPayPalOrder {
+.paypalOrder {
     text-align: center;
     clear:both;
 }
 
-.pluginPaypalOrder #paypalBilling {
+.paypalOrder #paypalBilling {
     float: left;
     margin-left: 0;
     margin-bottom: 1em;
 }
 
-.pluginPaypalOrder #paypalShipping {
+.paypalOrder #paypalShipping {
     float: left;
     margin-left: 20%;
     margin-bottom: 1em;
 }
 
-.pluginPaypalOrder #paypalOrderNumber {
+.paypalOrder #paypalOrderNumber {
     clear: both;
     text-align: left;
     padding: 1em 0 1em 0;
 }
 
-.pluginPaypalOrderItems {
+.paypalOrderItems {
     clear: both;
     text-align: left;
 }
 
-.pluginPaypalOrderItems table {
+.paypalOrderItems table {
     width: 550px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.pluginPaypalOrderItems td {
+.paypalOrderItems td {
     vertical-align: top;
 }
 
-.pluginPaypalOrderButtons {
+.paypalOrderButtons {
     position: relative;
     float: right;
     margin-right: 50px;
     clear: right;
 }
 
-.pluginPaypalStateSelect {
+.paypalStateSelect {
     width: 264px;
 }
 
-.pluginPaypalCheckoutButton {
+.paypalCheckoutButton {
     display: inline;
     margin-right: 20px;
     vertical-align: top;
 }
 
-.pluginPaypalAlertText {
+.paypalAlertText {
     color: red;
     font-weight: bold;
 }
 
-.pluginPaypalBlock #CartTotal {
+.paypalBlock #CartTotal {
     font-weight: bold;
 }
 
-.pluginPaypalBlock #CartTotalAmount {
+.paypalBlock #CartTotalAmount {
     float: right;
 }
 
-.pluginPaypalBlock div.ItemOptions {
+.paypalBlock div.ItemOptions {
     font-size: smaller;
     padding-left: 2em;
 }
 
-.pluginPaypalBlock div.CartItem {
+.paypalBlock div.CartItem {
     padding-bottom: .5em;
 }
 
-.pluginPaypalCategorySelectRoot {
+.paypalCategorySelectRoot {
     /*background-color: lightblue;*/
     font-weight: bold;
 }
 
-.pluginPaypalErrorMsg p {
+.paypalErrorMsg p {
     font-weight: bold;
 }
 
@@ -430,11 +302,11 @@ div.pluginPaypalProductListItemUrl {
     padding-top: 2em;
 }
 
-#pluginPaypalOrderLog th {
+#paypalOrderLog th {
     text-align: center;
 }
 
-#pluginPaypalOrderLog td {
+#paypalOrderLog td {
     padding-right: 1em;
     padding-left: 1em;
 }
