@@ -193,14 +193,14 @@ class paypal extends PaymentGw
         $address = $cart->getAddress('shipto');
         if (!empty($address)) {
             list($fname, $lname) = explode(' ', $address['name']);
-            $fields['first_name'] = $fname;
-            $fields['last_name'] = $lname;
-            $fields['address1'] = $address['address1'];
-            $fields['address2'] = $address['address2'];
-            $fields['city'] = $address['city'];
-            $fields['state'] = $address['state'];
-            $fields['country'] = $address['country'];
-            $fields['zip'] = $address['zip'];
+            $fields['first_name'] = htmlspecialchars($fname);
+            $fields['last_name'] = htmlspecialchars($lname);
+            $fields['address1'] = htmlspecialchars($address['address1']);
+            $fields['address2'] = htmlspecialchars($address['address2']);
+            $fields['city'] = htmlspecialchars($address['city']);
+            $fields['state'] = htmlspecialchars($address['state']);
+            $fields['country'] = htmlspecialchars($address['country']);
+            $fields['zip'] = htmlspecialchars($address['zip']);
         }
 
         $i = 1;
@@ -223,8 +223,8 @@ class paypal extends PaymentGw
                 }
                 $item['descrip'] .= $opt_str;
             }
-            $fields['item_number_' . $i] = $item_id;
-            $fields['item_name_' . $i] = $item['descrip'];
+            $fields['item_number_' . $i] = htmlspecialchars($item_id);
+            $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
             $fields['amount_' . $i] = $item['price'];
             $fields['quantity_' . $i] = $item['quantity'];
             $total_amount += $item['price'];
