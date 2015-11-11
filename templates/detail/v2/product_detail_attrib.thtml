@@ -67,6 +67,7 @@ function ProcessForm(frm) {
 
     price = price.toFixed({cur_decimals});
     frm.amount.value = price;
+    frm.options.value = options.value;
     document.getElementById('price').innerHTML = price;
     return;
 }
@@ -78,7 +79,12 @@ function checkForJavascript()
         e.style.display = "inline";
 }
 
-window.addEvent('load',function() {
+{!if mootools}
+window.addEvent('load',
+{!else}
+$(document).ready(
+{!endif}
+  function() {
     checkForJavascript();
     ProcessForm();
 });
@@ -145,9 +151,6 @@ window.addEvent('load',function() {
     {!if attributes}
       {attributes}
     {!endif}
-      <!-- BEGIN BtnBlock -->
-        {button}<br />
-      <!-- END BtnBlock -->
     </div> 
 
     {!if onhand}
@@ -155,13 +158,16 @@ window.addEvent('load',function() {
       {onhand} {$LANG_PP['available']}
     </div>
     {!endif}
-
+    {add_cart_button}
   </form>
+      <!-- BEGIN BtnBlock -->
+        {buy_now_button}<br />
+      <!-- END BtnBlock -->
 </div>
 
 {!if main_img}
 {# with a main image the description goes below the image and price #}
-<div id="paypalProductDesc" style="clear:both;">
+<div id="paypalProductDesc" style="clear:both;margin-bottom:2em;">
   {description}
 </div>
 {!endif}

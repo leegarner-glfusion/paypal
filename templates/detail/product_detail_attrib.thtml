@@ -121,7 +121,12 @@ function checkForJavascript()
         e.style.display = "inline";
 }
 
-window.addEvent('load',function() {
+{!if mootools}
+window.addEvent('load',
+{!else}
+$(document).ready(
+{!endif}
+function() {
     checkForJavascript();
     ProcessForm();
 });

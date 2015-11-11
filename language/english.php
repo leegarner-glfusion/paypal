@@ -144,8 +144,8 @@ $LANG_PP = array (
 'sortby'            => 'Sort By',
 'name'              => 'Name',
 'dt_add'            => 'Date Added',
-'ascending'         => 'Ascending',
-'descending'        => 'Descending',
+'ascending'         => 'Lowest to Highest',
+'descending'        => 'Highest to Lowest',
 'sortdir'           => 'Sort Direction',
 'comments'          => 'Comments',
 'ratings_enabled'   => 'Allow Ratings',
@@ -250,6 +250,13 @@ $LANG_PP = array (
 'oversell_hide' => 'Hide product from catalog',
 'anon_and_empty' => 'There are no products available for purchase by anonymous users. Try logging into the site to view the catalog.',
 'back_to_catalog' => 'Back to Catalog',
+'list_sort_options' => array(
+    //'most_popular' => 'Most Popular',
+    'price_l2h' => 'Price - Low to High',
+    'price_h2l' => 'Price - High to Low',
+    'top_rated' => 'Top Rated',
+    'newest' => 'Newest',
+    ),
 );
 
 

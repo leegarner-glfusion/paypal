@@ -73,7 +73,7 @@ class Product
             $this->enabled = $_PP_CONF['def_enabled'];
             $this->featured = $_PP_CONF['def_featured'];
             $this->taxable = $_PP_CONF['def_taxable'];
-            $this->dt_add = time();
+            $this->dt_add = $_PP_CONF['now']->toMySQL();
             $this->views = 0;
             $this->rating = 0;
             $this->votes = 0;
@@ -109,8 +109,6 @@ class Product
         switch ($var) {
         case 'id':
         case 'views':
-        case 'dt_add':
-        case 'expiration':
         case 'votes':
         case 'prod_type':
         case 'cat_id':
@@ -118,6 +116,7 @@ class Product
         case 'comments_enabled':
         case 'onhand':
         case 'oversell':
+        case 'expiration':
             // Integer values
             $this->properties[$var] = (int)$value;
             break;
@@ -131,6 +130,7 @@ class Product
             $this->properties[$var] = (float)$value;
             break;
 
+        case 'dt_add':
         case 'description':
         case 'short_description':
         case 'name':
@@ -561,7 +561,8 @@ class Product
     */
     public function showForm($id = 0)
     {
-        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $LANG24, $LANG_postmodes;
+        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $LANG24, $LANG_postmodes,
+                $_SYSTEM;
 
         $id = (int)$id;
         if ($id > 0) {
@@ -606,6 +607,7 @@ class Product
         }
 
         $T->set_var(array(
+            'mootools'      => $_SYSTEM['disable_jquery'] ? 'true' : '',
             'post_options'  => $post_options,
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
             'category'      => $this->cat_id,
@@ -894,7 +896,7 @@ class Product
     */
     public function Detail()
     {
-        global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
+        global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $_SYSTEM;
 
         USES_lib_comments();
 
@@ -934,6 +936,7 @@ class Product
                     $this->price : $this->sale_price;
 
         $T->set_var(array(
+            'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
             //'has_attrib'        => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
@@ -1008,7 +1011,7 @@ class Product
                     value=\"\">\n
                     {$Attr['attr_name']}:</td>
                     <td align=\"left\">
-                    <select name=\"options[]\"
+                    <select id=\"options\" name=\"options[]\"
                     onchange=\"ProcessForm(this.form);\">\n";
                     /*<td align=\"left\"><select name=\"pp_os{$i}\"*/
                 $i++;
@@ -1032,8 +1035,13 @@ class Product
         $buttons = $this->PurchaseLinks();
         $T->set_block('product', 'BtnBlock', 'Btn');
         foreach ($buttons as $name=>$html) {
-            $T->set_var('button', $html);
-            $T->parse('Btn', 'BtnBlock', true);
+            if ($name == 'add_cart') {
+                // Set the add to cart button in the main form
+                $T->set_var('add_cart_button', $html);
+            } else {
+                $T->set_var('buy_now_button', $html);
+                $T->parse('Btn', 'BtnBlock', true);
+            }
         }
 
         // Show the user comments if enabled globally and for this product
@@ -1223,7 +1231,7 @@ class Product
                 'pi_url'        => PAYPAL_URL,
                 'form_url'  => $this->hasAttributes() ? '' : 'true',
             ) );
-            $buttons[] = $T->parse('', 'cart');
+            $buttons['add_cart'] = $T->parse('', 'cart');
         }
         return $buttons;
     }

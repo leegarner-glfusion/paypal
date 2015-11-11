@@ -281,7 +281,12 @@
 </form>
 
 <script type="text/javascript">
-window.addEvent('load',function() {
+{!if mootools}
+window.addEvent('load',
+{!else}
+$(document).ready(
+{!endif}
+function() {
   PP_changeProdType('{prod_type}');
   PP_changeShippingType('{shipping_type}');
   PP_showOversell({track_onhand});
