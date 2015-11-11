@@ -27,6 +27,8 @@ $_PP_CONF= $pp_config->get_config('paypal');
 /** Include paypal config file  */
 require_once dirname(__FILE__) . '/paypal.php';
 
+$_PP_CONF['datetime_fmt'] = 'Y-m-d H:i:s T';
+
 /** Define base path to plugin */
 define('PAYPAL_PI_PATH', "{$_CONF['path']}plugins/{$_PP_CONF['pi_name']}");
 /** Define base URL to plugin */

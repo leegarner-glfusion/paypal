@@ -469,7 +469,8 @@ class ppOrder
             'total'     => sprintf('%6.2f', $total),
             'not_final' => $final ? '' : 'true',
             //'order_date' => $this->order_date,
-            'order_date' => $dt->toMySQL(true),
+            'order_date' => $dt->format($_PP_CONF['datetime_fmt'], true),
+            'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
             'shipping' => COM_numberFormat($this->shipping, 2),
             'handling' => COM_numberFormat($this->handling, 2),
@@ -496,7 +497,8 @@ class ppOrder
                 $T->set_var(array(
                     'log_username'  => $L['username'],
                     'log_msg'       => $L['message'],
-                    'log_ts'        => $dt->toMySQL(true),
+                    'log_ts'        => $dt->format($_PP_CONF['datetime_fmt'], true),
+                    'log_ts_tip'    => $dt->format($_PP_CONF['datetime_fmt'], false),
                 ) );
                 $T->parse('Log', 'LogMessages', true);
             }

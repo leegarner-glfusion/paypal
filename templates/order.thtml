@@ -76,7 +76,7 @@
     {!else}
     <div id="paypalOrderNumber">
       {$LANG_PP['order_number']}:&nbsp;&nbsp;{order_number}<br />
-      {$LANG_PP['order_date']}:&nbsp;&nbsp;{order_date}
+      {$LANG_PP['order_date']}:&nbsp;&nbsp;<span title="{order_date_tip}">{order_date}</span>
     </div>
     {!endif}
 
@@ -154,7 +154,7 @@
     </tr>
     <!-- BEGIN LogMessages -->
     <tr>
-      <td class="nowrap">{log_ts}</td>
+      <td class="nowrap" title="{log_ts_tip}">{log_ts}</td>
       <td>{log_username}</td>
       <td>{log_msg}</td>
     </tr>

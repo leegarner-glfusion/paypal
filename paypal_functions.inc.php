@@ -213,11 +213,20 @@ function PAYPAL_history($admin = false, $uid = '')
 */
 function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
+
+    static $dt = NULL;
+    if ($dt === NULL) $dt = new Date('now', $_USER['tzid']);
 
     $retval = '';
 
     switch($fieldname) {
+    case 'order_date':
+        $dt->setTimestamp(strtotime($fieldvalue));
+        $retval = '<span title="' . $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
+                $dt->format($_PP_CONF['datetime_fmt'], true) . '</span>';
+        break;
+
     case 'name':
         list($item_id, $item_opts) = explode('|', $A['product_id']);
         //if (is_numeric($A['product_id'])) {
