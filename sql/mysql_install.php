@@ -218,7 +218,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `expiration` int(11) default NULL,
   `enabled` tinyint(1) default '1',
   `featured` tinyint(1) unsigned default '0',
-  `dt_add` int(11) unsigned default NULL,
+  `dt_add` datetime not NULL,
   `views` int(4) unsigned default '0',
   `comments` int(5) unsigned default '0',
   `comments_enabled` tinyint(1) unsigned default '0',
@@ -322,7 +322,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `order_id` varchar(40) NOT NULL,
   `uid` int(11) NOT NULL DEFAULT '0',
   `order_date` datetime NOT NULL,
-  `last_mod` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_mod` datetime NOT NULL,
   `billto_name` varchar(255) DEFAULT NULL,
   `billto_company` varchar(255) DEFAULT NULL,
   `billto_address1` varchar(255) DEFAULT NULL,
@@ -414,7 +414,7 @@ $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
 
 $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ts` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ts` datetime NOT NULL,
   `order_id` VARCHAR(40) NULL DEFAULT NULL,
   `username` VARCHAR(60) NOT NULL DEFAULT '',
   `message` TEXT NULL,
@@ -704,6 +704,16 @@ $PP_UPGRADE['0.5.7'] = array(
     VALUES 
         ('phpblock', 'paypal_recent', 'Newest Items', 'all', 
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        CHANGE dt_add dt_add datetime not null",
+    "UPDATE {$_TABLES['paypal.products']}
+        SET dt_add = NOW()",
+    "ALTER TABLE {$_TABLES['paypal.cart']}
+        CHANGE last_update last_update datetime NOT NULL",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        CHANGE last_mod last_mod datetime NOT NULL",
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        CHANGE ts ts datetime NOT NULL",
 );
  
 ?>

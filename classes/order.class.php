@@ -44,7 +44,7 @@ class ppOrder
         $this->isNew = true;
         $this->uid = $_USER['uid'];
         $this->buyer_email = $_USER['email'];
-        $this->order_date = $_PP_CONF['now'];
+        $this->order_date = $_PP_CONF['now']->toMySql();
         if (!empty($id)) {
             $this->order_id = $id;
             if (!$this->Load($id)) {
@@ -414,7 +414,7 @@ class ppOrder
     */
     public function View($final = false)
     {
-        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES;
+        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file(array(
@@ -459,7 +459,8 @@ class ppOrder
                 $this->no_shipping = 0;
             }
         }
-        
+
+        $dt = new Date(strtotime($this->order_date), $_CONF['timezone']);
         $total = $subtotal + $this->shipping + $this->handling + $this->tax;
         $T->set_var(array(
             'pi_url'    => PAYPAL_URL,
@@ -467,7 +468,8 @@ class ppOrder
             'pi_admin_url' => PAYPAL_ADMIN_URL,
             'total'     => sprintf('%6.2f', $total),
             'not_final' => $final ? '' : 'true',
-            'order_date' => $this->order_date,
+            //'order_date' => $this->order_date,
+            'order_date' => $dt->toMySQL(true),
             'order_number' => $this->order_id,
             'shipping' => COM_numberFormat($this->shipping, 2),
             'handling' => COM_numberFormat($this->handling, 2),
@@ -490,10 +492,11 @@ class ppOrder
             $res = DB_query($sql, 1);
             $T->set_block('order', 'LogMessages', 'Log');
             while ($L = DB_fetchArray($res, false)) {
+                $dt->setTimestamp(strtotime($L['ts']));
                 $T->set_var(array(
                     'log_username'  => $L['username'],
                     'log_msg'       => $L['message'],
-                    'log_ts'        => $L['ts'],
+                    'log_ts'        => $dt->toMySQL(true),
                 ) );
                 $T->parse('Log', 'LogMessages', true);
             }
@@ -611,7 +614,8 @@ class ppOrder
         $sql = "INSERT INTO {$_TABLES['paypal.order_log']} SET
             username = '" . DB_escapeString($log_user) . "',
             order_id = '" . DB_escapeString($order_id) . "',
-            message = '" . DB_escapeString($msg) . "'";
+            message = '" . DB_escapeString($msg) . "',
+            ts = UTC_TIMESTAMP()";
         DB_query($sql);
         return true;
     }

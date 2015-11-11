@@ -192,17 +192,9 @@ class ppCart
     */
     public function Save()
     {
-        global $_TABLES, $_USER;
+        global $_TABLES, $_USER, $_PP_CONF;
 
         $uid = (int)$_USER['uid'];
-
-        /*$cart_info = array(
-                'billto' => $this->m_billto,
-                'shipto' => $this->m_shipto,
-        );
-        $cart_info = @serialize($cart_info);
-        if (!$cart_info) return;
-        $cart_info = DB_escapeString($cart_info);*/
 
         $cart = @serialize($this->m_cart);
         if (!$cart) return;     // Error with the array, just quit
@@ -210,12 +202,16 @@ class ppCart
 
         // New way- use the cart table
         $sql = "INSERT INTO {$_TABLES['paypal.cart']} 
-                (cart_id, cart_uid, cart_contents)
+                (cart_id, cart_uid, cart_contents, last_update)
             VALUES (
                 '" . $this->cartID(true) . "',
                 $uid,
-                '$cart')
-            ON DUPLICATE KEY UPDATE cart_contents = '$cart'";
+                '$cart',
+                '{$_PP_CONF['now']->toMySql()}'
+            )
+            ON DUPLICATE KEY UPDATE
+                cart_contents = '$cart',
+                last_update = '{$_PP_CONF['now']->toMySql()}'";
         //echo $sql;die;
         DB_query($sql, 1);
         if (DB_error()) COM_errorLog("Error saving cart for user $uid");

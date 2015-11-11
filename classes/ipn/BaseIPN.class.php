@@ -95,7 +95,7 @@ class BaseIPN
         if (is_array($A))
             $this->ipn_data = $A;
 
-        $this->sql_date = $_PP_CONF['now'];
+        $this->sql_date = $_PP_CONF['now']->toMySQL();
 
         $this->pp_data = array(
             'txn_id'        => '',
@@ -731,7 +731,7 @@ class BaseIPN
 
             // add an expiration date if appropriate
             if (is_numeric($item['expiration']) && $item['expiration'] > 0) {
-                $sql .= ", expiration = DATE_ADD('{$_PP_CONF['now']}', INTERVAL {$item['expiration']} DAY)";
+                $sql .= ", expiration = DATE_ADD('{$this->sql_date}', INTERVAL {$item['expiration']} DAY)";
             }
             PAYPAL_debug($sql);
             DB_query($sql);

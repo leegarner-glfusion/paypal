@@ -32,7 +32,7 @@ if (!empty($token)) {
         LEFT JOIN {$_TABLES['paypal.products']} AS d 
             ON d.id = p.product_id 
         WHERE p.token = '$token'
-        AND p.expiration > '{$_PP_CONF['now']}'";
+        AND p.expiration > '{$_PP_CONF['now']->toMySQL()}'";
 } else {
     // Get product by product ID.  Have to check the user id also
     $sql = "SELECT d.id, d.file, d.prod_type
@@ -47,7 +47,7 @@ if (!empty($token)) {
                 AND 
                 p.user_id = '" . (int)$_USER['uid'] . "'
                 AND 
-                p.expiration > '{$_PP_CONF['now']}'
+                p.expiration > '{$_PP_CONF['now']->toMySql()}'
             )
             OR 
                 ( d.price <= 0 )

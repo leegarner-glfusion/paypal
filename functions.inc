@@ -155,7 +155,8 @@ function USES_paypal_class_currency()
 $_PP_CONF['gateways'] = array();
 
 /** Store the current SQL-formatted timestamp since it's used often */
-$_PP_CONF['now'] = date('Y-m-d H:i:s');
+USES_class_date();
+$_PP_CONF['now'] = new Date('now', $_CONF['timezone']);
 
 global $ppGCart;
 $ppGCart = NULL;
