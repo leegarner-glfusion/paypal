@@ -65,7 +65,7 @@ function removeAddress(id)
   <SCRIPT type="text/javascript" SRC="{pi_url}/js/country_state.js"></SCRIPT>
 
 {!if have_addresses}
-  <div class="pluginPaypalContent">
+  <div class="paypalContent">
     <p>{sel_addr_text}</p>
     <div class="paypalSavedAddress" id="use_addr0">
       <input type="radio" name="useaddress" value="0" {none_chk} 

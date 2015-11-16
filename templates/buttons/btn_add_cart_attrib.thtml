@@ -8,7 +8,7 @@
   <input type="hidden" name="item_type" value='{item_type}' />
   <input type="hidden" name="amount" value="{amount}" />
   <input type="hidden" name="custom" value='{custom}' />
-  <input type="text" name="quantity" size="3" maxlength="5" value="1" />&nbsp;&nbsp;<input type="submit" class="pluginPaypalButton orange" border="0" 
+  <input type="text" name="quantity" size="3" maxlength="5" value="1" />&nbsp;&nbsp;<input type="submit" class="paypalButton orange" border="0" 
     name="addcartitem" value="{$LANG_PP['add_to_cart']}" />
 {!if form_url}
 </form>

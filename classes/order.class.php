@@ -291,9 +291,6 @@ class ppOrder
         }
         if (isset($A['uid'])) $this->uid = $A['uid'];
 
-        //$this->setShipping($A);
-
-        $this->order_date = $A['order_date'];
         if (isset($A['order_id']) && !empty($A['order_id'])) {
             $this->order_id = $A['order_id'];
             $this->isNew = false;
@@ -460,7 +457,7 @@ class ppOrder
             }
         }
 
-        $dt = new Date(strtotime($this->order_date), $_CONF['timezone']);
+        $dt = new Date($this->order_date, $_CONF['timezone']);
         $total = $subtotal + $this->shipping + $this->handling + $this->tax;
         $T->set_var(array(
             'pi_url'    => PAYPAL_URL,

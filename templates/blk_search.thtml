@@ -14,7 +14,7 @@
     <input type="text" name="search_name" style="width:135px;" />
     <br />
     <div align="center">
-      <input type="submit" class="pluginPaypalButton orange" name="searchcat" 
+      <input type="submit" class="paypalButton orange" name="searchcat" 
         value="{$LANG_PP['search']}" />
     </div>
 </form>

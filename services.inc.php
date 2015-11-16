@@ -205,7 +205,7 @@ function service_btnCheckout_paypal($args, &$output, &$svc_msg)
     if (!is_array($args)) $args = array($args);
     $text = isset($args['text']) ? $args['text'] : $LANG_PP['checkout'];
     $color = isset($args['color']) ? $args['color'] : 'green';
-    $output = '<a href="' . PAYPAL_URL . '/index.php?checkout=x"><button type="button" id="ppcheckout" class="pluginPaypalButton ' . $color . '">'
+    $output = '<a href="' . PAYPAL_URL . '/index.php?checkout=x"><button type="button" id="ppcheckout" class="paypalButton ' . $color . '">'
         . $text . '</button></a>';
     return PLG_RET_OK;
 }

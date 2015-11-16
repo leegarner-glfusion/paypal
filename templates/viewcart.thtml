@@ -17,7 +17,13 @@
     <!-- BEGIN ItemRow -->
     <tr>
       <td>
+        {!if item_link}
+        <a href="{pi_url}/detail.php?id={item_id}">
+        {!endif}
         {item_descrip}
+        {!if item_link}
+        </a>
+        {!endif}
         <!-- BEGIN ItemOptions -->
           <br />
           &nbsp;&nbsp;<small>--{opt_name}: {opt_value}
@@ -50,12 +56,12 @@
     </tr>
   </table>
   <input type="hidden" name="custom" value='{custom}' />
-  <input type="submit" class="pluginPaypalButton blue" name="updatecart" 
+  <input type="submit" class="paypalButton blue" name="updatecart" 
         value="{$LANG_PP['update_cart']}" />
-  <input type="submit" class="pluginPaypalButton red" name="emptycart"
+  <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <input id="submit" type="submit" class="pluginPaypalButton green" name="checkout" 
+  <input id="submit" type="submit" class="paypalButton green" name="checkout" 
         value="{$LANG_PP['checkout']} >>" />
 </form>
 </div>

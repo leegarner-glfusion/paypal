@@ -132,10 +132,10 @@
   <div style="clear:both;">
   {!if checkout}
     <div>
-      <input class="pluginPaypalButton blue" type="submit" name="viewcart"
+      <input class="paypalButton blue" type="submit" name="viewcart"
         value="{$LANG_PP['update_cart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';" />
-  <input type="submit" class="pluginPaypalButton red" name="emptycart"
+  <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
     </div>
     <div class="paypalOrderButtons">

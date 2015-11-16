@@ -1336,9 +1336,11 @@ class Product
         }
         $discount_factor = 1;
         foreach ($this->qty_discounts as $qty=>$discount) {
-            if ($quantity < $qty) {
+            $qty = (int)$qty;
+            if ($quantity < $qty) {     // haven't reached this discount level
                 break;
             } else {
+                $discount = (float)$discount;
                 $discount_factor = (100 - $discount) / 100;
             }
         }
