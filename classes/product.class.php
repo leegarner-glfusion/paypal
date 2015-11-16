@@ -87,6 +87,7 @@ class Product
             $this->rating_enabled = $_PP_CONF['ena_ratings'] == 1 ? 1 : 0;
             $this->track_onhand = $_PP_CONF['def_track_onhand'];
             $this->oversell = $_PP_CONF['def_oversell'];
+            $this->qty_discounts = array();
         } else {
             $this->id = $id;
             if (!$this->Read()) {
@@ -160,6 +161,15 @@ class Product
             $this->properties[$var] = $value;
             break;
 
+        case 'qty_discounts':
+            if (!is_array($value)) {
+                $value = @unserialize($value);
+                if ($value === false) $value = array();
+            }
+            ksort($value);
+            $this->properties[$var] = $value;
+            break;
+
         default:
             // Other value types (array?). Save it as-is.
             $this->properties[$var] = $value;
@@ -220,6 +230,24 @@ class Product
         $this->track_onhand = $row['track_onhand'];
         $this->onhand = $row['onhand'];
         $this->oversell = $row['oversell'];
+
+        // Get the quantity discount table. If coming from a form,
+        // there will be two array variables for qty and discount percent.
+        // From the DB there's a single serialized string
+        if ($fromDB) {
+            // unserialization happens in __set()
+            $this->qty_discounts = $row['qty_discounts'];
+        } else {
+            $qty_discounts = array();
+            for ($i = 0; $i < count($row['disc_qty']); $i++) {
+                $disc_qty = (int)$row['disc_qty'][$i];
+                if ($disc_qty < 1) continue;
+                if (isset($row['disc_amt'][$i])) {
+                    $qty_discounts[$disc_qty] = abs($row['disc_amt'][$i]);
+                }
+            }
+            $this->qty_discounts = $qty_discounts;
+        }
 
         if (isset($row['categories'])) {
             $this->categories = $row['categories'];
@@ -336,6 +364,11 @@ class Product
             $this->shipping_amt = 0;
         }
 
+        // Serialize the quantity discount array
+        $qty_discounts = $this->qty_discounts;
+        if (!is_array($qty_discounts)) $qty_discounts = array();
+        $qty_discounts = DB_escapeString(@serialize($qty_discounts));
+
         // Insert or update the record, as appropriate
         if ($this->id > 0) {
             PAYPAL_debug('Preparing to update product id ' . $this->id);
@@ -369,10 +402,12 @@ class Product
                 onhand='{$this->onhand}',
                 track_onhand='{$this->track_onhand}',
                 oversell = '{$this->oversell}',
+                qty_discounts = '{$qty_discounts}',
                 options='$options',
                 sale_price={$this->sale_price},
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
         $sql = $sql1 . $sql2 . $sql3;
+        //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
             if ($this->isNew) {
@@ -752,6 +787,15 @@ class Product
             $T->parse('UFLD', 'UploadFld', true);
         }
 
+        $i = 0;
+        foreach ($this->qty_discounts as $qty=>$amt) {
+            $T->set_var(array(
+                'disc_qty' . $i => $qty,
+                'disc_amt' . $i => $amt,
+            ) );
+            $i++;
+        }
+
         /*$sql = "SELECT cat_id, cat_name
                 FROM {$_TABLES['paypal.categories']}
                 WHERE enabled=1 AND parent_id=0";
@@ -935,6 +979,11 @@ class Product
         $act_price = $this->sale_price == $this->price ? 
                     $this->price : $this->sale_price;
 
+        $qty_disc_txt = '';
+        foreach ($this->qty_discounts as $qty=>$pct) {
+            $qty_disc_txt .= sprintf('Buy %d, save %.02f%%<br />', $qty, $pct);
+        }
+
         $T->set_var(array(
             'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
             //'has_attrib'        => $this->hasAttributes(),
@@ -951,6 +1000,7 @@ class Product
             'price_prefix'      => $this->currency->Pre(),
             'price_postfix'     => $this->currency->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
+            'qty_disc'          => $qty_disc_txt,
         ) );
 
         // Retrieve the photos and put into the template
@@ -1194,7 +1244,7 @@ class Product
 
         } else {
             // Normal buttons for everyone else
-            if (!$this->hasAttributes() && $this->btn_type != '') {
+            if (!$this->canBuyNow() && $this->btn_type != '') {
                 // Gateway buy-now buttons only used if no options
                 PAYPAL_loadGateways();
                 foreach ($_PP_CONF['gateways'] as $gw_info) {
@@ -1212,7 +1262,7 @@ class Product
         // and cart is enabled, and product is not a donation. Donations
         // can't be mixed with products, so don't allow adding to the cart.
         if ($add_cart && $this->btn_type != 'donation' &&
-                ($this->price > 0 || $this->hasAttributes()) ) {
+                ($this->price > 0 || !$this->canBuyNow()) ) {
             if ($this->hasAttributes()) {
                 $tpl_add_cart = 'btn_add_cart_attrib.thtml';
             } else {
@@ -1249,21 +1299,51 @@ class Product
 
 
     /**
+    *   Determine if a "Buy Now" button is allowed for this item.
+    *   Items with attributes or a quantity discount schedule must be
+    *   purchased through the shopping cart to allow for proper price
+    *   calculation.
+    *
+    *   @return boolean     True to allow Buy Now, False to disable
+    */
+    public function canBuyNow()
+    {
+        if ($this->hasAttributes() ||
+            !empty($this->qty_discounts)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
     *   Get the unit price of this product, considering the specified options.
     *
     *   @param  array   $options    Array of integer option values
     *   @return float       Product price, including options
     */
-    public function getPrice($options = array())
+    public function getPrice($options = array(), $quantity = 1)
     {
+        if (!is_array($options)) $options = array($options);
         $price = $this->price;
+
         // future: return sale price if on sale, otherwise base price
-        //$price = $this->sale_price;
         foreach ($options as $key) {
             if (isset($this->options[$key])) {
                 $price += (float)$this->options[$key]['attr_price'];
             }
         }
+        $discount_factor = 1;
+        foreach ($this->qty_discounts as $qty=>$discount) {
+            if ($quantity < $qty) {
+                break;
+            } else {
+                $discount_factor = (100 - $discount) / 100;
+            }
+        }
+        $price *= $discount_factor;
+        $price = round($price, $this->currency->Decimals());
         return $price;
     }
 
@@ -1299,7 +1379,7 @@ class Product
     *   @param  string  $order_id   Optional order ID (not used yet)
     *   @return integer     Zero or error value
     */
-    function handlePurchase($qty, $order_id='')
+    public function handlePurchase($qty, $order_id='')
     {
         global $_TABLES;
 
@@ -1319,10 +1399,23 @@ class Product
     }
 
 
-    function cancelPurchase($qty, $order_id='')
+    public function cancelPurchase($qty, $order_id='')
     {
     }
 
+
+    public function getOption($key)
+    {
+        if (isset($this->options[$key])) {
+            return array(
+                'name' => $this->options[$key]['attr_name'],
+                'value' => $this->options[$key]['attr_value'],
+                'price' => $this->options[$key]['attr_price'],
+            );
+        } else {
+            return false;
+        }
+    }
 }   // class Product
 
 ?>

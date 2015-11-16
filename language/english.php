@@ -257,6 +257,7 @@ $LANG_PP = array (
     'top_rated' => 'Top Rated',
     'newest' => 'Newest',
     ),
+'qty_disc_text' => 'Discounts calculated at checkout',
 );
 
 

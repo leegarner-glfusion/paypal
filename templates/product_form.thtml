@@ -4,7 +4,7 @@
 {!endif}
 
 <form action="{pi_admin_url}/index.php" method="post" 
-    class="paypalProductForm"
+    class="paypalForm paypalProductForm"
     enctype="multipart/form-data" onsubmit='set_postcontent();'>
 
   {!if product_id}
@@ -263,6 +263,30 @@
         <option value="2" {oversell_sel2} >{$LANG_PP['oversell_hide']}</option>
       </select>
     </p>
+
+    <div id="qty_discounts">
+      <label>Quantiy Discounts:</label>
+       <a href="#" onclick="popupWindow('{doc_url}#desc_qty_discounts', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+      </label>
+      <table border="0" align="left">
+      <tr>
+        <th>Min. Purchase</th><th>Discount %</th>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[0]" value="{disc_qty0}" /></td>
+        <td><input type="text" size="5" name="disc_amt[0]" value="{disc_amt0}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[1]" value="{disc_qty1}" /></td>
+        <td><input type="text" size="5" name="disc_amt[1]" value="{disc_amt1}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[2]" value="{disc_qty2}" /></td>
+        <td><input type="text" size="5" name="disc_amt[2]" value="{disc_amt2}" /></td>
+      </tr>
+      </table>
+    </div>
 
   </fieldset>
   <font color="red">*</font>{$LANG_PP['indicate_req_fld']}

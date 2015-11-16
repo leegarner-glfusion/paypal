@@ -12,7 +12,6 @@ function PPupdateImage(disp_img, lg_img)
 {!if attributes}
 <script type="text/javascript" language="JavaScript">
 var emsg = "";
-
 function isValidField(obj)
 {
     if (null == obj) {
@@ -142,8 +141,12 @@ $(document).ready(
       {!else}
       <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{price}</span><span class="paypalPrice normal">{price_postfix}</span>
       {!endif}
+      {!if qty_disc}
+      <br /><span class="paypalQtyDisc">{qty_disc}</span>
+      <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
+      {!endif}
       {!if rating_bar}
-        {rating_bar}<br />
+        <div style="margin-top:2em;">{rating_bar}</div>
       {!endif}
     </div>
 

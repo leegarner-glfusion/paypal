@@ -464,7 +464,7 @@ class ppCart
                 // a catalog item, get the "right" price
                 $P = new Product($item_id);
                 $attr_keys = explode(',', $attr_str);
-                $item_price = $P->getPrice($attr_keys);
+                $item_price = $P->getPrice($attr_keys, $item['quantity']);
                 if (!empty($attr_keys)) {
                     // Get the add-on price for attributes
                     $attr_desc = '';
@@ -507,11 +507,12 @@ class ppCart
                 'pi_url'        => PAYPAL_URL,
                 'cart_id'       => $id,
                 'pp_id'         => $counter,
-                'item_id'       => $item['id'],
+                'item_id'       => $item_id,
                 'item_descrip'  => $item['descrip'],
                 'item_price'    => COM_numberFormat($item_price, 2),
                 'item_quantity' => $item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
+                'item_link'     => is_numeric($item_id) ? 'true' : '',
             ) );
             $T->parse('iRow', 'ItemRow', true);
 

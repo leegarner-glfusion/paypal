@@ -17,8 +17,12 @@
       <p />
       <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>
       <span id="price" name="price">{price}</span> {currency}
+      {!if qty_disc}
+      <br /><span class="paypalQtyDisc">{qty_disc_txt}</span>
+      <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
+      {!endif}
       {!if rating_bar}
-        {rating_bar}<br />
+        <div style="margin-top:2em;">{rating_bar}</div>
       {!endif}
     </div>
 

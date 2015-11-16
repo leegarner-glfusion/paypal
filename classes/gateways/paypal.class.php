@@ -210,22 +210,24 @@ class paypal extends PaymentGw
 
         foreach ($cartItems as $item_id=>$item) {
             $opt_str = '';
+            list($db_item_id, $options) = explode('|', $item_id);
+            $P = new Product($db_item_id);
+            $db_item_id = DB_escapeString($db_item_id);
             if (is_array($item['options'])) {
-                list($db_item_id, $options) = explode('|', $item_id);
                 $opts = explode(',', $options);
-                $db_item_id = DB_escapeString($db_item_id);
                 foreach ($opts as $optval) {
-                    $optval = (int)$optval;
-                    $value = DB_getItem($_TABLES['paypal.prod_attr'],
-                        'attr_value',
-                        "item_id='{$db_item_id}' AND attr_id={$optval}");
-                    if (!empty($value)) $opt_str .= ', ' . $value;
+                    $opt_info = $P->getOption($optval);
+                    if ($opt_info) {
+                        $opt_str .= ', ' . $opt_info['value'];
+                    }
                 }
                 $item['descrip'] .= $opt_str;
+            } else {
+                $opts = array();
             }
             $fields['item_number_' . $i] = htmlspecialchars($item_id);
             $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
-            $fields['amount_' . $i] = $item['price'];
+            $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
             $fields['quantity_' . $i] = $item['quantity'];
             $total_amount += $item['price'];
 

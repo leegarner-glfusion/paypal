@@ -238,6 +238,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `onhand` int(10) unsigned DEFAULT '0',
   `sale_price` DECIMAL(15,4),
   `oversell` tinyint(1) NOT NULL DEFAULT 0,
+  `qty_discounts` text DEFAULT '',
   PRIMARY KEY  (`id`),
   KEY `products_name` (`name`),
   KEY `products_price` (`price`)
@@ -705,7 +706,8 @@ $PP_UPGRADE['0.5.7'] = array(
         ('phpblock', 'paypal_recent', 'Newest Items', 'all', 
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
     "ALTER TABLE {$_TABLES['paypal.products']}
-        CHANGE dt_add dt_add datetime not null",
+        CHANGE dt_add dt_add datetime not null,
+        ADD `qty_discounts` text DEFAULT '' AFTER `oversell`",
     "UPDATE {$_TABLES['paypal.products']}
         SET dt_add = NOW()",
     "ALTER TABLE {$_TABLES['paypal.cart']}

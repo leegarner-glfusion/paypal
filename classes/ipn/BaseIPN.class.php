@@ -266,7 +266,7 @@ class BaseIPN
                 } else {
                     $opts = array();
                 }
-                $price = $P->getPrice($opts);
+                $price = $P->getPrice($opts, $item['quantity']);
             }
 
             // calculate the total purchase price
