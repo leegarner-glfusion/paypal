@@ -1687,10 +1687,32 @@ function PAYPAL_debug($msg, $type = 'debug')
 }
 
 
+/**
+*   Select the template to use for product detail pages, by default
+*
+*   @return array   $option => path
+*/
 function plugin_configmanager_select_product_tpl_ver_paypal()
 {
     $A = array();
     $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
+    foreach ($dirs as $dir) {
+        $opt = end(explode('/', $dir));
+        $A[$opt] = '/' . $opt; 
+    }
+    return $A;
+}
+
+
+/**
+*   Select the template to use for product list pages
+*
+*   @return array   $option => path
+*/
+function plugin_configmanager_select_list_tpl_ver_paypal()
+{
+    $A = array();
+    $dirs = glob(PAYPAL_PI_PATH . '/templates/list/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $opt = end(explode('/', $dir));
         $A[$opt] = '/' . $opt; 
