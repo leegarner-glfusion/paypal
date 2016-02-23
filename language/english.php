@@ -258,6 +258,7 @@ $LANG_PP = array (
     'newest' => 'Newest',
     ),
 'qty_disc_text' => 'Discounts calculated at checkout',
+'order_instr' => 'Special Order Insructions',
 );
 
 
@@ -323,6 +324,7 @@ $LANG_confignames['paypal'] = array(
     'shop_name' => 'Shop Name',
     'shop_addr' => 'Shop Address',
     'product_tpl_ver' => 'Default Product Template',
+    'list_tpl_ver' => 'Product List Template',
     'cache_max_age' => 'Max file cache age in seconds',
 );
 
