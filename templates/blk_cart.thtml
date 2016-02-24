@@ -23,7 +23,7 @@
 
 <span class="aligncenter">
     <a href="{pi_url}/index.php?view=cart">{$LANG_PP['viewcart']}</a>
-    &nbsp;-&nbsp;
-    <a href="{pi_url}/index.php?checkout=x">{$LANG_PP['checkout']}</a> 
+    <!--&nbsp;-&nbsp;
+    <a href="{pi_url}/index.php?checkout=x">{$LANG_PP['checkout']}</a> -->
 </span>
 {# end {templatelocation} #}

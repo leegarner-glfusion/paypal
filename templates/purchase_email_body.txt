@@ -11,22 +11,20 @@
   <td style="width:80px; text-align:right;">{ext}</td>
 </tr>
 <!-- END ItemList -->
-</table>
-<table border="0" cellpadding="2">
 <tr>
-  <td>Total Items:</td><td align="right">{payment_items}</td>
+  <td colspan="3" align="right">Total Items:</td><td align="right">{payment_items}</td>
 </tr>
 <tr>
-  <td>Tax</td><td align="right">{tax}</td>
+  <td colspan="3"> align="right"Tax</td><td align="right">{tax}</td>
 </tr>
 <tr>
-  <td>Shipping</td><td align="right">{shipping}</td>
+  <td colspan="3" align="right">Shipping</td><td align="right">{shipping}</td>
 </tr>
 <tr>
-  <td>Handling</td><td align="right">{handling}</td>
+  <td colspan="3" align="right">Handling</td><td align="right">{handling}</td>
 </tr>
 <tr>
-  <td>Purchase Total:</td><td align="right">{payment_gross}</td>
+  <td colspan="3" align="right">Purchase Total:</td><td align="right">{payment_gross}</td>
 </tr>
 </table>
 

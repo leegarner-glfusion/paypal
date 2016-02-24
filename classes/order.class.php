@@ -45,6 +45,7 @@ class ppOrder
         $this->uid = $_USER['uid'];
         $this->buyer_email = $_USER['email'];
         $this->order_date = $_PP_CONF['now']->toMySql();
+        $this->instructions = '';
         if (!empty($id)) {
             $this->order_id = $id;
             if (!$this->Load($id)) {
@@ -285,6 +286,7 @@ class ppOrder
         $this->shipping = $A['shipping'];
         $this->handling = $A['handling'];
         $this->tax = $A['tax'];
+        $this->instructions = $A['instructions'];
 
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
@@ -387,6 +389,7 @@ class ppOrder
                 "tax = '{$this->tax}'",
                 "shipping = '{$this->shipping}'",
                 "handling = '{$this->handling}'",
+                "instructions = '" . DB_escapeString($this->instructions) . "'",
         );
         foreach ($this->_addr_fields as $fld) {
             $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -475,6 +478,7 @@ class ppOrder
             'subtotal' => COM_numberFormat($subtotal, 2),
             'have_billto' => 'true',
             'have_shipto' => 'true',
+            'order_instr' => htmlspecialchars($this->instructions),
         ) );
 
         if ($isAdmin) {

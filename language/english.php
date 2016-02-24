@@ -252,13 +252,14 @@ $LANG_PP = array (
 'back_to_catalog' => 'Back to Catalog',
 'list_sort_options' => array(
     //'most_popular' => 'Most Popular',
+    'name' => 'Name A-Z',
     'price_l2h' => 'Price - Low to High',
     'price_h2l' => 'Price - High to Low',
     'top_rated' => 'Top Rated',
     'newest' => 'Newest',
     ),
 'qty_disc_text' => 'Discounts calculated at checkout',
-'order_instr' => 'Special Order Insructions',
+'order_instr' => 'Special Order Instructions',
 );
 
 

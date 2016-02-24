@@ -680,7 +680,7 @@ class BaseIPN
         $this->Order->handling = $this->pp_data['pmt_handling'];
         $this->Order->buyer_email = $this->pp_data['payer_email'];
         $this->Order->log_user = $this->gw->Description();
-
+        if ($cart) $this->Order->instructions = $cart->getInstructions();
         $order_id = $this->Order->Save();
         $db_order_id = DB_escapeString($order_id);
 

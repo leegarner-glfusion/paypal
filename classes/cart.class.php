@@ -200,17 +200,23 @@ class ppCart
         if (!$cart) return;     // Error with the array, just quit
         $cart = DB_escapeString($cart);
 
+        $info = @serialize($this->m_info);
+        if (!$info) $info = '';
+        $info = DB_escapeString($info);
+
         // New way- use the cart table
         $sql = "INSERT INTO {$_TABLES['paypal.cart']} 
-                (cart_id, cart_uid, cart_contents, last_update)
+                (cart_id, cart_uid, cart_info, cart_contents, last_update)
             VALUES (
                 '" . $this->cartID(true) . "',
                 $uid,
+                '$info',
                 '$cart',
                 '{$_PP_CONF['now']->toMySql()}'
             )
             ON DUPLICATE KEY UPDATE
                 cart_contents = '$cart',
+                cart_info = '$info',
                 last_update = '{$_PP_CONF['now']->toMySql()}'";
         //echo $sql;die;
         DB_query($sql, 1);
@@ -327,7 +333,7 @@ class ppCart
     *   @param  array   $items  Array if items as itemID=>newQty
     *   @return array           Updated cart contents
     */
-    function UpdateAllQty($items)
+    public function UpdateAllQty($items)
     {
         if (!is_array($items)) {
             return;
@@ -363,6 +369,19 @@ class ppCart
             if ($save) $this->Save();
         }
         return $this->m_cart;
+    }
+
+
+    public function setInstructions($text)
+    {
+        $this->m_info['order_instr'] = $text;
+        $this->Save();
+    }
+
+
+    public function getInstructions()
+    {
+        return $this->m_info['order_instr'];
     }
 
 
@@ -479,7 +498,6 @@ class ppCart
                         }*/
                     }
                     $item['descrip'] .= $attr_desc;
-
                 }
 
                 // Get shipping amount and weight
@@ -538,6 +556,7 @@ class ppCart
             'shipping'  => $shipping > 0 ? $currency->Format($shipping) : '',
             'subtotal'  => $subtotal > 0 ? $currency->Format($subtotal) : '',
             'total'     => $currency->Format($total),
+            'order_instr' => htmlspecialchars($this->getInstructions()),
         ) );
 
         // If this is the final checkout, then show the payment buttons
@@ -561,7 +580,7 @@ class ppCart
     *   @uses   PaymentGw::CheckoutButton()
     *   @return string      HTML for checkout buttons
     */
-    function getCheckoutButtons()
+    public function getCheckoutButtons()
     {
         global $_PP_CONF;
 
@@ -595,13 +614,13 @@ class ppCart
     *   @param  string  $item_id    Item ID to check
     *   @return boolean     True if item exists in cart, False if not
     */
-    function Contains($item_id)
+    public function Contains($item_id)
     {
-        if (array_key_exists($item_id, $this->m_cart)) {
-            return true;
-        } else {
+        // No such item in the cart
+        if (!array_key_exists($item_id, $this->m_cart)) {
             return false;
         }
+        return true;
     }
 
 
@@ -610,7 +629,7 @@ class ppCart
     *
     *   @return boolean     True if cart is NOT empty, False if it is
     */
-    function hasItems()
+    public function hasItems()
     {
         return empty($this->m_cart) ? false : true;
     }
@@ -625,7 +644,7 @@ class ppCart
     *
     *   @return string  Cart ID
     */
-    function makeCartID()
+    public function makeCartID()
     {
         global $_CONF;
 
@@ -640,7 +659,7 @@ class ppCart
     *   @param  boolean $escape True to escape return value for DB
     *   @return string      Cart ID string
     */
-    function cartID($escape=false)
+    public function cartID($escape=false)
     {
         if ($escape)
             return DB_escapeString($this->m_cart_id);
@@ -655,7 +674,7 @@ class ppCart
     *   @param  array   $A      Array of address elements
     *   @param  string  $type   Type of address, billing or shipping
     */
-    function setAddress($A, $type = 'billto')
+    public function setAddress($A, $type = 'billto')
     {
         global $_TABLES;
 
@@ -696,7 +715,7 @@ class ppCart
     *   @param  string  $type   Type of address, billing or shipping
     *   @return array           Array of address elements
     */
-    function getAddress($type)
+    public function getAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
         return $this->m_info[$type];

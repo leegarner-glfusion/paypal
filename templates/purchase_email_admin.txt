@@ -14,6 +14,7 @@ Buyer: {payer_name} (ID {buyer_uid}, {user_name})<br />
 <p>
 {purchase_details}
 </p>
+<p>Special Instructions: {order_instr}</p>
 <p>Order Status: {status}</p>
 <p>Payment was made via {gateway_name} on {payment_date}</p>
 

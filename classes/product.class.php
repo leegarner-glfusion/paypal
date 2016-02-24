@@ -1047,41 +1047,59 @@ class Product
         $cbrk = '';
         $attributes = '';
         foreach ($this->options as $id=>$Attr) {
+            /*if ($Attr['attr_value'] === '') {
+                $type = 'text';
+            } else {
+                $type = 'select';
+            }*/
+            $type = 'select';
             if ($Attr['attr_name'] != $cbrk) {
                 if ($i > 0) {
-                    $attributes .= "</select></td></tr>\n";
+                    if ($type == 'select') {
+                        $attributes .= '</select>';
+                    }
+                    $attributes .= "</td></tr>\n";
                 } else {
                     $attributes = '<table border="0">'. "\n";
                 }
                 $cbrk = $Attr['attr_name'];
-                $attributes .= "<tr><td>
-                    <input type=\"hidden\" name=\"on{$i}\" 
-                    value=\"{$Attr['attr_name']}\">\n
-                    <input type=\"hidden\" name=\"os{$i}\" 
-                    value=\"\">\n
-                    {$Attr['attr_name']}:</td>
-                    <td align=\"left\">
-                    <select id=\"options\" name=\"options[]\"
-                    onchange=\"ProcessForm(this.form);\">\n";
-                    /*<td align=\"left\"><select name=\"pp_os{$i}\"*/
+                $attributes .= '<tr><td>';
+                if ($type == 'select') {
+                    $attributes .= "<input type=\"hidden\" name=\"on{$i}\" 
+                        value=\"{$Attr['attr_name']}\">\n
+                        <input type=\"hidden\" name=\"os{$i}\" 
+                        value=\"\">\n
+                        {$Attr['attr_name']}:</td>
+                        <td align=\"left\">
+                        <select class=\"uk-contrast uk-form\" id=\"options\" name=\"options[]\"
+                        onchange=\"ProcessForm(this.form);\">\n";
+                        /*<td align=\"left\"><select name=\"pp_os{$i}\"*/
+                }
                 $i++;
             }
-            if ($Attr['attr_price'] != 0) {
-                $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
-            } else {
+            if ($type == 'select') {
+                if ($Attr['attr_price'] != 0) {
+                    $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
+                } else {
                 $attr_str = '';
-            }
-            $attributes .= '<option value="' . $id . '|' . 
+                }
+                $attributes .= '<option value="' . $id . '|' . 
                     $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
                     $Attr['attr_value'] . $attr_str . 
                     '</option>' . LB;
+            } else {
+                $attributes .= "<input type=\"hidden\" name=\"on{$i}\" 
+                        value=\"{$Attr['attr_name']}\">\n";
+                $attributes .= $Attr['attr_name'] . ':</td>
+                    <td><input class="uk-contrast uk-form" type"text" name="os' . $i. '" value="" size="32" /></td></tr>';
+            }
         }
 
         if ($attributes != '') {
             $attributes .= "</select></td></tr></table>\n";
             $T->set_var('attributes', $attributes);
         }
- 
+
         $buttons = $this->PurchaseLinks();
         $T->set_block('product', 'BtnBlock', 'Btn');
         foreach ($buttons as $name=>$html) {

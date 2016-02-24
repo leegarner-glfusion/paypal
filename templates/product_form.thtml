@@ -163,8 +163,7 @@
         <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-      <input type="checkbox" name="rating_enabled" value="1" 
-        {rating_chk} />
+      <input type="checkbox" name="rating_enabled" value="1" {rating_chk} />
     </p>
 
   </fieldset>

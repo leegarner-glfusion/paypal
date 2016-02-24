@@ -83,7 +83,7 @@
     <div class="paypalOrderItems">
       <table>
         <tr>
-          <th class="alignright">{$LANG_PP['description']}</th>
+          <th class="aligncenter">{$LANG_PP['description']}</th>
           <th class="alignright">{$LANG_PP['price']}</th>
           <th class="alignright">{$LANG_PP['quantity']}</th>
           <th class="alignright">{$LANG_PP['total']}</th>
@@ -129,6 +129,9 @@
     </div>
   </div>
 
+  <div id="orderInstructions"><span class="orderInstructionsTitle">{$LANG_PP['order_instr']}:</span><br />
+    {order_instr}
+  </div>
   <div style="clear:both;">
   {!if checkout}
     <div>

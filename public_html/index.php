@@ -90,7 +90,9 @@ case 'checkout':
         // Update the cart quantities if coming from the cart view.
         $ppGCart->UpdateAllQty($_POST['quantity']);
     }
-
+    if (isset($_POST['order_instr'])) {
+        $ppGCart->setInstructions($_POST['order_instr']);
+    }
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         USES_paypal_class_workflow();
         USES_paypal_class_userinfo();

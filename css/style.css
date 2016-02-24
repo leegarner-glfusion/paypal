@@ -371,4 +371,12 @@ div.paypalProductSort {
 div.paypalProductSearch {
     float: right;
 }
+#orderInstructions {
+    clear: both;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.orderInstructionsTitle {
+    font-weight: bold;
+}
 

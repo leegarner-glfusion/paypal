@@ -33,6 +33,7 @@ follow:
   <td>Purchase Total:</td><td align="right">{payment_gross}</td>
 </tr>
 </table>
+<p>Special Instructions: {order_instr}</p>
 <p>Order Status: {status}</p>
 <p>Payment was made via {gateway_name} on {payment_date}</p>
 

@@ -427,12 +427,6 @@ function PAYPAL_ProductList($cat=0, $search='')
         }
     }
 
-    $sortby_opts = array(
-        'name' => $LANG_PP['name'],
-        'price' => $LANG_PP['price'],
-        'dt_add' => $LANG_PP['dt_add'],
-        'rating' => $LANG13['rating'],
-    );
     //$sortdir = $_REQUEST['sortdir'] == 'DESC' ? 'DESC' : 'ASC';
     //$sql_sortdir = $sortdir;
     $sortby = isset($_REQUEST['sortby']) ? $_REQUEST['sortby'] : $_PP_CONF['order'];
@@ -468,7 +462,6 @@ function PAYPAL_ProductList($cat=0, $search='')
         break;
     }
     $sortby_options = '';
-    //foreach ($sortby_opts as $value=>$text) {
     foreach ($LANG_PP['list_sort_options'] as $value=>$text) {
         $sel = $value == $sortby ? ' selected="selected"' : '';
         $sortby_options .= "<option value=\"$value\" $sel>$text</option>\n";
