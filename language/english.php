@@ -260,6 +260,11 @@ $LANG_PP = array (
     ),
 'qty_disc_text' => 'Discounts calculated at checkout',
 'order_instr' => 'Special Order Instructions',
+'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />' .
+    'Existing attributes will not be changed',
+'copy_from' => 'Copy From',
+'target_prod' => 'Target Product',
+'target_cat' => 'Target Category',
 );
 
 

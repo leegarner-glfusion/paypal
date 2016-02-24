@@ -1,0 +1,19 @@
+{# begin {templatelocation} #}
+<form action="{site_admin_url}/plugins/paypal/index.php" method="post">
+<p>{$LANG_PP['copy_attributes']}:<br />
+{$LANG_PP['copy_from']}: <select name="src_prod">
+<option value="0">-- Make Selection --</option>
+{product_select}
+</select>&nbsp;&nbsp;
+{$LANG_PP['target_prod']}: <select name="dest_prod">
+<option value="0">-- Make Selection --</option>
+{product_select}
+</select>&nbsp;&nbsp;
+{$LANG_PP['target_cat']}: <select name="dest_cat">
+<option value="0">-- Make Selection --</option>
+{cat_select}
+</select>
+</p>
+<p><button class="uk-button uk-button-danger" name="attrcopy" type="submit" value="attrcopy">{$LANG_ADMIN['copy']}</button>
+</form>
+{# end {templatelocation} #}

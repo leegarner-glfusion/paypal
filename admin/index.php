@@ -47,7 +47,7 @@ $expected = array(
     // Actions to perform
     'deleteproduct', 'deletecatimage', 'deletecat', 'delete_img',
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
-    'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete',
+    'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit', 
@@ -204,6 +204,44 @@ case 'wfmove':
         break;
     }
     $view = 'wfadmin';
+    break;
+
+case 'attrcopy':
+    // Copy attributes from a product to another product or category
+    $src_prod = (int)$_POST['src_prod'];
+    $dest_prod = (int)$_POST['dest_prod'];
+    $dest_cat = (int)$_POST['dest_cat'];
+
+    // Nothing to do if no source product selected
+    if ($src_prod < 1) break;
+
+    if ($dest_prod > 0 && $dest_prod != $src_prod) {
+        $sql = "INSERT IGNORE INTO {$_TABLES['paypal.prod_attr']}
+            SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
+            FROM {$_TABLES['paypal.prod_attr']}
+            WHERE item_id = $src_prod";
+        DB_query($sql, 1);
+    }
+
+    // Copy product attributes to all products in a category.
+    // Ignore the source product, which may or may not be in the category.
+    if ($dest_cat > 0) {
+        // Get all products in the category
+        $res = DB_query("SELECT id FROM {$_TABLES['paypal.products']}
+                WHERE cat_id = $dest_cat
+                AND id <> $src_prod");
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $dest_prod = (int)$A['id'];
+                $sql = "INSERT IGNORE INTO {$_TABLES['paypal.prod_attr']}
+                SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
+                FROM {$_TABLES['paypal.prod_attr']}
+                WHERE item_id = $src_prod";
+                DB_query($sql, 1);
+            }
+        }
+    }
+    echo COM_refresh(COM_buildUrl(PAYPAL_ADMIN_URL . '/index.php?attributes=x'));
     break;
 
 default:
@@ -925,10 +963,11 @@ function PAYPAL_adminlist_Attributes()
 
     $display = COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
 
+    $product_selection = COM_optionList($_TABLES['paypal.products'], 'id, name', $sel_prod_id);
     $filter = "{$LANG_PP['product']}: <select name=\"product_id\"
         onchange=\"this.form.submit();\">
         <option value=\"0\">-- Any --</option>\n" .
-        COM_optionList($_TABLES['paypal.products'], 'id, name', $sel_prod_id) .
+        $product_selection .
         "</select>&nbsp;\n";
 
     $query_arr = array('table' => 'paypal.prod_attr',
@@ -950,6 +989,16 @@ function PAYPAL_adminlist_Attributes()
     $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Attribute',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', $options, '');
+
+    // Create the "copy attributes" form at the bottom
+    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T->set_file('copy_attr_form', 'copy_attributes_form.thtml');
+    $T->set_var(array(
+        'src_product'       => $product_selection,
+        'product_select'    => COM_optionList($_TABLES['paypal.products'], 'id, name'),
+        'cat_select'        => COM_optionList($_TABLES['paypal.categories'], 'cat_id,cat_name'),
+    ) );
+    $display .= $T->parse('output', 'copy_attr_form');
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
