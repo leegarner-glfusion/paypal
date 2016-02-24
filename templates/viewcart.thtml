@@ -1,4 +1,5 @@
 {# begin {templatelocation} #}
+<a href="{pi_url}">{$LANG_PP['back_to_catalog']}</a>
 <div align="center">
 <h1>{$LANG_PP['cart_blocktitle']}</h1>
 <form action="{pi_url}/index.php" method="post">
