@@ -43,7 +43,7 @@ class ProductImage extends upload
         $this->setContinueOnError(true);
         $this->setLogFile('/tmp/warn.log');
         $this->setDebug(true);
-        parent::upload();
+        $this->_setAvailableMimeTypes();
 
         // Before anything else, check the upload directory
         if (!$this->setPath($_PP_CONF['image_dir'])) {
