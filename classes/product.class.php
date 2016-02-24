@@ -1436,6 +1436,61 @@ class Product
             return false;
         }
     }
+
+
+    /**
+    *   Duplicate a product.
+    *   1 - Creates a new product record
+    *   2 - Copies all images
+    *   3 - Creates image records
+    *
+    *   @return boolean     True on success, False on failure
+    */
+    public function Duplicate()
+    {
+        global $_TABLES, $_PP_CONF;
+
+        $old_id = $this->id;
+        if ($old_id < 1) return false;      // nothing to do
+
+        // Set product variables to indicate a new product and save it.
+        $this->isNew = true;
+        $this->id = 0;
+        $this->name = $this->name . ' - Copy';
+        $this->Save();
+        if ($this->id < 1) {
+            COM_errorLog("Error duplicating product id $old_id");
+            return false;
+        }
+        $new_id = $this->id;
+
+        // Copy all the image files
+        $sql = "SELECT * FROM {$_TABLES['paypal.images']}
+                WHERE product_id = $old_id;";
+        $res = DB_query($sql, 1);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $parts = explode('_', $A['filename']);
+                $new_fname = "{$new_id}_$parts[1]";
+                $src_f = $_PP_CONF['image_dir'] . '/' . $A['filename'];
+                $dst_f = $_PP_CONF['image_dir'] . '/' . $new_fname;
+                if (@copy($src_f, $dst_f)) {
+                    // copy successful, insert record into table
+                    $sql = "INSERT INTO {$_TABLES['paypal.images']}
+                                (product_id, filename)
+                            VALUES ('$new_id', '" . DB_escapeString($new_fname) . "')";
+                    DB_query($sql, 1);
+                } else {
+                    COM_errorLog("Error copying file $src_f to $dst_f, continuing");
+                }
+            }
+        } else {
+            COM_errorLog("Bad image query for product $old_id, continuing");
+        }
+
+        return true;
+    }
+
 }   // class Product
 
 ?>

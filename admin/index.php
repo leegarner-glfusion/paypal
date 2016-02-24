@@ -48,6 +48,7 @@ $expected = array(
     'deleteproduct', 'deletecatimage', 'deletecat', 'delete_img',
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
+    'dup_product',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit', 
@@ -68,6 +69,12 @@ foreach($expected as $provided) {
 $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : '';
 
 switch ($action) {
+case 'dup_product':
+    $P = new Product($_REQUEST['id']);
+    $P->Duplicate();
+    echo COM_refresh(PAYPAL_ADMIN_URL.'/index.php');
+    break;
+
 case 'deleteproduct':
     $P = new Product($_REQUEST['id']);
     if (!$P->isUsed()) {
@@ -409,6 +416,9 @@ function PAYPAL_adminlist_Product($cat_id=0)
         array('text' => $LANG_ADMIN['edit'], 
                 'field' => 'edit', 'sort' => false,
                 'align' => 'center'),
+        array('text' => $LANG_ADMIN['copy'],
+                'field' => 'copy', 'sort' => false,
+                'align' => 'center'),
         array('text' => $LANG_PP['enabled'], 
                 'field' => 'enabled', 'sort' => false,
                 'align' => 'center'),
@@ -427,6 +437,9 @@ function PAYPAL_adminlist_Product($cat_id=0)
                 'field' => 'prod_type', 'sort' => true),
         array('text' => $LANG_ADMIN['delete'],
                 'field' => 'delete', 'sort' => false,
+                'align' => 'center'),
+        array('text' => $LANG_ADMIN['copy'],
+                'field' => 'copy', 'sort' => false,
                 'align' => 'center'),
     );
 
@@ -483,6 +496,13 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
     $retval = '';
 
     switch($fieldname) {
+    case 'copy':
+        $retval .= '<span>' . COM_createLink(
+                $icon_arr['copy'],
+                PAYPAL_ADMIN_URL . "/index.php?dup_product=x&amp;id={$A['id']}"
+            ) . "</span>\n";
+        break;
+
     case 'edit':
         $retval .= '<span>' . COM_createLink(
                 $icon_arr['edit'],
