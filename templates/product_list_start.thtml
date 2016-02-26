@@ -1,5 +1,8 @@
 {# begin {templatelocation} #}
 {breadcrumbs}
+{!if cat_desc}
+<p>{cat_desc}</p>
+{!endif}
 <div class="paypalListSeparator">
 <hr />
 </div>

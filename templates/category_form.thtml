@@ -28,8 +28,7 @@
     <tr>
       <td>{$LANG_PP['description']}:</td>
       <td>
-        <input type="text" name="description" value="{description}" 
-            size="40" maxlength="255" />
+        <textarea name="description" rows="4" cols="100">{description}</textarea>
       </td>
     </tr>
 

@@ -287,7 +287,7 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   `cat_id` smallint(5) unsigned NOT NULL auto_increment,
   `parent_id` smallint(5) unsigned default '0',
   `cat_name` varchar(255) default '',
-  `description` varchar(255) default '',
+  `description` text default '',
   `enabled` tinyint(1) unsigned default '1',
   `group_id` mediumint(8) unsigned NOT NULL default '1',
   `owner_id` mediumint(8) unsigned NOT NULL default '1',
@@ -719,6 +719,8 @@ $PP_UPGRADE['0.5.7'] = array(
         CHANGE last_mod last_mod datetime NOT NULL",
     "ALTER TABLE {$_TABLES['paypal.order_log']}
         CHANGE ts ts datetime NOT NULL",
+    "ALTER TABLE {$_TABLES['paypal.categories']}
+        CHANGE description description text",
     "TRUNCATE {$_TABLES['paypal.cart']}",
 );
  
