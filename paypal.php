@@ -7,7 +7,7 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Mark Evans <mark@glfusion.org
-*   @copyright  Copyright (c) 2009-2010 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @copyright  Mark Evans <mark@glfusion.org
 *   @package    paypal
 *   @version    0.5.7

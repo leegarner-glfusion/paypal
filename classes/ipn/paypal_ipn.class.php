@@ -5,9 +5,9 @@
 *   Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2011 Lee Garner
+*   @copyright  Copyright (c) 2009-2016 Lee Garner
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -277,6 +277,15 @@ class PaypalIPN extends BaseIPN
             $fees_paid = $this->pp_data['pmt_tax'] + 
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];
+            USES_paypal_class_cart();
+            if (empty($this->pp_data['custom']['cart_id'])) {
+                $this->handleFailure(NULL, 'Missing Cart ID');
+                return false;
+            }
+            // Create a cart and read the info from the cart table.
+            // Actual items purchased and prices will come from the IPN.
+            $ppCart = new ppCart($this->pp_data['custom']['cart_id']);
+            $Cart = $ppCart->Cart();
 
             $items = array();
             for ($i = 1; $i <= $this->ipn_data['num_cart_items']; $i++) {
@@ -307,8 +316,12 @@ class PaypalIPN extends BaseIPN
                     $item_handling = 0;
                 }
                 $unit_price = $item_gross / (float)$this->ipn_data["quantity$i"];
+                // Add the item to the array for the order creation.
+                // IPN item numbers are indexes into the cart, so get the
+                // actual product ID from the cart
                 $this->AddItem(
-                        $this->ipn_data["item_number$i"],
+                        //$this->ipn_data["item_number$i"],
+                        $Cart[$this->ipn_data["item_number$i"]]['item_id'],
                         $this->ipn_data["quantity$i"],
                         $unit_price,
                         $this->ipn_data["item_name$i"],

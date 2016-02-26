@@ -7,7 +7,7 @@
   <input type="hidden" name="upload" value="1" />
   <input type="hidden" name="business" value="{receiver_email}" />
 
-  <table width="500">
+  <table id="paypalViewCartTable" class="paypalViewCartTable">
     <tr>
       <th class="aligncenter">{$LANG_PP['description']}</th>
       <th class="aligncenter">{$LANG_PP['price']}</th>
@@ -36,14 +36,14 @@
       </td>
       <td class="alignright">{item_price}</td>
       <td class="aligncenter">
-        <input type="text" name="quantity[{cart_id}]" value="{item_quantity}" 
+        <input type="text" name="quantity[{cart_item_id}]" value="{item_quantity}" 
           size="3"
           />
 <!--          onchange="javascript:document.getElementById('submit').disabled=true;"-->
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">
-        <a href="{pi_url}/index.php?action=delcartitem&id={cart_id}"><img
+        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><img
             src="{layout_url}/images/admin/delete.png"></a>
       </td>
       <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />

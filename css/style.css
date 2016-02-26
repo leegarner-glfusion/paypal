@@ -380,3 +380,16 @@ div.paypalProductSearch {
     font-weight: bold;
 }
 
+table.paypalViewCartTable {
+    width: 500px;
+}
+
+.paypalViewCartTable a {
+    text-decoration: none;
+}
+
+.paypalProductCustomText {
+    margin-bottom: 5px;
+    line-height: 1.3rem;
+}
+

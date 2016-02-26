@@ -1,21 +1,21 @@
 <?php
 /**
- *  Class to manage products
- *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
- *  @package    paypal
- *  @version    0.5.5
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
- *              GNU Public License v2 or later
- *  @filesource
- */
+*   Class to manage products
+*
+*   @author     Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @package    paypal
+*   @version    0.5.7
+*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*               GNU Public License v2 or later
+*   @filesource
+*/
 
 
 /**
- *  Class for product
- *  @package paypal
- */
+*   Class for product
+*   @package paypal
+*/
 class Product
 {
     /** Property fields.  Accessed via __set() and __get()
@@ -88,6 +88,7 @@ class Product
             $this->track_onhand = $_PP_CONF['def_track_onhand'];
             $this->oversell = $_PP_CONF['def_oversell'];
             $this->qty_discounts = array();
+            $this->custom = '';
         } else {
             $this->id = $id;
             if (!$this->Read()) {
@@ -230,6 +231,7 @@ class Product
         $this->track_onhand = $row['track_onhand'];
         $this->onhand = $row['onhand'];
         $this->oversell = $row['oversell'];
+        $this->custom = $row['custom'];
 
         // Get the quantity discount table. If coming from a form,
         // there will be two array variables for qty and discount percent.
@@ -404,6 +406,7 @@ class Product
                 oversell = '{$this->oversell}',
                 qty_discounts = '{$qty_discounts}',
                 options='$options',
+                custom='" . DB_escapeString($this->custom) . "',
                 sale_price={$this->sale_price},
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
         $sql = $sql1 . $sql2 . $sql3;
@@ -681,6 +684,7 @@ class Product
                                     'checked="checked"' : '',
             'onhand'        => $this->onhand,
             "oversell_sel{$this->oversell}" => 'selected="selected"',
+            'custom' => $this->custom,
         ) );
 
         // Create the button type selections. New products get the default
@@ -984,6 +988,15 @@ class Product
             $qty_disc_txt .= sprintf('Buy %d, save %.02f%%<br />', $qty, $pct);
         }
 
+        $text_field_names = explode('|', $this->custom);
+        $custom = '';
+        foreach ($text_field_names as $text_field_name) {
+            $custom .= htmlspecialchars($text_field_name) .
+                    ': <input type="text" class="paypalProductCustomText" '.
+                    'name="extras[custom][]" '.
+                    'size="80" /><br />' . LB;
+        }
+ 
         $T->set_var(array(
             'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
             //'has_attrib'        => $this->hasAttributes(),
@@ -1001,6 +1014,7 @@ class Product
             'price_postfix'     => $this->currency->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
+            'custom'            => $custom,
         ) );
 
         // Retrieve the photos and put into the template
@@ -1353,6 +1367,7 @@ class Product
             }
         }
         $discount_factor = 1;
+        if (is_array($this->qty_discounts)) {
         foreach ($this->qty_discounts as $qty=>$discount) {
             $qty = (int)$qty;
             if ($quantity < $qty) {     // haven't reached this discount level
@@ -1361,6 +1376,7 @@ class Product
                 $discount = (float)$discount;
                 $discount_factor = (100 - $discount) / 100;
             }
+        }
         }
         $price *= $discount_factor;
         $price = round($price, $this->currency->Decimals());
@@ -1434,6 +1450,27 @@ class Product
             );
         } else {
             return false;
+        }
+    }
+
+
+    /**
+    *   Get the prompt for a custom field.
+    *   Returns "Undefined" if for some reason the field isn't defined.
+    *
+    *   @param  integer $key    Array key into the $custom fields
+    *   @return string      Custom field name, or "undefined"
+    */
+    public function getCustom($key)
+    {
+        static $custom = NULL;
+        if ($custom === NULL) {
+            $custom = explode('|', $this->custom);
+        }
+        if (isset($custom[$key])) {
+            return $custom[$key];
+        } else {
+            return 'Undefined';
         }
     }
 

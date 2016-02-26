@@ -28,6 +28,12 @@
 
     <div id="paypalProductAttrib">
       {attributes}
+      {!if custom}
+      <div>
+        {custom}
+      </div>
+      {!endif}
+
       <!-- BEGIN BtnBlock -->
         {button}<br />
       <!-- END BtnBlock -->

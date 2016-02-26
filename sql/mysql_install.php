@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -239,6 +239,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `sale_price` DECIMAL(15,4),
   `oversell` tinyint(1) NOT NULL DEFAULT 0,
   `qty_discounts` text DEFAULT '',
+  `custom` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id`),
   KEY `products_name` (`name`),
   KEY `products_price` (`price`)
@@ -347,6 +348,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `status` varchar(25) DEFAULT 'pending',
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
+  `instructions` text DEFAULT '',
   PRIMARY KEY (`order_id`)
 )";
 
@@ -707,7 +709,8 @@ $PP_UPGRADE['0.5.7'] = array(
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
     "ALTER TABLE {$_TABLES['paypal.products']}
         CHANGE dt_add dt_add datetime not null,
-        ADD `qty_discounts` text DEFAULT '' AFTER `oversell`",
+        ADD `qty_discounts` text DEFAULT '' AFTER `oversell`,
+        ADD `custom` varchar(255) NOT NULL DEFAULT ''",
     "UPDATE {$_TABLES['paypal.products']}
         SET dt_add = NOW()",
     "ALTER TABLE {$_TABLES['paypal.cart']}
@@ -716,6 +719,7 @@ $PP_UPGRADE['0.5.7'] = array(
         CHANGE last_mod last_mod datetime NOT NULL",
     "ALTER TABLE {$_TABLES['paypal.order_log']}
         CHANGE ts ts datetime NOT NULL",
+    "TRUNCATE {$_TABLES['paypal.cart']}",
 );
  
 ?>

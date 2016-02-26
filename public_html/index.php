@@ -159,6 +159,9 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
     if (isset($_POST['_ret_url'])) {
         COM_refresh($_POST['_ret_url']);
         exit;
+    } else {
+        COM_refresh(PAYPAL_URL);
+        exit;
     }
     break;
 

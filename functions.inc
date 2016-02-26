@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2011 Lee Garner
+*   @copyright  Copyright (c) 2009-2016 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.1
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -647,22 +647,38 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
     global $_CONF, $_TABLES;
 
     if ($op == 'tagname' ) {
-        return 'paypal';
+        return array('paypal','paypal_cat');
     } else if ($op == 'parse') {
-        $id = COM_applyFilter($autotag['parm1'], true);
-        $url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
+        switch ($autotag['tag']) {
+        case 'paypal':
+            $id = COM_applyFilter($autotag['parm1'], true);
+            $url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
 
-        // Allow the author to use different text for the link.  Default
-        // is the stored product name.
-        if (empty($autotag['parm2'])) {
-            $linktext = DB_getItem($_TABLES['paypal.products'], 
-                    'name', "id = '$id'");
-        } else {
-            $linktext = $autotag['parm2'];
+            // Allow the author to use different text for the link.  Default
+            // is the stored product name.
+            if (empty($autotag['parm2'])) {
+                $linktext = DB_getItem($_TABLES['paypal.products'], 
+                        'name', "id = '$id'");
+            } else {
+                $linktext = $autotag['parm2'];
+            }
+            $link = '<a href="' . $url . '">' . $linktext . '</a>';
+            $content = str_replace ($autotag['tagstr'], $link, $content);
+            break;
+
+        case 'paypal_cat':
+            $id = COM_applyFilter($autotag['parm1'], true);
+            $url = COM_buildUrl(PAYPAL_URL.'/index.php?category='.$id);
+            if (empty($autotag['parm2'])) {
+                $linktext = DB_getItem($_TABLES['paypal.categories'],
+                        'cat_name', "cat_id = '$id'");
+            } else {
+                $linktext = $autotag['parm2'];
+            }
+            $link = '<a href="' . $url . '">' . $linktext . '</a>';
+            $content = str_replace ($autotag['tagstr'], $link, $content);
+            break;
         }
-        $link = '<a href="' . $url . '">' . $linktext . '</a>';
-        $content = str_replace ($autotag['tagstr'], $link, $content);
-
         return $content;
     }
 }
@@ -1047,26 +1063,38 @@ function phpblock_paypal_cart()
     $T->set_file('shopping_cart', 'blk_cart.thtml');
 
     $T->set_block('shopping_cart', 'CartRow', 'cRow');
+
     foreach ($cart->Cart() as $id=>$item) {
         $link = true;
-        if (strstr($id, ':')) {
-            $item_info = explode(':', $id);
+        if (strstr($item['item_id'], ':')) {
+            $item_info = explode(':', $item['item_id']);
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
 
-        list($item_id, $options) = explode('|', $id);
+        list($item_id, $options) = explode('|', $item['item_id']);
         $P = new Product($item_id);
         $item_total = $item['price'] * $item['quantity'];
+
+        // Store the text for each attribute and custom field in an array,
+        // then implode around linebreaks to display them
         $opt_str = '';
+        $opt_arr = array();
         if ($options) {
             $opt_ids = explode(',', $options);
-            $opt_arr = array();
             foreach ($opt_ids as $opt_id) {
                 $opt_arr[] = $P->options[$opt_id]['attr_name'] . ': '.
                         $P->options[$opt_id]['attr_value'];
-                $opt_str = implode('<br />', $opt_arr);
             }
         }
+        $text_names = explode('|', $P->custom);
+
+        if (!empty($text_names) && is_array($item['extras']['custom'])) {
+            foreach ($item['extras']['custom'] as $id=>$val) {
+                $opt_arr[] = $text_names[$id] . ': ' . $val;
+            }
+        }
+        $opt_str = implode('<br />', $opt_arr);
+
         $T->set_var(array(
             'item_id'       => $item_id,
             'options'       => $opt_str,

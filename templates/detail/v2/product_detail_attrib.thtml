@@ -156,6 +156,12 @@ $(document).ready(
     {!endif}
     </div> 
 
+    {!if custom}
+    <div>
+      {custom}
+    </div>
+    {!endif}
+
     {!if onhand}
     <div id="paypalOnhand">
       {onhand} {$LANG_PP['available']}

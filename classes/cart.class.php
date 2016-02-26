@@ -10,9 +10,9 @@
 *   cart during login.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -54,28 +54,35 @@ class ppCart
     *   Does not read from the userinfo table- that's up to the uesr
     *   login and logout functions.
     */
-    public function __construct($cart_id='') 
+    public function __construct($cart_id='', $interactive=true) 
     {
         global $_TABLES, $_PP_CONF;
 
-        ppWorkflow::Init();
+        // Don't use session-based carts for paypal IPN, for those
+        // we just want an empty cart that can be read.
+        if ($interactive) {
+            ppWorkflow::Init();
 
-        if (!isset($_SESSION[PP_CART_VAR])) {
-            $_SESSION[PP_CART_VAR] = array(
-                'cart_id' => '',
-                //'items' => array(),
-            );
-        }
+            if (!isset($_SESSION[PP_CART_VAR])) {
+                $_SESSION[PP_CART_VAR] = array(
+                    'cart_id' => '',
+                    //'items' => array(),
+                );
+            }
 
-        // Cart ID can be passed in, typically by IPN processors
-        if (!empty($cart_id)) {
-            $_SESSION[PP_CART_VAR]['cart_id'] = $cart_id;
-        } elseif (empty($_SESSION[PP_CART_VAR]['cart_id'])) {
-            $_SESSION[PP_CART_VAR]['cart_id'] = self::makeCartID();
+            // Cart ID can be passed in, typically by IPN processors
+            if (!empty($cart_id)) {
+                $_SESSION[PP_CART_VAR]['cart_id'] = $cart_id;
+            } elseif (empty($_SESSION[PP_CART_VAR]['cart_id'])) {
+                $_SESSION[PP_CART_VAR]['cart_id'] = self::makeCartID();
+            }
+ 
+           $this->m_cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
+        } else {
+            $this->m_cart_id = $cart_id;
         }
 
         $this->m_cart = array();
-        $this->m_cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
         //$this->m_billto = array();
         //$this->m_shipto = array();
         $this->m_info = array();
@@ -179,7 +186,7 @@ class ppCart
             // Add saved items to current cart
             foreach ($saved as $id=>$A) {
                 $this->addItem($id, $A['name'], $A['descrip'], $A['quantity'], 
-                            $A['price'], $A['options']);
+                            $A['price'], $A['options'], $A['extras']);
             }
             $this->Save();
         }
@@ -306,10 +313,13 @@ class ppCart
 
         // Look for identical items, including options (to catch 
         // attributes).  If found, just update the quantity.
-        if ($this->Contains($item_id)) {
-            $this->m_cart[$item_id]['quantity'] += $quantity;
+        $have_id = $this->Contains($item_id, $extras);
+        if ($have_id !== false) {
+            $this->m_cart[$have_id]['quantity'] += $quantity;
+            $new_quantity = $this->m_cart[$have_id]['quantity'];
         } else {
-            $this->m_cart[$item_id] = array(
+            $this->m_cart[] = array(
+                'item_id'   => $item_id,
                 'quantity'  => $quantity,
                 'name'      => $name,
                 'descrip'   => $descrip, 
@@ -317,10 +327,10 @@ class ppCart
                 'options'   => $options,
                 'extras'    => $extras,
             );
+            $new_quantity = $quantity;
         }
-
         $this->Save();
-        return $this->m_cart[$item_id]['quantity'];
+        return $new_quantity;
     }
 
 
@@ -360,7 +370,7 @@ class ppCart
     */
     public function UpdateQty($id, $newqty, $save=true)
     {
-        if ($this->Contains($id)) {
+        if (isset($this->m_cart[$id])) {
             if ($newqty <= 0) {
                 $this->Remove($id);
             } else {
@@ -394,7 +404,7 @@ class ppCart
     */
     public function Remove($id)
     {
-        if ($this->Contains($id)) {
+        if (isset($this->m_cart[$id])) {
             unset($this->m_cart[$id]);
             $this->Save();
         }
@@ -477,7 +487,7 @@ class ppCart
 
         foreach ($this->m_cart as $id=>$item) {
             $counter++;
-            list($item_id, $attr_str) = explode('|', $id);
+            list($item_id, $attr_str) = explode('|', $item['item_id']);
 
             if (is_numeric($item_id)) {
                 // a catalog item, get the "right" price
@@ -496,6 +506,15 @@ class ppCart
                         /*if ($attr_price != 0) {
                             $item_price += $attr_price;
                         }*/
+                    }
+                    $text_names = explode('|', $P->custom);
+                    if (!empty($text_names) &&
+                        is_array($item['extras']['custom'])) {
+                        foreach ($item['extras']['custom'] as $tid=>$val) {
+                             $attr_desc .= '<br />&nbsp;&nbsp;-- ' .
+                                htmlspecialchars($text_names[$tid]) . ': ' .
+                                htmlspecialchars($val);
+                        }
                     }
                     $item['descrip'] .= $attr_desc;
                 }
@@ -520,10 +539,10 @@ class ppCart
                 }
             }
             $item_total = $item_price * $item['quantity'];
-
             $T->set_var(array(
+                'cart_item_id'  => $id,
                 'pi_url'        => PAYPAL_URL,
-                'cart_id'       => $id,
+                'cart_id'       => $item['item_id'],
                 'pp_id'         => $counter,
                 'item_id'       => $item_id,
                 'item_descrip'  => $item['descrip'],
@@ -612,15 +631,23 @@ class ppCart
     *   This can be used to determine whether to add the item or not.
     *
     *   @param  string  $item_id    Item ID to check
+    *   @param  array   $extras     Option custom values, e.g. text fields
     *   @return boolean     True if item exists in cart, False if not
     */
-    public function Contains($item_id)
+    public function Contains($item_id, $extras=NULL)
     {
-        // No such item in the cart
-        if (!array_key_exists($item_id, $this->m_cart)) {
-            return false;
+        foreach ($this->m_cart as $id=>$info) {
+            if ($info['item_id'] == $item_id) {
+                if ($extras !== NULL) {
+                    if ($info['extras']['custom'] == $extras['custom']) {
+                        return $id;
+                    }
+                } else {
+                    return $id;
+                }
+            }
         }
-        return true;
+        return false;
     }
 
 

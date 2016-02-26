@@ -1,6 +1,13 @@
 HISTORY
 ==========
 
+Ver. 0.5.7
+==========
+- Add quantity-based item discounts
+- Allow custom text fields for products, e.g. monogram or engraving info
+- Change Paypal IPN to use cart fields for product info
+- Fully implement new template types for product list and detail view
+- Add paypal_cat autotag. Usage: [paypal_cat:ID Optional Text]
 
 PayPal - 0.4.5 (Released 2010-06-02)
 ====================================

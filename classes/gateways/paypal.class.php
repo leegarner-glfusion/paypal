@@ -3,9 +3,9 @@
 *   Gateway implementation for PayPal.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.3
+*   @version    0.5.7
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -208,28 +208,44 @@ class paypal extends PaymentGw
         $shipping = 0;
         $weight = 0;
 
-        foreach ($cartItems as $item_id=>$item) {
-            $opt_str = '';
-            list($db_item_id, $options) = explode('|', $item_id);
-            $P = new Product($db_item_id);
-            $db_item_id = DB_escapeString($db_item_id);
-            if (is_array($item['options'])) {
-                $opts = explode(',', $options);
-                foreach ($opts as $optval) {
-                    $opt_info = $P->getOption($optval);
-                    if ($opt_info) {
-                        $opt_str .= ', ' . $opt_info['value'];
+        foreach ($cartItems as $cart_item_id=>$item) {
+            //$opt_str = '';
+            list($db_item_id, $options) = explode('|', $item['item_id']);
+            if (is_numeric($db_item_id)) {
+                $P = new Product($db_item_id);
+                $db_item_id = DB_escapeString($db_item_id);
+                $oc = 0;
+                if (is_array($item['options'])) {
+                    $opts = explode(',', $options);
+                    foreach ($opts as $optval) {
+                        $opt_info = $P->getOption($optval);
+                        if ($opt_info) {
+                            $opt_str .= ', ' . $opt_info['value'];
+                            $fields['on'.$oc.'_'.$i] = $opt_info['name'];
+                            $fields['os'.$oc.'_'.$i] = $opt_info['value'];
+                            $oc++;
+                        }
                     }
+                    //$item['descrip'] .= $opt_str;
+                } else {
+                    $opts = array();
                 }
-                $item['descrip'] .= $opt_str;
+                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
             } else {
-                $opts = array();
+                // Plugin item
+                $fields['amount_' . $i] = $item['price'];
             }
-            $fields['item_number_' . $i] = htmlspecialchars($item_id);
+            $fields['item_number_' . $i] = htmlspecialchars($cart_item_id);
             $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
-            $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
-            $fields['quantity_' . $i] = $item['quantity'];
             $total_amount += $item['price'];
+            if (is_array($item['extras']['custom'])) {
+                foreach ($item['extras']['custom'] as $id=>$val) {
+                    $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
+                    $fields['os'.$oc.'_'.$i] = $val;
+                    $oc++;
+                }
+            }
+            $fields['quantity_' . $i] = $item['quantity'];
 
             if (isset($item['shipping'])) {
                 $fields['shipping_' . $i] = $item['shipping'];

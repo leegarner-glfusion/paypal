@@ -1,4 +1,4 @@
-<table border="1" cellpadding="2">
+<table border="0" cellpadding="2">
 <tr>
   <th>Qty.</th><th>Item</th><th>Price</th><th>Extension</th>
 </tr>
@@ -12,19 +12,19 @@
 </tr>
 <!-- END ItemList -->
 <tr>
-  <td colspan="3" align="right">Total Items:</td><td align="right">{payment_items}</td>
+  <td colspan="3" align="right">{$LANG_PP['item_total']}:</td><td align="right">{payment_items}</td>
 </tr>
 <tr>
-  <td colspan="3"> align="right"Tax</td><td align="right">{tax}</td>
+  <td colspan="3" align="right">{$LANG_PP['tax']}</td><td align="right">{tax}</td>
 </tr>
 <tr>
-  <td colspan="3" align="right">Shipping</td><td align="right">{shipping}</td>
+  <td colspan="3" align="right">{$LANG_PP['shipping']}</td><td align="right">{shipping}</td>
 </tr>
 <tr>
-  <td colspan="3" align="right">Handling</td><td align="right">{handling}</td>
+  <td colspan="3" align="right">{$LANG_PP['handling']}</td><td align="right">{handling}</td>
 </tr>
 <tr>
-  <td colspan="3" align="right">Purchase Total:</td><td align="right">{payment_gross}</td>
+  <td colspan="3" align="right">{$LANG_PP['total']}:</td><td align="right">{payment_gross}</td>
 </tr>
 </table>
 
