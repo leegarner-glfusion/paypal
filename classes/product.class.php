@@ -988,13 +988,15 @@ class Product
             $qty_disc_txt .= sprintf('Buy %d, save %.02f%%<br />', $qty, $pct);
         }
 
-        $text_field_names = explode('|', $this->custom);
         $custom = '';
-        foreach ($text_field_names as $text_field_name) {
-            $custom .= htmlspecialchars($text_field_name) .
+        if ('' != $this->custom) {
+            $text_field_names = explode('|', $this->custom);
+            foreach ($text_field_names as $text_field_name) {
+                $custom .= htmlspecialchars($text_field_name) .
                     ': <input type="text" class="paypalProductCustomText" '.
                     'name="extras[custom][]" '.
                     'size="80" /><br />' . LB;
+            }
         }
  
         $T->set_var(array(
