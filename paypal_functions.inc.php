@@ -336,13 +336,14 @@ function PAYPAL_ProductList($cat=0, $search='')
     $display = '';
     if ($cat != 0) {
         $cat = (int)$cat;
-        $A = DB_fetchArray(DB_query("SELECT cat_name, image
+        $A = DB_fetchArray(DB_query("SELECT cat_name, image, description
                 FROM {$_TABLES['paypal.categories']}
                 WHERE cat_id='$cat' " .
                 COM_getPermSQL('AND')), false);
         if (!empty($A)) {
             $breadcrumbs = PAYPAL_Breadcrumbs($cat);
             $cat_name = $A['cat_name'];
+            $cat_desc = $A['description'];
             if (!empty($A['image']) && 
                 is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
                         '/images/categories/' . $A['image'])) {
@@ -447,8 +448,11 @@ function PAYPAL_ProductList($cat=0, $search='')
         $sql_sortby = 'dt_add';
         $sql_sortdir = 'DESC';
         break;
-    /*case 'name':
-    case 'price':
+    case 'name':
+        $sql_sortby = 'short_description';
+        $sql_sortdir = 'ASC';
+        break;
+    /*case 'price':
     case 'dt_add':
         $sql_sortby = $sortby;
         break;
@@ -577,6 +581,7 @@ function PAYPAL_ProductList($cat=0, $search='')
 
     if (!empty($cat_name)) {
         $product->set_var('title', $cat_name);
+        $product->set_var('cat_desc', $cat_desc);
     } else {
         $product->set_var('title', $LANG_PP['blocktitle']);
     }

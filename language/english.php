@@ -255,7 +255,7 @@ $LANG_PP = array (
     'name' => 'Name A-Z',
     'price_l2h' => 'Price - Low to High',
     'price_h2l' => 'Price - High to Low',
-    'top_rated' => 'Top Rated',
+    //'top_rated' => 'Top Rated',
     'newest' => 'Newest',
     ),
 'qty_disc_text' => 'Discounts calculated at checkout',
@@ -267,7 +267,9 @@ $LANG_PP = array (
 'target_cat' => 'Target Category',
 'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)'
 );
-
+if ($_PP_CONF['ena_ratings']) {
+    $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
+}
 
 /** Message indicating plugin version is up to date */
 $PLG_paypal_MESSAGE03 = 'Error retrieving current version number';
