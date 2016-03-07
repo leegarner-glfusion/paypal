@@ -160,7 +160,7 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
         COM_refresh($_POST['_ret_url']);
         exit;
     } else {
-        COM_refresh(PAYPAL_URL);
+        COM_refresh(PAYPAL_URL.'/detail.php?id='.$_POST['item_number']);
         exit;
     }
     break;
