@@ -560,7 +560,7 @@ function plugin_getadminoption_paypal()
 */
 function plugin_getuseroption_paypal() 
 {
-    global $LANG_PP, $_TABLES, $ppGCart;
+    global $LANG_PP, $_TABLES, $ppGCart, $_USER;
 
     $retval = array();
     if (!COM_isAnonUser() &&
