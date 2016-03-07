@@ -815,8 +815,11 @@ function plugin_dopluginsearch_paypal(
 {
     global $_CONF, $_TABLES, $_PP_CONF, $LANG_PP;
 
-    if (!SEC_hasRights('paypal.user,paypal.admin,paypal.view', 'OR'))
+    // Products aren't "auhored", so return null if searching by author
+    if (!empty($author) ||
+            !SEC_hasRights('paypal.user,paypal.admin,paypal.view', 'OR')) {
         return NULL;
+    }
 
     if (empty($keyType)) {
         $type = 'all';
@@ -844,7 +847,6 @@ function plugin_dopluginsearch_paypal(
             $search->buildSearchSQL($keyType, $query, $columns, $sql);
     $search->setSQL($sql);
     return $search;
-
 }
 
 
