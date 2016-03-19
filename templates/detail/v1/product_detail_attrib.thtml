@@ -22,7 +22,7 @@
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
       {!endif}
       {!if rating_bar}
-        <div style="margin-top:2em;">{rating_bar}</div>
+        <div class="paypalRatingBar">{rating_bar}</div>
       {!endif}
     </div>
 

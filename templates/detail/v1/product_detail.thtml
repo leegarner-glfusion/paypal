@@ -14,7 +14,7 @@
       <span id="price" name="price">{price}</span> {currency}
 
       {!if rating_bar}
-        {rating_bar}<br />
+         <div class="paypalRatingBar">{rating_bar}</div>
       {!endif}
   </div>
 

@@ -26,12 +26,11 @@ function PPupdateImage(filename)
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
-<div class="paypalProductDetail" id="product-image"
-   style="position:relative;float:left;margin-left:10px;">
+<div class="paypalProductDetail" id="product-image">
   <a id="lg_img" href="{img_url}/{main_img}" rel="slimbox">
-    <img id="disp_img" style="max-width:450px;" src="{img_url}/{main_img}" />
+    <img id="disp_img" src="{img_url}/{main_img}" />
   </a>
-  <div class="additional-images" style="clear:both;">
+  <div class="additional-images">
     <!-- BEGIN Thumbnail -->
     <div class="paypalProductThumb" >
       {!if thumb_url}

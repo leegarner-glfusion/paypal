@@ -18,7 +18,10 @@
         {price}
       </div>
     {!endif}
+    <a href="{item_url}"><button type="button" class="paypalButton orange">{$LANG_PP['customize']}</button></a>
+    {!if rating_bar}
      <div class="ratingbar">{rating_bar}</div>
+    {!endif}
   </div>
 
 </div>

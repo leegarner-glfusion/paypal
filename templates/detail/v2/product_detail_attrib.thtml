@@ -104,14 +104,13 @@ $(document).ready(
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
-<div class="paypalProductDetail" id="product-image"
-   style="position:relative;float:left;margin-left:10px;">
-  <div class="paypalProductLgImg" style="width:460px; height:410px;" >
+<div class="paypalProductDetail" id="product-image">
+  <div class="paypalProductLgImg">
     <a id="lg_img" href="{main_img}" rel="slimbox">
-      <img id="disp_img" style="max-width:460px; max-height:400px;" src="{main_img}"/>
+      <img id="disp_img" src="{main_img}"/>
     </a>
   </div>
-  <div class="additional-images" style="clear:both;">
+  <div class="additional-images">
     <!-- BEGIN Thumbnail -->
     <div class="paypalProductThumb" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
@@ -128,8 +127,7 @@ $(document).ready(
   </div>
 </div>
 {!else}
-<div class="paypalProductDetail" id="product-image"
-   style="position:relative;float:left;margin-left:10px;width:460px;">{description}</div>
+<div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
 <div style="float:left;">
@@ -146,7 +144,7 @@ $(document).ready(
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
       {!endif}
       {!if rating_bar}
-        <div style="margin-top:2em;">{rating_bar}</div>
+        <div class="paypalRatingBar">{rating_bar}</div>
       {!endif}
     </div>
 
