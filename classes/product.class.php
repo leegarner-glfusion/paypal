@@ -1088,7 +1088,7 @@ class Product
                         {$Attr['attr_name']}:</td>
                         <td align=\"left\">
                         <select class=\"uk-contrast uk-form\" id=\"options\" name=\"options[]\"
-                        onchange=\"ProcessForm(this.form);\">\n";
+                        onchange=\"ProcessForm(this);\">\n";
                         /*<td align=\"left\"><select name=\"pp_os{$i}\"*/
                 }
                 $i++;

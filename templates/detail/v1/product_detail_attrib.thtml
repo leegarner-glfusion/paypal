@@ -33,9 +33,10 @@
         {custom}
       </div>
       {!endif}
+      {add_cart_button}
 
       <!-- BEGIN BtnBlock -->
-        {button}<br />
+        {buy_now_button}<br />
       <!-- END BtnBlock -->
       {!if onhand}
       <div id="paypalOnhand">
@@ -84,16 +85,21 @@ function isValidField(obj)
     return true;
 }
 
-function ProcessForm() {
+function ProcessForm(opt) {
     var rec,i,j;
     var price, frm;
     var on_elem, os_elem;
+
+    if (typeof(opt) === "undefined") {
+        return;
+    }
 
     emsg="";
     frm = document.getElementById("add_cart");
     if (frm === null) return;
     price = {price};
-    options = frm.elements['options[]'];
+    //options = frm.elements['options[]'];
+    options = opt;
 
     // If there's only one option selection, then 'options' will be an array
     // of all it's option items.  We need to handle them differently than if
@@ -118,8 +124,9 @@ function ProcessForm() {
         }
     }
 
-    price = price.toFixed(2);
+    price = price.toFixed({cur_decimals});
     frm.amount.value = price;
+    frm.options.value = options.value;
     document.getElementById('price').innerHTML = price;
     return;
 }
