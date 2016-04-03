@@ -56,13 +56,12 @@ class ppCart
     */
     public function __construct($cart_id='', $interactive=true) 
     {
-        global $_TABLES, $_PP_CONF;
+        global $_TABLES, $_PP_CONF, $_USER;
 
         // Don't use session-based carts for paypal IPN, for those
         // we just want an empty cart that can be read.
         if ($interactive) {
             ppWorkflow::Init();
-
             if (!isset($_SESSION[PP_CART_VAR])) {
                 $_SESSION[PP_CART_VAR] = array(
                     'cart_id' => '',
@@ -71,14 +70,23 @@ class ppCart
             }
 
             // Cart ID can be passed in, typically by IPN processors
-            if (!empty($cart_id)) {
-                $_SESSION[PP_CART_VAR]['cart_id'] = $cart_id;
-            } elseif (empty($_SESSION[PP_CART_VAR]['cart_id'])) {
-                $_SESSION[PP_CART_VAR]['cart_id'] = self::makeCartID();
+            if (empty($cart_id)) {
+                if (!empty($_SESSION[PP_CART_VAR]['cart_id'])) {
+                    $cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
+                } elseif (!COM_isAnonUser()) {
+                    $uid = (int)$_USER['uid'];
+                    $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id', "cart_uid = $uid");
+                }
             }
- 
-           $this->m_cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
+            // If a cart ID still not found, create a new one
+            if (empty($cart_id)) {
+                $cart_id = self::makeCartID();
+            }
+            // Set the cart ID in the session and the local variable
+            $_SESSION[PP_CART_VAR]['cart_id'] = $cart_id;
+            $this->m_cart_id = $cart_id;
         } else {
+            // For non-interactive sessions a cart ID must be provided
             $this->m_cart_id = $cart_id;
         }
 
