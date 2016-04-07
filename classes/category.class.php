@@ -53,13 +53,7 @@ class Category
         $this->parent_id = 0;
         $this->cat_name = '';
         $this->description = '';
-        $this->group_id = isset($_VARS['paypal_gid']) ? 
-                    $_VARS['paypal_gid'] : 1;
-        $this->owner_id = $_USER['uid'];
-        $this->perm_owner = 3;
-        $this->perm_group = 3;
-        $this->perm_members = 2;
-        $this->perm_anon = 2;
+        $this->grp_access = 13;
         $this->image = '';
         $this->enabled = 1;
 
@@ -84,12 +78,7 @@ class Category
         switch ($var) {
         case 'cat_id':
         case 'parent_id':
-        case 'perm_owner':
-        case 'perm_group':
-        case 'perm_members':
-        case 'perm_anon':
-        case 'group_id':
-        case 'owner_id':
+        case 'grp_access':
             // Integer values
             $this->properties[$var] = (int)$value;
             break;
@@ -146,25 +135,7 @@ class Category
         $this->cat_name = $row['cat_name'];
         $this->keywords = $row['keywords'];
         $this->image = $row['image'];
-        $this->group_id = $row['group_id'];
-        $this->owner_id = $row['owner_id'];
-
-        if ($fromDB) {
-            $this->perm_owner = $row['perm_owner'];
-            $this->perm_group = $row['perm_group'];
-            $this->perm_members = $row['perm_members'];
-            $this->perm_anon = $row['perm_anon'];
-        } else {
-            if (isset($_POST['perm_owner'])) {
-                $perms = SEC_getPermissionValues($row['perm_owner'],
-                    $row['perm_group'], $row['perm_members'],
-                    $row['perm_anon']);
-                $this->perm_owner = $perms[0];
-                $this->perm_group = $perms[1];
-                $this->perm_members = $perms[2];
-                $this->perm_anon = $perms[3];
-            }
-        }
+        $this->grp_access = $row['grp_access'];
     }
 
 
@@ -260,12 +231,7 @@ class Category
                 cat_name='" . DB_escapeString($this->cat_name) . "',
                 description='" . DB_escapeString($this->description) . "',
                 enabled='{$this->enabled}',
-                owner_id='{$this->owner_id}',
-                group_id='{$this->group_id}',
-                perm_owner='{$this->perm_owner}',
-                perm_group='{$this->perm_group}',
-                perm_members='{$this->perm_members}',
-                perm_anon='{$this->perm_anon}',
+                grp_access ='{$this->grp_access}',
                 image='" . DB_escapeString($this->image) . "'";
             $sql = $sql1 . $sql2 . $sql3;
 
@@ -382,7 +348,6 @@ class Category
         }
 
         $T->set_var(array(
-            'site_url'      => $_CONF['site_url'],
             'action_url'    => PAYPAL_ADMIN_URL,
             'pi_url'        => PAYPAL_URL,
             'cat_name'      => $this->cat_name,
@@ -392,12 +357,7 @@ class Category
                                     'PAYPAL_callbackCatOptionList',
                                     $this->parent_id, 0, '', 
                                     $not, $items),
-            'permissions_editor' => SEC_getPermissionsHTML(
-                        $this->perm_owner, $this->perm_group, 
-                        $this->perm_members, $this->perm_anon),
-            'group_sel'     => SEC_getGroupDropdown($this->group_id, 3),
-            'owner_sel'     => COM_optionList($_TABLES['users'], 'uid,username',
-                                $this->owner_id, 1),
+            'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
         ) );
 
         if ($this->image != '') {

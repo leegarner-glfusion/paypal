@@ -339,7 +339,7 @@ function PAYPAL_ProductList($cat=0, $search='')
         $A = DB_fetchArray(DB_query("SELECT cat_name, image, description
                 FROM {$_TABLES['paypal.categories']}
                 WHERE cat_id='$cat' " .
-                COM_getPermSQL('AND')), false);
+                PAYPAL_buildAccessSql()));
         if (!empty($A)) {
             $breadcrumbs = PAYPAL_Breadcrumbs($cat);
             $cat_name = $A['cat_name'];
@@ -355,13 +355,13 @@ function PAYPAL_ProductList($cat=0, $search='')
     // Display categories
     if (isset($_PP_CONF['cat_columns']) && 
             $_PP_CONF['cat_columns'] > 0) {
-        $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt 
+        $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
             WHERE cat.enabled = '1' AND cat.parent_id = '$cat' 
                 AND prod.enabled = '1' " .
-            COM_getPermSQL('AND', 0, 2, 'cat') .
+            PAYPAL_buildAccessSql('AND', 'cat.grp_access') .
             " GROUP BY cat.cat_id
             ORDER BY cat.cat_name";
             //HAVING cnt > 0
@@ -481,7 +481,7 @@ function PAYPAL_ProductList($cat=0, $search='')
                 ON p.cat_id = c.cat_id
             WHERE p.enabled=1 
             AND (
-                (c.enabled=1 " . COM_getPermSQL('AND', 0, 2, 'c') . ")
+                (c.enabled=1 " . PAYPAL_buildAccessSql('AND', 'c.grp_access') . ")
                 OR c.enabled IS NULL
                 )
             AND (
@@ -1087,17 +1087,14 @@ function PAYPAL_recurseCats(
 
     // Locate the parent category of this one, or the root categories
     // if papa_id is 0.
-    $sql = "SELECT
-            cat_id, cat_name, parent_id, description,
-            owner_id, group_id,
-            perm_owner, perm_group, perm_members, perm_anon
+    $sql = "SELECT cat_id, cat_name, parent_id, description
         FROM {$_TABLES['paypal.categories']}
-        WHERE parent_id = $parent_id ";
+        WHERE parent_id = $parent_id " .
+        PAYPAL_buildAccessSql();
 
     if (!empty($items)) {
         $sql .= " AND cat_id $not IN ($items) ";
     }
-    $sql .= COM_getPermSQL('AND');
     $sql .= ' ORDER BY cat_name ASC ';
     //echo $sql;die;
     $result = DB_query($sql);
@@ -1165,14 +1162,6 @@ function PAYPAL_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
 
     if ($txt == '')
         $txt = $A['cat_name'];
-
-    /*if (SEC_hasAccess($row['owner_id'], $row['group_id'],
-                $row['perm_owner'], $row['perm_group'], 
-                $row['perm_members'], $row['perm_anon']) < 3) {
-            $disabled = 'disabled="true"';
-    } else {
-        $disabled = '';
-    }*/
 
     $str = "<option value=\"{$A['cat_id']}\" $style $selected $disabled>";
     $str .= $txt;
@@ -1264,7 +1253,7 @@ function PAYPAL_Breadcrumbs($id)
         $sql = "SELECT cat_name, cat_id, parent_id
             FROM {$_TABLES['paypal.categories']}
             WHERE cat_id='$parent' " .
-            COM_getPermSQL('AND');
+            PAYPAL_buildAccessSql();
         $result = DB_query($sql);
         if (!$result) 
             break;
@@ -1327,6 +1316,29 @@ function PAYPAL_userMenu($selected = '')
     }
     if ($selected != '') $menu->set_selected($selected);
     return $menu->generate();
+}
+
+/**
+*   Common function used to build group access SQL
+*   Modified version of SEC_buildAccessSql. This one allow a field name
+*   to be provided, which can include a table identifier if needed.
+*
+*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
+*   @param  string  $fld        Optional field, including table id if needed
+*   @return string  $groupsql   Formatted SQL string to be appended 
+*/
+function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
+{
+    global $_USER, $_GROUPS;
+
+    $groupsql = '';
+    if (count($_GROUPS) == 1) {
+        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
+    } else {
+        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
+    }
+
+    return $groupsql;
 }
 
 ?>

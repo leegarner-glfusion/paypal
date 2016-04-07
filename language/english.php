@@ -265,7 +265,8 @@ $LANG_PP = array (
 'copy_from' => 'Copy From',
 'target_prod' => 'Target Product',
 'target_cat' => 'Target Category',
-'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)'
+'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)',
+'visible_to' => 'Visible To',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

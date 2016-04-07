@@ -75,7 +75,7 @@ if (is_file("$langpath/custom/$langfile")) {
 }
 
 //  Set user ID = 1 for anonymous users.
-if (empty($_USER['uid'])) {
+if (empty($_USER['uid']) || $_USER['uid'] < 2) {
     $_USER['uid'] = 1;
     $_USER['username'] = 'anonymous';
     $_USER['fullname'] = 'Anonymous';
@@ -422,25 +422,6 @@ function plugin_displaycomment_paypal(
     // nefarious is going on, but just in case...
     if (!plugin_commentsupport_paypal())
         return $retval;
-
-    // Maybe some permission check will be added later...
-    /*$sql = "SELECT 
-                COUNT(*) AS count, 
-                owner_id, 
-                group_id, 
-                perm_owner, 
-                perm_group, 
-                perm_members, 
-                perm_anon 
-            FROM 
-                {$_TABLES['paypal.products']} 
-            WHERE 
-                (id = '" . DB_escapeString($id) . "')"
-                . COM_getPermSQL('AND') .
-        ;
-    $result = DB_query($sql);
-    $A = DB_fetchArray($result);
-    $allowed = $A['count'];*/
 
     $allowed = 1;
 

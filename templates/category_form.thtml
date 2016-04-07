@@ -53,18 +53,8 @@
     </tr>
 
     <tr>
-      <td>{$LANG_ACCESS['owner']}:</td>
-      <td><select name="owner_id">{owner_sel}</select></td>
-    </tr>
-
-    <tr>
-      <td>{$LANG_ACCESS['group']}:</td>
+      <td>{$LANG_PP['visible_to']}:</td>
       <td>{group_sel}</td>
-    </tr>
-
-    <tr>
-      <td>{$LANG_ACCESS['permissions']}</td>
-      <td>{permissions_editor}</td>
     </tr>
 
     <!--<tr>

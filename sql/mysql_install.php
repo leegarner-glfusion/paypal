@@ -289,12 +289,7 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   `cat_name` varchar(255) default '',
   `description` text default '',
   `enabled` tinyint(1) unsigned default '1',
-  `group_id` mediumint(8) unsigned NOT NULL default '1',
-  `owner_id` mediumint(8) unsigned NOT NULL default '1',
-  `perm_owner` tinyint(1) unsigned NOT NULL default '3',
-  `perm_group` tinyint(1) unsigned NOT NULL default '3',
-  `perm_members` tinyint(1) unsigned NOT NULL default '2',
-  `perm_anon` tinyint(1) unsigned NOT NULL default '2',
+  `grp_access` mediumint(8) unsigned NOT NULL default '1',
   `image` varchar(255) default '',
   PRIMARY KEY  (`cat_id`),
   KEY `idxName` (`cat_name`,`cat_id`)
@@ -723,5 +718,11 @@ $PP_UPGRADE['0.5.7'] = array(
         CHANGE description description text",
     "TRUNCATE {$_TABLES['paypal.cart']}",
 );
- 
+
+$PP_UPGRADE['0.5.8'] = array(
+    "ALTER TABLE {$_TABLES['paypal.categories']}
+        CHANGE group_id grp_access mediumint(8) unsigned not null default 13,
+        DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
+);
+
 ?>

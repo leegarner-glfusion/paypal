@@ -810,7 +810,7 @@ function PAYPAL_adminlist_Category()
  
     $sql = "SELECT 
                 cat.cat_id, cat.cat_name, cat.description, cat.enabled,
-                parent.cat_name as pcat
+                cat.grp_access, parent.cat_name as pcat
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.categories']} parent
             ON cat.parent_id = parent.cat_id";
@@ -827,9 +827,11 @@ function PAYPAL_adminlist_Category()
         array('text' => $LANG_PP['category'], 
                 'field' => 'cat_name', 'sort' => true),
         array('text' => $LANG_PP['description'],
-                'field' => 'description', 'sort' => true),
+                'field' => 'description', 'sort' => false),
         array('text' => $LANG_PP['parent_cat'],
                 'field' => 'pcat', 'sort' => true),
+        array('text' => $LANG_PP['visible_to'],
+                'field' => 'grp_access', 'sort' => false),
         array('text' => $LANG_ADMIN['delete'],
                 'field' => 'delete', 'sort' => false,
                 'align' => 'center'),
@@ -876,9 +878,10 @@ function PAYPAL_adminlist_Category()
 */
 function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
    
     $retval = '';
+    static $grp_names = array();
 
     switch($fieldname) {
     case 'edit':
@@ -909,6 +912,15 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
                 "\"category\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
         break;
 
+    case 'grp_access':
+        $fieldvalue = (int)$fieldvalue;
+        if (!isset($grp_names[$fieldvalue])) {
+            $grp_names[$fieldvalue] = DB_getItem($_TABLES['groups'], 'grp_name',
+                        "grp_id = $fieldvalue");
+        }
+        $retval = $grp_names[$fieldvalue];
+        break;
+
     case 'delete':
         if (!Category::isUsed($A['cat_id'])) {
             $retval .= COM_createLink(
@@ -919,6 +931,13 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
                     'title' => 'Delete this item',
                 )
             );
+        }
+        break;
+
+    case 'description':
+        $retval = strip_tags($fieldvalue);
+        if (utf8_strlen($retval) > 80) {
+            $retval = substr($retval, 0, 80 ) . '...';
         }
         break;
 

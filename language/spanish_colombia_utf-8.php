@@ -248,8 +248,28 @@ $LANG_PP = array (
 'oversell_allow' => 'Allow, display product and accept orders',
 'oversell_deny' => 'Deny, display product but prevent ordering',
 'oversell_hide' => 'Hide product from catalog',
-);
+'list_sort_options' => array(
+    //'most_popular' => 'Most Popular',
+    'name' => 'Name A-Z',
+    'price_l2h' => 'Price - Low to High',
+    'price_h2l' => 'Price - High to Low',
+    //'top_rated' => 'Top Rated',
+    'newest' => 'Newest',
+    ),
+'qty_disc_text' => 'Discounts calculated at checkout',
+'order_instr' => 'Special Order Instructions',
+'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />Existing attributes will not be changed',
+'copy_from' => 'Copy From',
+'target_prod' => 'Target Product',
+'target_cat' => 'Target Category',
+'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)',
+'visible_to' => 'Visible To',
+'anon_and_empty' => 'There are no products available for purchase by anonymous users. Try logging into the site to view the catalog.',
+'back_to_catalog' => 'Back to Catalog',);
 
+if ($_PP_CONF['ena_ratings']) {
+    $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
+}
 
 /** Message indicating plugin version is up to date */
 $PLG_paypal_MESSAGE03 = 'Error retrieving current version number';

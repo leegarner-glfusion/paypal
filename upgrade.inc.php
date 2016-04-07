@@ -439,6 +439,13 @@ function PAYPAL_do_upgrade($current_ver)
 
     }
 
+    if ($current_ver < '0.5.8') {
+        $error = PAYPAL_do_upgrade_sql('0.5.8');
+        if ($error) {
+            return $error;
+        }
+    }
+
     return $error;
 
 }
