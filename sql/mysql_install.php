@@ -233,7 +233,6 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `show_random` tinyint(1) unsigned NOT NULL default '1',
   `show_popular` tinyint(1) unsigned NOT NULL default '1',
   `options` text,
-  `purch_grp` int(11) unsigned DEFAULT '1',
   `track_onhand` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `onhand` int(10) unsigned DEFAULT '0',
   `sale_price` DECIMAL(15,4),
@@ -723,6 +722,8 @@ $PP_UPGRADE['0.5.8'] = array(
     "ALTER TABLE {$_TABLES['paypal.categories']}
         CHANGE group_id grp_access mediumint(8) unsigned not null default 13,
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        DROP purch_grp",
 );
 
 ?>

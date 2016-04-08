@@ -1,6 +1,11 @@
 HISTORY
 ==========
 
+Ver. 0.5.8
+==========
+- Simplify permissions, use just group ID for categories
+- Remove unused access group from products
+
 Ver. 0.5.7
 ==========
 - Add quantity-based item discounts

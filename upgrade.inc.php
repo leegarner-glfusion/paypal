@@ -440,6 +440,22 @@ function PAYPAL_do_upgrade($current_ver)
     }
 
     if ($current_ver < '0.5.8') {
+        // Upgrade sql changes from owner/group/member/anon perms to group id
+        // First update the group_id based on the perms.
+        $sql = "SELECT cat_id,group_id,perm_group,perm_members,perm_anon
+                FROM {$_TABLES['paypal.categories']}";
+        $res = DB_query($sql,1);
+        while ($A = DB_fetchArray($res, false)) {
+            if ($A['perm_anon'] >= 2) $grp_id = 2;      // all users
+            elseif ($A['perm_members'] >= 2) $grp_id = 13;  // logged-in users
+            else $grp_id = $A['group_id'];
+            if ($A['group_id'] != $grp_id) {
+                $grp_id = (int)$grp_id;
+                DB_query("UPDATE {$_TABLES['paypal.categories']}
+                        SET group_id = $grp_id
+                        WHERE cat_id = {$A['cat_id']}");
+            }
+        }
         $error = PAYPAL_do_upgrade_sql('0.5.8');
         if ($error) {
             return $error;
