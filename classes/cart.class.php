@@ -193,7 +193,7 @@ class ppCart
         if (is_array($saved)) {
             // Add saved items to current cart
             foreach ($saved as $id=>$A) {
-                $this->addItem($id, $A['name'], $A['descrip'], $A['quantity'], 
+                $this->addItem($A['item_id'], $A['name'], $A['descrip'], $A['quantity'], 
                             $A['price'], $A['options'], $A['extras']);
             }
             $this->Save();
@@ -261,17 +261,10 @@ class ppCart
 
         // See if there's a userinfo record for this user and update or insert
         // as appropriate
-        $cnt = (int)DB_count($_TABLES['paypal.userinfo'], 'uid', $uid);
-        if ($cnt > 0) {
-            $sql = "UPDATE {$_TABLES['paypal.userinfo']}
-                    SET cart='$cart'
-                    WHERE uid=$uid";
-        } else {
-            $sql = "INSERT INTO {$_TABLES['paypal.userinfo']}
-                        (uid, cart)
-                    VALUES
-                        ($uid, '$cart')";
-        }
+        $sql = "INSERT INTO {$_TABLES['paypal.userinfo']} (uid, cart)
+                    VALUES ($uid, '$cart')
+                ON DUPLICATE KEY UPDATE 
+                    cart = '$cart'";
         //echo $sql;die;
         DB_query($sql, 1);
 
