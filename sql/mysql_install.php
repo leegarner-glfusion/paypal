@@ -427,9 +427,7 @@ $_PP_SAMPLEDATA = array(
             (id, orderby, enabled, description, config, services)
         VALUES
             ('paypal', 10, 0, 'Paypal Website Payments Standard', '', 
-             'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}'),
-            ('amazon', 20, 0, 'Amazon SimplePay', '', 
-             'a:2:{s:7:\"buy_now\";i:1;s:7:\"pay_now\";i:1;}')",
+             'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",
     "INSERT INTO {$_TABLES['paypal.workflows']}
             (id, wf_name, orderby, enabled)
         VALUES
@@ -724,6 +722,7 @@ $PP_UPGRADE['0.5.8'] = array(
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     "ALTER TABLE {$_TABLES['paypal.products']}
         DROP purch_grp",
+    "DELETE FROM {$_TABLES['paypal.gateways']} WWHERE id='amazon'",
 );
 
 ?>
