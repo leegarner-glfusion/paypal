@@ -356,6 +356,7 @@ function PAYPAL_do_upgrade($current_ver)
                 // Also, split out the item number from any attributes.
                 // Starting with 0.5.0 we store the actual item number
                 // and options separately.
+                // * PAYPAL_explode_opts() not available in this version *
                 list($item_num, $options) = explode('|', $A['product_id']);
                 if (!$options) $options = '';
                 DB_query("UPDATE {$_TABLES['paypal.purchases']} SET
@@ -456,6 +457,8 @@ function PAYPAL_do_upgrade($current_ver)
                         WHERE cat_id = {$A['cat_id']}");
             }
         }
+        // Remove Amazon Simplepay gateway file to prevent re-enabling
+        @unlink(PAYPAL_PI_PATH . '/classes/gateways/amazon.class.php');
         $error = PAYPAL_do_upgrade_sql('0.5.8');
         if ($error) {
             return $error;

@@ -5,6 +5,9 @@ Ver. 0.5.8
 ==========
 - Simplify permissions, use just group ID for categories
 - Remove unused access group from products
+- Add templates for Uikit-based themes
+- Remove Amazon Simple Pay
+- Save option and custom string text in the purchase records for display
 
 Ver. 0.5.7
 ==========
