@@ -110,7 +110,7 @@ $(document).ready(
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
 <div class="paypalProductDetail" id="product-image">
-  <div class="paypalProductLgImg">
+  <div class="paypalProductLgImg uk-hidden-small">
     <a id="lg_img" href="{main_img}" rel="slimbox">
       <img id="disp_img" src="{main_img}"/>
     </a>
@@ -135,8 +135,8 @@ $(document).ready(
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div style="float:left;">
-  <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
+<div class="paypalDetailAttrib uk-form">
+  <form class="uk-form" id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div>
       {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
@@ -154,17 +154,27 @@ $(document).ready(
     </div>
 
     <div id="paypalProductAttrib">
-    {!if attributes}
-      {attributes}
-    {!endif}
-    </div> 
+      <!-- BEGIN AttrSelect -->
+      <div class="uk-form-row">
+      <label class="uk-form-label" for="options{opt_id}">{attr_name}:</label>
+      <div class="uk-form-controls">
+        <select class="uk-contrast uk-form" id="options{opt_id}" name="options[]" onchange="ProcessForm(this);">
+          {attr_options}
+        </select>
+      </div>
+      </div>
+      <!-- END AttrSelect -->
 
-    {!if custom}
-    <div>
-      {custom}
+      <!-- BEGIN CustAttrib -->
+      <div class=uk-form-row>
+        <label class="uk-form-label" for="{fld_id}">{fld_name}:</label>
+        <div class="uk-form-controls">
+          <input type="text" class="paypalProductCustomText" 'name="extras[custom][]" id="{fld_id}" size="40" /><br />
+        </div>
+      </div>
+      <!-- END CustAttrib -->
     </div>
-    {!endif}
-
+ 
     {!if onhand}
     <div id="paypalOnhand">
       {onhand} {$LANG_PP['available']}

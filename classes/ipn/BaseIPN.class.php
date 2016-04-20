@@ -132,7 +132,7 @@ class BaseIPN
     *   @param  float   $tax        Optional per-item sales tax amount
     */
     protected function AddItem($item_id, $qty, $price, $item_name='',
-            $shipping=0, $handling=0, $tax=0)
+            $shipping=0, $handling=0, $tax=0, $extras='')
     {
         list($item_number, $options) = explode('|', $item_id);
         $this->items[] = array(
@@ -145,6 +145,7 @@ class BaseIPN
             'handling'  => $handling,
             'tax'       => $tax,
             'options'   => $options,
+            'extras'    => $extras,
         );
     }
  
@@ -447,7 +448,6 @@ class BaseIPN
     protected function handlePurchase()
     {
         global $_TABLES, $_CONF, $_PP_CONF;
-
         //USES_paypal_functions();
 
         // Create an order record to get the order ID
@@ -460,6 +460,7 @@ class BaseIPN
 
         // For each item purchased, create an order item
         foreach ($this->items as $id=>$item) {
+
             // If the item number is numeric, assume it's an
             // inventory item.  Otherwise, it should be a plugin-supplied
             // item with the item number like pi_name:item_number:options
@@ -687,6 +688,7 @@ class BaseIPN
         $this->Order->items = array();
         foreach ($this->items as $id=>$item) {
             $options = DB_escapeString($item['options']);
+            $option_desc = array();
             list($item_number,$options) = explode('|', $item['item_number']);
             //if (is_numeric($item['item_number'])) {
             if (is_numeric($item_number)) {
@@ -696,15 +698,25 @@ class BaseIPN
                 // other plugins.
                 if (!empty($options)) {
                     // options is expected as CSV
-                    $sql = "SELECT attr_value
+                    $sql = "SELECT attr_name, attr_value
                             FROM {$_TABLES['paypal.prod_attr']}
                             WHERE attr_id IN ($options)";
                     $optres = DB_query($sql);
                     $opt_str = '';
                     while ($O = DB_fetchArray($optres, false)) {
                         $opt_str .= ', ' . $O['attr_value'];
+                        $option_desc[] = $O['attr_name'] . ': ' . $O['attr_value'];
                     }
-                    $item['name'] .= $opt_str;
+                    //$item['name'] .= $opt_str;
+                }
+
+                // Get the product record and custom strings
+                if (is_array($item['extras']['custom']) && 
+                        !empty($item['extras']['custom'])) {
+                    $P = new Product($item['item_id']);
+                    foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
+                        $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
+                    }
                 }
                 /*$sql = "UPDATE {$_TABLES['paypal.products']} SET
                         onhand = GREATEST(0, onhand - " . 
@@ -727,7 +739,8 @@ class BaseIPN
                     status = 'pending',
                     token = '" . md5(time()) . "',
                     price = " . (float)$item['price'] . ",
-                    options = '$options'";
+                    options = '$options',
+                    options_text = '" . DB_escapeString(json_encode($option_desc)) . "'";
 
             // add an expiration date if appropriate
             if (is_numeric($item['expiration']) && $item['expiration'] > 0) {

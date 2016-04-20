@@ -111,6 +111,11 @@ div.paypalProductDetail {
     clear: right;
 }
 
+div.paypalDetailAttrib {
+    float:left;
+    margin-bottom: 5px;
+}
+
 .paypalProductDetail #paypalProductDesc {
     clear: both;
     margin-bottom: 1em;
@@ -406,5 +411,10 @@ table.paypalViewCartTable {
 
 .paypalRatingBar {
     margin-top: 2em;
+}
+
+.paypalCatHeaderImage {
+    float: left;
+    margin-right: 6px;
 }
 

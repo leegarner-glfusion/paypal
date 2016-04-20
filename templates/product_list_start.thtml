@@ -1,7 +1,12 @@
 {# begin {templatelocation} #}
 {breadcrumbs}
 {!if cat_desc}
-<p>{cat_desc}</p>
+<p>
+{!if cat_img_url}
+  <img src="{cat_img_url}" class="paypalCatHeaderImage" />
+{!endif}
+{cat_desc}
+</p>
 {!endif}
 <div class="paypalListSeparator">
 <hr />

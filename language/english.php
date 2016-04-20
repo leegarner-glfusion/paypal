@@ -11,6 +11,7 @@
 *   @filesource
 */
 
+global $_PP_CONF;
 
 /** Global array to hold all plugin-specific configuration items. */
 $LANG_PP = array (
@@ -135,10 +136,12 @@ $LANG_PP = array (
 'other_func'        => 'Other Functions',
 'q_del_item'        => 'Are you sure you want to delete this item?',
 'clearform'         => 'Reset Form',
-'indicate_req_fld'  => 'Indicates a required field',
+'del_item_instr'    => 'Items that have no purchases can be deleted. If an item has been purchased it can only be disabled.',
+'del_cat_instr'     => 'Categories containing products cannot be deleted.',
 'delivery_info'     => 'Delivery Information',
 'product_info'      => 'Product Information',
 'delete_image'      => 'Delete Image',
+'select_image'      => 'Select New Image',
 'weight'            => 'Weight',
 'no_download_path'  => 'No file download path configured.',
 'sortby'            => 'Sort By',
@@ -258,6 +261,9 @@ $LANG_PP = array (
     //'top_rated' => 'Top Rated',
     'newest' => 'Newest',
     ),
+'discount' => 'Discount',
+'min_purch' => 'Min. Purchase',
+'qty_discounts' => 'Quantity Discounts',
 'qty_disc_text' => 'Discounts calculated at checkout',
 'order_instr' => 'Special Order Instructions',
 'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />' .
@@ -265,7 +271,8 @@ $LANG_PP = array (
 'copy_from' => 'Copy From',
 'target_prod' => 'Target Product',
 'target_cat' => 'Target Category',
-'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)',
+'custom' => 'Text Fields',
+'custom_instr' => '(separate by &quot;|&quot;&nbsp;)',
 'visible_to' => 'Visible To',
 );
 if ($_PP_CONF['ena_ratings']) {

@@ -286,7 +286,6 @@ class PaypalIPN extends BaseIPN
             // Actual items purchased and prices will come from the IPN.
             $ppCart = new ppCart($this->pp_data['custom']['cart_id']);
             $Cart = $ppCart->Cart();
-
             $items = array();
             for ($i = 1; $i <= $this->ipn_data['num_cart_items']; $i++) {
 
@@ -327,7 +326,8 @@ class PaypalIPN extends BaseIPN
                         $this->ipn_data["item_name$i"],
                         $item_shipping,
                         $item_handling,
-                        $item_tax
+                        $item_tax,
+                        $Cart[$this->ipn_data["item_number$i"]]['extras']
                 );
             }
             $payment_gross = $this->ipn_data['mc_gross'] - $fees_paid;

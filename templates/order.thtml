@@ -90,7 +90,11 @@
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
-          <td>{item_descrip}</td>
+          <td>{item_descrip}
+          {!if item_options}
+          <br />{item_options}
+          {!endif}
+          </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
           <td class="alignright">{item_total}</td>

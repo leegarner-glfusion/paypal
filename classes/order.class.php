@@ -420,7 +420,7 @@ class ppOrder
         $T->set_file(array(
                 'order'=> 'order.thtml',
         ) );
-            
+ 
         $isAdmin = SEC_hasRights('paypal.admin') ? true : false;
 
         foreach ($this->_addr_fields as $fldname) {
@@ -441,6 +441,12 @@ class ppOrder
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
+            $opt = json_decode($item['options_text'], true);
+            if ($opt) {
+                foreach ($opt as $opt_str) {
+                    $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
+                }
+            }
             $item_total = $item['price'] * $item['quantity'];
             $subtotal += $item_total;
             $T->set_var(array(
@@ -453,6 +459,7 @@ class ppOrder
                 'item_price'    => COM_numberFormat($item['price'], 2),
                 'item_quantity' => (int)$item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
+                'item_options'  => $item_options,
             ) );
             $T->parse('iRow', 'ItemRow', true);
             if ($item['data']['prod_type'] == PP_PROD_PHYSICAL) {
@@ -695,12 +702,19 @@ class ppOrder
                 $item_descr = isset($item['description']) ? $item['description'] : $item['descrip'];
 
                 //$message->set_block('message', 'ItemList', 'List');
+                $opts = json_decode($item['options_text'], true);
+                if ($opts) {
+                    foreach ($opts as $opt_text) {
+                        $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
+                    }
+                }
                 $message->set_block('msg_body', 'ItemList', 'List');
                 $message->set_var(array(
                     'qty'   => $item['quantity'],
                     'price' => sprintf($num_format, $item['price']),
                     'ext'   => sprintf($num_format, $ext),
                     'name'  => $item_descr,
+                    'options_text' => $options_text,
                 ) );
                 //PAYPAL_debug("Qty: {$item['quantity']} : Amount: {$item['price']} : Name: {$item['name']}", 'debug_ipn');
                 $message->parse('List', 'ItemList', true);

@@ -11,7 +11,11 @@ follow:
 <!-- BEGIN ItemList -->
 <tr>
   <td>{qty}</td>
-  <td style="width:275px;">{name}</td>
+  <td style="width:275px;">{name}
+  {!if options_text}
+    <br />{options_text}
+  {!endif}
+  </td>
   <td style="width:80px; text-align:right;">{price}</td>
   <td style="width:80px; text-align:right;">{ext}</td>
 </tr>

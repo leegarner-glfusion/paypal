@@ -259,6 +259,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `price` float(10,2) NOT NULL default '0.00',
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
+  `options_text text default '',
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
@@ -722,6 +723,8 @@ $PP_UPGRADE['0.5.8'] = array(
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     "ALTER TABLE {$_TABLES['paypal.products']}
         DROP purch_grp",
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
+        ADD options_text text default ''",
     "DELETE FROM {$_TABLES['paypal.gateways']} WWHERE id='amazon'",
 );
 

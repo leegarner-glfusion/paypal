@@ -135,7 +135,6 @@ $LANG_PP = array (
 'other_func'        => 'Other Functions',
 'q_del_item'        => 'Are you sure you want to delete this item?',
 'clearform'         => 'Reiniciar',
-'indicate_req_fld'  => 'Indicates a required field',
 'delivery_info'     => 'Delivery Information',
 'product_info'      => 'Product Information',
 'delete_image'      => 'Delete Image',
@@ -265,8 +264,15 @@ $LANG_PP = array (
 'custom' => 'Text Fields (separate by &quot;|&quot;&nbsp;)',
 'visible_to' => 'Visible To',
 'anon_and_empty' => 'There are no products available for purchase by anonymous users. Try logging into the site to view the catalog.',
-'back_to_catalog' => 'Back to Catalog',);
-
+'back_to_catalog' => 'Back to Catalog',
+'del_item_instr' => 'Items that have no purchases can be deleted. If an item has been purchased it can only be disabled.',
+'del_cat_instr' => 'Categories containing products cannot be deleted.',
+'select_image' => 'Select New Image',
+'discount' => 'Discount',
+'min_purch' => 'Min. Purchase',
+'qty_discounts' => 'Quantity Discounts',
+'custom_instr' => '(separate by &quot;|&quot;&nbsp;)',
+);
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
 }

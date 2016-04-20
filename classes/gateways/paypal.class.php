@@ -235,8 +235,8 @@ class paypal extends PaymentGw
                 // Plugin item
                 $fields['amount_' . $i] = $item['price'];
             }
-            $fields['item_number_' . $i] = htmlspecialchars($item['item_id']);
-            //$fields['item_number_' . $i] = htmlspecialchars($cart_item_id);
+            //$fields['item_number_' . $i] = htmlspecialchars($item['item_id']);
+            $fields['item_number_' . $i] = (int)$cart_item_id;
             $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
             $total_amount += $item['price'];
             if (is_array($item['extras']['custom'])) {

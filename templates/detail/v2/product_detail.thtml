@@ -56,6 +56,15 @@ function PPupdateImage(filename)
   {rating_bar}<br />
   {!endif}
 
+  <!-- BEGIN CustAttrib -->
+  <div class=uk-form-row>
+    <label class="uk-form-label" for="{fld_id}">{fld_name}:</label>
+    <div class="uk-form-controls">
+      <input type="text" class="paypalProductCustomText" 'name="extras[custom][]" id="{fld_id}" size="40" /><br />
+    </div>
+  </div>
+  <!-- END CustAttrib -->
+ 
   <div id="paypalProductAttrib">
     <!-- BEGIN BtnBlock -->
     {button}<br />
