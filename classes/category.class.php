@@ -320,11 +320,14 @@ class Category
      */
     public function showForm()
     {
-        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
+        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file(array('category' => 'category_form.thtml'));
-
+        if ($_SYSTEM['disable_jquery_slimbox']) {
+            $T->set_file('category', 'category_form.uikit.thtml');
+        } else {
+            $T->set_file('category', 'category_form.thtml');
+        }
         $id = $this->cat_id;
 
         // If we have a nonzero category ID, then we edit the existing record.

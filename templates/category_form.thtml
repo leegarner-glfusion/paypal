@@ -82,7 +82,8 @@
 
     <tr>
       <td>
-        <font color="red">*</font>&nbsp;{$LANG_PP['ind_req_fld']}
+        <font color="red">*</font>&nbsp;{$LANG_PP['ind_req_fld']}<br />
+        {$LANG_PP['del_cat_instr']}
       </td>
     </tr>
   </table>

@@ -288,7 +288,7 @@ class Attribute
     */
     function Edit()
     {
-        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
+        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
         // If there are no products defined, return a formatted error message
         // instead of the form.
@@ -297,7 +297,11 @@ class Attribute
         }
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file(array('attrform' => 'attribute_form.thtml'));
+        if ($_SYSTEM['disable_jquery_slimbox']) {
+            $T->set_file('attrform', 'attribute_form.uikit.thtml');
+        } else {
+            $T->set_file('attrform', 'attribute_form.thtml');
+        }
 
         $id = $this->attr_id;
 
