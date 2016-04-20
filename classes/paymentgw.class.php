@@ -623,7 +623,7 @@ abstract class PaymentGw
         // For each item purchased, record purchase in purchase table
         foreach ($items as $id=>$item) {
             //COM_errorLog("Processing item: $id");
-            list($item_number, $item_opts) = explode('|', $id);
+            list($item_number, $item_opts) = PAYPAL_explode_opts($id, true);
 
             // If the item number is numeric, assume it's an
             // inventory item.  Otherwise, it should be a plugin-supplied

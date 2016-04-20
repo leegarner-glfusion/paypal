@@ -180,6 +180,7 @@ class ppCart
     {
         global $_TABLES, $_USER;
 
+COM_errorLog("Merging cart for user " . $_USER['uid']);
         if ($_USER['uid'] < 2) return;
 
         $txt = DB_getItem($_TABLES['paypal.userinfo'], 'cart',
@@ -193,8 +194,9 @@ class ppCart
         if (is_array($saved)) {
             // Add saved items to current cart
             foreach ($saved as $id=>$A) {
-                $this->addItem($A['item_id'], $A['name'], $A['descrip'], $A['quantity'], 
-                            $A['price'], $A['options'], $A['extras']);
+                list($item_id, $options) = PAYPAL_explode_opts($A['item_id']);
+                $this->addItem($item_id, $A['name'], $A['descrip'], $A['quantity'], 
+                            $A['price'], $options, $A['extras']);
             }
             $this->Save();
         }
@@ -423,7 +425,12 @@ class ppCart
     {
         global $_TABLES;
 
-        DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->cartID());
+        $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
+                cart_id = '" . DB_escapeString($this->cartID()) . "'";
+        if (!COM_isAnonUser()) {
+            $sql .= " OR cart_uid = " . (int)$_USER['uid'];
+        }
+        DB_query($sql);
         if ($del_order && isset($_SESSION[PP_CART_VAR]['order_id']) &&
             !empty($_SESSION[PP_CART_VAR]['order_id'])) {
             USES_paypal_class_order();
@@ -485,15 +492,13 @@ class ppCart
         $counter = 0;
         $subtotal = 0;
         $shipping = 0;
-
         foreach ($this->m_cart as $id=>$item) {
             $counter++;
-            list($item_id, $attr_str) = explode('|', $item['item_id']);
+            list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
 
             if (is_numeric($item_id)) {
                 // a catalog item, get the "right" price
                 $P = new Product($item_id);
-                $attr_keys = explode(',', $attr_str);
                 $item_price = $P->getPrice($attr_keys, $item['quantity']);
                 if (!empty($attr_keys)) {
                     // Get the add-on price for attributes
@@ -508,17 +513,17 @@ class ppCart
                             $item_price += $attr_price;
                         }*/
                     }
-                    $text_names = explode('|', $P->custom);
-                    if (!empty($text_names) &&
-                        is_array($item['extras']['custom'])) {
-                        foreach ($item['extras']['custom'] as $tid=>$val) {
-                             $attr_desc .= '<br />&nbsp;&nbsp;-- ' .
-                                htmlspecialchars($text_names[$tid]) . ': ' .
-                                htmlspecialchars($val);
-                        }
-                    }
-                    $item['descrip'] .= $attr_desc;
                 }
+                $text_names = explode('|', $P->custom);
+                if (!empty($text_names) &&
+                    is_array($item['extras']['custom'])) {
+                    foreach ($item['extras']['custom'] as $tid=>$val) {
+                        $attr_desc .= '<br />&nbsp;&nbsp;-- ' .
+                            htmlspecialchars($text_names[$tid]) . ': ' .
+                            htmlspecialchars($val);
+                    }
+                }
+                $item['descrip'] .= $attr_desc;
 
                 // Get shipping amount and weight
                 if ($P->shipping_type == 2 && $P->shipping_amt > 0) {

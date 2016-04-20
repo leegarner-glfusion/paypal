@@ -1049,6 +1049,7 @@ function phpblock_paypal_cart()
 
     foreach ($cart->Cart() as $id=>$item) {
         $link = true;
+        // See if this is a plugin item, will have a ':' in the item number
         if (strstr($item['item_id'], ':')) {
             $item_info = explode(':', $item['item_id']);
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
@@ -1565,8 +1566,8 @@ function plugin_user_logout_paypal($uid)
 
     USES_paypal_class_cart();
     $Cart = new ppCart();
-    $Cart->SaveUserCart();
-    $Cart->Clear();
+    $Cart->SaveUserCart($uid);
+    $Cart->Clear($uid);
 }
 
 
@@ -1784,6 +1785,30 @@ function PAYPAL_child_cat_product_count($parent_cat)
     return $parent_total;
 }
 
+
+/**
+*   Explode a full item ID into item_id and options
+*   If $opt_string is set then the option string is returned
+*   unchanged, otherwise option IDs are returned as an array
+*
+*   @param  string  $item   Original item ID, e.g. "4|20,17"
+*   @param  boolean $opt_string True to return options as a string
+*   @return array       Array of (item_id, options)
+*/
+function PAYPAL_explode_opts($item, $opt_string = false)
+{
+    list($item_id, $options) = explode('|', $item);
+
+    if ($options === NULL) $options = '';
+    if (!$opt_string) {
+        if (empty($options)) {
+            $options = array();
+        } else {
+            $options = explode(',', $options);
+        }
+    }
+    return array($item_id, $options);
+}
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';
 

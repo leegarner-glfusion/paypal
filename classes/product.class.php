@@ -262,7 +262,6 @@ class Product
         $this->comments_enabled = $row['comments_enabled'];
         $this->rating_enabled = $row['rating_enabled'];
         $this->btn_type = $row['buttons'];
-
         if ($fromDB) {
             $this->views = $row['views'];
         }
@@ -612,7 +611,11 @@ class Product
         $id = $this->id;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file(array('product' => "product_form.thtml"));
+        if ($_SYSTEM['disable_jquery_slimbox']) {
+            $T->set_file('product', 'product_form.uikit.thtml');
+        } else {
+            $T->set_file('product', 'product_form.thtml');
+        }
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
@@ -988,14 +991,16 @@ class Product
             $qty_disc_txt .= sprintf('Buy %d, save %.02f%%<br />', $qty, $pct);
         }
 
-        $custom = '';
+        // Get custom text input fields
         if ('' != $this->custom) {
+            $T->set_block('product', 'CustAttrib', 'cAttr');
             $text_field_names = explode('|', $this->custom);
-            foreach ($text_field_names as $text_field_name) {
-                $custom .= htmlspecialchars($text_field_name) .
-                    ': <input type="text" class="paypalProductCustomText" '.
-                    'name="extras[custom][]" '.
-                    'size="80" /><br />' . LB;
+            foreach ($text_field_names as $id=>$text_field_name) {
+                $T->set_var(array(
+                    'fld_id'    => "cust_text_fld_$id",
+                    'fld_name'  => htmlspecialchars($text_field_name),
+                ) );
+                $T->parse('cAttr', 'CustAttrib', true);
             }
         }
  
@@ -1016,7 +1021,6 @@ class Product
             'price_postfix'     => $this->currency->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
-            'custom'            => $custom,
         ) );
 
         // Retrieve the photos and put into the template
@@ -1059,9 +1063,8 @@ class Product
         }
 
         // Get the product options, if any, and set them into the form
-        $i = 0;
         $cbrk = '';
-        $attributes = '';
+        $T->set_block('product', 'AttrSelect', 'attrSel');
         foreach ($this->options as $id=>$Attr) {
             /*if ($Attr['attr_value'] === '') {
                 $type = 'text';
@@ -1070,29 +1073,18 @@ class Product
             }*/
             $type = 'select';
             if ($Attr['attr_name'] != $cbrk) {
-                if ($i > 0) {
-                    if ($type == 'select') {
-                        $attributes .= '</select>';
-                    }
-                    $attributes .= "</td></tr>\n";
-                } else {
-                    $attributes = '<table border="0">'. "\n";
+                if ($cbrk != '') {      // end block if not the first element
+                    $T->set_var(array(
+                        'attr_name' => $cbrk,
+                        'attr_options' => $attributes,
+                        'opt_id' => $id,
+                    ) );
+                    $T->parse('attrSel', 'AttrSelect', true);
                 }
                 $cbrk = $Attr['attr_name'];
-                $attributes .= '<tr><td>';
-                if ($type == 'select') {
-                    $attributes .= "<input type=\"hidden\" name=\"on{$i}\" 
-                        value=\"{$Attr['attr_name']}\">\n
-                        <input type=\"hidden\" name=\"os{$i}\" 
-                        value=\"\">\n
-                        {$Attr['attr_name']}:</td>
-                        <td align=\"left\">
-                        <select class=\"uk-contrast uk-form\" id=\"options\" name=\"options[]\"
-                        onchange=\"ProcessForm(this);\">\n";
-                        /*<td align=\"left\"><select name=\"pp_os{$i}\"*/
-                }
-                $i++;
+                $attributes = '';
             }
+            
             if ($type == 'select') {
                 if ($Attr['attr_price'] != 0) {
                     $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
@@ -1103,19 +1095,23 @@ class Product
                     $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
                     $Attr['attr_value'] . $attr_str . 
                     '</option>' . LB;
-            } else {
+            /*} else {
                 $attributes .= "<input type=\"hidden\" name=\"on{$i}\" 
                         value=\"{$Attr['attr_name']}\">\n";
                 $attributes .= $Attr['attr_name'] . ':</td>
                     <td><input class="uk-contrast uk-form" type"text" name="os' . $i. '" value="" size="32" /></td></tr>';
+            */
             }
         }
-
-        if ($attributes != '') {
-            $attributes .= "</select></td></tr></table>\n";
-            $T->set_var('attributes', $attributes);
+        if ($cbrk != '') {      // finish off the last selection
+            $T->set_var(array(
+                'attr_name' => $cbrk,
+                'attr_options' => $attributes,
+                'opt_id' => $id,
+            ) );
+            $T->parse('attrSel', 'AttrSelect', true);
         }
-
+ 
         $buttons = $this->PurchaseLinks();
         $T->set_block('product', 'BtnBlock', 'Btn');
         foreach ($buttons as $name=>$html) {
@@ -1278,7 +1274,7 @@ class Product
 
         } else {
             // Normal buttons for everyone else
-            if (!$this->canBuyNow() && $this->btn_type != '') {
+            if ($this->canBuyNow() && $this->btn_type != '') {
                 // Gateway buy-now buttons only used if no options
                 PAYPAL_loadGateways();
                 foreach ($_PP_CONF['gateways'] as $gw_info) {

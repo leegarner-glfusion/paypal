@@ -228,8 +228,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'name':
-        list($item_id, $item_opts) = explode('|', $A['product_id']);
-        //if (is_numeric($A['product_id'])) {
+        list($item_id, $item_opts) = PAYPAL_explode_opts($A['product_id']);
         if (is_numeric($item_id)) {
             // One of our catalog items, so link to it
             $retval = COM_createLink($fieldvalue, 
@@ -332,7 +331,7 @@ function PAYPAL_ProductList($cat=0, $search='')
 
     $cat_name = '';
     $breadcrumbs = '';
-    $img_url = '';
+    $cat_img_url = '';
     $display = '';
     if ($cat != 0) {
         $cat = (int)$cat;
@@ -347,7 +346,7 @@ function PAYPAL_ProductList($cat=0, $search='')
             if (!empty($A['image']) && 
                 is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
                         '/images/categories/' . $A['image'])) {
-                $img_url = PAYPAL_URL . '/images/categories/' . $A['image'];
+                $cat_img_url = PAYPAL_URL . '/images/categories/' . $A['image'];
             }
         }
     }
@@ -396,8 +395,8 @@ function PAYPAL_ProductList($cat=0, $search='')
                         'row'      => 'category_row.thtml',
                         'category' => 'category.thtml'));
             $CT->set_var('breadcrumbs', $breadcrumbs);
-            if ($img_url != '') {
-                $CT->set_var('catimg_url', $img_url);
+            if ($cat_img_url != '') {
+                $CT->set_var('catimg_url', $cat_img_url);
             }
 
             $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
@@ -582,6 +581,7 @@ function PAYPAL_ProductList($cat=0, $search='')
     if (!empty($cat_name)) {
         $product->set_var('title', $cat_name);
         $product->set_var('cat_desc', $cat_desc);
+        $product->set_var('cat_img_url', $cat_img_url);
     } else {
         $product->set_var('title', $LANG_PP['blocktitle']);
     }
