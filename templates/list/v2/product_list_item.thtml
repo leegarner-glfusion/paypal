@@ -11,11 +11,11 @@
   <div class="paypalProductListItemUrl2">
     <div class="shortdescription">{short_description}</div>
     {!if price}
-      <div class="paypalPrice normal ver2">
         {!if track_onhand}
-        ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
+        ({qty_onhand} {$LANG_PP['available']})<br />
         {!endif}
-        {price}
+       <div class="paypalPrice normal ver2">
+       {price}
       </div>
     {!endif}
     <a href="{item_url}"><button type="button" class="paypalButton orange">{$LANG_PP['customize']}</button></a>

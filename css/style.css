@@ -325,6 +325,7 @@ div.paypalProductListItemUrl2 {
 
 .paypalPrice.ver2 {
     margin-top: 4px;
+    text-align: right;
 }
 
 .paypalPrice.was {
