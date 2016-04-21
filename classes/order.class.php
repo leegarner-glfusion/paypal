@@ -416,6 +416,9 @@ class ppOrder
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF;
 
+        // canView should be handled by the caller
+        if (!$this->canView()) return '';
+
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file(array(
                 'order'=> 'order.thtml',
@@ -819,6 +822,24 @@ class ppOrder
     public function miscCharges()
     {
         return $this->shipping + $this->handling + $this->tax;
+    }
+
+
+    /**
+    *   Determine if the current user can view this order.
+    *
+    *   @return boolean     True if allowed to view, False if denied.
+    */
+    public function canView()
+    {
+        global $_USER;
+
+        if ($_USER['uid'] == $this->uid ||
+            SEC_hasRights('paypal.admin') ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

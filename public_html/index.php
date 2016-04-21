@@ -310,7 +310,11 @@ case 'shipto':
 case 'order':
     USES_paypal_class_order();
     $order = new ppOrder($actionval);
-    $content .= $order->View(true);
+    if ($order->canView()) {
+        $content .= $order->View(true);
+    } else {
+        $content .= $LANG_PP['access_denied_msg'];
+    }
     break;
 
 case 'vieworder':
