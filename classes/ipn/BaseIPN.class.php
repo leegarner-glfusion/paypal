@@ -690,7 +690,6 @@ class BaseIPN
             $options = DB_escapeString($item['options']);
             $option_desc = array();
             list($item_number,$options) = explode('|', $item['item_number']);
-            //if (is_numeric($item['item_number'])) {
             if (is_numeric($item_number)) {
                 // For Paypal catalog options, check for options and append
                 // to the description.  Update quantity on hand if tracking
@@ -707,7 +706,6 @@ class BaseIPN
                         $opt_str .= ', ' . $O['attr_value'];
                         $option_desc[] = $O['attr_name'] . ': ' . $O['attr_value'];
                     }
-                    //$item['name'] .= $opt_str;
                 }
 
                 // Get the product record and custom strings
@@ -718,15 +716,7 @@ class BaseIPN
                         $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
                     }
                 }
-                /*$sql = "UPDATE {$_TABLES['paypal.products']} SET
-                        onhand = GREATEST(0, onhand - " . 
-                            (int)$item['quantity'] . ") 
-                        WHERE id = '" . (int)$item['item_number'] .
-                        "' AND track_onhand > 0";*/
-                //COM_errorLog($sql);
-                DB_query($sql, 1);
             }
-
             $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET 
                     order_id = '{$db_order_id}',
                     product_id = '{$item['item_number']}',
@@ -736,7 +726,7 @@ class BaseIPN
                     txn_type = '{$this->pp_data['custom']['transtype']}',
                     txn_id = '{$this->pp_data['txn_id']}', 
                     purchase_date = '{$this->sql_date}', 
-                    status = 'pending',
+                    status = 'paid',
                     token = '" . md5(time()) . "',
                     price = " . (float)$item['price'] . ",
                     options = '$options',
