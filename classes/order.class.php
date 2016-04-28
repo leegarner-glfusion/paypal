@@ -444,6 +444,7 @@ class ppOrder
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
+            $item_options = '';
             $opt = json_decode($item['options_text'], true);
             if ($opt) {
                 foreach ($opt as $opt_str) {

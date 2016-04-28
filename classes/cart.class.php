@@ -180,7 +180,6 @@ class ppCart
     {
         global $_TABLES, $_USER;
 
-COM_errorLog("Merging cart for user " . $_USER['uid']);
         if ($_USER['uid'] < 2) return;
 
         $txt = DB_getItem($_TABLES['paypal.userinfo'], 'cart',
@@ -494,6 +493,7 @@ COM_errorLog("Merging cart for user " . $_USER['uid']);
         $shipping = 0;
         foreach ($this->m_cart as $id=>$item) {
             $counter++;
+            $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
 
             if (is_numeric($item_id)) {
@@ -501,8 +501,6 @@ COM_errorLog("Merging cart for user " . $_USER['uid']);
                 $P = new Product($item_id);
                 $item_price = $P->getPrice($attr_keys, $item['quantity']);
                 if (!empty($attr_keys)) {
-                    // Get the add-on price for attributes
-                    $attr_desc = '';
                     foreach ($attr_keys as $attr_key) {
                         if (!isset($P->options[$attr_key])) continue;   // invalid?
                         //$attr_price = (float)$P->options[$attr_key]['attr_price'];
