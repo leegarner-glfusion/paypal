@@ -296,30 +296,6 @@
       </select>
     </p>
 
-    <div id="qty_discounts">
-      <label>{$LANG_PP['qty_discounts']}:</label>
-       <a href="#" onclick="popupWindow('{doc_url}#desc_qty_discounts', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
-      </label>
-      <table border="0" align="left">
-      <tr>
-        <th>{$LANG_PP['min_purch']}</th><th>{$LANG_PP['discount']} %</th>
-      </tr>
-      <tr>
-        <td><input type="text" size="5" name="disc_qty[0]" value="{disc_qty0}" /></td>
-        <td><input type="text" size="5" name="disc_amt[0]" value="{disc_amt0}" /></td>
-      </tr>
-      <tr>
-        <td><input type="text" size="5" name="disc_qty[1]" value="{disc_qty1}" /></td>
-        <td><input type="text" size="5" name="disc_amt[1]" value="{disc_amt1}" /></td>
-      </tr>
-      <tr>
-        <td><input type="text" size="5" name="disc_qty[2]" value="{disc_qty2}" /></td>
-        <td><input type="text" size="5" name="disc_amt[2]" value="{disc_amt2}" /></td>
-      </tr>
-      </table>
-    </div>
-
     <p>
       <label>{$LANG_PP['available']}:
        <a href="#" onclick="popupWindow('{doc_url}#desc_avail_dates', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png"
@@ -343,6 +319,30 @@
               title="Date Selector"
               />
     </p>
+
+    <div id="qty_discounts">
+      <label>{$LANG_PP['qty_discounts']}:</label>
+       <a href="#" onclick="popupWindow('{doc_url}#desc_qty_discounts', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
+            alt="{$LANG_PP['clk_help']}" /></a>
+      </label>
+      <table border="0" align="left">
+      <tr>
+        <th>{$LANG_PP['min_purch']}</th><th>{$LANG_PP['discount']} %</th>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[0]" value="{disc_qty0}" /></td>
+        <td><input type="text" size="5" name="disc_amt[0]" value="{disc_amt0}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[1]" value="{disc_qty1}" /></td>
+        <td><input type="text" size="5" name="disc_amt[1]" value="{disc_amt1}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[2]" value="{disc_qty2}" /></td>
+        <td><input type="text" size="5" name="disc_amt[2]" value="{disc_amt2}" /></td>
+      </tr>
+      </table>
+    </div>
 
   </fieldset>
   <font color="red">*</font>{$LANG_PP['ind_req_fld']}<br />
