@@ -756,6 +756,7 @@ class ppOrder
                 'pending'       => $this->status == 'pending' ? 'true' : '',
                 'gw_msg'        => $gw_msg,
                 'status'            => $this->status,
+                'order_instr'   => $this->instructions,
             ) );
 
             // parse templates for subject/text
