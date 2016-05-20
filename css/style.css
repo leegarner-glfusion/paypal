@@ -419,3 +419,7 @@ table.paypalViewCartTable {
     margin-right: 6px;
 }
 
+.ppQtyDiscSmall {
+    font-size: small;
+    font-style: italic;
+}

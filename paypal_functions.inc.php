@@ -475,10 +475,12 @@ function PAYPAL_ProductList($cat=0, $search='')
 
     // Get products from database. "c.enabled is null" is to allow products
     // with no category defined
+    $today = $_PP_CONF['now']->toMySQL();
     $sql = " FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
             WHERE p.enabled=1 
+            AND p.avail_beg <= '$today' AND p.avail_end >= '$today'
             AND (
                 (c.enabled=1 " . PAYPAL_buildAccessSql('AND', 'c.grp_access') . ")
                 OR c.enabled IS NULL
@@ -621,6 +623,9 @@ function PAYPAL_ProductList($cat=0, $search='')
             $product->set_var('rating_bar', '');
         }
 
+        $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
+                "product_id = '{$A['id']}'");
+
         $product->set_var(array(
             'id'        => $A['id'],
             'name'      => htmlspecialchars($P->name),
@@ -634,28 +639,20 @@ function PAYPAL_ProductList($cat=0, $search='')
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'track_onhand' => $P->track_onhand ? 'true' : '',
             'qty_onhand' => $P->onhand,
+            'has_discounts' => $P->hasDiscounts() ? 'true' : '',
+            'price'     => $P->getPrice() > 0 ? $P->currency->Format($P->price) : '',
+            'sale_price' => $P->currency->Format($P->sale_price),
+            'on_sale'   => $P->isOnSale() ? 'true' : '',
+            'small_pic' => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
         ) );
 
-        if ($P->price > 0) {
-            //$product->set_var('price', COM_numberFormat($P->price, 2));
-            $product->set_var('price', $P->currency->Format($P->price));
-        } else {
-            $product->clear_var('price');
-        }
-
         if ($isAdmin) {
-            $product->set_var('is_admin', 'true');
-            $product->set_var('pi_admin_url', PAYPAL_ADMIN_URL);
-            $product->set_var('edit_icon', 
-                    "{$_CONF['layout_url']}/images/edit.$_IMAGE_TYPE");
-        }
-
-        $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
-                "product_id = '{$A['id']}'");
-        if ($pic_filename) {
-            $product->set_var('small_pic', PAYPAL_ImageUrl($pic_filename));
-         } else {
-            $product->set_var('small_pic', '');
+            $product->set_var(array(
+                'is_admin'  => 'true',
+                'pi_admin_url' => PAYPAL_ADMIN_URL,
+                'edit_icon' =>
+                    "{$_CONF['layout_url']}/images/edit.$_IMAGE_TYPE",
+            ) );
         }
 
         // FIXME: If a user purchased once with no expiration, this query 
@@ -780,11 +777,8 @@ function PAYPAL_ipnlogSingle($id, $txn_id)
     global $_TABLES, $_CONF, $LANG_PP;
 
     $sql = "SELECT * FROM {$_TABLES['paypal.ipnlog']} ";
-    if ($id > 0) {
-        $sql .= "WHERE id = $id";
-    } else {
-        $sql .= "WHERE txn_id = '$txn_id'";
-    }
+    $sql .= $id > 0 ? "WHERE id = $id" : "WHERE txn_id = '$txn_id'";
+
     $res = DB_query($sql);
     $A = DB_fetchArray($res, false);
     if (empty($A))

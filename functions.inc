@@ -1810,6 +1810,9 @@ function PAYPAL_explode_opts($item, $opt_string = false)
     return array($item_id, $options);
 }
 
+// This is temporary, and will be included in glFusion 1.6.0
+isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
+
 require_once PAYPAL_PI_PATH . '/services.inc.php';
 
 ?>

@@ -40,6 +40,7 @@ $LANG_PP = array (
 'download'          => 'Download',
 'downloadable'      => 'Downloadable',
 'price'             => 'Price',
+'sale_price'        => 'Sale Price',
 'quantity'          => 'Quantity',
 'item_total'        => 'Item Total',
 'total'             => 'Total',
@@ -264,6 +265,7 @@ $LANG_PP = array (
 'discount' => 'Discount',
 'min_purch' => 'Min. Purchase',
 'qty_discounts' => 'Quantity Discounts',
+'qty_discounts_avail' => 'Quantity Discounts Available',
 'qty_disc_text' => 'Discounts calculated at checkout',
 'order_instr' => 'Special Order Instructions',
 'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />' .
@@ -274,6 +276,8 @@ $LANG_PP = array (
 'custom' => 'Text Fields',
 'custom_instr' => '(separate by &quot;|&quot;&nbsp;)',
 'visible_to' => 'Visible To',
+'from' => 'From',
+'to' => 'To',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

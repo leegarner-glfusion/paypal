@@ -272,6 +272,10 @@ $LANG_PP = array (
 'min_purch' => 'Min. Purchase',
 'qty_discounts' => 'Quantity Discounts',
 'custom_instr' => '(separate by &quot;|&quot;&nbsp;)',
+'sale_price' => 'Sale Price',
+'qty_discounts_avail' => 'Quantity Discounts Available',
+'from' => 'From',
+'to' => 'To',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

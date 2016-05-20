@@ -3,9 +3,9 @@
 *   Class to manage product categories
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.4.6
+*   @version    0.5.8
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -26,9 +26,9 @@ class Category
     *   @var boolean */
     var $isAdmin;
 
+    /** Indicate whether this is a new record or not
+    *   @var boolean */
     var $isNew;
-
-    //var $button_types = array();
 
     /** Array of error messages, to be accessible by the calling routines.
      *  @var array */
@@ -53,7 +53,7 @@ class Category
         $this->parent_id = 0;
         $this->cat_name = '';
         $this->description = '';
-        $this->grp_access = 13;
+        $this->grp_access = 2;  // All users have access by default
         $this->image = '';
         $this->enabled = 1;
 
@@ -202,16 +202,14 @@ class Category
                     $_PP_CONF['catimgpath']."/$img_filename",
                     $_PP_CONF['max_thumb_size'], $_PP_CONF['max_thumb_size'],
                     '', true);
-            //if (!@move_uploaded_file($_FILES['imagefile']['tmp_name'],
-            //                $_PP_CONF['catimgpath']."/$img_filename")) {
             if ($status[0] == false) {
                 $this->AddError('Error Moving Image');
             } else {
-                // If a new image was uploaded, and this is an existing category,
-                // then delete the old image, if any.  The DB still has the old 
-                // filename at this point.
+                // If a new image was uploaded, and this is an existing
+                // category, then delete the old image file, if any.
+                // The DB still has the old filename at this point.
                 if (!$this->isNew) {
-                    $this->DeleteImage();
+                    $this->DeleteImage(false);
                 }
             }
         }
@@ -264,7 +262,7 @@ class Category
         if ($this->cat_id <= 0)
             return false;
 
-        $this->DeleteImage();
+        $this->DeleteImage(false);
 
         DB_delete($_TABLES['paypal.categories'], 'cat_id', $this->cat_id);
 
@@ -277,10 +275,11 @@ class Category
     *   Deletes a single image from disk.
     *   Only needs the $img_id value, so this function may be called as a
     *   standalone function.
+    *   $del_db is used to save a DB call if this is called from Save().
     *
-    *   @param  integer $img_id     DB ID of image to delete
+    *   @param  boolean $del_db     True to update the database.
     */
-    public function DeleteImage()
+    public function DeleteImage($del_db = true)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -289,9 +288,11 @@ class Category
             @unlink("{$_PP_CONF['catimgpath']}/{$filename}");
         }
 
-        DB_query("UPDATE {$_TABLES['paypal.categories']}
-                SET image=''
-                WHERE cat_id='" . $this->cat_id . "'");
+        if ($del_db) {
+            DB_query("UPDATE {$_TABLES['paypal.categories']}
+                    SET image=''
+                    WHERE cat_id='" . $this->cat_id . "'");
+        }
         $this->image = '';
     }
 
@@ -323,7 +324,7 @@ class Category
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        if ($_SYSTEM['disable_jquery_slimbox']) {
+        if ($_SYSTEM['framework'] == 'uikit') {
             $T->set_file('category', 'category_form.uikit.thtml');
         } else {
             $T->set_file('category', 'category_form.thtml');
@@ -334,16 +335,11 @@ class Category
         // Otherwise, we're creating a new item.  Also set the $not and $items
         // values to be used in the parent category selection accordingly.
         if ($id > 0) {
-            //if (!$this->Read($id)) {
-            //    return PAYPAL_errorMessage($LANG_PP['invalid_category_id'], 'info');
-            //}
-            //$id = $this->cat_id;
             $retval = COM_startBlock($LANG_PP['edit'] . ': ' . $this->cat_name);
             $T->set_var('cat_id', $id);
             $not = 'NOT';
             $items = $id;
         } else {
-            //$id = $this->cat_id;
             $retval = COM_startBlock($LANG_PP['create_category']);
             $T->set_var('cat_id', '');
             $not = '';
@@ -385,6 +381,8 @@ class Category
             $T->parse('BRow', 'BtnRow', true);
         }*/
 
+        // If there's an image for this category, display it and offer
+        // a link to delete it
         if ($this->image != '') {
             $T->set_var('img_url', 
                     PAYPAL_URL . '/images/categories/' . $this->image);
@@ -407,12 +405,12 @@ class Category
 
 
     /**
-     *  Sets the "enabled" field to the specified value.
-     *
-     *  @param  integer $id ID number of element to modify
-     *  @param  integer $value New value to set
-     *  @return         New value, or old value upon failure
-     */
+    *   Sets a boolean field to the specified value.
+    *
+    *   @param  integer $id ID number of element to modify
+    *   @param  integer $value New value to set
+    *   @return         New value, or old value upon failure
+    */
     function _toggle($oldvalue, $varname, $id=0)
     {
         global $_TABLES;
@@ -481,7 +479,6 @@ class Category
         }
 
         // Check if any products are under this category
-        //if (DB_count($_TABLES['paypal.prodXcat'], 'cat_id', $cat_id) > 0) {
         if (DB_count($_TABLES['paypal.products'], 'cat_id', $cat_id) > 0) {
             return true;
         }

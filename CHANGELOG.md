@@ -3,11 +3,14 @@ HISTORY
 
 Ver. 0.5.8
 ==========
-- Simplify permissions, use just group ID for categories
-- Remove unused access group from products
+- Simplify permissions, use just group ID for categories, no product perms
+- Remove unused access group field from products
 - Add templates for Uikit-based themes
 - Remove Amazon Simple Pay
+- Enable custom text fields for products, e.g. engraving information
 - Save option and custom string text in the purchase records for display
+- Enable sale pricing with dates for products
+- Enable availability dates for products
 
 Ver. 0.5.7
 ==========

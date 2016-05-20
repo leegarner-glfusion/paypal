@@ -15,7 +15,15 @@
         ({qty_onhand} {$LANG_PP['available']})<br />
         {!endif}
        <div class="paypalPrice normal ver2">
-       {price}
+        {!if on_sale}
+          <span class="paypalPrice was">{price}</span>
+          <span class="paypalPrice sale" id="price" name="price">{sale_price}</span>
+        {!else}
+          {price}
+        {!endif}
+        {!if has_discounts}
+        <span class="ppQtyDiscSmall">{$LANG_PP['qty_discounts_avail']}</span>
+        {!endif}
       </div>
     {!endif}
     <a href="{item_url}"><button type="button" class="paypalButton orange">{$LANG_PP['customize']}</button></a>
