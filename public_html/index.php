@@ -293,7 +293,7 @@ default:
 
 switch ($view) {
 case 'history':
-    //$content .= PAYPAL_history();
+    if (COM_isAnonUser()) COM_404();
     $content .= PAYPAL_orders();
     $menu_opt = $LANG_PP['purchase_history'];
     $page_title = $LANG_PP['purchase_history'];
@@ -301,6 +301,7 @@ case 'history':
 
 case 'billto':
 case 'shipto':
+    if (COM_isAnonUser()) COM_404();
     USES_paypal_class_userinfo();
     $U = new ppUserInfo();
     $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
@@ -308,6 +309,7 @@ case 'shipto':
     break;
 
 case 'order':
+    if (COM_isAnonUser()) COM_404();
     USES_paypal_class_order();
     $order = new ppOrder($actionval);
     if ($order->canView()) {
@@ -318,6 +320,7 @@ case 'order':
     break;
 
 case 'vieworder':
+    if (COM_isAnonUser()) COM_404();
     $_SESSION[PP_CART_VAR]['prevpage'] = $view;
     $content .= $ppGCart->View(true);
     $page_title = $LANG_PP['view_order'];

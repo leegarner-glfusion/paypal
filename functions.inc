@@ -680,23 +680,9 @@ function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 
     // If this plugin or a required plugin isn't available, abort gracefully
     if (!in_array('paypal', $_PLUGINS) ||
-        !in_array('lglib', $_PLUGINS) ) {
+        !in_array('lglib', $_PLUGINS) ||
+        !SEC_hasRights($rights, 'OR')) {
         COM_404();
-        exit;
-    }
-
-    // Confirm that the user has sufficient rights to access this page
-    if (!SEC_hasRights($rights, 'OR')) {
-        $display .= COM_siteHeader();
-        $display .= COM_startBlock('Access Denied');
-        $display .= PAYPAL_errorMessage($LANG_PP['access_denied_msg'], 
-                    'alert', $LANG_PP['access_denied']);
-        $display .= COM_endBlock();
-        $display .= COM_siteFooter();
-        COM_accessLog("Unauthorized user {$_USER['username']} from "
-                . "IP {$_SERVER['REMOTE_ADDR']} attempted to access the "
-                . "paypal plugin at {$_SERVER['REQUEST_URI']}");
-        echo $display;
         exit;
     }
 }
