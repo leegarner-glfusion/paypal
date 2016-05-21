@@ -43,7 +43,6 @@ class ppOrder
 
         $this->isNew = true;
         $this->uid = $_USER['uid'];
-        $this->buyer_email = $_USER['email'];
         $this->order_date = $_PP_CONF['now']->toMySql();
         $this->instructions = '';
         if (!empty($id)) {
@@ -390,6 +389,7 @@ class ppOrder
                 "shipping = '{$this->shipping}'",
                 "handling = '{$this->handling}'",
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
+                "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
         );
         foreach ($this->_addr_fields as $fld) {
             $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";

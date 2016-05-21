@@ -736,6 +736,8 @@ $PP_UPGRADE['0.5.8'] = array(
     "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD options_text text default ''",
     "DELETE FROM {$_TABLES['paypal.gateways']} WHERE id='amazon'",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        ADD buyer_email varchar(255) AFTER phone",
 );
 
 ?>
