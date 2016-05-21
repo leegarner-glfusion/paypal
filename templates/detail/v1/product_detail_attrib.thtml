@@ -5,7 +5,7 @@
 
 <div class="paypalProductDetail">
   <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
-    <div id="paypalShortDesc">
+    <div id="paypalShortDesc" class="ppShortDesc ver1">
       <h1>{short_description}
       {!if can_edit}
         <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
@@ -16,7 +16,12 @@
       {name}&nbsp;&nbsp;{edit_icon}
       <p />
       <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>
-      <span id="price" name="price">{price}</span> {currency}
+      {!if on_sale}
+      <span class="paypalPrice was">{orig_price}</span>
+      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      {!else}
+      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{price}</span><span class="paypalPrice normal">{price_postfix}</span>
+      {!endif}
       {!if qty_disc}
       <br /><span class="paypalQtyDisc">{qty_disc_txt}</span>
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
@@ -31,7 +36,7 @@
       <div class="uk-form-row">
       <label class="uk-form-label" for="options{opt_id}">{attr_name}:</label>
       <div class="uk-form-controls">
-        <select class="uk-contrast uk-form" id="options{opt_id}" name="options[]" onchange="ProcessForm(this);">
+        <select class="uk-form" id="options{opt_id}" name="options[]" onchange="ProcessForm(this);">
           {attr_options}
         </select>
       </div>
@@ -60,13 +65,13 @@
       {!endif}
     </div>
 
-    <div id="paypalProductDesc">
+    <div id="paypalProductDesc" class="ppProductDesc ver1">
       {description}
     </div>
 
-    <div class="paypalProductThumbWrapper">
+    <div class="paypalProductThumbWrapper ver1">
       <!-- BEGIN Thumbnail -->
-      <div class="paypalProductThumb" style="width:{img_cell_width}px;">
+      <div class="paypalProductThumb ver1">
       {!if thumb_url}
         <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
           <img src="{thumb_url}" border="0"
@@ -141,7 +146,7 @@ function ProcessForm(opt) {
 
     price = price.toFixed({cur_decimals});
     frm.amount.value = price;
-    frm.options.value = options.value;
+    //frm.options.value = options.value;
     document.getElementById('price').innerHTML = price;
     return;
 }

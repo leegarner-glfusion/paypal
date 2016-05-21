@@ -9,7 +9,7 @@ function PPupdateImage(disp_img, lg_img)
     document.getElementById("lg_img").href = lg_img;
 }
 </script>
-{!if attributes}
+{!if have_attributes}
 <script type="text/javascript" language="JavaScript">
 var emsg = "";
 function isValidField(obj)
@@ -71,7 +71,7 @@ function ProcessForm(opt) {
 
     price = price.toFixed({cur_decimals});
     frm.amount.value = price;
-    frm.options.value = options.value;
+    //frm.options.value = options.value;
     document.getElementById('price').innerHTML = price;
     return;
 }
@@ -115,9 +115,9 @@ $(document).ready(
       <img id="disp_img" src="{main_img}"/>
     </a>
   </div>
-  <div class="additional-images">
+  <div class="paypalProductThumbWrapper">
     <!-- BEGIN Thumbnail -->
-    <div class="paypalProductThumb" style="width:{tn_width}px; height:{tn_height}px;" >
+    <div class="paypalProductThumb ver2" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
       <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
         <img src="{thumb_url}" border="0" 
@@ -135,7 +135,7 @@ $(document).ready(
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div class="paypalDetailAttrib uk-form">
+<div class="paypalDetailAttrib ver2">
   <form class="uk-form" id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div>
       {!if on_sale}
@@ -189,7 +189,7 @@ $(document).ready(
 
 {!if main_img}
 {# with a main image the description goes below the image and price #}
-<div id="paypalProductDesc" style="clear:both;margin-bottom:2em;">
+<div id="paypalProductDesc" class="ppProductDesc ver2">
   {description}
 </div>
 {!endif}

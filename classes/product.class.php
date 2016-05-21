@@ -975,15 +975,7 @@ class Product
         $tpl_dir = PAYPAL_PI_PATH . '/templates/detail' .
                 $_PP_CONF['product_tpl_ver'];
         $T = new Template($tpl_dir);
-
-        if ($this->hasAttributes()) {
-            $detail_template = 'product_detail_attrib.thtml';
-        } else {
-            $detail_template = 'product_detail.thtml';
-        }
-            // TODO: test single template
-            $detail_template = 'product_detail_attrib.thtml';
-        $T->set_file('product', $detail_template);
+        $T->set_file('product', 'product_detail_attrib.thtml');
 
         $name = $this->name;
         $l_desc = PLG_replaceTags($this->description);
@@ -1019,7 +1011,7 @@ class Product
  
         $T->set_var(array(
             'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
-            //'has_attrib'        => $this->hasAttributes(),
+            'have_attributes'   => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
             'name'              => $name,
@@ -1320,7 +1312,7 @@ class Product
                 'item_name'     => htmlspecialchars($this->name),
                 'item_number'   => $this->id,
                 'short_description' => htmlspecialchars($this->short_description),
-                'amount'        => $this->price,
+                'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
                 'form_url'  => $this->hasAttributes() ? '' : 'true',
             ) );

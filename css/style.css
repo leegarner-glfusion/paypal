@@ -97,8 +97,10 @@ div.paypalProductDetail {
     margin-left: 10px;
 }
 
-.paypalProductDetail #paypalShortDesc {
+.paypalProductDetail #paypalShortDesc,
+div.paypalProctDetail .ppShortDesc {
     float: left;
+    margin-bottom: 10px;
 }
 .paypalProductDetail h1 {
     font-size: 200%;
@@ -115,19 +117,29 @@ div.paypalDetailAttrib {
     float:left;
     margin-bottom: 5px;
 }
+div.paypalDetailAttrib.ver2 {
+    margin-bottom: 2em;
+}
 
-.paypalProductDetail #paypalProductDesc {
+.paypalProductDetail #paypalProductDesc,
+.ppProductDesc {
     clear: both;
     margin-bottom: 1em;
+    margin-top: 2em;
     font-size: 1.2em;
 }
-
-.paypalProductDetail .paypalProductThumbWrapper {
-    clear: both;
+.ppProductDesc.ver2 {
+    margin-bottom: 2em;
 }
-
-.paypalProductDetail .paypalProductThumb {
+div.paypalProductThumbWrapper {
+    clear: both;
     float: left;
+    margin-top: .5em;
+    margin-bottom: 1em;
+}
+div.paypalProductThumb {
+    float: left;
+    margin-right: .25em;
 }
 
 .paypalProductListItem {
@@ -356,16 +368,12 @@ div.paypalProductListItemUrl2 {
     font-style:italic;
 }
 
-div.additional-images {
-    padding-bottom: 1rem;
-    clear: both;
-}
-
 .paypalProductLgImg #disp_img {
     /*max-width: 460px;
     max-height: 400px;*/
     width: 460px;
     height: 410px;
+    margin-bottom: 2px;
 }
 
 .alignright {
