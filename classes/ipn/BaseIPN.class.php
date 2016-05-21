@@ -641,6 +641,7 @@ class BaseIPN
 
         $uid = (int)$this->pp_data['custom']['uid'];
         $this->Order->uid = $uid;
+        $this->Order->buyer_email = $this->pp_data['payer_email'];
         $this->Order->status = !empty($this->pp_data['status']) ?
                 $this->pp_data['status'] : 'pending';
 
