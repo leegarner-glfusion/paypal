@@ -414,15 +414,15 @@ class ppOrder
     */
     public function View($final = false)
     {
-        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF;
+        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
+            $_SYSTEM;
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file(array(
-                'order'=> 'order.thtml',
-        ) );
+        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        $T->set_file('order', "order$tpltype.thtml");
  
         $isAdmin = SEC_hasRights('paypal.admin') ? true : false;
 

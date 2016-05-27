@@ -119,9 +119,13 @@ $(document).ready(
     <!-- BEGIN Thumbnail -->
     <div class="paypalProductThumb ver2" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
+      {!if mootools}
       <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
+      {!else}
+      <a href="{img_url}/{img_file}" data-uk-lightbox="{group:'product'}">
+      {!endif}
         <img src="{thumb_url}" border="0" 
-              alt="{$LANG_PP[click_to_enlarge]}" 
+              alt="{$LANG_PP[click_to_enlarge]}"
               onmouseover="javascript:PPupdateImage('{disp_img}','{lg_img}');"
               title="{$LANG_PP[click_to_enlarge]}"
               class="gl_mootip" />
@@ -135,7 +139,7 @@ $(document).ready(
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div class="paypalDetailAttrib ver2">
+<div class="paypalDetailAttrib ver2 uk-width-1-3">
   <form class="uk-form" id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div>
       {!if on_sale}

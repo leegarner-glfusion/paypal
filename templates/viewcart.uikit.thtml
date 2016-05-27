@@ -1,0 +1,77 @@
+{# begin {templatelocation} #}
+<a href="{pi_url}">{$LANG_PP['back_to_catalog']}</a>
+<div align="center">
+<h1>{$LANG_PP['cart_blocktitle']}</h1>
+<form action="{pi_url}/index.php" method="post">
+  <input type="hidden" name="cmd" value="_cart" />
+  <input type="hidden" name="upload" value="1" />
+  <input type="hidden" name="business" value="{receiver_email}" />
+
+  <table id="paypalViewCartTable" class="paypalViewCartTable">
+    <tr>
+      <th class="aligncenter">{$LANG_PP['description']}</th>
+      <th class="aligncenter">{$LANG_PP['price']}</th>
+      <th class="aligncenter">{$LANG_PP['quantity']}</th>
+      <th class="aligncenter">{$LANG_PP['total']}</th>
+      <th class="aligncenter">{$LANG_PP['delete']}</th>
+    </tr>
+    <!-- BEGIN ItemRow -->
+    <tr>
+      <td>
+        {!if item_link}
+        <a href="{pi_url}/detail.php?id={item_id}">
+        {!endif}
+        {item_descrip}
+        {!if item_link}
+        </a>
+        {!endif}
+        <!-- BEGIN ItemOptions -->
+          <br />
+          &nbsp;&nbsp;<small>--{opt_name}: {opt_value}
+          {!if opt_price}
+            &nbsp;({opt_price})
+          {!endif}
+          </small>
+        <!-- END ItemOptions -->
+      </td>
+      <td class="alignright">{item_price}</td>
+      <td class="aligncenter">
+        <input type="text" name="quantity[{cart_item_id}]" value="{item_quantity}" 
+          size="3"
+          />
+<!--          onchange="javascript:document.getElementById('submit').disabled=true;"-->
+      </td>
+      <td class="alignright">{item_total}</td>
+      <td class="aligncenter">
+        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><img
+            src="{layout_url}/images/admin/delete.png"></a>
+      </td>
+      <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
+      <input type="hidden" name="item_number_{pp_id}" value="{item_id}">
+      <input type="hidden" name="amount_{pp_id}" value="{item_price}">
+    </tr>
+    <!-- END ItemRow -->
+    <tr>
+      <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
+      <td class="alignright"><b>{subtotal}</b></td>
+    </tr>
+  </table>
+    <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
+      <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
+    </div>
+  <input type="hidden" name="custom" value='{custom}' />
+  <button type="submit" class="uk-button uk-button-primary" name="updatecart" 
+        value="{$LANG_PP['update_cart']}">{$LANG_PP['update_cart']}</button>
+  <button type="submit" class="uk-button uk-button-danger" name="emptycart"
+        value="{$LANG_PP['empty_cart']}">{$LANG_PP['empty_cart']}</button>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <button id="submit" type="submit" class="uk-button uk-button-success" name="checkout" 
+        value="{$LANG_PP['checkout']}">{$LANG_PP['checkout']} &gt;&gt;</button>
+</form>
+{!if tc_link}
+<div class="ppTOCLink">
+    <a href="{tc_link}" target="_new">Terms and Conditions</a>
+</div>
+{!endif}
+</div>
+{# end {templatelocation} #}

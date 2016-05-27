@@ -341,7 +341,9 @@ case 'viewcart':
     if ($ppGCart->hasItems()) {
         $content .= $ppGCart->View();
     } else {
-        $content .= '<span class="info">' . $LANG_PP['cart_empty'] . '</span>';
+        LGLIB_storeMessage($LANG_PP['cart_empty']);
+        COM_refresh(PAYPAL_URL . '/index.php');
+        exit;
     }
     break;
 
