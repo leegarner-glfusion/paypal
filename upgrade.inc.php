@@ -441,6 +441,9 @@ function PAYPAL_do_upgrade($current_ver)
     }
 
     if ($current_ver < '0.5.8') {
+        // Add terms and conditions link
+        $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
+                'text', 0, 40, 2, 50, true, $_PP_CONF['pi_name']);
         // Upgrade sql changes from owner/group/member/anon perms to group id
         // First update the group_id based on the perms.
         $sql = "SELECT cat_id,group_id,perm_group,perm_members,perm_anon

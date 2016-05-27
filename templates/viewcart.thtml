@@ -68,5 +68,10 @@
   <input id="submit" type="submit" class="paypalButton green" name="checkout" 
         value="{$LANG_PP['checkout']} >>" />
 </form>
+{!if tc_link}
+<div class="ppTOCLink">
+    <a href="{tc_link}" target="_new">{$LANG_PP['terms_and_cond']}</a>
+</div>
+{!endif}
 </div>
 {# end {templatelocation} #}

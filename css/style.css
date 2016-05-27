@@ -431,3 +431,8 @@ table.paypalViewCartTable {
     font-size: small;
     font-style: italic;
 }
+
+div.ppTOCLink {
+    margin-top: 10px;
+}
+

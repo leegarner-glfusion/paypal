@@ -453,7 +453,7 @@ class ppCart
     */
     public function View($checkout = false)
     {
-        global $_PP_CONF, $_USER, $LANG_PP, $_TABLES;
+        global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
 
         USES_paypal_class_product();
         USES_paypal_class_currency();
@@ -461,7 +461,10 @@ class ppCart
         $currency = new ppCurrency();
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('cart', $checkout ? 'order.thtml' : 'viewcart.thtml');
+        
+        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        $T->set_file('cart', $checkout ? "order$tpltype.thtml" :
+                "viewcart$tpltype.thtml");
         if (!isset($this->m_cart) ||
                 empty($this->m_cart)) {
             return $LANG_PP['cart_empty'];
@@ -572,6 +575,12 @@ class ppCart
         // charges
         if ($total == $subtotal) $subtotal = 0;
 
+        // Format the TOC link, if any
+        if (!empty($_PP_CONF['tc_link'])) {
+            $tc_link = str_replace('{site_url}', $_CONF['site_url'], $_PP_CONF['tc_link']);
+        } else {
+            $tc_link = '';
+        }
         $T->set_var(array(
             'paypal_url'        => $_PP_CONF['paypal_url'],
             'receiver_email'    => $_PP_CONF['receiver_email'][0],
@@ -580,6 +589,7 @@ class ppCart
             'subtotal'  => $subtotal > 0 ? $currency->Format($subtotal) : '',
             'total'     => $currency->Format($total),
             'order_instr' => htmlspecialchars($this->getInstructions()),
+            'tc_link'  => $tc_link,
         ) );
 
         // If this is the final checkout, then show the payment buttons
