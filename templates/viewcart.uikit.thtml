@@ -70,7 +70,7 @@
 </form>
 {!if tc_link}
 <div class="ppTOCLink">
-    <a href="{tc_link}" target="_new">Terms and Conditions</a>
+    <a href="{tc_link}" target="_new">{$LANG_PP['terms_and_cond']}</a>
 </div>
 {!endif}
 </div>
