@@ -90,10 +90,17 @@
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
-          <td>{item_descrip}
-          {!if item_options}
-          <br />{item_options}
-          {!endif}
+          <td>
+            {!if is_admin}
+            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}">
+            {!endif}
+            {item_descrip}
+            {!if is_admin}
+            </a>
+            {!endif}
+            {!if item_options}
+            <br />{item_options}
+            {!endif}
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>

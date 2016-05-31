@@ -464,6 +464,7 @@ class ppOrder
                 'item_quantity' => (int)$item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_options'  => $item_options,
+                'is_admin' => $isAdmin ? 'true' : '',
             ) );
             $T->parse('iRow', 'ItemRow', true);
             if ($item['data']['prod_type'] == PP_PROD_PHYSICAL) {

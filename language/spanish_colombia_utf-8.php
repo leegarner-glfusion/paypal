@@ -277,6 +277,7 @@ $LANG_PP = array (
 'from' => 'From',
 'to' => 'To',
 'terms_and_cond' => 'Terms and Conditions',
+'item_history' => 'Item Purchase History',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

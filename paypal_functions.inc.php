@@ -240,9 +240,14 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         break; 
 
     case 'username':
-        $retval = COM_createLink($fieldvalue, 
+        if ($A['isAdmin']) {
+            $retval = COM_createLink($fieldvalue, 
+                PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $A['uid']);
+        } else {
+            $retval = COM_createLink($fieldvalue, 
                 $_CONF['site_url'] . '/users.php?mode=profile&uid=' . 
                 $A['uid']);
+        }
         break;
 
     case 'quantity':
