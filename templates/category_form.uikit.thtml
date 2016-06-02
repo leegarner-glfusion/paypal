@@ -56,7 +56,7 @@
     </div>
   </div>
 
-  <div class="uk-margin-large">
+  <div class="uk-form-row" uk-margin-large">
     <label class="uk-form-label" for=""></label>
     <div class="uk-form-controls">
       <button class="uk-button uk-button-success" type="submit" name="savecat" value="{$LANG_PP['savecat']}" />{$LANG_PP['savecat']}</button>

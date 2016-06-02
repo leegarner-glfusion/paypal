@@ -521,7 +521,39 @@ class Category
         return $retval;
     }
 
- 
+
+    /**
+    *   Determine if the current user has access to this category.
+    *
+    *   @return boolean     True if user has access, False if not
+    */
+    public function hasAccess()
+    {
+        global $_GROUPS;
+
+        return (in_array($_GROUPS, $this->grp_access)) ? true : false;
+    }
+
+
+    /**
+    *   Get the URL to the category image.
+    *   Returns an empty string if no image defined or found.
+    *
+    *   @return string  URL of image
+    */
+    public function ImageUrl()
+    {
+        global $_CONF, $_PP_CONF;
+
+        if ($this->image != '' &&
+                is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
+                '/images/categories/' . $A['image'])) {
+            $retval = PAYPAL_URL . '/images/categories/' . $this->image;
+        } else {
+            $retval = '';
+        }
+    }
+
 }   // class Category
 
 
