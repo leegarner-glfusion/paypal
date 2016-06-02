@@ -259,7 +259,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `price` float(10,2) NOT NULL default '0.00',
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
-  `options_text text default '',
+  `options_text` text default '',
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
