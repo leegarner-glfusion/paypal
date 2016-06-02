@@ -98,9 +98,9 @@
             {!if is_admin}
             </a>
             {!endif}
-            {!if item_options}
-            <br />{item_options}
-            {!endif}
+          {!if item_options}
+          <br />{item_options}
+          {!endif}
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
@@ -146,11 +146,11 @@
   <div style="clear:both;">
   {!if checkout}
     <div>
-      <input class="paypalButton blue" type="submit" name="viewcart"
+      <button class="uk-button uk-button-primary" type="submit" name="viewcart"
         value="{$LANG_PP['update_cart']}"
-        onclick="document.location.href='{pi_url}/index.php?view=cart';" />
-  <input type="submit" class="paypalButton red" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
+        onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['update_cart']}</button>
+      <button type="submit" class="uk-button uk-button-danger" name="emptycart"
+        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';">{$LANG_PP['empty_cart']}</button>
     </div>
     <div class="paypalOrderButtons">
       {gateway_vars}

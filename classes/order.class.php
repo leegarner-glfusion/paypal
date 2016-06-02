@@ -43,7 +43,6 @@ class ppOrder
 
         $this->isNew = true;
         $this->uid = $_USER['uid'];
-        $this->buyer_email = $_USER['email'];
         $this->order_date = $_PP_CONF['now']->toMySql();
         $this->instructions = '';
         if (!empty($id)) {
@@ -390,6 +389,7 @@ class ppOrder
                 "shipping = '{$this->shipping}'",
                 "handling = '{$this->handling}'",
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
+                "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
         );
         foreach ($this->_addr_fields as $fld) {
             $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -414,15 +414,15 @@ class ppOrder
     */
     public function View($final = false)
     {
-        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF;
+        global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
+            $_SYSTEM;
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file(array(
-                'order'=> 'order.thtml',
-        ) );
+        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        $T->set_file('order', "order$tpltype.thtml");
  
         $isAdmin = SEC_hasRights('paypal.admin') ? true : false;
 
@@ -464,6 +464,7 @@ class ppOrder
                 'item_quantity' => (int)$item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_options'  => $item_options,
+                'is_admin' => $isAdmin ? 'true' : '',
             ) );
             $T->parse('iRow', 'ItemRow', true);
             if ($item['data']['prod_type'] == PP_PROD_PHYSICAL) {
@@ -756,6 +757,7 @@ class ppOrder
                 'pending'       => $this->status == 'pending' ? 'true' : '',
                 'gw_msg'        => $gw_msg,
                 'status'            => $this->status,
+                'order_instr'   => $this->instructions,
             ) );
 
             // parse templates for subject/text

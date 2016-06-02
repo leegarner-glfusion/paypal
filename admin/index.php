@@ -52,7 +52,7 @@ $expected = array(
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit', 
-    'wfadmin', 'order',
+    'wfadmin', 'order', 'itemhist',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -263,6 +263,7 @@ case 'history':
     break;
 
 case 'orderhist':
+    // Show all purchases
     if (isset($_POST['upd_orders']) && is_array($_POST['upd_orders'])) {
         USES_paypal_class_order();
         $i = 0;
@@ -278,9 +279,15 @@ case 'orderhist':
         }
         $msg[] = sprintf($LANG_PP['updated_x_orders'], $i);
     }
-    $content .= PAYPAL_orders(true);
+    $uid = isset($_REQUEST['uid']) ? $_REQUEST['uid'] : 0;
+    
+    $content .= PAYPAL_orders(true, $uid);
     break;
 
+case 'itemhist':
+    $content .= PAYPAL_itemhist($actionval);
+    break;
+    
 case 'order':
     USES_paypal_class_order();
     $order = new ppOrder($actionval);
@@ -438,9 +445,6 @@ function PAYPAL_adminlist_Product($cat_id=0)
         array('text' => $LANG_ADMIN['delete'],
                 'field' => 'delete', 'sort' => false,
                 'align' => 'center'),
-        array('text' => $LANG_ADMIN['copy'],
-                'field' => 'copy', 'sort' => false,
-                'align' => 'center'),
     );
 
     $defsort_arr = array('field' => 'id',
@@ -555,7 +559,8 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'name':
         $retval = COM_createLink($fieldvalue, 
-                PAYPAL_URL . '/index.php?detail=x&id=' . $A['id']);
+            PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $A['id']);
+        //        PAYPAL_URL . '/index.php?detail=x&id=' . $A['id']);
         break; 
 
     case 'prod_type':
@@ -957,7 +962,7 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 */
 function PAYPAL_adminlist_Attributes()
 {
-    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
 
     $sql = "SELECT a.*, p.name AS prod_name
             FROM {$_TABLES['paypal.prod_attr']} a
@@ -1036,6 +1041,7 @@ function PAYPAL_adminlist_Attributes()
         'src_product'       => $product_selection,
         'product_select'    => COM_optionList($_TABLES['paypal.products'], 'id, name'),
         'cat_select'        => COM_optionList($_TABLES['paypal.categories'], 'cat_id,cat_name'),
+        'uikit'     => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
     ) );
     $display .= $T->parse('output', 'copy_attr_form');
 
@@ -1429,6 +1435,103 @@ function PAYPAL_getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     return $retval;
 }
 
+
+function PAYPAL_itemhist($item_id = 0)
+{
+    global $_TABLES, $LANG_PP;
+
+    $Item = new Product($item_id);
+    if ($Item->isNew) {
+        COM_404();
+    }
+
+    $sql = "SELECT *, sum(quantity) as qty FROM {$_TABLES['paypal.purchases']}";
+    if ($item_id > 0) {
+        $sql .= ' WHERE product_id = ' . $Item->id;
+    }
+    $sql .= " GROUP BY order_id";
+
+    $header_arr = array(
+        array('text' => $LANG_PP['purch_date'],
+                'field' => 'purchase_date', 'sort' => true),
+        array('text' => $LANG_PP['quantity'],
+                'field' => 'qty', 'sort' => false),
+        array('text' => $LANG_PP['order'],
+                'field' => 'order_id', 'sort' => true),
+        array('text' => $LANG_PP['name'], 
+                'field' => 'user_id', 'sort' => true),
+    );
+
+    $defsort_arr = array('field' => 'purchase_date',
+            'direction' => 'ASC');
+
+    $display = COM_startBlock('', '', 
+                    COM_getBlockTemplate('_admin_block', 'header'));
+
+    $query_arr = array('table' => 'paypal.orderstatus',
+        'sql' => $sql,
+        'query_fields' => array(),
+        'default_filter' => '',
+    );
+
+    $text_arr = array(
+        'has_extras' => false,
+        'form_url' => PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $Item->id,
+    );
+
+    if (!isset($_REQUEST['query_limit']))
+        $_GET['query_limit'] = 20;
+
+    $display .= ADMIN_createMenu(array(), $LANG_PP['item_history'] . ': ' . $Item->short_description);
+
+    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_itemhist',
+            $header_arr, $text_arr, $query_arr, $defsort_arr,
+            '', '', '', '');
+
+    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+    return $display;
+
+}
+
+
+/**
+*   Get an individual field for the item purchase history
+*
+*   @param  string  $fieldname  Name of field (from the array, not the db)
+*   @param  mixed   $fieldvalue Value of the field
+*   @param  array   $A          Array of all fields from the database
+*   @param  array   $icon_arr   System icon array (not used)
+*   @param  object  $EntryList  This entry list object
+*   @return string              HTML for field display in the table
+*/
+function PAYPAL_getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CONF, $_PP_CONF, $LANG_PP;
+   
+    $retval = '';
+    static $username = array();
+
+    switch($fieldname) {
+    case 'user_id':
+        if (!isset($username[$fieldvalue])) {
+            $username[$fieldvalue] = COM_getDisplayName($fieldvalue);
+        }
+        $retval = COM_createLink($username[$fieldvalue],
+            PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $fieldvalue);
+        break;
+
+    case 'order_id':
+        $retval = COM_createLink($fieldvalue,
+            PAYPAL_ADMIN_URL . '/index.php?order=' . $fieldvalue);
+        break;
+
+    default:
+        $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
+        break;
+    }
+
+    return $retval;
+}
 
 
 ?>

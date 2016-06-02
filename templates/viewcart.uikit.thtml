@@ -60,13 +60,13 @@
       <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
     </div>
   <input type="hidden" name="custom" value='{custom}' />
-  <input type="submit" class="paypalButton blue" name="updatecart" 
-        value="{$LANG_PP['update_cart']}" />
-  <input type="submit" class="paypalButton red" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" />
+  <button type="submit" class="uk-button uk-button-primary" name="updatecart" 
+        value="{$LANG_PP['update_cart']}">{$LANG_PP['update_cart']}</button>
+  <button type="submit" class="uk-button uk-button-danger" name="emptycart"
+        value="{$LANG_PP['empty_cart']}">{$LANG_PP['empty_cart']}</button>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <input id="submit" type="submit" class="paypalButton green" name="checkout" 
-        value="{$LANG_PP['checkout']} >>" />
+  <button id="submit" type="submit" class="uk-button uk-button-success" name="checkout" 
+        value="{$LANG_PP['checkout']}">{$LANG_PP['checkout']} &gt;&gt;</button>
 </form>
 {!if tc_link}
 <div class="ppTOCLink">

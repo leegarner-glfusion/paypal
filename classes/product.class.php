@@ -139,6 +139,8 @@ class Product
         case 'file':
         case 'keywords':
         case 'btn_type':
+        case 'sale_beg':
+        case 'sale_end':
             // String values
             $this->properties[$var] = trim($value);
             break;
@@ -213,10 +215,7 @@ class Product
         $this->cat_id = $row['cat_id'];
         $this->short_description = $row['short_description'];
         $this->price = $row['price'];
-        //$this->sale_price = $row['sale_price'];
-        // set sale_price to price until specials function is completely
-        // done.
-        $this->sale_price = $row['price'];
+        $this->sale_price = $row['sale_price'];
         $this->file = $row['file'];
         $this->expiration = $row['expiration'];
         $this->dt_add = $row['dt_add'];
@@ -232,6 +231,10 @@ class Product
         $this->onhand = $row['onhand'];
         $this->oversell = $row['oversell'];
         $this->custom = $row['custom'];
+        $this->sale_beg = $row['sale_beg'];
+        $this->sale_end = $row['sale_end'];
+        $this->avail_beg = $row['avail_beg'];
+        $this->avail_end = $row['avail_end'];
 
         // Get the quantity discount table. If coming from a form,
         // there will be two array variables for qty and discount percent.
@@ -407,6 +410,10 @@ class Product
                 options='$options',
                 custom='" . DB_escapeString($this->custom) . "',
                 sale_price={$this->sale_price},
+                sale_beg='" . DB_escapeString($this->sale_beg) . "',
+                sale_end='" . DB_escapeString($this->sale_end) . "',
+                avail_beg='" . DB_escapeString($this->avail_beg) . "',
+                avail_end='" . DB_escapeString($this->avail_end) . "',
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
@@ -688,6 +695,12 @@ class Product
             'onhand'        => $this->onhand,
             "oversell_sel{$this->oversell}" => 'selected="selected"',
             'custom' => $this->custom,
+            'sale_price'    => sprintf('%.2f', $this->sale_price),
+            'sale_beg'      => $this->sale_beg,
+            'sale_end'      => $this->sale_end,
+            'avail_beg'     => $this->avail_beg,
+            'avail_end'     => $this->avail_end,
+            //'limit_availability_chk' => $this->limit_availability ? 'checked="checked"' : '',
         ) );
 
         // Create the button type selections. New products get the default
@@ -952,7 +965,7 @@ class Product
         USES_lib_comments();
 
         $prod_id = $this->id;
-        if ($prod_id < 1 || !$this->enabled) {
+        if ($prod_id < 1 || !$this->enabled ||!$this->isAvailable()) {
             return PAYPAL_errorMessage($LANG_PP['invalid_product_id'], 'info');
         }
 
@@ -962,15 +975,7 @@ class Product
         $tpl_dir = PAYPAL_PI_PATH . '/templates/detail' .
                 $_PP_CONF['product_tpl_ver'];
         $T = new Template($tpl_dir);
-
-        if ($this->hasAttributes()) {
-            $detail_template = 'product_detail_attrib.thtml';
-        } else {
-            $detail_template = 'product_detail.thtml';
-        }
-            // TODO: test single template
-            $detail_template = 'product_detail_attrib.thtml';
-        $T->set_file('product', $detail_template);
+        $T->set_file('product', 'product_detail_attrib.thtml');
 
         $name = $this->name;
         $l_desc = PLG_replaceTags($this->description);
@@ -983,8 +988,8 @@ class Product
             $s_desc = COM_highlightQuery($s_desc, $_REQUEST['query']);
         }
 
-        $act_price = $this->sale_price == $this->price ? 
-                    $this->price : $this->sale_price;
+        $onsale = $this->isOnSale();
+        $act_price = $onsale ? $this->sale_price : $this->price;
 
         $qty_disc_txt = '';
         foreach ($this->qty_discounts as $qty=>$pct) {
@@ -1006,7 +1011,7 @@ class Product
  
         $T->set_var(array(
             'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
-            //'has_attrib'        => $this->hasAttributes(),
+            'have_attributes'   => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
             'name'              => $name,
@@ -1015,7 +1020,7 @@ class Product
             'cur_decimals'      => $this->currency->Decimals(),
             'price'             => $this->currency->FormatValue($act_price),
             'orig_price'        => $this->currency->Format($this->price),
-            'on_sale'           => $act_price == $this->price ? '' : 'true',
+            'on_sale'           => $onsale ? 'true' : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => $this->currency->Pre(),
             'price_postfix'     => $this->currency->Post(),
@@ -1307,7 +1312,7 @@ class Product
                 'item_name'     => htmlspecialchars($this->name),
                 'item_number'   => $this->id,
                 'short_description' => htmlspecialchars($this->short_description),
-                'amount'        => $this->price,
+                'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
                 'form_url'  => $this->hasAttributes() ? '' : 'true',
             ) );
@@ -1329,6 +1334,20 @@ class Product
 
 
     /**
+    *   Determine if this product has any quantity-based discounts.
+    *   Used to display "discounts available" message in the product liet.
+    *
+    *   @return boolean     True if attributes exist, False if not.
+    */
+    public function hasDiscounts()
+    {
+        // Have to assign to temp var to get empty() to work
+        $discounts = $this->qty_discounts;
+        return empty($discounts) ? false : true;
+    }
+
+
+    /**
     *   Determine if a "Buy Now" button is allowed for this item.
     *   Items with attributes or a quantity discount schedule must be
     *   purchased through the shopping cart to allow for proper price
@@ -1338,8 +1357,9 @@ class Product
     */
     public function canBuyNow()
     {
+        $discounts = $this->qty_discounts;
         if ($this->hasAttributes() ||
-            !empty($this->qty_discounts)
+            !empty($discounts)
         ) {
             return false;
         }
@@ -1356,7 +1376,12 @@ class Product
     public function getPrice($options = array(), $quantity = 1)
     {
         if (!is_array($options)) $options = array($options);
-        $price = $this->price;
+        // Use the sale price if this item is on sale
+        if ($this->isOnSale()) {
+            $price = $this->sale_price;
+        } else {
+            $price = $this->price;
+        }
 
         // future: return sale price if on sale, otherwise base price
         foreach ($options as $key) {
@@ -1525,6 +1550,49 @@ class Product
 
         return true;
     }
+
+
+    /**
+    *   Determine if this product is on sale
+    *
+    *   @return boolean True if on sale, false if not
+    */
+    public function isOnSale()
+    {
+        global $_PP_CONF;
+
+        // Not on sale if the price isn't different
+        if ($this->sale_price == $this->price)
+            return false;
+
+        $today = $_PP_CONF['now']->toMySQL();
+        if ($this->sale_end < $today || $this->sale_beg > $today) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+    *   Determine if a product is available for sale based on dates
+    *   Default availability dates are from 0000-00-00 to 9999-12-31
+    *
+    *   @return boolean True if on sale, false if not
+    */
+    public function isAvailable($isadmin = false)
+    {
+        global $_PP_CONF;
+
+        if ($isadmin) return true;  // Admin can always view
+
+        $today = $_PP_CONF['now']->toMySQL();
+        if ($today < $this->avail_beg || $today > $this->avail_end) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
 }   // class Product
 

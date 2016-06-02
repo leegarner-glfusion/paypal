@@ -40,6 +40,7 @@ $LANG_PP = array (
 'download'          => 'Download',
 'downloadable'      => 'Downloadable',
 'price'             => 'Price',
+'sale_price'        => 'Sale Price',
 'quantity'          => 'Quantity',
 'item_total'        => 'Item Total',
 'total'             => 'Total',
@@ -264,6 +265,7 @@ $LANG_PP = array (
 'discount' => 'Discount',
 'min_purch' => 'Min. Purchase',
 'qty_discounts' => 'Quantity Discounts',
+'qty_discounts_avail' => 'Quantity Discounts Available',
 'qty_disc_text' => 'Discounts calculated at checkout',
 'order_instr' => 'Special Order Instructions',
 'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />' .
@@ -274,6 +276,10 @@ $LANG_PP = array (
 'custom' => 'Text Fields',
 'custom_instr' => '(separate by &quot;|&quot;&nbsp;)',
 'visible_to' => 'Visible To',
+'from' => 'From',
+'to' => 'To',
+'terms_and_cond' => 'Terms and Conditions',
+'item_history' => 'Item Purchase History',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -343,6 +349,7 @@ $LANG_confignames['paypal'] = array(
     'product_tpl_ver' => 'Product View Template',
     'list_tpl_ver' => 'Product List Template',
     'cache_max_age' => 'Max file cache age in seconds',
+    'tc_link' => 'Link to Terms and Conditions',
 );
 
 /** Language strings for the subgroup names in the config section */

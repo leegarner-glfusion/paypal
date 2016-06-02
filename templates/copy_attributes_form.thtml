@@ -1,5 +1,6 @@
 {# begin {templatelocation} #}
-<form action="{site_admin_url}/plugins/paypal/index.php" method="post">
+<form class="uk-form" action="{site_admin_url}/plugins/paypal/index.php" method="post">
+<fieldset data-uk-margin>
 <p>{$LANG_PP['copy_attributes']}:<br />
 {$LANG_PP['copy_from']}: <select name="src_prod">
 <option value="0">-- Make Selection --</option>
@@ -14,6 +15,13 @@
 {cat_select}
 </select>
 </p>
-<p><button class="uk-button uk-button-danger" name="attrcopy" type="submit" value="attrcopy">{$LANG_ADMIN['copy']}</button>
+<p><button 
+{!if uikit}
+class="uk-button uk-button-danger"
+{!else}
+class="lgButton red"
+{!endif}
+name="attrcopy" type="submit" value="attrcopy">{$LANG_ADMIN['copy']}</button>
+</fieldset>
 </form>
 {# end {templatelocation} #}
