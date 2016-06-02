@@ -32,7 +32,7 @@
   <div class="uk-form-row">
     <label class="uk-form-label" for="imagefile">{$LANG_PP['cat_image']}:</label>
     <div class="uk-form-controls">
-      <button type="file" class="uk-button" name="imagefile" id="imagefile" />{$LANG_PP['select_image']}</button>
+      <input type="file" class="uk-button" name="imagefile" id="imagefile" value="{$LANG_PP['select_image']}" />
       {!if img_url}
         <img src="{img_url}" border="0" />
         <a href="{action_url}/index.php?deletecatimage=x&cat_id={cat_id}">
