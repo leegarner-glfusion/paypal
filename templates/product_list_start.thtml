@@ -12,17 +12,19 @@
 <hr />
 </div>
 <div>
-  <div class="paypalProductSort">
+  <div class="paypalProductSort uk-form">
   {$LANG_PP['sortby']}:&nbsp;
   <select name="sortby" onchange='document.location="{pi_url}/index.php?sortby="+this.value+"";'>
     {sortby_options}
-  </select>&nbsp;&nbsp;
+  </select>
   </div>
   <div class="paypalProductSearch">
-    <form method="get" action="{pi_url}/index.php">
+    <form method="get" class="uk-form" action="{pi_url}/index.php">
+<fieldset data-uk-margin>
     <input type="search" id="query" name="query" value="{search_text}" placeholder="{$LANG_PP['search_catalog']}" />
-    <input type="submit" class="lgButton green" value="{$LANG09[10]}" name="submit" />
-    <input type="submit" class="lgButton grey" value="X" name="clearsearch" />
+    <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG09[10]}</button>
+    <button type="submit" class="uk-button" name="clearsearch" ><i class="uk-icon-remove"></i></button>
+</fieldset>
   </form>
   </div>
 </div>
