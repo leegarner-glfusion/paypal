@@ -322,7 +322,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 function PAYPAL_ProductList($cat=0, $search='')
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS, 
-            $_IMAGE_TYPE, $_GROUPS, $LANG13;
+            $_IMAGE_TYPE, $_GROUPS, $LANG13, $_SYSTEM;
 
     USES_paypal_class_product();
 
@@ -583,6 +583,7 @@ function PAYPAL_ProductList($cat=0, $search='')
             'currency'      => $_PP_CONF['currency'],
             'breadcrumbs'   => $breadcrumbs,
             'search_text'   => $srchitem,
+            'uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
     ) );
 
     if (!empty($cat_name)) {

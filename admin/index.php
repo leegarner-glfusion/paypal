@@ -962,7 +962,7 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 */
 function PAYPAL_adminlist_Attributes()
 {
-    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
 
     $sql = "SELECT a.*, p.name AS prod_name
             FROM {$_TABLES['paypal.prod_attr']} a
@@ -1041,6 +1041,7 @@ function PAYPAL_adminlist_Attributes()
         'src_product'       => $product_selection,
         'product_select'    => COM_optionList($_TABLES['paypal.products'], 'id, name'),
         'cat_select'        => COM_optionList($_TABLES['paypal.categories'], 'cat_id,cat_name'),
+        'uikit'     => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
     ) );
     $display .= $T->parse('output', 'copy_attr_form');
 
