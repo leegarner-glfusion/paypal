@@ -1,20 +1,13 @@
 {# begin {templatelocation} #}
-<div class="paypalOrderContainer">
+<link rel="stylesheet" type="text/css" href="{site_url}/paypal/css/style.css" />
+<div class="paypalOrderContainer print">
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
-  <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
-  <div class="floatright">
-    <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
-        title="Print" class="uk-icon-print"></a>
-  </div>
-
   <div class="paypalOrder">
 
+  <div id="paypalAddr">
     {!if have_billto}
     <div id="paypalBilling">
       <b>{$LANG_PP['bill_to']}:</b>
-      {!if not_final}
-      <a href="{pi_url}/index.php?view=billto">[{$LANG_ADMIN['edit']}]</a>
-      {!endif}
       <br />
       {!if billto_name}
       {billto_name}<br />
@@ -39,16 +32,12 @@
       {!if billto_country}
       {billto_country}
       {!endif}
-      <p>&nbsp;</p>
     </div>
     {!endif}
 
     {!if have_shipto}
     <div id="paypalShipping">
       <b>{$LANG_PP['ship_to']}:</b>&nbsp;
-      {!if not_final}
-      <a href="{pi_url}/index.php?view=shipto">[{$LANG_ADMIN['edit']}]</a>
-      {!endif}
       <br />
       {!if shipto_name}
       {shipto_name}<br />
@@ -73,17 +62,14 @@
       {!if shipto_country}
       {shipto_country}
       {!endif}
-      <p>&nbsp;</p>
     </div>
     {!endif}
+  </div>
 
-    {!if checkout}
-    {!else}
     <div id="paypalOrderNumber">
       {$LANG_PP['order_number']}:&nbsp;&nbsp;{order_number}<br />
       {$LANG_PP['order_date']}:&nbsp;&nbsp;<span title="{order_date_tip}">{order_date}</span>
     </div>
-    {!endif}
 
     <div class="paypalOrderItems">
       <table>
@@ -96,16 +82,10 @@
         <!-- BEGIN ItemRow -->
         <tr>
           <td>
-            {!if is_admin}
-            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}">
-            {!endif}
             {item_descrip}
-            {!if is_admin}
-            </a>
+            {!if item_options}
+            <br />{item_options}
             {!endif}
-          {!if item_options}
-          <br />{item_options}
-          {!endif}
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
@@ -149,21 +129,9 @@
     {order_instr}
   </div>
   <div style="clear:both;">
-  {!if checkout}
-    <div>
-      <button class="uk-button uk-button-primary" type="submit" name="viewcart"
-        value="{$LANG_PP['update_cart']}"
-        onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['update_cart']}</button>
-      <button type="submit" class="uk-button uk-button-danger" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';">{$LANG_PP['empty_cart']}</button>
-    </div>
-    <div class="paypalOrderButtons">
-      {gateway_vars}
-    </div>
-  {!else}
     {!if is_admin}
-  <p id="orderPurchaser">{$LANG_PP['purchaser']}: <a href="{site_url}/users.php?mode=profile&uid={purch_uid}">{purch_name} ({purch_uid})</a></p>
-  <p>{$LANG_PP['status']}: {stat_update}</p>
+  <p id="orderPurchaser">{$LANG_PP['purchaser']}: {purch_name} ({purch_uid})</p>
+  <p>{$LANG_PP['status']}: {status}</p>
   <p>
     <table id="paypalOrderLog">
     <tr>
@@ -180,15 +148,12 @@
     <!-- END LogMessages -->
     </table>
     {!endif}
-  {!endif}
   {!if pmt_method}
     <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
     {!if is_admin}
     {!if pmt_txn_id}
     , {$LANG_PP['trans_id']}
-    <a href="{pi_admin_url}/index.php?ipnlog=x&amp;op=single&amp;txn_id={pmt_txn_id}">
     {pmt_txn_id}
-    </a>
     {!endif}
     {!endif}
     </p>

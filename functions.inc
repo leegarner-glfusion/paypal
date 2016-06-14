@@ -843,7 +843,7 @@ function plugin_getheadercss_paypal()
     global $_CONF, $_PP_CONF;
 
     $styles = array();
-    $pi_css = PAYPAL_PI_PATH . '/css/';
+    $pi_css = $_CONF['path_html'] . 'paypal/css/';
     $layout_css = "{$_CONF['path_layout']}plugins/{$_PP_CONF['pi_name']}/";
 
     $files = array('style.css');
@@ -1795,9 +1795,6 @@ function PAYPAL_explode_opts($item, $opt_string = false)
     }
     return array($item_id, $options);
 }
-
-// This is temporary, and will be included in glFusion 1.6.0
-isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';
 

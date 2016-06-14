@@ -229,20 +229,27 @@ div.paypalProductListItemUrl2 {
     margin-right: auto;
 }
 
+.paypalOrderContainer.print h1 {
+    font-size: 24px;
+}
+
 .paypalOrder {
     clear:both;
+}
+
+.paypalOrder #paypalAddr {
+    padding-bottom: 1em;
+    position:relative;
 }
 
 .paypalOrder #paypalBilling {
     float: left;
     margin-left: 0;
-    margin-bottom: 1em;
 }
 
 .paypalOrder #paypalShipping {
     float: left;
     margin-left: 20%;
-    margin-bottom: 1em;
 }
 
 .paypalOrder #paypalOrderNumber {

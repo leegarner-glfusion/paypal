@@ -54,7 +54,8 @@ if (!empty($action)) {
         'addcartitem', 'addcartitem_x', 'checkoutcart',
         'processorder', 'thanks', 'action', 
         // Views
-        'order', 'view', 'detail');
+        'order', 'view', 'detail', 'printorder',
+    );
     $action = 'view';
     //echo $action;die;
     foreach($expected as $provided) {
@@ -316,6 +317,17 @@ case 'order':
         $content .= $order->View(true);
     } else {
         $content .= $LANG_PP['access_denied_msg'];
+    }
+    break;
+
+case 'printorder':
+    USES_paypal_class_order();
+    $order = new ppOrder($actionval);
+    if ($order->canView()) {
+        echo $order->View(true, 'print');
+        exit;
+    } else {
+        COM_404();
     }
     break;
 

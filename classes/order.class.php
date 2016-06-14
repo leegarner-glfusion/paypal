@@ -410,9 +410,10 @@ class ppOrder
     *   View the current order summary
     *
     *   @param  boolean $final      Indicates that this order is final.
+    *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($final = false)
+    public function View($final = false, $tpl = '')
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -421,7 +422,11 @@ class ppOrder
         if (!$this->canView()) return '';
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        if ($tpl == 'print') {
+            $tpltype = '.print';
+        } else {
+            $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
+        }
         $T->set_file('order', "order$tpltype.thtml");
  
         $isAdmin = SEC_hasRights('paypal.admin') ? true : false;
@@ -499,6 +504,7 @@ class ppOrder
                 'purch_name' => COM_getDisplayName($this->uid),
                 'purch_uid' => $this->uid,
                 'stat_update' => ppOrderStatus::Selection($this->order_id, 1, $this->status),
+                'status' => $this->status,
             ) );
 
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']} WHERE order_id = '" .

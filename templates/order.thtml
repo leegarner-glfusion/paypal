@@ -2,6 +2,13 @@
 <div class="paypalOrderContainer">
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
   <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
+  <div class="floatright">
+    <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
+        title="Print" class="uk-icon-print">
+      <img src="{layout_url}/images/print.png" />
+    </a>
+  </div>
+
   <div class="paypalOrder">
 
     {!if have_billto}
@@ -178,13 +185,11 @@
   {!endif}
   {!if pmt_method}
     <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
+    {!if is_admin}
     {!if pmt_txn_id}
     , {$LANG_PP['trans_id']}
-    {!if is_admin}
     <a href="{pi_admin_url}/index.php?ipnlog=x&amp;op=single&amp;txn_id={pmt_txn_id}">
-    {!endif}
     {pmt_txn_id}
-    {!if is_admin}
     </a>
     {!endif}
     {!endif}
