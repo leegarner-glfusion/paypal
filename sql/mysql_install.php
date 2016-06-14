@@ -239,8 +239,8 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `oversell` tinyint(1) NOT NULL DEFAULT '0',
   `qty_discounts` text,
   `custom` varchar(255) NOT NULL DEFAULT '',
-  `sale_beg` date DEFAULT NULL,
-  `sale_end` date DEFAULT NULL,
+  `sale_beg` date DEFAULT '0000-00-00',
+  `sale_end` date DEFAULT '0000-00-00',
   `avail_beg` date DEFAULT '0000-00-00',
   `avail_end` date DEFAULT '9999-12-31',
   PRIMARY KEY (`id`),
@@ -729,8 +729,8 @@ $PP_UPGRADE['0.5.8'] = array(
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     "ALTER TABLE {$_TABLES['paypal.products']}
         DROP purch_grp,
-        ADD sale_beg DATE DEFAULT NULL,
-        ADD sale_end DATE DEFAULT NULL,
+        ADD sale_beg DATE DEFAULT '0000-00-00',
+        ADD sale_end DATE DEFAULT '0000-00-00',
         ADD avail_beg DATE DEFAULT '0000-00-00',
         ADD avail_end DATE DEFAULT '9999-12-31'",
     "ALTER TABLE {$_TABLES['paypal.purchases']}

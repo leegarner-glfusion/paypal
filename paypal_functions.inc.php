@@ -319,12 +319,13 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 *
 *   @return string      HTML for product catalog.
 */
-function PAYPAL_ProductList($cat=0, $search='')
+function PAYPAL_ProductList($cat_id = 0, $search = '')
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS, 
-            $_IMAGE_TYPE, $_GROUPS, $LANG13;
+            $_IMAGE_TYPE, $_GROUPS, $LANG13, $_SYSTEM;
 
     USES_paypal_class_product();
+    USES_paypal_class_category();
 
     if (SEC_hasRights('paypal.admin')) {
         $isAdmin = true;
@@ -338,22 +339,17 @@ function PAYPAL_ProductList($cat=0, $search='')
     $breadcrumbs = '';
     $cat_img_url = '';
     $display = '';
-    if ($cat != 0) {
-        $cat = (int)$cat;
-        $A = DB_fetchArray(DB_query("SELECT cat_name, image, description
-                FROM {$_TABLES['paypal.categories']}
-                WHERE cat_id='$cat' " .
-                PAYPAL_buildAccessSql()));
-        if (!empty($A)) {
-            $breadcrumbs = PAYPAL_Breadcrumbs($cat);
-            $cat_name = $A['cat_name'];
-            $cat_desc = $A['description'];
-            if (!empty($A['image']) && 
-                is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
-                        '/images/categories/' . $A['image'])) {
-                $cat_img_url = PAYPAL_URL . '/images/categories/' . $A['image'];
-            }
+    if ($cat_id != 0) {
+        $Cat = new ppCategory($cat_id);
+        if ($Cat->isNew || !$Cat->hasAccess()) {
+            echo COM_refresh(PAYPAL_URL);
+            exit;
         }
+            
+        $breadcrumbs = PAYPAL_Breadcrumbs($cat);
+        $cat_name = $Cat->name;
+        $cat_desc = $Cat->description;
+        $cat_img_url = $Cat->ImageUrl();
     }
 
     // Display categories
@@ -583,6 +579,7 @@ function PAYPAL_ProductList($cat=0, $search='')
             'currency'      => $_PP_CONF['currency'],
             'breadcrumbs'   => $breadcrumbs,
             'search_text'   => $srchitem,
+            'uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
     ) );
 
     if (!empty($cat_name)) {

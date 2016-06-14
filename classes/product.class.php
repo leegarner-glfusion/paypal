@@ -132,6 +132,21 @@ class Product
             $this->properties[$var] = (float)$value;
             break;
 
+        case 'avail_end':
+            // available to end of time by default
+            if (empty($value) || $value == '0000-00-00')
+                $value = '9999-12-31';
+            $this->properties[$var] = trim($value);
+            break;
+
+        case 'sale_beg':
+        case 'sale_end':
+        case 'avail_beg':
+            // sale dates and beginning availability default to 0000-00-00
+            if (empty($value)) $value = '0000-00-00';
+            $this->properties[$var] = trim($value);
+            break;
+
         case 'dt_add':
         case 'description':
         case 'short_description':
@@ -139,8 +154,6 @@ class Product
         case 'file':
         case 'keywords':
         case 'btn_type':
-        case 'sale_beg':
-        case 'sale_end':
             // String values
             $this->properties[$var] = trim($value);
             break;
