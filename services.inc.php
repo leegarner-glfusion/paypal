@@ -151,7 +151,10 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
 
 
 /**
-*   Allow a plugin to push an item into the cart
+*   Allow a plugin to push an item into the cart.
+*   If $args['unique'] is not True, the item will be added to the cart
+*   or the quantity updated if the item already exists. Setting the unique
+*   flag prevents the item from being updated at all if it exists in the cart.
 *
 *   @param  array   $args   Array of item information
 *   @param  mixed   &$output    Output data
@@ -174,13 +177,11 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
     $descrip = isset($args['short_description']) ? $args['short_description'] : '';
     $options = isset($args['options']) ? $args['options'] : array();
-    $extras = isset($args['extras']) ? $args['extras'] : '';
+    $extras = isset($args['extras']) ? $args['extras'] : array();
 
-    // Option to add an item only if it is not currently in the cart.
-    // Cart::addItem will be called to increment the quantity if the
-    // unique flag is not set.
+    // Option to add or update an item only if it is not currently in the cart.
     if (isset($args['unique']) && $args['unique']) {
-        if ($ppGCart->Contains($args['item_number'])) return PLG_RET_OK;
+        if ($ppGCart->Contains($args['item_number']) !== false) return PLG_RET_OK;
     }
 
     $ppGCart->addItem($args['item_number'], $item_name,

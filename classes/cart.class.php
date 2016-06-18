@@ -573,7 +573,7 @@ class ppCart
 
         // A little hack to show only the total if there are no other
         // charges
-        if ($total == $subtotal) $subtotal = 0;
+        //if ($total == $subtotal) $subtotal = 0;
 
         // Format the TOC link, if any
         if (!empty($_PP_CONF['tc_link'])) {
@@ -643,16 +643,18 @@ class ppCart
     /**
     *   Check if an item already exists in the cart.
     *   This can be used to determine whether to add the item or not.
+    *   Check for "false" return value as the return may be zero for the
+    *   first item in the cart.
     *
     *   @param  string  $item_id    Item ID to check
     *   @param  array   $extras     Option custom values, e.g. text fields
-    *   @return boolean     True if item exists in cart, False if not
+    *   @return mixed       Item cart ID if item exists in cart, False if not
     */
-    public function Contains($item_id, $extras=NULL)
+    public function Contains($item_id, $extras=array())
     {
         foreach ($this->m_cart as $id=>$info) {
             if ($info['item_id'] == $item_id) {
-                if ($extras !== NULL) {
+                if (!empty($extras)) {
                     if ($info['extras']['custom'] == $extras['custom']) {
                         return $id;
                     }
