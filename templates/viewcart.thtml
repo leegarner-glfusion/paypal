@@ -52,8 +52,8 @@
     </tr>
     <!-- END ItemRow -->
     <tr>
-      <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
-      <td class="alignright"><b>{subtotal}</b></td>
+      <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
+      <td colspan="2" class="alignright"><b>{subtotal}</b></td>
     </tr>
   </table>
     <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />

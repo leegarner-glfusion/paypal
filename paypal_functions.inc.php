@@ -303,6 +303,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
         $retval = COM_createLink($fieldvalue, 
                 $base_url. '/index.php?order=' . $fieldvalue);
+        $retval .= '<a href="' . PAYPAL_URL . '/index.php?printorder=' . $fieldvalue . '" target="_blank" class="uk-icon-small uk-icon-print"></a>';
         break;
 
     default:
