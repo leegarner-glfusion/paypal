@@ -379,7 +379,7 @@ abstract class PaymentGw
 
 
     /**
-    *   Move a profile definition up or down the admin list.
+    *   Move a gateway definition up or down the admin list.
     *
     *   @param  string  $id     Gateway IDa
     *   @param  string  $where  Direction to move (up or down)
