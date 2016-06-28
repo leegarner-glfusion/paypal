@@ -1,0 +1,432 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>PayPal Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1><a name="advt_plugin" id="advt_plugin">PayPal Plugin</a></h1>
+<style>
+td {
+    vertical-align:top;
+}
+</style>
+<div class="level1">
+<h1><a name="paypal_plugin_configuration_options" id="paypal_plugin_configuration_options">PayPal Plugin Configuration Options</a></h1>
+
+<table class="inline">
+  <tbody>
+    <tr>
+      <th class="col0 leftalign" colspan="2">Main PayPal Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_admin_email_addr"></a>Administrator' Email Address</td>
+      <td class="col1 leftalign">Enter the email addresses to which confirmation email messages should be sent.  If this is empty, the site email address will be used.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_currency"></a>Currency</td>
+      <td class="col1 leftalign">This is the currency in which you want all transactions to occur. Your Paypal account must have the choosen currency enabled (on the Paypal website. See: Selling Preferences-&gt;Payment Receiving Preferences).<p />
+    This plugin currently requires you to have only one currency enabled in your Paypal account. All the currencies listed in ISO 4217 are available for selection, If the selected currency is not supported by a payment gateway such as PayPal the gateway will be disabled.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_anon_buy"></a>Anonymous users can buy?</td>
+      <td class="col1 leftalign">
+        Select "Yes" if you allow anonymous users to buy items from your site.  Select "No" to allow only registered usrs to purchase.<p >
+        See "Attach files to anonymous buyers' email" below if you allow anonymous purchases of downloadable files.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_purch_email_user"></a>Email User upon purchase?</td>
+      <td class="col1 leftalign">Specify whether "on purchase" emails will be sent.  Be sure to edit the files templates/purchase_email_subject.txt and templates/purchase_email_message.txt to customize the email message. <br />
+You should disable the *_attach options below if you are distributing large files or it is likely that a purchaser will be buying many medium files otherwise the email will become too large and will likely never be received.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_purch_email_user_attach"></a>Attach files to user's email message?</td>
+      <td class="col1 leftalign">Indicate whether the purchase confirmation email to registered users (only) includes the file to download. <p />
+        See "Attach files to anonymous buyers' email" to set this function for anonymous purchasers. </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_purch_email_anon"></a>Email anonymous users upon purchase?</td>
+      <td class="col1 leftalign">Select whether to email anonymous users upon purchase.  See "Email Users upon purchase" for details.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_purch_email_anon_attach"></a>Attach files to anonymous buyers' email?</td>
+      <td class="col1 leftalign">Select whether to attach the purchased files to emails sent to anonymous users.<p>
+        This should be "Yes" if you allow anonymous purchases of downloadable items, since this is currently the only way to distribute files to these buyers unless you send them via another method.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_purch_email_admin"></a>Notify administrators of purchases?</td>
+      <td class="col1 leftalign">Select if and when the site administrator should receive an email notification of a purchase.  The options are:
+<p>
+<dt><b>Never</b></dt><dd>No notifications will be sent to the administrator.</dd>
+<dt><b>Physical Items Only</b><dt><dd>A notification will be sent if the order contains a physical item.  If the order is for only virtual items, such as downloadable files, then no email is sent.</dd>
+<dt><b>Always</b></dt><dd>An email is sent for every purchase.</dd>
+</p>
+<p>If your site sells physical items that require further action on your part, such as shipping, then you are encouraged to enable notifications for at least <b>Physical Items Only</b>.</p>
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_menuitem"></a>Add to main menu?</td>
+      <td class="col1 leftalign">Select "Yes" to have the "Product" menu option added to the plugin menu.  Select "No" if you wish to manually add this plugin to another menu.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_order"></a>Default sort order for product display</td>
+      <td class="col1 leftalign">Select the default sort order for products shown on the main product list.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_prod_per_page"></a>Max products displayed per page</td>
+      <td class="col1 leftalign">Set the maximum number of products to display on a single page.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_cat_columns"></a>Category Columns</td>
+      <td class="col1 leftalign">Set the number of columns in which to display categories on the product display page.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_use_css_menus"></a>Use Internal CSS Menus?</td>
+      <td class="col1 leftalign">Select "Yes" to use the internal CSS-based tabbed menu.  Select "No" to use the built-in glFusion menu style.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_ena_comments"></a>Enable Comments?</td>
+      <td class="col1 leftalign">Select whether you'd like to enable user comments for products.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_ena_ratings"></a>Enable Product Ratings?</td>
+      <td class="col1 leftalign">Select whether you'd like to enable user ratings for products.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_anon_can_rate"></a>Anonymous can rate products?
+      </td>
+      <td class="col1 leftalign">Select whether you'd like to allow anonymous users to rate products.  If this is "No" then only logged-in users can give ratings.</td>
+    </tr>
+
+    <tr class="row0">
+      <td valign="top" class="col0 leftalign"><a name="desc_displayblocks"></a>Display glFusion Blocks</td>
+      <td class="col1 leftalign">Select whether to display left blocks, right blocks, both, or neither when the product catalog is displayed.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td valign="top" class="col0 leftalign"><a name="desc_ena_cart"></a>Enable shopping cart?</td>
+      <td class="col1 leftalign">Select whether the internal shopping cart should be enabled.  If this is not enabled, there will be no way for a buyer to purchase items with various attributes, as those items must go through the shopping cart and checkout process.
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Image and Path Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_max_images"></a>Max. Product Images
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum number of images to be associated with a single product.  This determines how many upload fields are shown on the product form.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_max_image_size"></a>Max. Image Size
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum size, in bytes, for uploaded images.  Only PayPal administrators can update product records, so this is simply a sanity check.  This number should be less than or equal to the <i>upload_max_filesize</i> setting for PHP.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_max_thumb_size"></a>Max. Thumbnail Dimension
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum size, in pixels, for thumbnail images.  The thumbnail will be sized so that its longest side does not exceed this value while preservint the aspect ratio.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_img_max_width"></a>Max. Image Width
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum width, in pixels, for uploaded images.  The display version of the image, shown when the thumbnail is clicked, will be sized so that its dimensions do not exceed this width or the <i>Max. Image Height</i> height, while preserving the aspect ratio.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_img_max_height"></a>Max. Image Height
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum height, in pixels, for uploaded images.  The display version of the image, shown when the thumbnail is clicked, will be sized so that its dimensions do not exceed this height or the <i>Max. Image Width</i> widgh, while preserving the aspect ratio.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_download_path"></a>Full Path to Downloadable Files
+      </td>
+      <td class="col1 leftalign">
+        This is the full path, including trailing slash, where files will be stored for later download by the buyer.
+<p>The default path is created under the private/data/paypal directory during plugin installation.  This path may be changed, but must be readable by your web server.  If you wish to be able to upload product files via the product form, then it must also be writable.</p>
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_max_file_size"></a>Max size for downloadable files
+      </td>
+      <td class="col1 leftalign">
+        This is the maximum size, in MB, of files that will be downloadable by buyers.  This number actually limits the size of file uploads, not downloads.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_tmpdir"></a>Temporary Working Directory
+      </td>
+      <td class="col1 leftalign">
+        Enter the full path to a working directory to be used during the creation of encrypted buttons.  The web server <b>must</b> be able to create and delete files in this directory.<p />
+    When buttons are encrypted, several temporary files are created and then deleted.  These do not contain sensitive information, but this directory should still be fairly private.
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">New Product Defaults</th>
+    </tr>
+    <tr>
+      <td class="col0 leftalign" colspan="2">These options set the default values for new products and can be overridden for each product.</td>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_enabled"></a>Product Enabled?
+      </td>
+      <td class="col1 leftalign">
+        If "Yes", then the "Enabled" checkbox will be checked automatically for new products.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_taxable"></a>Product is Taxable?
+      </td>
+      <td class="col1 leftalign">
+        If "Yes", then the "Taxable" checkbox will be checked automatically for new products.  This checkbox only has an effect if you've set up tax schedules in your PayPal profile.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_featured"></a>Product Featured?
+      </td>
+      <td class="col1 leftalign">
+        If "Yes", then the "Featured" checkbox will be checked automatically for new products.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_track_onhand"></a>Track Qty On Hand?
+      </td>
+      <td class="col1 leftalign">
+        Select &quot;Yes&quot; to have the plugin track the quantity on hand of an item, by default. The administrator can update the quantity by editing the product, and the quantity will be reduced as purchases are made (to a minimum of zero).
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_def_oversell"></a>Action when Qty On Hand = 0
+      </td>
+      <td class="col1 leftalign">
+        Select the action to be taken when the quantity on hand reaches zero. Options are:
+<ul><li><b>Allow Backordering:</b> Continue to allow sales of the product.</li>
+<li><b>Hide from Catalog:</b> Hide the product from the catalog so it cannot be seen or purchased.</li>
+<li><b>Keep in Catalog, Prevent Sales:</b> Continue to display the product in the catalog but remove the purchase links.</li>
+</ul>
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_product_tpl_ver"></a>Product Detail Template Version
+      </td>
+      <td class="col1 leftalign">
+        <p>Select the default template version to use for the Product Detail views. Two template versions are currently included: the previous template and a new version that emphasizes product images. This is currently a global setting and affects all products but a future version may include per-product selections.</p>
+        <p>You may add your own templates by creating a directory under private/paypal/templates/detail and creating product_detail.thtml and product_detail_attrib.thtml. Both files are required (this may change later).</p>
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Block Settings</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_blk_random_limit"></a>Number of products in Random block
+      </td>
+      <td class="col1 leftalign">
+        This is the number of products that will be shown in the "Random Product" block.  If this number is less than one, then one product will be shown.  
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_blk_featured_limit"></a>Number of products in Featured block
+      </td>
+      <td class="col1 leftalign">
+        This is the number of products that will be shown in the "Featured Product" block.  If this number is less than one, then one product will be shown.  
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_blk_popular_limit"></a>Number of products in Popular block
+      </td>
+      <td class="col1 leftalign">
+        This is the number of products that will be shown in the "Popular Products" block.  If this number is less than one, then one product will be shown.  
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_cache_max_age"></a>Max. Cache File Age
+      </td>
+      <td class="col1 leftalign">
+        The output of blocks such as "Popular Products" can be cached to reduce database queries and improve performance. This is the number of seconds that a cached file will be used before it is refreshed from the database. Set this to zero to disable caching.
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Debugging</th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_debug"></a>Program Debug?</td>
+      <td class="col1 leftalign">Select "Yes" to have messages sent to the error log when the plugin performs various actions.  This may be useful to debug why the plugin isn't behaving as you expect.</td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign"><a name="desc_debug_ipn"></a>Debug IPN Messages?</td>
+      <td class="col1 leftalign">Select "Yes" to have the complete Instant Payment Notification (IPN) message from Paypal logged to your site's error log.  This can be useful to troubleshoot difficulty with handling the messages.</td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Checkout Address Collection</th>
+    </tr>
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_get_street"></a>Street Address</td>
+      <td class="col1 leftalign">
+        At checkout, the Street Address field can be Required, Optional, or Not Available for the Billing and Shipping addresses (whichever are used).
+      </td>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_get_city"></a>City</td>
+      <td class="col1 leftalign">
+        At checkout, the City field can be Required, Optional, or Not Available for the Billing and Shipping addresses (whichever are used).
+      </td>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_get_state"></a>State</td>
+      <td class="col1 leftalign">
+        At checkout, the State field can be Required, Optional, or Not Available for the Billing and Shipping addresses (whichever are used).
+      </td>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_get_country"></a>Country</td>
+      <td class="col1 leftalign">
+        At checkout, the Country field can be Required, Optional, or Not Available for the Billing and Shipping addresses (whichever are used).
+      </td>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_get_postal"></a>Postal Code</td>
+      <td class="col1 leftalign">
+        At checkout, the Postal Code field can be Required, Optional, or Not Available for the Billing and Shipping addresses (whichever are used).
+      </td>
+    </tr>
+
+    <tr>
+      <th class="col0 leftalign" colspan="2">Shop Information</th>
+    </tr>
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_shop_name"></a>Shop Name</td>
+      <td class="col1 leftalign">
+        Enter the name of your store. During installation this was set to the site name but can be changed here. This will be displayed on remittance coupons and receipts.
+      </td>
+    </tr>
+
+    <tr>
+      <td class="col0 leftalign"><a name="desc_shop_address"></a>Shop Address</td>
+      <td class="col1 leftalign">
+        Enter the remittance address for your shop. This value is optional, but should be provided if you accept payments by check.
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
