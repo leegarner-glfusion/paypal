@@ -531,7 +531,7 @@ class Category
     {
         global $_GROUPS;
 
-        return (in_array($_GROUPS, $this->grp_access)) ? true : false;
+        return (in_array($this->grp_access, $_GROUPS)) ? true : false;
     }
 
 
