@@ -236,7 +236,7 @@ class ppCart
                 last_update = '{$_PP_CONF['now']->toMySql()}'";
         //echo $sql;die;
         DB_query($sql, 1);
-        if (DB_error()) COM_errorLog("Error saving cart for user $uid");
+        if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);
     }
 
 
@@ -271,7 +271,7 @@ class ppCart
 
         // TODO: Delete cart table contents?
 
-        if (DB_error()) COM_errorLog("Error saving cart for user $uid");
+        if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);
     }
 
 

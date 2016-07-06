@@ -66,7 +66,7 @@ if (is_array($A) && !empty($A['file'])) {
     if (!file_exists($logfile)) {
         $fp = fopen($logfile, "w+");
         if (!$fp) {
-            COM_errorLog("Failed to create $logfile");
+            COM_errorLog("Failed to create $logfile", 1);
         } else {
             fwrite($fp, "**** Created Logfile ***\n");
         }

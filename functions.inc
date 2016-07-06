@@ -291,7 +291,7 @@ function plugin_upgrade_paypal()
 
     // if we're at the current version, what are we doing here?
     if ($current_ver >= $_PP_CONF['pi_version']) {
-        COM_errorLog("Current version $current_ver is already up to date");
+        COM_errorLog("Current version $current_ver is already up to date",1);
         return '06';
     }
 
@@ -1678,13 +1678,13 @@ function PAYPAL_debug($msg, $type = 'debug')
     switch ($type) {
     case 'error':
         // Always log an error message
-        COM_errorLog('PP Error: ' . $msg);
+        COM_errorLog('PP Error: ' . $msg, 1);
         break;
     case 'debug':
     default:
         // Log a message only if the message type is enabled
         if (isset($_PP_CONF[$type]) && $_PP_CONF[$type] == 1) {
-            COM_errorLog('PP DEBUG: ' . $msg);
+            COM_errorLog('PP DEBUG: ' . $msg, 1);
         }
     }
 }

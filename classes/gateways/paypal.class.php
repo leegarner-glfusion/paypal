@@ -352,23 +352,23 @@ class paypal extends PaymentGw
 
         $pub_key = @openssl_x509_read(file_get_contents($this->config['pub_key']));
         if (!$pub_key) {
-            COM_errorLog("Failed reading public key from {$this->config['pub_key']}");
+            COM_errorLog("Failed reading public key from {$this->config['pub_key']}", 1);
             return '';
         }
         $prv_key = @openssl_get_privatekey(file_get_contents($this->config['prv_key']));
         if (!$prv_key) {
-            COM_errorLog("Failed reading private key from {$this->config['prv_key']}");
+            COM_errorLog("Failed reading private key from {$this->config['prv_key']}", 1);
             return '';
         }
         $pp_cert = @openssl_x509_read(file_get_contents($this->config['pp_cert']));
         if (!$pp_cert) {
-            COM_errorLog("Failed reading PayPal certificate from {$this->config['pp_cert']}");
+            COM_errorLog("Failed reading PayPal certificate from {$this->config['pp_cert']}", 1);
             return '';
         }
 
         //  Make sure this key and certificate belong together
         if (!openssl_x509_check_private_key($pub_key, $prv_key)) {
-            COM_errorLog("Mismatched private & public keys");
+            COM_errorLog("Mismatched private & public keys", 1);
             return '';
         }
 

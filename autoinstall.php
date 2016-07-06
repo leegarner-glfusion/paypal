@@ -263,12 +263,12 @@ function plugin_postinstall_paypal()
         $_PP_DEFAULTS['download_path'],
     );
     foreach ($paths as $path) {
-        COM_errorLog("Creating $path");
+        COM_errorLog("Creating $path", 1);
         if (!is_dir($path)) {
             mkdir($path, 0755, true);
         }
         if (!is_writable($path)) {
-            COM_errorLog("Cannot write to $path");
+            COM_errorLog("Cannot write to $path", 1);
         }
     }
 
@@ -276,20 +276,20 @@ function plugin_postinstall_paypal()
     if (!file_exists($_PP_CONF['logfile'])) {
         $fp = fopen($_PP_CONF['logfile'], "w+");
         if (!$fp) {
-            COM_errorLog("Failed to create logfile {$_PP_CONF['logfile']}");
+            COM_errorLog("Failed to create logfile {$_PP_CONF['logfile']}", 1);
         } else {
             fwrite($fp, "*** Logfile Created ***\n");
         }
     }
 
     if (!is_writable($_PP_CONF['logfile'])) {
-        COM_errorLog("Can't write to {$_PP_CONF['logfile']}");
+        COM_errorLog("Can't write to {$_PP_CONF['logfile']}", 1);
     }
 
     $pi_path = $_CONF['path'] . '/plugins/' . $_PP_CONF['pi_name'];
     if (is_file($pi_path . '/config.php')) {
         if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
-            COM_errorLog("Failed to rename old config.php file.  Manual intervention needed");
+            COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
         }
     }
 
@@ -297,7 +297,7 @@ function plugin_postinstall_paypal()
         foreach ($_PP_SAMPLEDATA as $sql) {
             DB_query($sql, 1);
             if (DB_error()) {
-                COM_errorLog("Sample Data SQL Error: $sql");
+                COM_errorLog("Sample Data SQL Error: $sql", 1);
             }
         }
     }

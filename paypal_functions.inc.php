@@ -1015,7 +1015,7 @@ function PAYPAL_mailAttachment(
     }
 
     if(!$mail->Send()) {
-        COM_errorLog("Email Error: " . $mail->ErrorInfo);
+        COM_errorLog("Email Error: " . $mail->ErrorInfo, 1);
         return false;
     }
     return true;

@@ -21,8 +21,8 @@ USES_paypal_class_ipn('paypal');
 
 if ($_PP_CONF['debug_ipn'] == 1) {
     // Get the complete IPN message prior to any processing
-    COM_errorLog("Recieved IPN:");
-    COM_errorLog(var_export($_POST, true));
+    COM_errorLog("Recieved IPN:", 1);
+    COM_errorLog(var_export($_POST, true), 1);
 }
 
 // Process IPN request

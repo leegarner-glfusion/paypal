@@ -873,7 +873,7 @@ class BaseIPN
     protected function debug($var)
     {
         $msg = print_r($var, true);
-        COM_errorLog('IPN Debug: ' . $msg);
+        COM_errorLog('IPN Debug: ' . $msg, 1);
     }
 
 
@@ -885,7 +885,7 @@ class BaseIPN
     */
     protected function Error($str)
     {
-        COM_errorLog($this->gw_id. ' IPN Exception: ' . $str);
+        COM_errorLog($this->gw_id. ' IPN Exception: ' . $str, 1);
     }
 
 }   // class BaseIPN

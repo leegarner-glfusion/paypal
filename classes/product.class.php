@@ -437,7 +437,7 @@ class Product
             }
             $status = true;
         } else {
-            COM_errorLog("Paypal- SQL error in Product::Save: $sql");
+            COM_errorLog("Paypal- SQL error in Product::Save: $sql", 1);
             $status = false;
         }
 
@@ -631,7 +631,7 @@ class Product
         $id = $this->id;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        if ($_SYSTEM['disable_jquery_slimbox']) {
+        if ($_SYSTEM['framework'] == 'uikit') {
             $T->set_file('product', 'product_form.uikit.thtml');
         } else {
             $T->set_file('product', 'product_form.thtml');
@@ -668,7 +668,6 @@ class Product
         }
 
         $T->set_var(array(
-            'mootools'      => $_SYSTEM['disable_jquery'] ? 'true' : '',
             'post_options'  => $post_options,
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
             'category'      => $this->cat_id,
@@ -1023,7 +1022,7 @@ class Product
         }
  
         $T->set_var(array(
-            'mootools' => $_SYSTEM['disable_jquery'] ? 'true' : '',
+            'is_uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
             'have_attributes'   => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
@@ -1532,7 +1531,7 @@ class Product
         $this->name = $this->name . ' - Copy';
         $this->Save();
         if ($this->id < 1) {
-            COM_errorLog("Error duplicating product id $old_id");
+            COM_errorLog("Error duplicating product id $old_id", 1);
             return false;
         }
         $new_id = $this->id;
@@ -1554,11 +1553,11 @@ class Product
                             VALUES ('$new_id', '" . DB_escapeString($new_fname) . "')";
                     DB_query($sql, 1);
                 } else {
-                    COM_errorLog("Error copying file $src_f to $dst_f, continuing");
+                    COM_errorLog("Error copying file $src_f to $dst_f, continuing", 1);
                 }
             }
         } else {
-            COM_errorLog("Bad image query for product $old_id, continuing");
+            COM_errorLog("Bad image query for product $old_id, continuing", 1);
         }
 
         return true;
