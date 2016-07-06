@@ -9,7 +9,11 @@
       <h1>{short_description}
       {!if can_edit}
         <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
+        {!if is_uikit}
+          <i class="uk-icon uk-icon-edit"></i>
+        {!else}
           <img src="{layout_url}/images/admin/edit.png" />
+        {!endif}
         </a>
       {!endif}
       </h1>
@@ -72,11 +76,19 @@
       <!-- BEGIN Thumbnail -->
       <div class="paypalProductThumb ver1">
       {!if thumb_url}
+        {!if is_uikit}
+        <a href="{img_url}/{img_file}" data-uk-lightbox="{group:'product'}">
+          <img src="{thumb_url}" border="0"
+              alt="{$LANG_PP[click_to_enlarge]}" 
+              title="{$LANG_PP[click_to_enlarge]}"
+              data-uk-tooltip />
+        {!else}
         <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
           <img src="{thumb_url}" border="0"
               alt="{$LANG_PP[click_to_enlarge]}" 
               title="{$LANG_PP[click_to_enlarge]}"
               class="gl_mootip" />
+        {!endif}
         </a>
         {!endif}
       </div>
@@ -157,10 +169,10 @@ function checkForJavascript()
         e.style.display = "inline";
 }
 
-{!if mootools}
-window.addEvent('load',
-{!else}
+{!if is_uikit}
 $(document).ready(
+{!else}
+window.addEvent('load',
 {!endif}
   function() {
     checkForJavascript();
