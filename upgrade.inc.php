@@ -506,10 +506,8 @@ function PAYPAL_do_upgrade_sql($version='', $ignore_error=false)
             }
         }
     }
-    COM_errorLog("--- Paypal plugin SQL update to version $version done", 1)
-
+    COM_errorLog("--- Paypal plugin SQL update to version $version done", 1);
     return $error;
-
 }
 
 
