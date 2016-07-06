@@ -213,7 +213,7 @@ function PAYPAL_history($admin = false, $uid = '')
 */
 function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_USER, $is_uikit;
 
     static $dt = NULL;
     if ($dt === NULL) $dt = new Date('now', $_USER['tzid']);
@@ -302,8 +302,18 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'order_id':
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
         $retval = COM_createLink($fieldvalue, 
-                $base_url. '/index.php?order=' . $fieldvalue);
-        $retval .= '<a href="' . PAYPAL_URL . '/index.php?printorder=' . $fieldvalue . '" target="_blank" class="uk-icon-small uk-icon-print"></a>';
+                $base_url. '/index.php?order=' . $fieldvalue,
+                array('data-uk-tooltip' => '',
+                    'title' => 'View',
+                    'class' => 'gl_mootip',
+                )
+        );
+        $retval .= '&nbsp;&nbsp;<a href="' . PAYPAL_URL . '/index.php?printorder=' . $fieldvalue . '" target="_blank" class="uk-icon-mini uk-icon-print gl_mootip"
+            title="Print" data-uk-tooltip>';
+        if (!$is_uikit) {
+            $retval .= '(print)';
+        }
+        $retval .= '</a>';
         break;
 
     default:
