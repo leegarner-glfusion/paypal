@@ -343,6 +343,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `shipto_country` varchar(255) DEFAULT NULL,
   `shipto_zip` varchar(255) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
+  `buyer_email` varchar(255) DEFAULT NULL, 
   `tax` decimal(5,2) unsigned DEFAULT NULL,
   `shipping` decimal(5,2) unsigned DEFAULT NULL,
   `handling` decimal(5,2) unsigned DEFAULT NULL,
@@ -661,7 +662,7 @@ $PP_UPGRADE['0.5.0'] = array(
 
 $PP_UPGRADE['0.5.2'] = array(
     "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD buyer_email varchar(255) not null default '' after phone,
+        ADD buyer_email varchar(255) default '' after phone,
         CHANGE status status varchar(25) not null default 'pending'",
     "UPDATE {$_TABLES['paypal.orders']} SET status='paid'",
     "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
@@ -737,7 +738,7 @@ $PP_UPGRADE['0.5.8'] = array(
         ADD options_text text default ''",
     "DELETE FROM {$_TABLES['paypal.gateways']} WHERE id='amazon'",
     "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD buyer_email varchar(255) AFTER phone",
+        ADD buyer_email varchar(255) DEFAULT NULL AFTER phone",
 );
 
 ?>

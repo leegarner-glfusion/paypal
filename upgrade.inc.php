@@ -54,7 +54,7 @@ function PAYPAL_do_upgrade($current_ver)
                 FROM {$_TABLES['paypal.products']}
                 WHERE category <> '' and category IS NOT NULL");
         if (DB_error()) {
-            COM_errorLog("Could not retrieve old categories");
+            COM_errorLog("Could not retrieve old categories", 1);
             return 1;
         }
         if (DB_numRows($r) > 0) {
@@ -63,7 +63,7 @@ function PAYPAL_do_upgrade($current_ver)
                         (cat_name)
                     VALUES ('{$A['category']}')");
                 if (DB_error()) {
-                    COM_errorLog("Could not add new category {$A['category']}");
+                    COM_errorLog("Could not add new category {$A['category']}", 1);
                     return 1;
                 }
                 $cats[$A['category']] = DB_insertID();
@@ -72,7 +72,7 @@ function PAYPAL_do_upgrade($current_ver)
             $r = DB_query("SELECT id, category
                     FROM {$_TABLES['paypal.products']}");
             if (DB_error()) {
-                COM_errorLog("Error retrieving category data from products");
+                COM_errorLog("Error retrieving category data from products", 1);
                 return 1;
             }
             if (DB_numRows($r) > 0) {
@@ -81,7 +81,7 @@ function PAYPAL_do_upgrade($current_ver)
                         SET cat_id = '{$cats[$A['category']]}'
                         WHERE id = '{$A['id']}'");
                     if (DB_error()) {
-                        COM_errorLog("Error updating prodXcat table");
+                        COM_errorLog("Error updating prodXcat table", 1);
                         return 1;
                     }
                 }
@@ -101,9 +101,9 @@ function PAYPAL_do_upgrade($current_ver)
         // the online configuration.
         $pi_path = $_CONF['path'] . '/plugins/' . $_PP_CONF['pi_name'];
         if (is_file($pi_path . '/config.php')) {
-            COM_errorLog("Renaming old config.php file to $pi_path/config.old.php");
+            COM_errorLog("Renaming old config.php file to $pi_path/config.old.php", 1);
             if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
-                COM_errorLog("Failed to rename old config.php file.  Manual intervention needed");
+                COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
             }
         }
 
@@ -285,7 +285,7 @@ function PAYPAL_do_upgrade($current_ver)
                 AND group_name='paypal'");
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("Error Executing SQL: $sql");
+            COM_errorLog("Error Executing SQL: $sql", 1);
         }
 
         // Convert saved buttons in the product records to simple text strings
@@ -462,7 +462,7 @@ function PAYPAL_do_upgrade($current_ver)
         }
         // Remove Amazon Simplepay gateway file to prevent re-enabling
         @unlink(PAYPAL_PI_PATH . '/classes/gateways/amazon.class.php');
-        $error = PAYPAL_do_upgrade_sql('0.5.8');
+        $error = PAYPAL_do_upgrade_sql('0.5.8', true);
         if ($error) {
             return $error;
         }
@@ -480,9 +480,10 @@ function PAYPAL_do_upgrade($current_ver)
 *
 *   @since  version 0.4.0
 *   @param  string  $version    Version being upgraded TO
+*   @param  boolean $ignore_error   True to ignore SQL errors.
 *   @param  array   $sql        Array of SQL statement(s) to execute
 */
-function PAYPAL_do_upgrade_sql($version='')
+function PAYPAL_do_upgrade_sql($version='', $ignore_error=false)
 {
     global $_TABLES, $_PP_CONF, $PP_UPGRADE;
 
@@ -493,16 +494,19 @@ function PAYPAL_do_upgrade_sql($version='')
         return $error;
 
     // Execute SQL now to perform the upgrade
-    COM_errorLOG("--Updating Paypal to version $version");
+    COM_errorLog("--- Updating Paypal to version $version", 1);
     foreach($PP_UPGRADE[$version] as $sql) {
         COM_errorLOG("Paypal Plugin $version update: Executing SQL => $sql");
         DB_query($sql, '1');
         if (DB_error()) {
-            COM_errorLog("SQL Error during Paypal Plugin update",1);
-            $error = 1;
-            break;
+            COM_errorLog("SQL Error during Paypal Plugin update", 1);
+            if (!$ignore_error){
+                $error = 1;
+                break;
+            }
         }
     }
+    COM_errorLog("--- Paypal plugin SQL update to version $version done", 1)
 
     return $error;
 
