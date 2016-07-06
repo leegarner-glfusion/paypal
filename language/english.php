@@ -281,6 +281,7 @@ $LANG_PP = array (
 'terms_and_cond' => 'Terms and Conditions',
 'item_history' => 'Item Purchase History',
 'reset' => 'Reset',
+'datepicker' => 'Date Selector',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

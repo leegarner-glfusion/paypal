@@ -143,7 +143,7 @@ class Product
         case 'sale_end':
         case 'avail_beg':
             // sale dates and beginning availability default to 0000-00-00
-            if (empty($value)) $value = '0000-00-00';
+            if (empty($value)) $value = '1900-01-01';
             $this->properties[$var] = trim($value);
             break;
 
@@ -708,8 +708,8 @@ class Product
             "oversell_sel{$this->oversell}" => 'selected="selected"',
             'custom' => $this->custom,
             'sale_price'    => sprintf('%.2f', $this->sale_price),
-            'sale_beg'      => $this->sale_beg,
-            'sale_end'      => $this->sale_end,
+            'sale_beg'      => $this->_InputDtFormat($this->sale_beg),
+            'sale_end'      => $this->_InputDtFormat($this->sale_end),
             'avail_beg'     => $this->avail_beg,
             'avail_end'     => $this->avail_end,
             //'limit_availability_chk' => $this->limit_availability ? 'checked="checked"' : '',
@@ -1587,7 +1587,7 @@ class Product
 
     /**
     *   Determine if a product is available for sale based on dates
-    *   Default availability dates are from 0000-00-00 to 9999-12-31
+    *   Default availability dates are from 1900-01-01 to 9999-12-31
     *
     *   @return boolean True if on sale, false if not
     */
@@ -1605,6 +1605,14 @@ class Product
         }
     }
 
+
+    private function _InputDtFormat($str)
+    {
+        if ($str == '0000-00-00')
+            return '';
+        else
+            return $str;
+    }
 
 }   // class Product
 

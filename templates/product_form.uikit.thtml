@@ -94,20 +94,12 @@
         maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
       {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
               value="{sale_beg}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg" 
-              id="sale_beg_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />&nbsp;&nbsp;
+            <i class="uk-icon-calendar" id="sale_beg_trigger"
+              title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="sale_end" name="sale_end" size="12"
               value="{sale_end}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg"
-              id="sale_end_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />
+            <i class="uk-icon-calendar" id="sale_end_trigger"
+              title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>
       </div>
     </div>
 
@@ -371,20 +363,12 @@
         <i class="uk-icon uk-icon-trash pp-icon-danger" data-uk-tooltip title="{$LANG_PP['reset']}" onclick="PP_resetAvailDates();"></i>
         {$LANG_PP['from']}: <input type="text" id="avail_beg" name="avail_beg" size="12"
               value="{avail_beg}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg" 
-              id="avail_beg_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />&nbsp;&nbsp;
+            <i class="uk-icon-calendar" id="avail_beg_trigger"
+              title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="avail_end" name="avail_end" size="12"
               value="{avail_end}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg"
-              id="avail_end_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />
+            <i class="uk-icon-calendar" id="avail_end_trigger"
+              title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>
       </div>
     </div>
 
