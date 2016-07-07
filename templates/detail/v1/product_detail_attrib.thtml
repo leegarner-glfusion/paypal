@@ -3,8 +3,8 @@
   <span class="alert">{$LANG_PP['no_javascript']}</span>
 </noscript>
 
-<div class="paypalProductDetail">
-  <form id="add_cart" action="{site_url}/paypal/index.php" method="post">
+<form id="add_cart" action="{site_url}/paypal/index.php" method="post">
+  <div class="paypalProductDetail">
     <div id="paypalShortDesc" class="ppShortDesc ver1">
       <h1>{short_description}
       {!if can_edit}
@@ -29,9 +29,6 @@
       {!if qty_disc}
       <br /><span class="paypalQtyDisc">{qty_disc_txt}</span>
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
-      {!endif}
-      {!if rating_bar}
-        <div class="paypalRatingBar">{rating_bar}</div>
       {!endif}
     </div>
 
@@ -72,6 +69,9 @@
       {description}
     </div>
 
+{!if rating_bar}
+    <div class="ppRatingBar detail v1">{rating_bar}</div>
+{!endif}
     <div class="paypalProductThumbWrapper ver1">
       <!-- BEGIN Thumbnail -->
       <div class="paypalProductThumb ver1">
@@ -95,9 +95,8 @@
       <!-- END Thumbnail -->
     </div>
 
-
-  </form>
-</div>
+  </div>
+</form>
 <div class="paypalComments">
   {usercomments}
 </div>

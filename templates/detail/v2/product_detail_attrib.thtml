@@ -163,7 +163,7 @@ target="_blank" rel="slimbox[product]">
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
       {!endif}
       {!if rating_bar}
-        <div class="paypalRatingBar">{rating_bar}</div>
+        <div class="ppRatingBar detail v2">{rating_bar}</div>
       {!endif}
     </div>
 

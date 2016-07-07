@@ -25,7 +25,7 @@
     {!endif}
     </div>
     {!if rating_bar}
-      <div class="ratingbar">{rating_bar}</div>
+      <div class="ppRatingBar v1">{rating_bar}</div>
     {!endif}
     <p />
   </div>
