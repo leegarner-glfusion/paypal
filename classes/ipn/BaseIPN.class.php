@@ -710,7 +710,8 @@ class BaseIPN
                 }
 
                 // Get the product record and custom strings
-                if (is_array($item['extras']['custom']) && 
+                if (isset($item['extras']['custom']) &&
+                        is_array($item['extras']['custom']) && 
                         !empty($item['extras']['custom'])) {
                     $P = new Product($item['item_id']);
                     foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
