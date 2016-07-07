@@ -418,6 +418,8 @@ class ppOrder
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
 
+        USES_paypal_class_product();
+
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
@@ -449,6 +451,7 @@ class ppOrder
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
+            $P = new Product($item['product_id']);
             $item_options = '';
             $opt = json_decode($item['options_text'], true);
             if ($opt) {
@@ -470,6 +473,7 @@ class ppOrder
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_options'  => $item_options,
                 'is_admin' => $isAdmin ? 'true' : '',
+                'is_file' => $P->file != '' ? 'true' : '',
             ) );
             $T->parse('iRow', 'ItemRow', true);
             if ($item['data']['prod_type'] == PP_PROD_PHYSICAL) {
@@ -704,7 +708,7 @@ class ppOrder
                         } else {
                             $dl_url .= 'id=' . $item['item_number'];
                         }
-                        $dl_links .= "<p /><a href=\"$dl_url\">$dl_url</a>";
+                        $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
                     }
                 }
 
@@ -731,9 +735,23 @@ class ppOrder
                 $message->parse('List', 'ItemList', true);
 
             }
-            if (!empty($files)) {
-                $message->set_var('files', 'true');
+
+            // Determine if files will be attached to this message based on
+            // global config and whether there are actually any files to
+            // attach. Affects the 'files' flag in the email template and
+            // which email function is used.
+            if ( (( is_numeric($this->uid) &&
+                    $this->uid != 1 &&
+                    $_PP_CONF['purch_email_user_attach'] ) ||
+                ( (!is_numeric($this->uid) ||
+                    $this->uid == 1) &&
+                    $_PP_CONF['purch_email_anon_attach'] )) &&
+                count($files) > 0  ) {
+                $do_send_attachments = true;
+            } else {
+                $do_send_attachments = false;
             }
+
             $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
             $user_name = COM_getDisplayName($this->uid);
@@ -757,6 +775,7 @@ class ppOrder
                 'pi_url'            => PAYPAL_URL,
                 'pi_admin_url'      => PAYPAL_ADMIN_URL,
                 'dl_links'          => $dl_links,
+                'files'             => $do_send_attachments ? 'true' : '',
                 'buyer_uid'         => $this->uid,
                 'user_name'         => $user_name,
                 'gateway_name'      => $this->pmt_method,
@@ -776,14 +795,7 @@ class ppOrder
             if ($this->buyer_email != '') {
                 // if specified to mail attachment, do so, otherwise skip 
                 // attachment
-                if ( (( is_numeric($this->uid) &&
-                        $this->uid != 1 &&
-                        $_PP_CONF['purch_email_user_attach'] ) ||
-                    ( (!is_numeric($this->uid) ||
-                        $this->uid == 1) &&
-                        $_PP_CONF['purch_email_anon_attach'] )) &&
-                        count($files) > 0  ) {
-
+                if ($do_send_attachments) {
                     // Make sure plugin functions are available
                     USES_paypal_functions();
                     PAYPAL_mailAttachment($this->buyer_email,

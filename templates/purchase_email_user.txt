@@ -7,6 +7,8 @@ follow:</p>
 <p>
 Attached to this email are the files you purchased.  If you were logged into {site_name} when you made your purchase, you can also download your files from the following links:
 </p>
+{!endif}
+{!if dl_links}
 <p>
 {dl_links}
 </p>
