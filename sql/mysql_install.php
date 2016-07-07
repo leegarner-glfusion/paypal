@@ -221,7 +221,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `dt_add` datetime NOT NULL,
   `views` int(4) unsigned DEFAULT '0',
   `comments` int(5) unsigned DEFAULT '0',
-  `comments_enabled` tinyint(1) unsigned DEFAULT '0',
+  `comments_enabled` tinyint(1) DEFAULT '0',
   `rating_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `buttons` text,
   `rating` double(6,4) NOT NULL DEFAULT '0.0000',
@@ -739,6 +739,9 @@ $PP_UPGRADE['0.5.8'] = array(
     "DELETE FROM {$_TABLES['paypal.gateways']} WHERE id='amazon'",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD buyer_email varchar(255) DEFAULT NULL AFTER phone",
+    // Altered in 0.4.1 but installation sql wasn't updated
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        CHANGE comments_enabled comments_enabled tinyint(1) default 0",
 );
 
 ?>

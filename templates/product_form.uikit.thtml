@@ -188,9 +188,9 @@
       </label>
       <div class="uk-form-controls">
       <select name="comments_enabled" id="comments">
-        <option value="0" {sel_comment_0}>&nbsp;{$LANG_PP['enabled']}</option>
-        <option value="2" {sel_comment_2}>&nbsp;{$LANG_PP['disabled']}</option>
-        <option value="1" {sel_comment_1}>&nbsp;{$LANG_PP['closed']}</option>
+        <option value="0" {sel_comment_0}>{$LANG_PP['enabled']}</option>
+        <option value="-1" {sel_comment_-1}>{$LANG_PP['disabled']}</option>
+        <option value="1" {sel_comment_1}>{$LANG_PP['closed']}</option>
       </select>
       </div>
     </div>

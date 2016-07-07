@@ -178,7 +178,7 @@
       </label>
       <select name="comments_enabled">
         <option value="0" {sel_comment_0}>{$LANG_PP['enabled']}</option>
-        <option value="2" {sel_comment_2}>{$LANG_PP['disabled']}</option>
+        <option value="-1" {sel_comment_-1}>{$LANG_PP['disabled']}</option>
         <option value="1" {sel_comment_1}>{$LANG_PP['closed']}</option>
       </select>
     </p>

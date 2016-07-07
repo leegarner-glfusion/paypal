@@ -45,7 +45,7 @@ define('PP_PROD_VIRTUAL',   4);
 // Define comment status
 define('PP_COMMENTS_ENABLED',   0);
 define('PP_COMMENTS_CLOSED' ,   1);
-define('PP_COMMENTS_DISABLED',  2);
+define('PP_COMMENTS_DISABLED',  -1);
 
 // Order status codes
 define('PP_STATUS_OPEN', 0);
@@ -410,11 +410,9 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 *   @param   boolean $view   True to view comment (by cid), false to display (by $pid)
 *   @return  mixed   results of calling the plugin_displaycomment_ function
 */
-function plugin_displaycomment_paypal(
-            $id, $cid, $title, $order, 
-            $format, $page, $view)
+function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, $view)
 {
-    global $_TABLES, $LANG_ACCESS;
+    global $_USER, $LANG_ACCESS;
 
     $retval = '';
 
@@ -423,13 +421,18 @@ function plugin_displaycomment_paypal(
     if (!plugin_commentsupport_paypal())
         return $retval;
 
+    USES_paypal_class_product();
+    $item = new Product($id);
+    if ($item->isNew)
+        return $retval;
+
     $allowed = 1;
 
     if ($allowed == 1) {
         $delete_option = (SEC_hasRights('paypal.admin'));
         $retval .= CMT_userComments($id, $title, 'paypal', $order, $format,
                                      $cid, $page, $view, $delete_option,
-                                     plugin_commentsupport_paypal());
+                                     $P->comments_enabled, $_USER['uid']);
     } else {
         $retval .= COM_startBlock($LANG_ACCESS['accessdenied'], '',
                         COM_getBlockTemplate ('_msg_block', 'header'))
