@@ -984,7 +984,7 @@ class Product
         $retval = COM_startBlock();
 
         // Set the template dir based on the configured template version
-        $tpl_dir = PAYPAL_PI_PATH . '/templates/detail' .
+        $tpl_dir = PAYPAL_PI_PATH . '/templates/detail/' .
                 $_PP_CONF['product_tpl_ver'];
         $T = new Template($tpl_dir);
         $T->set_file('product', 'product_detail_attrib.thtml');
@@ -1327,6 +1327,7 @@ class Product
                 'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
                 'form_url'  => $this->hasAttributes() ? '' : 'true',
+                'tpl_ver' => $_PP_CONF['product_tpl_ver'],
             ) );
             $buttons['add_cart'] = $T->parse('', 'cart');
         }

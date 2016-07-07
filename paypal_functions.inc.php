@@ -351,7 +351,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     $cat_img_url = '';
     $display = '';
     if ($cat_id != 0) {
-        $Cat = new ppCategory($cat_id);
+        $Cat = new Category($cat_id);
         if ($Cat->isNew || !$Cat->hasAccess()) {
             echo COM_refresh(PAYPAL_URL);
             exit;
@@ -571,12 +571,12 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     $res = DB_query('SELECT DISTINCT p.id ' . $sql);
 
     // Create product template
-    if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = '/v1';
+    if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
     $product = new Template(PAYPAL_PI_PATH . '/templates');
     $product->set_file(array(
                 'start'   => 'product_list_start.thtml',
                 'end'     => 'product_list_end.thtml',
-                'product' => 'list' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
+                'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
           //    'product' => 'product_list.thtml',
                 //'buy'     => 'buttons/btn_buy_now.thtml',
                 //'cart'    => 'buttons/btn_add_cart.thtml',

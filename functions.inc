@@ -1701,7 +1701,7 @@ function plugin_configmanager_select_product_tpl_ver_paypal()
     $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $opt = end(explode('/', $dir));
-        $A[$opt] = '/' . $opt; 
+        $A[$opt] = $opt; 
     }
     return $A;
 }
@@ -1718,7 +1718,7 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
     $dirs = glob(PAYPAL_PI_PATH . '/templates/list/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $opt = end(explode('/', $dir));
-        $A[$opt] = '/' . $opt; 
+        $A[$opt] = $opt; 
     }
     return $A;
 }
