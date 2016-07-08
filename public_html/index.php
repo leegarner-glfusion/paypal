@@ -153,7 +153,7 @@ case 'addcartitem':
 case 'addcartitem_x':   // using the image submit button, such as Paypal's
     USES_paypal_class_cart();
     $view = 'productlist';
-    if (isset($_POST['unique']) && $_POST['unique'] &&
+    if (isset($_POST['_unique']) && $_POST['_unique'] &&
             $ppGCart->Contains($_POST['item_number']) !== false) {
         break;
     }

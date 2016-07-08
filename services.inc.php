@@ -82,6 +82,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 'tax'           => isset($args['tax']) ? $args['tax'] : 0,
                 'quantity'      => isset($args['quantity']) ? $args['quantity'] : '',
                 '_ret_url'      => isset($args['_ret_url']) ? $args['_ret_url'] : '',
+                '_unique'    => isset($args['unique']) ? 1 : 0,
         ) );
 
         $output['add_cart'] = $T->parse('', 'cart');
