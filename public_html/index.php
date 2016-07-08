@@ -153,12 +153,19 @@ case 'addcartitem':
 case 'addcartitem_x':   // using the image submit button, such as Paypal's
     USES_paypal_class_cart();
     $view = 'productlist';
+    if (isset($_POST['unique']) && $_POST['unique'] &&
+            $ppGCart->Contains($_POST['item_number']) !== false) {
+        break;
+    }
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
                 $_POST['item_descr'], $qty, 
                 $_POST['amount'], $_POST['options'], $_POST['extras']);
     if (isset($_POST['_ret_url'])) {
         COM_refresh($_POST['_ret_url']);
+        exit;
+    } elseif (PAYPAL_is_plugin_item($$_POST['item_number'])) {
+        COM_refresh(PAYPAL_URL);
         exit;
     } else {
         COM_refresh(PAYPAL_URL.'/detail.php?id='.$_POST['item_number']);
