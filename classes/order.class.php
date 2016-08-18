@@ -767,7 +767,7 @@ class ppOrder
                 'tax'               => sprintf($num_format, $this->tax),
                 'shipping'          => sprintf($num_format, $this->shipping),
                 'handling'          => sprintf($num_format, $this->handling),
-                'payment_date'      => $this->order_date,
+                'payment_date'      => $_PP_CONF['now']->toMySQL(true),
                 'payer_email'       => $this->buyer_email,
                 'payer_name'        => $this->billto_name,
                 'site_name'         => $_CONF['site_name'],
