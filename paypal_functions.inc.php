@@ -213,7 +213,7 @@ function PAYPAL_history($admin = false, $uid = '')
 */
 function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $_USER, $is_uikit;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
     static $dt = NULL;
     if ($dt === NULL) $dt = new Date('now', $_USER['tzid']);
@@ -310,7 +310,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         );
         $retval .= '&nbsp;&nbsp;<a href="' . PAYPAL_URL . '/index.php?printorder=' . $fieldvalue . '" target="_blank" class="uk-icon-mini uk-icon-print gl_mootip"
             title="Print" data-uk-tooltip>';
-        if (!$is_uikit) {
+        if (!$_PP_CONF['_is_uikit']) {
             $retval .= '(print)';
         }
         $retval .= '</a>';
@@ -574,23 +574,24 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
     $product = new Template(PAYPAL_PI_PATH . '/templates');
     $product->set_file(array(
-                'start'   => 'product_list_start.thtml',
-                'end'     => 'product_list_end.thtml',
-                'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
-          //    'product' => 'product_list.thtml',
-                //'buy'     => 'buttons/btn_buy_now.thtml',
-                //'cart'    => 'buttons/btn_add_cart.thtml',
-                'download'  => 'buttons/btn_download.thtml',
-                'login_req' => 'buttons/btn_login_req.thtml',
-                'btn_details' => 'buttons/btn_details.thtml',
-    ));
+        'start'   => 'product_list_start.thtml',
+        'end'     => 'product_list_end.thtml',
+        'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
+        //    'product' => 'product_list.thtml',
+        //'buy'     => 'buttons/btn_buy_now.thtml',
+        //'cart'    => 'buttons/btn_add_cart.thtml',
+        'download'  => 'buttons/btn_download.thtml',
+        'login_req' => 'buttons/btn_login_req.thtml',
+        'btn_details' => 'buttons/btn_details.thtml',
+    ) );
     $product->set_var(array(
-            'pi_url'        => PAYPAL_URL,
-            'user_id'       => $_USER['uid'],
-            'currency'      => $_PP_CONF['currency'],
-            'breadcrumbs'   => $breadcrumbs,
-            'search_text'   => $srchitem,
-            'uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
+        'pi_url'        => PAYPAL_URL,
+        'user_id'       => $_USER['uid'],
+        'currency'      => $_PP_CONF['currency'],
+        'breadcrumbs'   => $breadcrumbs,
+        'search_text'   => $srchitem,
+        'uikit'         => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
+        'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
     ) );
 
     if (!empty($cat_name)) {
@@ -657,6 +658,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             'sale_price' => $P->currency->Format($P->sale_price),
             'on_sale'   => $P->isOnSale() ? 'true' : '',
             'small_pic' => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
+            'tpl_ver'   => $_PP_CONF['list_tpl_ver'],
         ) );
 
         if ($isAdmin) {

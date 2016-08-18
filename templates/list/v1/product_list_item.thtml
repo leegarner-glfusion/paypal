@@ -1,49 +1,47 @@
 {# begin {templatelocation} #}
-<div class="paypalProductListItem">
+<div class="paypalProductListItem v1">
   <div class="paypalProductListItemImage">
-    {!if small_pic}
+{!if small_pic}
       <div style="width:{img_cell_width}px;">
-      {!if item_url}
+{!if item_url}
         <a href="{item_url}">
-      {!endif}
+{!endif}
         <img src="{small_pic}" alt="{name}" />
-      {!if item_url}
+{!if item_url}
         </a>
-      {!endif}
+{!endif}
       </div>
-    {!else}
-        &nbsp;
-   {!endif}
+{!else}
+      &nbsp;
+{!endif}
   </div>
 
-  <div class="paypalProductListItemUrl">
+  <div class="paypalProductListItemUrl v1">
     <div class="shortdescription">
-    {!if item_url}
+{!if item_url}
       <a class="itemname" href="{item_url}">{short_description}</a>
-    {!else}
+{!else}
       {short_description}
-    {!endif}
+{!endif}
     </div>
-    {!if rating_bar}
-      <div class="ppRatingBar v1">{rating_bar}</div>
-    {!endif}
-    <p />
+{!if rating_bar}
+    <div class="uk-hidden-small ppRatingBar list v1">{rating_bar}</div>
+{!endif}
   </div>
 
   <div class="paypalProductListItemButtons">
-    {!if price}
-      <div><span class="paypalPrice normal">
-        {!if track_onhand}
+{!if price}
+      <div class="paypalPrice list v1">
+        <span class="paypalPrice list v1 normal">
+{!if track_onhand}
         ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
-        {!endif}
-        {price}</span></div><br />
-    {!endif}
+{!endif}
+        {price}</span>
+    </div>
+{!endif}
     <!-- BEGIN BtnBlock -->
-      {button}<br />
+      {button}
     <!-- END BtnBlock -->
   </div>
-</div>
-<div class="paypalListSeparator">
-  <hr />
 </div>
 {# end {templatelocation} #}

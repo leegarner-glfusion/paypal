@@ -70,8 +70,9 @@ function ProcessForm(opt) {
     }
 
     price = price.toFixed({cur_decimals});
-    frm.amount.value = price;
-    //frm.options.value = options.value;
+    if (typeof(frm.amount) != "undefined") {
+        frm.amount.value = price;
+    }
     document.getElementById('price').innerHTML = price;
     return;
 }
@@ -113,7 +114,7 @@ window.addEvent('load',
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
-<div class="paypalProductDetail" id="product-image">
+<div class="paypalProductDetail uk-width-1-2" id="product-image">
   <div class="paypalProductLgImg uk-hidden-small">
     <a id="lg_img" href="{main_img}"
       {!if is_uikit}
@@ -121,12 +122,12 @@ window.addEvent('load',
       {!else}
       data-uk-lightbox>
       {!endif}
-      <img id="disp_img" src="{main_img}"/>
+      <img id="disp_img" class="uk-responsive-width uk-responsive-height" src="{main_img}"/>
     </a>
   </div>
   <div class="paypalProductThumbWrapper">
     <!-- BEGIN Thumbnail -->
-    <div class="paypalProductThumb ver2" style="width:{tn_width}px; height:{tn_height}px;" >
+    <div class="paypalProductThumb v2" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
       <a href="{img_url}/{img_file}" 
       {!if is_uikit}
@@ -149,7 +150,7 @@ target="_blank" rel="slimbox[product]">
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div class="paypalDetailAttrib ver2 uk-width-1-3">
+<div class="paypalDetailAttrib v2 uk-width-1-4">
   <form class="uk-form" id="add_cart" action="{site_url}/paypal/index.php" method="post">
     <div>
       {!if on_sale}
@@ -161,9 +162,6 @@ target="_blank" rel="slimbox[product]">
       {!if qty_disc}
       <br /><span class="paypalQtyDisc">{qty_disc}</span>
       <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
-      {!endif}
-      {!if rating_bar}
-        <div class="ppRatingBar detail v2">{rating_bar}</div>
       {!endif}
     </div>
 
@@ -189,21 +187,24 @@ target="_blank" rel="slimbox[product]">
       <!-- END CustAttrib -->
     </div>
  
-    {!if onhand}
+{!if onhand}
     <div id="paypalOnhand">
       {onhand} {$LANG_PP['available']}
     </div>
-    {!endif}
+{!endif}
     {add_cart_button}
   </form>
-      <!-- BEGIN BtnBlock -->
-        {buy_now_button}<br />
-      <!-- END BtnBlock -->
+  <!-- BEGIN BtnBlock -->
+  {buy_now_button}<br />
+  <!-- END BtnBlock -->
+{!if rating_bar}
+  <div class="ppRatingBar detail v2">{rating_bar}</div>
+{!endif}
 </div>
 
 {!if main_img}
 {# with a main image the description goes below the image and price #}
-<div id="paypalProductDesc" class="ppProductDesc ver2">
+<div id="paypalProductDesc" class="ppProductDesc v2">
   {description}
 </div>
 {!endif}

@@ -155,8 +155,9 @@ function ProcessForm(opt) {
     }
 
     price = price.toFixed({cur_decimals});
-    frm.amount.value = price;
-    //frm.options.value = options.value;
+    if (typeof(frm.amount) != "undefined") {
+        frm.amount.value = price;
+    }
     document.getElementById('price').innerHTML = price;
     return;
 }

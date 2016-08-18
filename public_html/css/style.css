@@ -129,7 +129,7 @@ div.paypalDetailAttrib {
     float:left;
     margin-bottom: 5px;
 }
-div.paypalDetailAttrib.ver2 {
+div.paypalDetailAttrib.v2 {
     margin-bottom: 2em;
 }
 
@@ -140,7 +140,7 @@ div.paypalDetailAttrib.ver2 {
     margin-top: 2em;
     font-size: 1.2em;
 }
-.ppProductDesc.ver2 {
+.ppProductDesc.v2 {
     margin-bottom: 2em;
 }
 div.paypalProductThumbWrapper {
@@ -154,18 +154,31 @@ div.paypalProductThumb {
     margin-right: .25em;
 }
 
+div.ppProductListOuter {
+  clear:both;
+  padding-top: 15px;
+  overflow: hidden;
+}
+
 .paypalProductListItem {
     position: relative;
     padding: 5px;
-    clear: both;
     text-decoration: none;
+    overflow: hidden;
 }
 
-.paypalProductListItem2 {
+.paypalProductListItem.v1 {
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  clear: both;
+}
+
+.paypalProductListItem.v2 {
   cursor: pointer;
   position:relative;
   float: left;
-  font-size: 1em;
   padding: 1em .5em;
   margin: 1em 0.5em -0.5em 0.15em;
   border: 3px outset #ddd;
@@ -186,13 +199,23 @@ div.paypalProductThumb {
   padding-top: 14px;
 }
 
+.ppRatingBar.list.v1 {
+  position: absolute;
+}
+
 .ppRatingBar.v2 {
   text-align:center;
-  font-size: .5rem;
+  font-size: x-small;
 }
 
 .ppRatingBar.list.v2 {
   width: 100%;
+}
+
+.ppRatingBar.detail.v2 {
+  position: relative;
+  clear: both;
+  padding-top: 10px;
 }
 
 .ppRatingBar.detail {
@@ -373,7 +396,12 @@ div.paypalProductListItemUrl2 {
     font-weight:bold;
 }
 
-.paypalPrice.ver2 {
+.paypalPrice.list.v1 {
+    padding-bottom: 1rem;
+    position: relative;
+}
+
+.paypalPrice.v2 {
     margin-top: 4px;
     text-align: right;
 }
@@ -406,7 +434,7 @@ div.paypalProductListItemUrl2 {
     font-style:italic;
 }
 
-.paypalProductLgImg #disp_img {
+.paypalProductLgImg {
     /*max-width: 460px;
     max-height: 400px;*/
     width: 460px;
@@ -480,3 +508,8 @@ div.ppTOCLink {
 .pp-icon-warning {
     color: #CC0;
 }
+
+form.frm_buy_now {
+    clear:left;
+}
+

@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<form style="display:inline;" class="frm_buy_now"
+<form class="frm_buy_now"
     action="{paypal_url}/cgi-bin/webscr" method="post">
   {gateway_vars}
   <input type="hidden" name="rm" value="2" />
