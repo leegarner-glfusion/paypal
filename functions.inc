@@ -160,6 +160,10 @@ $_PP_CONF['gateways'] = array();
 USES_class_date();
 $_PP_CONF['now'] = new Date('now', $_CONF['timezone']);
 
+// Mark whether this is a uikit theme. Save to global conf var
+// so it's available where needed.
+$_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
+
 global $ppGCart;
 $ppGCart = NULL;
 function PAYPAL_setCart()

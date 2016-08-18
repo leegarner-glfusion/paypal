@@ -71,6 +71,15 @@ class paypal extends PaymentGw
             'sandbox_url'       => 'https://www.sandbox.paypal.com',
         );
 
+        // Set the gateway URL depending on whether we're in test mode or not
+        if ($this->config['test_mode'] == 1) {
+            $this->gw_url = $this->config['sandbox_url'];
+            $this->postback_url = 'https://ipnpb.sandbox.paypal.com';
+        } else {
+            $this->gw_url = $this->config['prod_url'];
+            $this->postback_url = 'https://ipnpb.paypal.com';
+        }
+ 
         // Call the parent constructor to initialize the common variables.
         parent::__construct();
 
@@ -84,9 +93,6 @@ class paypal extends PaymentGw
         $this->cert_id = $this->config['pp_cert_id'];
         $this->receiver_email = $this->config['bus_prod_email'];
 
-        // Set the gateway URL depending on whether we're in test mode or not
-        $this->gw_url = $this->config['test_mode'] == 1 ?
-                $this->config['sandbox_url'] : $this->config['prod_url'];
     }
 
 

@@ -93,6 +93,12 @@ abstract class PaymentGw
     */
     protected $gw_url;
 
+    /**
+    *   The postback URL for verification of IPN messages. If not set
+    *   the value of gw_url will be used.
+    */
+    protected $postback_url = NULL;
+
 
     /**
     *   Constructor.
@@ -151,6 +157,10 @@ abstract class PaymentGw
 
         // The user ID is usually required, and doesn't hurt to add it here.
         $this->AddCustom('uid', $_USER['uid']);
+
+        if ($this->postback_url === NULL) {
+            $this->postback_url = $this->gw_url;
+        }
     }
 
 
@@ -888,6 +898,12 @@ abstract class PaymentGw
     public function getActionUrl()
     {
         return $this->gw_url;
+    }
+
+
+    public function getPostBackUrl()
+    {
+        return $this->postback_url;
     }
 
 
