@@ -11,6 +11,7 @@ Ver. 0.5.8
 - Save option and custom string text in the purchase records for display
 - Enable sale pricing with dates for products
 - Enable availability dates for products
+- Add Paypal SSL postback endpoints (ipnpb.paypal.com)
 
 Ver. 0.5.7
 ==========
