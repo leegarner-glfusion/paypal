@@ -8,6 +8,9 @@
   <input type="hidden" name="item_type" value='{item_type}' />
   <input type="hidden" name="amount" value="{amount}" />
   <input type="hidden" name="custom" value='{custom}' />
+{!if unique}
+  <input type="hidden" name="unique" value='{unique}' />
+{!endif}
   <div class="uk-form-row frmAddCart {tpl_ver}">
     <div class="uk-form-controls">
   <input type="text" name="quantity" size="3" maxlength="5" value="1" />&nbsp;&nbsp;<button type="submit" class="paypalButton orange" border="0" 
