@@ -2,6 +2,6 @@
 <form action="{pi_url}/download.php" method="post">
   <input type="hidden" name="id" value="{id}">
   <input type="submit" class="paypalButton orange" border="0" 
-    name="launch" value="{$LANG_PP['download']}" />
+    name="download" value="{$LANG_PP['download']}" />
 </form>
 {# end {templatelocation} #}
