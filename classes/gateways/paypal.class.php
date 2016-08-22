@@ -71,6 +71,9 @@ class paypal extends PaymentGw
             'sandbox_url'       => 'https://www.sandbox.paypal.com',
         );
 
+        // Call the parent constructor to initialize the common variables.
+        parent::__construct();
+
         // Set the gateway URL depending on whether we're in test mode or not
         if ($this->config['test_mode'] == 1) {
             $this->gw_url = $this->config['sandbox_url'];
@@ -80,9 +83,6 @@ class paypal extends PaymentGw
             $this->postback_url = 'https://ipnpb.paypal.com';
         }
  
-        // Call the parent constructor to initialize the common variables.
-        parent::__construct();
-
         // If the configured currency is not one of the supported ones,
         // this gateway cannot be used, so disable it.
         if (!in_array($this->currency_code, $supported_currency)) {
