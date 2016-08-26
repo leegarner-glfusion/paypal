@@ -279,7 +279,7 @@ abstract class PaymentGw
                 enabled = '{$this->enabled}'
                 WHERE id='$id'";
         //echo $sql;die;
-        DB_query($sql, 1);
+        DB_query($sql);
         if (DB_error())
             return false;
         else {
@@ -312,7 +312,7 @@ abstract class PaymentGw
                 SET $varname=$newvalue
                 WHERE id='$id'";
         //echo $sql;die;
-        DB_query($sql, 1);
+        DB_query($sql);
         if (DB_error())
             return $oldvalue;
         else
@@ -372,7 +372,7 @@ abstract class PaymentGw
         $sql = "SELECT id, orderby 
                 FROM {$_TABLES['paypal.gateways']} 
                 ORDER BY orderby ASC;";
-        $result = DB_query($sql, 1);
+        $result = DB_query($sql);
 
         $order = 10;
         $stepNumber = 10;
@@ -381,7 +381,7 @@ abstract class PaymentGw
                 $sql = "UPDATE {$_TABLES['paypal.gateways']}
                     SET orderby = '$order' 
                     WHERE id = '" . DB_escapeString($A['id']) . "'";
-                DB_query($sql, 1);
+                DB_query($sql);
             }
             $order += $stepNumber;
         }
@@ -416,7 +416,7 @@ abstract class PaymentGw
                     SET orderby = orderby $oper 11 
                     WHERE id = '$id'";
             //echo $sql;die;
-            DB_query($sql, 1);
+            DB_query($sql);
             self::ReOrder();
         }
     }
@@ -467,7 +467,7 @@ abstract class PaymentGw
                 '" . DB_escapeString($this->gw_desc) . "',
                 '" . DB_escapeString($config) . "',
                 '" . DB_escapeString($services) . "')";
-            DB_query($sql, 1);
+            DB_query($sql);
             return DB_error() ? false : true;
         }
         return false;

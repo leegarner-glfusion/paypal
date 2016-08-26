@@ -42,7 +42,7 @@ case 'updatestatus':
                 ORDER BY ts DESC
                 LIMIT 1";
             //echo $sql;die;
-            $L = DB_fetchArray(DB_query($sql, 1), false);
+            $L = DB_fetchArray(DB_query($sql), false);
             if (!empty($L)) {
                 $log_ts = $L['ts'];
                 $log_user = $L['username'];

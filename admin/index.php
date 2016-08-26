@@ -158,7 +158,7 @@ case 'deleteopt':
     break;
 
 case 'resetbuttons':
-    DB_query("TRUNCATE {$_TABLES['paypal.buttons']}", 1);
+    DB_query("TRUNCATE {$_TABLES['paypal.buttons']}");
     $view = 'other';
     break;
 
@@ -229,7 +229,7 @@ case 'attrcopy':
             SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
             FROM {$_TABLES['paypal.prod_attr']}
             WHERE item_id = $src_prod";
-        DB_query($sql, 1);
+        DB_query($sql);
     }
 
     // Copy product attributes to all products in a category.
@@ -246,7 +246,7 @@ case 'attrcopy':
                 SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
                 FROM {$_TABLES['paypal.prod_attr']}
                 WHERE item_id = $src_prod";
-                DB_query($sql, 1);
+                DB_query($sql);
             }
         }
     }

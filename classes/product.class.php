@@ -500,11 +500,12 @@ class Product
             FROM {$_TABLES['paypal.images']}
             WHERE product_id='". $this->id . "'";
         //echo $sql;
-        $photo= DB_query($sql, 1);
-        while ($prow = DB_fetchArray($photo, false)) {
-            self::DeleteImage($prow['img_id'], $prow['filename']);
+        $photo= DB_query($sql);
+        if ($photo) {
+            while ($prow = DB_fetchArray($photo, false)) {
+                self::DeleteImage($prow['img_id'], $prow['filename']);
+            }
         }
- 
         DB_delete($_TABLES['paypal.products'], 'id', $this->id);
         DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $this->id);
         self::DeleteButtons($this->id);
@@ -780,13 +781,12 @@ class Product
             $sql = "SELECT img_id, filename 
                 FROM {$_TABLES['paypal.images']} 
                 WHERE product_id='" . $this->id . "'";
-            $photo = DB_query($sql, 1);
-
+            $photo = DB_query($sql);
+        
             // save the count of photos for later use
-            if ($photo)
+            if ($photo) {
                 $photocount = DB_numRows($photo); 
-            else
-                $photocount = 0;
+            }
 
             // While we're checking the ID, set it as a hidden value
             // for updating this record
@@ -889,6 +889,7 @@ class Product
                 SET $varname=$newvalue
                 WHERE id=$id";
         //echo $sql;die;
+        // Ignore SQL errors since varname is indeterminate
         DB_query($sql, 1);
 
         return DB_error() ? $oldvalue : $newvalue;
@@ -1540,7 +1541,7 @@ class Product
         // Copy all the image files
         $sql = "SELECT * FROM {$_TABLES['paypal.images']}
                 WHERE product_id = $old_id;";
-        $res = DB_query($sql, 1);
+        $res = DB_query($sql);
         if ($res) {
             while ($A = DB_fetchArray($res, false)) {
                 $parts = explode('_', $A['filename']);
@@ -1552,7 +1553,7 @@ class Product
                     $sql = "INSERT INTO {$_TABLES['paypal.images']}
                                 (product_id, filename)
                             VALUES ('$new_id', '" . DB_escapeString($new_fname) . "')";
-                    DB_query($sql, 1);
+                    DB_query($sql);
                 } else {
                     COM_errorLog("Error copying file $src_f to $dst_f, continuing", 1);
                 }

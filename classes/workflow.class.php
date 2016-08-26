@@ -100,34 +100,6 @@ class ppWorkflow
 
 
     /**
-     *  Sets the "enabled" field to the specified value.
-     *
-     *  @param  integer $id ID number of element to modify
-     *  @param  integer $value New value to set
-     *  @return         New value, or old value upon failure
-     */
-    public function X_toggleEnabled($oldvalue, $id)
-    {
-        $id = (int)$id;
-
-        // If it's still an invalid ID, return the old value
-        if ($id < 1)
-            return $oldvalue;
-
-        // Determing the new value (opposite the old)
-        $newvalue = $oldvalue == 1 ? 0 : 1;
-
-        $sql = "UPDATE {$this->table}
-                SET enabled = $newvalue
-                WHERE id = $id";
-        //echo $sql;die;
-        DB_query($sql, 1);
-
-        return $newvalue;
-    }
-
-
-    /**
     *   Sets the "enabled" field to the specified value.
     *
     *   @uses   _toggle()
@@ -158,16 +130,7 @@ class ppWorkflow
             return $newvalue;
         else
             return $oldvalue;
-
-         /*if ($id == '') {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return $oldvalue;
-        }*/
-        //return self::_toggle($oldvalue, 'enabled', $id);
     }
-
 
 
     /**

@@ -440,7 +440,7 @@ class Attribute
                 WHERE item_id = '" . $this->item_id . "'
                 AND attr_name = '" . DB_escapeString($this->attr_name) . "'
                 ORDER BY orderby ASC;";
-        $result = DB_query($sql, 1);
+        $result = DB_query($sql);
 
         $order = 10;
         $stepNumber = 10;
@@ -450,7 +450,7 @@ class Attribute
                 $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
                     SET orderby = '$order' 
                     WHERE attr_id = '{$A['attr_id']}'";
-                DB_query($sql, 1);
+                DB_query($sql);
             }
             $order += $stepNumber;
         }
