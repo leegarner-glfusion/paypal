@@ -10,7 +10,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @copyright  Mark Evans <mark@glfusion.org
 *   @package    paypal
-*   @version    0.5.8
+*   @version    0.5.9
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -25,7 +25,7 @@ global $_PP_CONF;
 
 $_PP_CONF['pi_name']            = 'paypal';
 $_PP_CONF['pi_display_name']    = 'PayPal';
-$_PP_CONF['pi_version']         = '0.5.8';
+$_PP_CONF['pi_version']         = '0.5.9';
 $_PP_CONF['gl_version']         = '1.4.0';
 $_PP_CONF['pi_url']             = 'http://www.glfusion.org';
 
