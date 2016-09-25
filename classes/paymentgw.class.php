@@ -852,7 +852,7 @@ abstract class PaymentGw
     *
     *   @return string      HTML for purchase button
     */
-    public function CheckoutButton($cartID, $cartItems)
+    public function CheckoutButton($cart)
     {
         return '';
     }

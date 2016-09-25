@@ -513,7 +513,7 @@ class ppOrder
 
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']} WHERE order_id = '" .
                     DB_escapeString($this->order_id) . "'";
-            $res = DB_query($sql, 1);
+            $res = DB_query($sql);
             $T->set_block('order', 'LogMessages', 'Log');
             while ($L = DB_fetchArray($res, false)) {
                 $dt->setTimestamp(strtotime($L['ts']));

@@ -229,7 +229,7 @@ function PAYPAL_loadGateways($all = false)
     // If not loading all gateways, get just then enabled ones
     if (!$all) $sql .= ' WHERE enabled=1';
     $sql .= ' ORDER BY orderby';
-    $res = DB_query($sql, 1);
+    $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         // For each available gateway, load its class file and add it
         // to the global array
@@ -1437,6 +1437,9 @@ function PAYPAL_phpblock_product($sql)
     // Loop through all valid responses.  There may be more than one
     // item to show
     $res = DB_query($sql, 1);
+    if (DB_error()) {
+        COM_errorLog("PAYPAL_phpblock_product() SQL error: $sql", 1);
+    }
     if ($res && DB_numRows($res) > 0) {
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
@@ -1600,7 +1603,7 @@ function plugin_runScheduledTask_paypal()
         // Delete old shopping carts, if the cart is enabled
         $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
             last_update < DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        DB_query($sql, 1);
+        DB_query($sql);
     }
 
     // Clean up the HTML cache if used

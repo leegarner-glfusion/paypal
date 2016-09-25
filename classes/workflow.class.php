@@ -126,10 +126,12 @@ class ppWorkflow
                 WHERE id='$id'";
         //echo $sql;die;
         DB_query($sql, 1);
-        if (!DB_error())
+        if (!DB_error()) {
             return $newvalue;
-        else
+        } else {
+            COM_errorLog("ppWorkflow::Toggle() SQL error: $sql", 1);
             return $oldvalue;
+        }
     }
 
 
@@ -155,6 +157,9 @@ class ppWorkflow
                     SET orderby = '$order' 
                     WHERE id = '{$A['id']}'";
                 DB_query($sql, 1);
+                if (DB_error()) {
+                    COM_errorLog("ppWorkflow::ReOrder() SQL error: $sql", 1);
+                }
             }
             $order += $stepNumber;
         }
@@ -192,6 +197,8 @@ class ppWorkflow
         DB_query($sql, 1);
         if (!DB_error()) {
             self::ReOrder();
+        } else {
+            COM_errorLog("ppWorkflow::moveRow() SQL error: $sql", 1);
         }
     }
 

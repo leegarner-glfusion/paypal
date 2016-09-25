@@ -129,10 +129,12 @@ class ppOrderStatus extends ppWorkflow
                 WHERE id='$id'";
         //echo $sql;die;
         DB_query($sql, 1);
-        if (!DB_error())
+        if (!DB_error()) {
             return $newvalue;
-        else
+        } else {
+            COM_errorLog("ppOrderStatus::Toggle() SQL error: $sql", 1);
             return $oldvalue;
+        }
     }
 
 }   // class ppOrderStatus

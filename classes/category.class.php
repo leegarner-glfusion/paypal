@@ -233,7 +233,7 @@ class Category
                 image='" . DB_escapeString($this->image) . "'";
             $sql = $sql1 . $sql2 . $sql3;
 
-            DB_query($sql, 1);
+            DB_query($sql);
             if (!DB_error()) {
                 if ($this->isNew) {
                     $this->cat_id = DB_insertID();

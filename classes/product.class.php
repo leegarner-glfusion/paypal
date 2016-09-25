@@ -430,7 +430,7 @@ class Product
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
-        DB_query($sql, 1);
+        DB_query($sql);
         if (!DB_error()) {
             if ($this->isNew) {
                 $this->id = DB_insertID();
@@ -891,8 +891,12 @@ class Product
         //echo $sql;die;
         // Ignore SQL errors since varname is indeterminate
         DB_query($sql, 1);
-
-        return DB_error() ? $oldvalue : $newvalue;
+        if (DB_error()) {
+            COM_errorLog("ppProduct::_toggle() SQL error: $sql", 1);
+            return $oldvalue;
+        } else {
+            return $newvalue;
+        }
     }
 
 
@@ -1465,7 +1469,10 @@ class Product
                     onhand = GREATEST(0, onhand - $qty)
                     WHERE id = '{$this->id}'";
             DB_query($sql, 1);
-            if (DB_error()) $status = 1;
+            if (DB_error()) {
+                COM_errorLog("ppProduct::handlePurchase() SQL errror: $sql", 1);
+                $status = 1;
+            }
         }
 
         return $status;

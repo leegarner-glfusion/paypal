@@ -221,7 +221,7 @@ class Attribute
                 enabled='{$this->enabled}'";
         $sql = $sql1 . $sql2 . $sql3;
 
-        DB_query($sql, 1);
+        DB_query($sql);
         $err = DB_error();
         if ($err == '') {
             if ($this->isNew) {

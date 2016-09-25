@@ -183,6 +183,9 @@ class BaseIPN
                 ipn_data = '" . DB_escapeString(serialize($this->ipn_data)) . '\'';
         // Ignore DB error in order to not block IPN
         DB_query($sql, 1);
+        if (DB_error()) {
+            COM_errorLog("BaseIPN::Log() SQL error: $sql", 1);
+        }
         return DB_insertId();
     }
 
