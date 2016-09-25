@@ -347,7 +347,7 @@ class Product
      */
     public function Save($A = '')
     {
-        global $_TABLES;
+        global $_TABLES, $_PP_CONF;
         USES_paypal_class_productimage();
         USES_paypal_class_ppFile();
 
@@ -393,7 +393,8 @@ class Product
             $sql3 = " WHERE id='{$this->id}'";
         } else {
             PAYPAL_debug('Preparing to save a new product.');
-            $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET ";
+            $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET 
+                dt_add = '" . DB_escapeString($_PP_CONF['now']->toMySQL()) . "',";
             $sql3 = '';
         }
         $sql2 = "name='" . DB_escapeString($this->name) . "',
