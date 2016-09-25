@@ -239,9 +239,9 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `oversell` tinyint(1) NOT NULL DEFAULT '0',
   `qty_discounts` text,
   `custom` varchar(255) NOT NULL DEFAULT '',
-  `sale_beg` date DEFAULT '0000-00-00',
-  `sale_end` date DEFAULT '0000-00-00',
-  `avail_beg` date DEFAULT '0000-00-00',
+  `sale_beg` date DEFAULT '1900-01-01',
+  `sale_end` date DEFAULT '1900-01-01',
+  `avail_beg` date DEFAULT '1900-01-01',
   `avail_end` date DEFAULT '9999-12-31',
   PRIMARY KEY (`id`),
   KEY `products_name` (`name`),
@@ -265,7 +265,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `price` float(10,2) NOT NULL default '0.00',
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
-  `options_text` text default '',
+  `options_text` text,
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
@@ -293,7 +293,7 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   `cat_id` smallint(5) unsigned NOT NULL auto_increment,
   `parent_id` smallint(5) unsigned default '0',
   `cat_name` varchar(255) default '',
-  `description` text default '',
+  `description` text,
   `enabled` tinyint(1) unsigned default '1',
   `grp_access` mediumint(8) unsigned NOT NULL default '1',
   `image` varchar(255) default '',
@@ -350,7 +350,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `status` varchar(25) DEFAULT 'pending',
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
-  `instructions` text DEFAULT '',
+  `instructions` text,
   PRIMARY KEY (`order_id`)
 )";
 
@@ -709,7 +709,7 @@ $PP_UPGRADE['0.5.7'] = array(
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
     "ALTER TABLE {$_TABLES['paypal.products']}
         CHANGE dt_add dt_add datetime not null,
-        ADD `qty_discounts` text DEFAULT '' AFTER `oversell`,
+        ADD `qty_discounts` text AFTER `oversell`,
         ADD `custom` varchar(255) NOT NULL DEFAULT ''",
     "UPDATE {$_TABLES['paypal.products']}
         SET dt_add = NOW()",
@@ -730,12 +730,12 @@ $PP_UPGRADE['0.5.8'] = array(
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     "ALTER TABLE {$_TABLES['paypal.products']}
         DROP purch_grp,
-        ADD sale_beg DATE DEFAULT '0000-00-00',
-        ADD sale_end DATE DEFAULT '0000-00-00',
-        ADD avail_beg DATE DEFAULT '0000-00-00',
+        ADD sale_beg DATE DEFAULT '1900-01-01',
+        ADD sale_end DATE DEFAULT '1900-01-01',
+        ADD avail_beg DATE DEFAULT '1900-01-01',
         ADD avail_end DATE DEFAULT '9999-12-31'",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
-        ADD options_text text default ''",
+        ADD options_text text",
     "DELETE FROM {$_TABLES['paypal.gateways']} WHERE id='amazon'",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD buyer_email varchar(255) DEFAULT NULL AFTER phone",
