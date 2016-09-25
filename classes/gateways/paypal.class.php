@@ -581,7 +581,7 @@ class paypal extends PaymentGw
     *   @param  string  $type       Type of button (buy_now, etc.)
     *   @return string              HTML for button
     */
-    public function ExternalButton($attribs, $type)
+    public function ExternalButton($attribs = array(), $type = 'buy_now')
     {
         global $_PP_CONF, $LANG_PP;
 

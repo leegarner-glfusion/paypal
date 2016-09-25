@@ -835,11 +835,11 @@ abstract class PaymentGw
     *   Create a "buy now" button for an external (plugin) product.
     *   Each gateway must implement its own function for external buttons.
     *
-    *   @param  string  $btn_type   Type of button requested
     *   @param  array   $vars       Variables used to create the button
+    *   @param  string  $btn_type   Type of button requested
     *   @return string              Empty string, this is a stub function
     */
-    public function ExternalButton($btn_type = 'buy_now', $vars = array())
+    public function ExternalButton($vars = array(), $btn_type = 'buy_now')
     {
         return '';
     }
