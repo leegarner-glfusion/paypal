@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.4.5
+*   @version    0.5.9
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -316,7 +316,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('get_postal', $_PP_DEFAULTS['get_postal'],
                 'select', 0, 60, 14, 50, true, $_PP_CONF['pi_name']);
 
-        $c->add('sg_shop', NULL, 'subgroup', 0, 10, NULL, 0, true, 
+        $c->add('sg_shop', NULL, 'subgroup', 10, 0, NULL, 0, true, 
                 $_PP_CONF['pi_name']);
         $c->add('fs_shop', NULL, 'fieldset', 10, 100, NULL, 0, true, 
                 $_PP_CONF['pi_name']);
@@ -324,11 +324,14 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 10, 100, 0, 10, true, $_PP_CONF['pi_name']);
         $c->add('shop_addr', $_PP_DEFAULTS['shop_addr'],
                 'text', 10, 100, 0, 20, true, $_PP_CONF['pi_name']);
+        $c->add('shop_phone', '',
+                'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
+        $c->add('shop_email', $_PP_DEFAULTS['shop_addr'],
+                'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
 
      }
 
      return true;
-
 }
 
 ?>

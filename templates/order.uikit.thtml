@@ -2,10 +2,12 @@
 <div class="paypalOrderContainer">
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
   <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
+{!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
         title="Print" class="uk-icon-print"></a>
   </div>
+{!endif}
 
   <div class="paypalOrder">
 

@@ -744,4 +744,9 @@ $PP_UPGRADE['0.5.8'] = array(
         CHANGE comments_enabled comments_enabled tinyint(1) default 0",
 );
 
+$PP_UPGRADE['0.5.9'] = array(
+    // Fix the subgroup value, originally used the wrong field
+    "UPDATE {$_TABLES['conf_values']} SET subgroup=10 where name='sg_shop'",
+);
+
 ?>

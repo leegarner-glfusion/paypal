@@ -3,7 +3,16 @@
 <div class="paypalOrderContainer print">
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
   <div class="paypalOrder">
-
+  <div id="paypalShopInfo">
+    <span class="name">{shop_name}</span><br />{shop_addr}<br />
+{!if shop_phone}
+    <br />{shop_phone}
+{!endif}
+{!if shop_email}
+    <br />{shop_email}
+{!endif}
+  </div>
+  <div style="clear:both;"></div>
   <div id="paypalAddr">
     {!if have_billto}
     <div id="paypalBilling">

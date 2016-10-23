@@ -500,6 +500,8 @@ class ppOrder
             'have_billto' => 'true',
             'have_shipto' => 'true',
             'order_instr' => htmlspecialchars($this->instructions),
+            'shop_name' => $_PP_CONF['shop_name'],
+            'shop_addr' => $_PP_CONF['shop_addr'],
         ) );
 
         if ($isAdmin) {

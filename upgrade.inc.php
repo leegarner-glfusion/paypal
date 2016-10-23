@@ -3,11 +3,11 @@
 *   Upgrade routines for the Paypal plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.4.2
+*   @version    0.5.9
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
-*   GNU Public License v2 or later
+*               GNU Public License v2 or later
 *   @filesource
 */
 
@@ -468,8 +468,19 @@ function PAYPAL_do_upgrade($current_ver)
         }
     }
 
-    return $error;
+    if ($current_ver < '0.5.9') {
+        // Add shop phone and email conf values, fix subgroup ID for shop info
+        $c->add('shop_phone', '',
+                'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
+        $c->add('shop_email', $_PP_DEFAULTS['shop_addr'],
+                'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
+        $error = PAYPAL_do_upgrade_sql('0.5.9', true);
+        if ($error) {
+            return $error;
+        }
+    }
 
+    return $error;
 }
 
 
