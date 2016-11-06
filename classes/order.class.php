@@ -562,11 +562,10 @@ class ppOrder
     *
     *   @uses   Log()
     *   @param  string  $newstatus      New order status
-    *   @param  string  $order_id       Optional order ID or use current object
     *   @param  boolean $log            True to log the change, False to not
     *   @return boolean                 True on success or no change
     */
-    function UpdateStatus($newstatus, $order_id = '', $log = true)
+    public function UpdateStatus($newstatus, $log = true)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -575,18 +574,11 @@ class ppOrder
         USES_paypal_class_orderstatus();
         $OrdStat = new ppOrderStatus();
 
-        if ($order_id == '' && is_object($this)) {
-            $order_id = $this->order_id;
-            $oldstatus = $this->status;
-            $this->status = $newstatus;
-            $db_order_id = DB_escapeString($order_id);
-            $log_user = $this->log_user;
-        } elseif ($order_id != '') {
-            $db_order_id = DB_escapeString($order_id);
-            $oldstatus = DB_getItem($_TABLES['paypal.orders'], 'status',
-                "order_id = '$db_order_id'");
-            $log_user = '';
-        }
+        $order_id = $this->order_id;
+        $oldstatus = $this->status;
+        $this->status = $newstatus;
+        $db_order_id = DB_escapeString($order_id);
+        $log_user = $this->log_user;
 
         // If the status isn't really changed, don't bother updating anything
         // and just treat it as successful

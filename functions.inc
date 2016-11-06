@@ -554,7 +554,7 @@ function plugin_getuseroption_paypal()
     if (!COM_isAnonUser() &&
         DB_count($_TABLES['paypal.orders'], 'uid', $_USER['uid']) > 0) {
         $retval[] = array($LANG_PP['purchase_history'],
-                PAYPAL_URL . '/index.php?view=history');
+                PAYPAL_URL . '/index.php?orderhist=x');
     }
     PAYPAL_setCart();
     if ($ppGCart->hasItems()) {

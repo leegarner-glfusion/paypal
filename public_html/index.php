@@ -54,10 +54,9 @@ if (!empty($action)) {
         'addcartitem', 'addcartitem_x', 'checkoutcart',
         'processorder', 'thanks', 'action', 
         // Views
-        'order', 'view', 'detail', 'printorder',
+        'order', 'view', 'detail', 'printorder', 'orderhist',
     );
     $action = 'view';
-    //echo $action;die;
     foreach($expected as $provided) {
         if (isset($_POST[$provided])) {
             $action = $provided;
@@ -300,6 +299,7 @@ default:
 }
 
 switch ($view) {
+case 'orderhist':
 case 'history':
     if (COM_isAnonUser()) COM_404();
     $content .= PAYPAL_orders();

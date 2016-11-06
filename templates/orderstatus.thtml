@@ -10,7 +10,7 @@ PP_setStatus("{order_id}", "{oldvalue}");
 </select>
 <input type="hidden" name="oldstatus[{order_id}]" value="{oldvalue}" />
 <span id="ppSetStat_{order_id}" style="visibility:hidden;">
-<input type="reset" class="paypalButton small green"
+<input type="submit" class="paypalButton small green"
     onclick='PP_updateOrderStatus("{order_id}", PP_getStatus("{order_id}"), document.getElementById("statSelect_{order_id}").value, {showlog}, "{site_admin_url}/plugins/paypal");' value="{$LANG_PP['update_status']}" />
 </span>
 {# end {templatelocation} #}

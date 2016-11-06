@@ -276,13 +276,12 @@ case 'orderhist':
                 continue;
             }
             $ord = new ppOrder($order_id);
-            $ord->UpdateStatus($_POST['newstatus'][$order_id], $order_id);
+            $ord->UpdateStatus($_POST['newstatus'][$order_id]);
             $i++;
         }
         $msg[] = sprintf($LANG_PP['updated_x_orders'], $i);
     }
     $uid = isset($_REQUEST['uid']) ? $_REQUEST['uid'] : 0;
-    
     $content .= PAYPAL_orders(true, $uid);
     break;
 
@@ -344,7 +343,6 @@ case 'attributes':
             Attribute::Delete($attr_id);
         }
     }
-        
     $content .= PAYPAL_adminlist_Attributes();
     break;
 

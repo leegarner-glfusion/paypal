@@ -27,29 +27,14 @@ function PPstateChanged()
 {
   var newstate;
 
-  if (xmlHttp.readyState==4 || xmlHttp.readyState=="complete")
-  {
-    xmlDoc=xmlHttp.responseXML;
-    id = xmlDoc.getElementsByTagName("id")[0].childNodes[0].nodeValue;
-    //imgurl = xmlDoc.getElementsByTagName("imgurl")[0].childNodes[0].nodeValue;
-    baseurl = xmlDoc.getElementsByTagName("baseurl")[0].childNodes[0].nodeValue;
-    type = xmlDoc.getElementsByTagName("type")[0].childNodes[0].nodeValue;
-    component = xmlDoc.getElementsByTagName("component")[0].childNodes[0].nodeValue;
-    if (xmlDoc.getElementsByTagName("newval")[0].childNodes[0].nodeValue == 1) {
-        newval = 1;
-        document.getElementById("tog"+type+id).checked = true;
+  if (xmlHttp.readyState==4 || xmlHttp.readyState=="complete") {
+    jsonObj = JSON.parse(xmlHttp.responseText);
+    if (jsonObj.newval == 1) {
+        document.getElementById("tog"+jsonObj.type+jsonObj.id).checked = true;
     } else {
-        newval = 0;
-        document.getElementById("tog"+type+id).checked = false;
+        document.getElementById("tog"+jsonObj.type+jsonObj.id).checked = false;
     }
-    /*newHTML = 
-        "<img src=\""+imgurl+"\" " +
-        "width=\"16\" height=\"16\" " +
-        "onclick='PP_toggle("+newval+", \""+id+"\", \""+type+"\", \""+component+"\", \""+baseurl+"\");" +
-        "'>";
-    document.getElementById("tog"+type+id).innerHTML = newHTML;*/
   }
-
 }
 
 function PPgetXmlHttpObject()
@@ -67,7 +52,7 @@ function PPgetXmlHttpObject()
 }
 
 
-var PP_status = new Array();
+var PP_status = {};
 
 function PP_updateOrderStatus(order_id, oldstatus, newstatus, showlog, base_url)
 {
@@ -91,15 +76,8 @@ function PP_updateOrderStatus(order_id, oldstatus, newstatus, showlog, base_url)
 function PPorderStatusChanged()
 {
     if (xmlHttp.readyState==4 || xmlHttp.readyState=="complete") {
-        xmlDoc=xmlHttp.responseXML;
-        var showlog = xmlDoc.getElementsByTagName("showlog")[0].childNodes[0].nodeValue;
-        var newstatus = xmlDoc.getElementsByTagName("newstatus")[0].childNodes[0].nodeValue;
-        var order_id = xmlDoc.getElementsByTagName("order_id")[0].childNodes[0].nodeValue;
-        if (showlog == 1) {
-            log_user = xmlDoc.getElementsByTagName("log_user")[0].childNodes[0].nodeValue;
-            log_ts = xmlDoc.getElementsByTagName("log_ts")[0].childNodes[0].nodeValue;
-            log_msg = xmlDoc.getElementsByTagName("log_msg")[0].childNodes[0].nodeValue;
-
+        jsonObj = JSON.parse(xmlHttp.responseText);
+        if (jsonObj.showlog == 1) {
             var tbl = document.getElementById("paypalOrderLog");
             if (tbl) {
                 var lastRow = tbl.rows.length;
@@ -107,30 +85,25 @@ function PPorderStatusChanged()
                 var row = tbl.insertRow(lastRow);
 
                 var cell0 = row.insertCell(0);
-                var textNode = document.createTextNode(log_ts);
+                var textNode = document.createTextNode(jsonObj.log_ts);
                 cell0.appendChild(textNode);
 
                 var cell1 = row.insertCell(1);
-                var textNode = document.createTextNode(log_user);
+                var textNode = document.createTextNode(jsonObj.log_user);
                 cell1.appendChild(textNode);
 
                 var cell2 = row.insertCell(2);
-                var textNode = document.createTextNode(log_msg);
+                var textNode = document.createTextNode(jsonObj.log_msg);
                 cell2.appendChild(textNode);
             }
-        } else {
-            var el = document.getElementById("statSelect_" + order_id);
-            for (index = 0; index < el.length; index++) {
-            if (el[index].value == newstatus)
-                el.selectedIndex = index;
-            }
         }
+        var el = document.getElementById("statSelect_" + jsonObj.order_id);
+        el.value = jsonObj.newstatus;
 
         // Hide the button and update the new status in our array
-        document.getElementById("ppSetStat_" + order_id).style.visibility = "hidden";
-        PP_setStatus(order_id, newstatus);
+        document.getElementById("ppSetStat_" + jsonObj.order_id).style.visibility = "hidden";
+        PP_setStatus(jsonObj.order_id, jsonObj.newstatus);
     }
-
 }
 
 /*  Show the "update status" submit button if the order status selection has
@@ -167,4 +140,3 @@ function PP_getStatus(order_id)
 {
     return PP_status[order_id];
 }
-
