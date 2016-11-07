@@ -207,7 +207,7 @@ $_SQL['paypal.ipnlog'] = "CREATE TABLE {$_TABLES['paypal.ipnlog']} (
 
 $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `cat_id` int(11) unsigned NOT NULL DEFAULT '0',
   `short_description` varchar(255) DEFAULT NULL,
   `description` text,
@@ -253,11 +253,11 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
 $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `id` int(11) NOT NULL auto_increment,
   `order_id` varchar(40) NOT NULL,
-  `product_id` varchar(255) NOT NULL,
+  `product_id` varchar(128) NOT NULL,
   `description` varchar(255) default NULL,
   `quantity` int(11) NOT NULL default '1',
   `user_id` int(11) NOT NULL,
-  `txn_id` varchar(255) default '',
+  `txn_id` varchar(128) default '',
   `txn_type` varchar(255) default '',
   `purchase_date` datetime default NULL,
   `status` varchar(255) default NULL,
@@ -277,7 +277,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
 
 $_SQL['paypal.images'] = "CREATE TABLE {$_TABLES['paypal.images']} (
   `img_id` smallint(5) unsigned NOT NULL auto_increment,
-  `product_id` varchar(255) NOT NULL default '',
+  `product_id` int(11) unsigned NOT NULL,
   `filename` varchar(255) default NULL,
   PRIMARY KEY  (`img_id`),
   KEY `idxProd` (`product_id`,`img_id`)
@@ -292,7 +292,7 @@ $_SQL['paypal.images'] = "CREATE TABLE {$_TABLES['paypal.images']} (
 $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   `cat_id` smallint(5) unsigned NOT NULL auto_increment,
   `parent_id` smallint(5) unsigned default '0',
-  `cat_name` varchar(255) default '',
+  `cat_name` varchar(128) default '',
   `description` text,
   `enabled` tinyint(1) unsigned default '1',
   `grp_access` mediumint(8) unsigned NOT NULL default '1',
@@ -747,6 +747,15 @@ $PP_UPGRADE['0.5.8'] = array(
 $PP_UPGRADE['0.5.9'] = array(
     // Fix the subgroup value, originally used the wrong field
     "UPDATE {$_TABLES['conf_values']} SET subgroup=10 where name='sg_shop'",
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        CHANGE `name` `name` varchar(128) NOT NULL",
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
+        CHANGE `product_id` `product_id` varchar(128) NOT NULL,
+        CHANGE `txn_id` `txn_id` varchar(128) default ''",
+    "ALTER TABLE {$_TABLES['paypal.images']}
+        CHANGE `product_id` `product_id` int(11) unsigned NOT NULL",
+    "ALTER TABLE {$_TABLES['paypal.categories']}
+        CHANGE `cat_name` `cat_name` varchar(128) default ''",
 );
 
 ?>
