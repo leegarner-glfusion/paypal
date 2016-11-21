@@ -241,7 +241,7 @@ class BaseIPN
                 // pi_info[0] will be the plugin name, pi_info[1] is most
                 // likely a product ID which will be decoded by the plugin
                 // handler.
-                if (stristr($item['item_number'], ':')) {
+                if (strstr($item['item_number'], ':')) {
                     // received "plugin_name:sku..."
                     $pi_info = explode(':', $item['item_number']);
                 } else {
@@ -491,6 +491,7 @@ class BaseIPN
 
                 if (!empty($A)) {
                     $this->items[$id]['name'] = $A['name'];
+                    $this->items[$id]['short_description'] = $A['short_description'];
                 }
                 PAYPAL_debug("BaseIPN::handlePurchase() Got name " . $this->items[$id]['name']);
                 $vars = array(
@@ -725,7 +726,7 @@ class BaseIPN
             $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET 
                     order_id = '{$db_order_id}',
                     product_id = '{$item['item_number']}',
-                    description = '" . DB_escapeString($item['name']) . "',
+                    description = '" . DB_escapeString($item['short_description']) . "',
                     quantity = '{$item['quantity']}', 
                     user_id = '{$this->pp_data['custom']['uid']}', 
                     txn_type = '{$this->pp_data['custom']['transtype']}',
