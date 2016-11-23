@@ -237,6 +237,9 @@ class paypal extends PaymentGw
                     $opts = array();
                 }
                 $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
+                if ($P->taxable == 0) {
+                    $fields['tax_' . $i] = '0.00';
+                }
             } else {
                 // Plugin item
                 $fields['amount_' . $i] = $item['price'];
@@ -780,14 +783,18 @@ class paypal extends PaymentGw
     */
     public function Configure()
     {
-        global $_CONF, $LANG_PP_paypal;
+        global $_CONF, $LANG_PP_paypal, $_PP_CONF;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates/');
-        $T->set_file('tpl', 'gateway_edit.thtml');
+        if ($_PP_CONF['_is_uikit']) {
+            $T->set_file('tpl', 'gateway_edit.uikit.thtml');
+        } else {
+            $T->set_file('tpl', 'gateway_edit.thtml');
+        }
 
         $svc_boxes = $this->getServiceCheckboxes();
 
-        $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name . '.html',
+        $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name,
                 $_CONF['language']);
         $T->set_var(array(
             'gw_description' => self::Description(),

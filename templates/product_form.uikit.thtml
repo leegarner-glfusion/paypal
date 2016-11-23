@@ -15,8 +15,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="name">{$LANG_PP['product']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="name" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
         <input required type="text" id="name" name="name" value="{name}" size="40" maxlength="255" />
@@ -26,8 +25,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="cat_id">{$LANG_PP['category']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_category', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="cat_id" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <select name="cat_id" id="cat_id">
@@ -39,8 +37,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="short_desc">{$LANG_PP['short_description']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="short_descrip" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
         <input required type="text" name="short_description" id="short_desc" value="{short_description}" 
@@ -51,11 +48,10 @@
 
     <div class="uk-form-row" id="html_editarea">
       <label class="uk-form-label" for="description">{$LANG_PP['description']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="descrip" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
-      <textarea id="description" 
+        <textarea id="description" 
           name="description" cols="35" rows="10" 
           style="width:70%">{description}</textarea>
       </div>
@@ -63,8 +59,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="keywords">{$LANG_PP['keywords']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_keywords', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="keywords" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="text" id="keywords" name="keywords" value="{keywords}" size="40"
@@ -74,8 +69,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="price">{$LANG_PP['price']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="price" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="text" id="price" name="price" value="{price}" size="12" 
@@ -85,8 +79,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="sale_price">{$LANG_PP['sale_price']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_sale_price', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="sale_price" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <i class="uk-icon uk-icon-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetSale();" ></i>
@@ -105,8 +98,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['images']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="images" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <table border=0>
@@ -135,8 +127,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="enabled">{$LANG_PP['enabled']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="checkbox" id="enabled" name="enabled" value="1" {ena_chk} />
@@ -145,8 +136,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="taxable">{$LANG_PP['taxable']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="taxable" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="checkbox" id="taxable" name="taxable" value="1" {tax_chk} />
@@ -155,8 +145,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['txt_buttons']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_buttons', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="buttons" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <!-- BEGIN BtnRow -->
@@ -168,8 +157,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['incl_blocks']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_incl_blocks', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="incl_blocks" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="checkbox" name="show_random" value="1" 
@@ -183,8 +171,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="comments">{$LANG_PP['comments']}:
-       <a href="#" onclick="popupWindow('{doc_url}#desc_comments', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="comments" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <select name="comments_enabled" id="comments">
@@ -197,8 +184,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="ratings">{$LANG_PP['ratings_enabled']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_ratings', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="ratings" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="checkbox" id="ratings" name="rating_enabled" value="1" {rating_chk} />
@@ -207,8 +193,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="custom">{$LANG_PP['custom']}?
-        <a href="#" onclick="popupWindow('{doc_url}#desc_custom', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="custom" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="text" name="custom" id="custom" size="80" value="{custom}" />
@@ -223,8 +208,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="prod_type">{$LANG_PP['prod_type']}?:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_prod_type', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="prod_type" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <!-- BEGIN ProdTypeRadio -->
@@ -238,8 +222,7 @@
     <div id="type_download">
     <div class="uk-form-row">
       <label class="uk-form-label for="file">{$LANG_PP['select_file']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_select_file', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" i
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="select_file" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <select id="file" name="file">
@@ -251,8 +234,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label for="uploadfile">{$LANG_PP['or_upload_new']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_upload_file', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="upload_file" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="file" name="uploadfile" id="uploadfile" />
@@ -261,8 +243,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label for="expiration">{$LANG_PP['exp_time_days']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="text" id="expiration" name="expiration" value="{expiration}" 
@@ -274,8 +255,7 @@
     <div id="type_physical">
     <div class="uk-form-row">
       <label class="uk-form-label for="weight">{$LANG_PP['weight']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_weight', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="weight" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="text" name="weight" id="weight" value="{weight}" />
@@ -284,8 +264,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label for="shipping">{$LANG_PP['shipping_type']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_shipping_type', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="shipping" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <select name="shipping_type" id="shipping"
@@ -300,13 +279,11 @@
       </span>
       </div>
     </div>
-
     </div>
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="track_onhand">{$LANG_PP['track_onhand']}
-       <a href="#" onclick="popupWindow('{doc_url}#desc_track_onhand', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="track_onhand" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <input type="checkbox" id="track_onhand" name="track_onhand" value="1" {trk_onhand_chk} 
@@ -316,8 +293,7 @@
 
     <div class="uk-form-row" id="oversell" style="display:none;">
       <label class="uk-form-label" for="oversell">{$LANG_PP['oversell_action']}
-       <a href="#" onclick="popupWindow('{doc_url}#desc_oversell', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="oversell" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <select name="oversell" id="oversell">
@@ -330,8 +306,7 @@
 
     <div class="uk-form-row" id="qty_discounts">
       <label class="uk-form-label">{$LANG_PP['qty_discounts']}:
-       <a href="#" onclick="popupWindow('{doc_url}#desc_qty_discounts', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="qty_discounts" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
       <table border="0" align="left">
@@ -356,8 +331,7 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['available']}:
-       <a href="#" onclick="popupWindow('{doc_url}#desc_avail_dates', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png"
-            alt="{$LANG_PP['clk_help']}" /></a>
+        <span id="avail_dates" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
         <i class="uk-icon uk-icon-trash pp-icon-danger" data-uk-tooltip title="{$LANG_PP['reset']}" onclick="PP_resetAvailDates();"></i>
@@ -373,8 +347,10 @@
     </div>
 
  </fieldset>
+  <p>
   <i class="uk-icon uk-icon-warning pp-icon-warning"></i> {$LANG_PP['ind_req_fld']}<br />
   {$LANG_PP['del_item_instr']}
+  </p>
 
   <div class="uk-form-row" align="center">
     <button class="uk-button uk-button-success" type="submit" name="saveproduct" value="{$LANG_PP['saveproduct']}">{$LANG_PP['saveproduct']}</button>
@@ -479,6 +455,35 @@ Calendar.setup({
     showsTime      :    false,
     timeFormat     :    "24",
     button          :   "avail_end_trigger"
+});
+
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    //var a = $(data).find('a[name=desc_' + confVar + ']');
+                    //var tds = a.parent().parent().children("td");
+                    //var desc = tds.eq(1).html();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
 });
 </script>
 

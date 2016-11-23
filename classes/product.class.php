@@ -686,7 +686,7 @@ class Product
                                 $this->cat_id), 
             'currency'      => $_PP_CONF['currency'],
             'pi_url'        => PAYPAL_URL,
-            'doc_url'       => PAYPAL_getDocURL('product_form.html', 
+            'doc_url'       => PAYPAL_getDocURL('product_form', 
                                             $_CONF['language']),
             'prod_type'     => $this->prod_type,
             'weight'        => $this->weight,

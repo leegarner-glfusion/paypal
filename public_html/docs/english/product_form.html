@@ -1,185 +1,166 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" class="uk-height-1-1">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
-  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon-precomposed" href="../../layout/cms/images/apple-touch-icon.png">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.almost-flat.min.css">
   <meta name="robots" content="noindex,nofollow" />
-  <title>PayPal Plugin - glFusion CMS</title>
+  <title>glFusion Paypal Product Information</title>
+  <style>
+    html{background:#f9f9f9}.tm-dropdown,.tm-navbar{background:#325482!important}.uk-form label{font-weight:700}.tm-navbar{border-radius:0!important;padding:1px 0 6px!important;border:none!important}.tm-navbar-brand{color:#eee!important}.tm-navbar-brand a{text-shadow:none;color:#fff}.tm-navbar-brand a:hover{color:#ababab;text-decoration:none}.tm-navbar-brand-oc a{text-shadow:none;color:#fff}.tm-navbar-brand-oc a:hover{color:#ababab;text-decoration:none}.tm-navbar-nav>li>a{border:none;border-radius:3px!important;font-size:15px!important;height:40px!important;margin:0!important}.tm-dropdown{color:#000;border-radius:0!important;border:0!important}.tm-nav-navbar>li>a{color:#fff!important}.tm-navbar::after,.tm-navbar::before{margin-top:7px!important}.tm-navbar-nav>li.uk-open>a,.tm-navbar-nav>li:hover>a,.tm-navbar-nav>li>a:focus{color:#fff;outline:0;background:#35B3EE!important}.tm-navbar-nav>li>a{color:#fff!important;text-shadow:none!important}.tm-navbar-toggle{color:#ccc!important;text-shadow:none!important}.tm-navbar-toggle:focus,.tm-navbar-toggle:hover{color:#fff!important}.tm-footer{background:#252525;border-top:1px solid #232425;margin-bottom:0;bottom:0;padding:10px;color:#fff}.tm-wrapper{min-height:100%;margin:0 auto -51px!important}.tm-push,footer{height:51px}.uk-navbar-content > a {color:#fff !important;}
+  </style>
 </head>
 
-<body style="direction: ltr;">
-<div id="gl_container_fluid">
-  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
-  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
-</div>
-<div id="gl_wrapper">
-<div class="body-container">
-<h1><a name="advt_plugin" id="advt_plugin">PayPal Plugin</a></h1>
+<body class="uk-height-1-1">
+  <div class="tm-wrapper">
+    <nav class="uk-navbar uk-navbar-attached tm-navbar uk-margin-bottom">
+      <div class="uk-navbar-brand tm-navbar-brand">
+        Paypal Product Information
+      </div>
+      <div class="uk-navbar-flip uk-hidden-small">
+        <div class="uk-navbar-content tm-navbar-content" style="text-shadow:none;">
+          <a href="https://www.glfusion.org/wiki/">glFusion Wiki</a>
+        </div>
+      </div>
+    </nav>
 
-<div class="level1">
-<h1><a name="paypal_plugin_product_form" id="paypal_plugin_product_form">PayPal Plugin - Product Information Form Help</a></h1>
+    <div class="uk-container uk-container-center uk-margin-bottom">
+      <h1>Paypal Product Information</h1>
 
-<table class="inline">
-  <tbody>
-    <tr>
-      <th class="col0 leftalign" colspan="2">Main Product Settings</th>
-    </tr>
+      <h2>Product settings</h2>
 
-    <tr class="row0">
-      <th class="col0 leftalign">Option </th>
-      <th class="col1 leftalign">Description </th>
-    </tr>
+      <dl id="desc_name">
+        <dt>Name/SKU</dt>
+        <dd>This is the short product name or item number.  This will be submitted to Paypal and shown on the customer's receipt.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_name"></a>Product Name</td>
-      <td class="col1 leftalign">This is the short product name or item number.  This will be submitted to Paypal and shown on the customer's receipt.</td>
-    </tr>
+      <dl id="desc_category">
+        <dt>Category</dt>
+        <dd>Select the category for this product.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_category"></a>Category</td>
-      <td class="col1 leftalign">Select the category for this product.</td>
-    </tr>
+      <dl id="desc_short_descrip">
+        <dt>Short Description<dt>
+        <dd>Enter a short description for this product.  This will be displayed under the product name in the product lists.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_short_descrip"></a>Short Description</td>
-      <td class="col1 leftalign">Enter a short description for this product.  This will be displayed under the product name in the product lists.</td>
-    </tr>
+      <dl id="desc_descrip">
+        <dt>Description</dt>
+        <dd>Enter the full description for this product.  This will be displayed on the product detail screen.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_description"></a>Description</td>
-      <td class="col1 leftalign">Enter the full description for this product.  This will be displayed on the product detail screen.</td>
-    </tr>
+      <dl id="desc_keywords">
+        <dt>Keywords</dt>
+        <dd>Enter any additional search terms for this product.  The name, short description and full description are already searched, so this field should contain words that do not appear in any of the other fields.<p />
+These words will not appear anywhere with the product.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_keywords"></a>Keywords</td>
-      <td class="col1 leftalign">Enter any additional search terms for this product.  The name, short description and full description are already searched, so this field should contain words that do not appear in any of the other fields.<p />
-These words will not appear anywhere with the product.</td>
-    </tr>
+      <dl id="desc_price">
+        <dt>Price</dt>
+        <dd>Enter the unit price for this product.  Only numbers should be entered here- no commas or currency symbols.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_price"></a>Price</td>
-      <td class="col1 leftalign">Enter the unit price for this product.  Only numbers should be entered here- no commas or currency symbols.</td>
-    </tr>
+      <dl id="desc_sale_price">
+        <dt>Sale Price</dt>
+        <dd>If the item is to be sold at a &quot;sale&quot; price for a period of time, enter the sale price and the starting and ending dates of the sale. Click the red &quot;X&quot; to clear these fields.<p/>
+        If the Sale Price is set to the same value as the regular price it will be ignored. The sale price alters the base price of the product but does not affect attribute pricing.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_sale_price"></a>Sale Price</td>
-      <td class="col1 leftalign">
-        <p>If the item is to be sold at a &quot;sale&quot; price for a period of time, enter the sale price and the starting and ending dates of the sale. Click the red &quot;X&quot; to clear these fields.</p>
-        <p>If the Sale Price is set to the same value as the regular price it will be ignored. The sale price alters the base price of the product but does not affect attribute pricing.</p>
-      </td>
-    </tr>
-
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_images"></a>Images</td>
-      <td class="col1 leftalign">You may upload one or more images, up to the maximum number and size set in the Paypal configuration.  You may also delete existing images by clicking the "Delete" link next to the image thumbnail.<p />
+      <dl id="desc_images">
+        <dt>Images</dt>
+        <dd>You may upload one or more images, up to the maximum number and size set in the Paypal configuration.  You may also delete existing images by clicking the "Delete" link next to the image thumbnail.<p/>
 These images will be shown as thumbnails, and can be expanded using the Slimbox viewer.  You can also use the advanced editor to incorporate images directly into your product description.<p />
-You might want to have at least one image to serve as a product thumbnail.</td>
-    </tr>
+You might want to have at least one image to serve as a product thumbnail.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_enabled"></a>Enabled?</td>
-      <td class="col1 leftalign">This checkbox allows you to easily enable or disable products.  A product that is disabled will not appear in the catalog or search results.</td>
-    </tr>
+      <dl id="desc_enabled">
+        <dt>Enabled?</dt>
+        <dd>This checkbox allows you to easily enable or disable products.  A product that is disabled will not appear in the catalog or search results.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_taxable"></a>Taxable?</td>
-      <td class="col1 leftalign">Select whether this product is subject to sales tax.  The default is "true", which means that sales tax will be applied according to your Gateway account configuration.  If you have not configured the gateway to automatically apply sales tax, then this checkbox has no effect.<p>
-The primary purpose for this checkbox is to make certain items non-taxable.</td>
-    </tr>
+      <dl id="desc_taxable">
+        <dt>Taxable?</dt>
+        <dd>Select whether this product is subject to sales tax.  The default is "true", which means that sales tax will be applied according to your Gateway account configuration.  If you have not configured the gateway to automatically apply sales tax, then this checkbox has no effect.<p/>
+The primary purpose for this checkbox is to make certain items non-taxable.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_buttons"></a>Buttons</td>
-      <td class="col1 leftalign">
-        <p>Select the button types that will be available for this product.  To improve performance, especially if encrypted buttons are used, the buttons are created and stored with the product record each time is it updated.</p>
-        <p>If the shopping cart is enabled, the Add to Cart button is always shown.</p>
-      </td>
-    </tr>
+      <dl id="desc_buttons">
+        <dt>>Buttons</dt>
+        <dd>Select the button types that will be available for this product.  To improve performance, especially if encrypted buttons are used, the buttons are created and stored with the product record each time is it updated.<p/>
+        If the shopping cart is enabled, the Add to Cart button is always shown.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_incl_blocks"></a>Include in Blocks</td>
-      <td class="col1 leftalign">Select which blocks should include this product.  Checking one or more of the checkboxes will cause this product to appear in the associated block, subject to the block's configuration.</td>
-    </tr>
+      <dl id="desc_incl_blocks">
+        <dt>Include in Blocks</dt>
+        <dd>Select which blocks should include this product.  Checking one or more of the checkboxes will cause this product to appear in the associated block, subject to the block's configuration.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_comments"></a>Comments</td>
-      <td class="col1 leftalign">Select the comment option for this specific product.  Comments will only be shown at all if the global configuration allows it; this field allows special handling per product.<p />
+      <dl id="desc_comments">
+        <dt>Comments</dt>
+        <dd>Select the comment option for this specific product.  Comments will only be shown at all if the global configuration allows it; this field allows special handling per product.<p/>
 <dt>Yes</dt><dd>Comments will be shown and users can add comments.</dd>
 <dt>No</dt><dd>No comments will be shown.</dd>
 <dt>Closed</dt><dd>Comments will be shown, but no additional comments will be accepted.</dd>
-</td>
-    </tr>
+</dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_ratings"></a>Allow Ratings</td>
-      <td class="col1 leftalign">
-        Check this box to allow site visitors to rate this product.
-    </td>
-    </tr>
+      <dl id="desc_ratings">
+        <dt>Allow Ratings</dt>
+        <dd>Check this box to allow site visitors to rate this product.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_custom"></a>Text Fields</td>
-      <td class="col1 leftalign">
-        Enter the prompts for text fields, separated by the "|" character. When the product is viewed these fields will allow user input. This can be used to collect custom text information such as names to engrave or other special instructions.
-    </td>
-    </tr>
+      <dl id="desc_custom">
+        <dt>Text Fields</dt>
+        <dd>Enter the prompts for text fields, separated by the "|" character. When the product is viewed these fields will allow user input. This can be used to collect custom text information such as names to engrave or other special instructions.</dd>
+      </dl>
 
-    <tr>
-      <th class="col0 leftalign" colspan="2">Delivery Information</th>
-    </tr>
-
-    <tr class="row0">
-      <th class="col0 leftalign">Option </th>
-      <th class="col1 leftalign">Description </th>
-    </tr>
-
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_prod_type"></a>Product Type</td>
-      <td class="col1 leftalign">Select the type of product being sold.  The current options are<br /><ul>
+      <dl id="desc_prod_type">
+        <dt>Product Type</dt>
+        <dd>Select the type of product being sold.  The current options are<br /><ul>
 <li><i>Downloadable</i> : A downloadable product such as a piece of software.  This type may be priced at zero (free), or may have a price value.  It must be associated with a downloadable file.</li>
 <li><i>Physical</i> : A physical product that will be shipped to the customer.  Physical products must have a non-zero price.</li>
 <li><i>Other Virtual</i>: Some other type of product.  This product type may or may not have a price associated with it; if it is zero then the buyer will be able to enter their own price into the payment gateway.  This product type could be used for donations, for example.  This product type may optionally be associated with a downloadable file.</li>
-</ul></td>
-    </tr>
+</ul></dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_select_file"></a>Select File<br /><i>(Download Only)</i></td>
-      <td class="col1 leftalign">Select an existing file to be downloaded.</td>
-    </tr>
+      <dl id="desc_select_file">
+        <dt>Select File <i>(Download Only)</i></dt>
+        <dd>Select an existing file to be downloaded.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_upload_file"></a>Upload a new file<br /><i>(Download Only)</i></td>
-      <td class="col1 leftalign">Select and upload a new file for a downloadable product.  In the event that you select an existing file <b>and</b> upload a new one, the new file will take precedence.</td>
-    </tr>
+      <dl id="desc_upload_file">
+        <dt>Upload a new file <i>(Download Only)</i></dt>
+        <dd>Select and upload a new file for a downloadable product.  In the event that you select an existing file <b>and</b> upload a new one, the new file will take precedence.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_weight"></a>Weight<br /><i>(Physical only)</i></td>
-      <td class="col1 leftalign">This field is used to determine shipping charges, if you've set up a shipping schedule in your gateway account setup.  Enter the weight, using the unit of measure that you use in Paypal.  If the weight is set to zero, then no shipping charge will be calculated.</td>
-    </tr>
+      <dl id="desc_weight">
+        <dt>Weight <i>(Physical only)</i></dt>
+        <dd>This field is used to determine shipping charges, if you've set up a shipping schedule in your gateway account setup.  Enter the weight, using the unit of measure that you use in Paypal.  If the weight is set to zero, then no shipping charge will be calculated.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_shipping_type"></a>Shipping<br /><i>(Physical only)</i></td>
-      <td class="col1 leftalign">Select the type of shipping charge to be applied to the item.  The options are:
+      <dl id="desc_shipping_type">
+        <dt>Shipping <i>(Physical only)</i></dt>
+        <dd>Select the type of shipping charge to be applied to the item.  The options are:
 <ul><li><i>No Shipping</i>: No shipping charge will be added.</li>
 <li><i>Use Gateway Profile</i>: Shipping will be calculated by the gateway using the shipping charges set up in your business profile.</li>
 <li><i>Fixed Amount</i>: Enter a fixed amount per item to be added to the purchase.</li>
 </ul>
-</td>
-    </tr>
+</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_expiration"></a>Expiration Time<br /><i>(Downloadable, Virtual Only)</i></td>
-      <td class="col1 leftalign">Enter the number of days after which a purchase will expire.  This is normally used for downloadable products to allow a buyer to download the item only within a certain period.</td>
-    </tr>
+      <dl id="desc_expiration">
+        <dt>Expiration Time <i>(Downloadable, Virtual Only)</i></dt>
+        <dd>Enter the number of days after which a purchase will expire.  This is normally used for downloadable products to allow a buyer to download the item only within a certain period.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_track_onhand"></a>Track Quantity On Hand<br /><i>(Physical Only)</i></td>
-      <td class="col1 leftalign">Check the checkbox to indicate that you wish to track the quantity on hand of an item, and enter the current quantity on hand in the space provided. The quantity on hand can be updated at any time.</td>
-    </tr>
+      <dl id="desc_track_onhand">
+        <dt>Track Quantity On Hand <i>(Physical Only)</i></dt>
+        <dd>Check the checkbox to indicate that you wish to track the quantity on hand of an item, and enter the current quantity on hand in the space provided. The quantity on hand can be updated at any time.</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_qty_discounts"></a>Quantity Discounts</td>
-      <td class="col1 leftalign">
-        If you wish to offer product discounts based on quantity purchased, you can enter up to three minimum purchase amounts and a discount to apply as a percentage. For example, to offer 10% off of a purchase of two or more, and 15% off if 5 or more are purchased, enter "2" for the first minimum purchase amount and "10" for the Discount %; and "5" for the second minimum purchase with "15" for the discount.
+      <dl id="desc_qty_discounts">
+        <dt>Quantity Discounts</dt>
+        <dd>If you wish to offer product discounts based on quantity purchased, you can enter up to three minimum purchase amounts and a discount to apply as a percentage. For example, to offer 10% off of a purchase of two or more, and 15% off if 5 or more are purchased, enter "2" for the first minimum purchase amount and "10" for the Discount %; and "5" for the second minimum purchase with "15" for the discount.
 <ul><li>Discounts are applied to attribute prices, if any, as well as the product base price.</li>
 <li>Discounts are applied during final checkout.</li>
 </ul>
@@ -190,22 +171,15 @@ Example:
 <tr><td>5</td><td>15</td><td>5 - 9 items purchased, 15% off all items.</td></tr>
 <tr><td>10</td><td>20</td><td>10 or more purchased, 20% off all items.</td></tr>
 </table>
-      </td>
-    </tr>
+</dd>
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_avail_dates"></a>Available</td>
-      <td class="col1 leftalign">
-        If this product is to be sold only for a limited time, enter the starting and ending dates here. Click the red &quot;X&quot; to reset the fields and make the product available any time.
-      </td>
-    </tr>
+      <dl id="desc_avail_dates">
+        <dt>Available</dt>
+        <dd>If this product is to be sold only for a limited time, enter the starting and ending dates here. Click the red &quot;X&quot; to reset the fields and make the product available any time.</dd>
+      </dl>
 
-  </tbody>
-</table>
-<p></p>
-</div>
-</div>
-</div>
-</div>
+    </div>
+  </div>
 </body>
 </html>

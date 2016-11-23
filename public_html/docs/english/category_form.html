@@ -6,7 +6,7 @@
   <link rel="apple-touch-icon-precomposed" href="../../layout/cms/images/apple-touch-icon.png">
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.almost-flat.min.css">
   <meta name="robots" content="noindex,nofollow" />
-  <title>glFusion Paypal Product Attributes</title>
+  <title>glFusion Paypal Category Information</title>
   <style>
     html{background:#f9f9f9}.tm-dropdown,.tm-navbar{background:#325482!important}.uk-form label{font-weight:700}.tm-navbar{border-radius:0!important;padding:1px 0 6px!important;border:none!important}.tm-navbar-brand{color:#eee!important}.tm-navbar-brand a{text-shadow:none;color:#fff}.tm-navbar-brand a:hover{color:#ababab;text-decoration:none}.tm-navbar-brand-oc a{text-shadow:none;color:#fff}.tm-navbar-brand-oc a:hover{color:#ababab;text-decoration:none}.tm-navbar-nav>li>a{border:none;border-radius:3px!important;font-size:15px!important;height:40px!important;margin:0!important}.tm-dropdown{color:#000;border-radius:0!important;border:0!important}.tm-nav-navbar>li>a{color:#fff!important}.tm-navbar::after,.tm-navbar::before{margin-top:7px!important}.tm-navbar-nav>li.uk-open>a,.tm-navbar-nav>li:hover>a,.tm-navbar-nav>li>a:focus{color:#fff;outline:0;background:#35B3EE!important}.tm-navbar-nav>li>a{color:#fff!important;text-shadow:none!important}.tm-navbar-toggle{color:#ccc!important;text-shadow:none!important}.tm-navbar-toggle:focus,.tm-navbar-toggle:hover{color:#fff!important}.tm-footer{background:#252525;border-top:1px solid #232425;margin-bottom:0;bottom:0;padding:10px;color:#fff}.tm-wrapper{min-height:100%;margin:0 auto -51px!important}.tm-push,footer{height:51px}.uk-navbar-content > a {color:#fff !important;}
   </style>
@@ -16,7 +16,7 @@
   <div class="tm-wrapper">
     <nav class="uk-navbar uk-navbar-attached tm-navbar uk-margin-bottom">
       <div class="uk-navbar-brand tm-navbar-brand">
-        Paypal Product Attributes
+        Paypal Category Information
       </div>
       <div class="uk-navbar-flip uk-hidden-small">
         <div class="uk-navbar-content tm-navbar-content" style="text-shadow:none;">
@@ -26,42 +26,43 @@
     </nav>
 
     <div class="uk-container uk-container-center uk-margin-bottom">
-      <h1>Paypal Product Attributes</h1>
+      <h1>Paypal Category Information</h1>
 
-      <h2>Attribute settings</h2>
+      <h2>Category settings</h2>
 
-      <dl id="desc_item_id">
-        <dt>Product Name/SKU</dt>
-        <dd>Select the product to which this attribute will apply. The product must exist before you can apply attributes to it.</dd>
+      <dl id="desc_cat_name">
+        <dt>Category Name</dt>
+        <dd>Enter a short name for this producdt category</dd>
       </dl>
 
-      <dl id="desc_attr_name">
-        <dt>Attribute Name</dt>
-        <dd>This is the name of the attribute: Size, Color, Capacity, etc. You can select an existing name, or enter a new name in the text box. Note that the names must match exactly for the attribute to be shown properly in the selection list. For example, entering "Color" for one attribute and "color" for another will result in two selections when there should probably be only one.</dd>
+      <dl id="desc_parent_id">
+        <dt>Parent Category</dt>
+        <dd>Select the parent for this category, or select &quot;--Top--&quot; for a top-level category.</dd>
       </dl>
 
-      <dl id="desc_attr_value">
-        <dt>Attribute Value</dt>
-        <dd>The "Attribute Value" is the specific value of the attribute. For example, if the Attribute Name is "Color", an Attribute Value might be "Blue."</dd>
+      <dl id="desc_descrip">
+        <dt>Description<dt>
+        <dd>Enter a brief description for this category</dd>
       </dl>
 
-      <dl id="desc_attr_price">
-        <dt>Attribute Price</dt>
-        <dd>Enter the <i>incremental</i> price for this specific attribute.  This is the extra charge that will be applied to the product if this attribute is selected.<p />
-        This value may be negative if a discount is given for this attribute.
-        </dd>
+      <dl id="desc_descrip">
+        <dt>Description</dt>
+        <dd>Enter the full description for this product.  This will be displayed on the product detail screen.</dd>
       </dl>
 
-      <dl id="desc_orderby">
-        <dt>Order</dt>
-        <dd>The Order value indicates the order in which this Attribute Value will be displayed in the selection list.  Values are automatically sequenced by multiples of 10 (10, 20, 30, etc.), so to insert a new value between two existing ones you could enter something like "25".<p />
-The attribute with the lowest order value is displayed first in the selection list, and becomes the default.  You might want to make sure that an attribute with a zero price is the default.
-        </dd>
+      <dl id="desc_image">
+        <dt>Category Image</dt>
+        <dd>Upload an optional image for this category</dd>
       </dl>
 
       <dl id="desc_enabled">
-        <dt>Enabled?</dt>
-        <dd>Check this box if this attribute value is enabled.  You might want to disable a value if it is temporarily out of stock, for example.</dd>
+        <dt>Enabled</dt>
+        <dd>Check to enable this category. Disabled categories are not displayed in the product listing and their products cannot be purchased.</dd>
+      </dl>
+
+      <dl id="desc_grp_access">
+        <dt>Visible To</dt>
+        <dd>Select the user group that is allowed to view and purchase products from this category. Normally this should be &quot;All Users&quot;, but in some cases you may wish to restrict purchases of some products to specific members.</dd>
       </dl>
 
     </div>

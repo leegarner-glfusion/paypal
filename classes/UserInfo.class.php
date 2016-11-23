@@ -242,7 +242,11 @@ class ppUserInfo
         if (empty($this->formaction)) $this->formaction = 'save' . $type;
 
         $T = new Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('address', 'address.thtml');
+        if ($_PP_CONF['_is_uikit']) {
+            $T->set_file('address', 'address.uikit.thtml');
+        } else {
+            $T->set_file('address', 'address.thtml');
+        }
 
         // Set the address to select by default.  Start by using the one
         // already stored in the cart, if any.

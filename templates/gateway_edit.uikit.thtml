@@ -1,0 +1,50 @@
+{# begin {templatelocation} #}
+<h2>{gw_description}</h2>
+<form action="{pi_admin_url}/index.php" method="post" class="uk-form uk-form-horizontal">
+  <input type="hidden" name="gw_id" value="{gw_id}" />
+  <!-- BEGIN ItemRow -->
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="{field_name}">{param_name}:
+      <span id="{field_name}" class="tooltip_cfg tooltipstered"></span> 
+    </label>
+    <div class="uk-form-controls">
+      {param_field}
+    </div>
+  </div>
+  <!-- END ItemRow -->
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="enabled">{$LANG_PP['enabled']}:
+      <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
+    </label>
+    <div class="uk-form-controls">
+      <input id="enabled" type="checkbox" name="enabled" value="1" {enabled_chk} />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['txt_buttons']}:
+      <span id="txt_buttons" class="tooltip_cfg tooltipstered"></span> 
+    </label>
+    <div class="uk-form-controls">
+      {svc_checkboxes}
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label" for="orderby">{$LANG_PP['orderby']}:
+      <span id="order" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input id="orderby" type="text" size="3" name="orderby" value="{orderby}" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <div class="uk-form-controls">
+      <button type="submit" name="gwsave" class="uk-button uk-button-success">{$LANG_ADMIN['save']}</button>
+      <button type="reset" name="reset" class="uk-button uk-button-primary">{$LANG_PP['clearform']}</button>
+      <button type="submit" name="gwadmin" class="uk-button">{$LANG_ADMIN['cancel']}</button>
+    </div>
+  </div>
+</form>
+{# end {templatelocation} #}

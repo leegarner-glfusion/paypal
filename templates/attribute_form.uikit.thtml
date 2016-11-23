@@ -9,10 +9,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="item_id">{$LANG_PP['product']}:
-      <a href="#" onclick="popupWindow('{doc_url}#desc_item_id', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="item_id" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <select name="item_id" id="item_id">
@@ -23,10 +20,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="attr_name_sel">{$LANG_PP['attr_name']}:
-      <a href="#" onclick="popupWindow('{doc_url}#desc_attr_name', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="attr_name" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <select name="attr_name_sel" id="attr_name_sel">
@@ -40,10 +34,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="attr_value">{$LANG_PP['attr_value']}:
-      <a href="#" onclick="popupWindow('{doc_url}#desc_attr_value', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="attr_value" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <!--<select name="attr_value_sel">
@@ -57,10 +48,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="attr_price">{$LANG_PP['attr_price']}:
-      <a href="#" onclick="popupWindow('{doc_url}#desc_attr_price', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="attr_price" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <input type="text" id="attr_price" name="attr_price" value="{attr_price}" 
@@ -70,10 +58,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="orderby">{$LANG_PP['order']}:
-      <a href="#" onclick="popupWindow('{doc_url}#desc_orderby', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="orderby" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <input type="text" name="orderby" id="orderby" value="{orderby}" 
@@ -83,10 +68,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label for="enabled">{$LANG_PP['enabled']}?
-      <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
-      </a>
+      <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
     <input type="checkbox" name="enabled" value="1" {ena_chk} />
@@ -102,4 +84,35 @@
   </div>
 
 </form>
+<script type="text/javascript">
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    //var a = $(data).find('a[name=desc_' + confVar + ']');
+                    //var tds = a.parent().parent().children("td");
+                    //var desc = tds.eq(1).html();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
+});
+</script>
+
 {# end {templatelocation} #}
