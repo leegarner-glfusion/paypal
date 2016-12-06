@@ -8,8 +8,8 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.5.9
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -34,7 +34,7 @@ define('PAYPAL_PI_PATH', "{$_CONF['path']}plugins/{$_PP_CONF['pi_name']}");
 /** Define base URL to plugin */
 define('PAYPAL_URL', "{$_CONF['site_url']}/{$_PP_CONF['pi_name']}");
 /** Define URL to plugin admin interface */
-define('PAYPAL_ADMIN_URL', 
+define('PAYPAL_ADMIN_URL',
         "{$_CONF['site_admin_url']}/plugins/{$_PP_CONF['pi_name']}");
 
 // Define product types
@@ -84,6 +84,9 @@ if (empty($_USER['uid']) || $_USER['uid'] < 2) {
 /** Import plugin-specific functions */
 function USES_paypal_functions()
 {   require_once PAYPAL_PI_PATH . '/paypal_functions.inc.php';  }
+
+function USES_paypal_reports()
+{   require_once PAYPAL_PI_PATH . '/reports.inc.php';  }
 
 /** Import product class */
 function USES_paypal_class_product()
@@ -176,6 +179,18 @@ function PAYPAL_setCart()
 }
 
 
+function USES_paypal_class_report($name='')
+{
+    $classfile = PAYPAL_PI_PATH . '/classes/reports/' . $name . '.class.php';
+    if (is_file($classfile)) {
+        require_once $classfile;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 /**
 *   Import a single payment gateway.
 *   This function imports the requested gateway, regardless of whether
@@ -190,7 +205,7 @@ function USES_paypal_gateway($gw_name='')
     if ($gw_name == '') {
         $classfile = PAYPAL_PI_PATH . '/classes/paymentgw.class.php';
     } else {
-        $classfile = PAYPAL_PI_PATH . '/classes/gateways/' . 
+        $classfile = PAYPAL_PI_PATH . '/classes/gateways/' .
                     $gw_name . '.class.php';
     }
 
@@ -389,8 +404,8 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
                     'paypal', $LANG03[14], $postmode)
             . COM_siteFooter();
     } else {        // success - update the comment counter for this item
-        $comments = (int)DB_count($_TABLES['comments'], 
-                        array('type', 'sid'), 
+        $comments = (int)DB_count($_TABLES['comments'],
+                        array('type', 'sid'),
                         array('paypal', $id));
 
         DB_query("UPDATE {$_TABLES['paypal.products']}
@@ -481,7 +496,7 @@ function plugin_deletecomment_paypal($cid, $id)
 
 /**
 *   Handle any post-processing for an edited comment.
-*   Just redirects back to the product detail page.  The comment is actually 
+*   Just redirects back to the product detail page.  The comment is actually
 *   saved in comment.php.
 *
 *   @param  integer $cid    Comment ID
@@ -516,7 +531,7 @@ function plugin_cclabel_paypal()
     global $_PP_CONF;
 
     if (SEC_hasRights('paypal.admin')) {
-        return array($_PP_CONF['pi_display_name'], 
+        return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     plugin_geticon_paypal());
     }
@@ -533,7 +548,7 @@ function plugin_getadminoption_paypal()
     global $_TABLES, $_PP_CONF;
 
     if (SEC_hasRights('paypal.admin')) {
-        return array($_PP_CONF['pi_display_name'], 
+        return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     DB_count($_TABLES['paypal.products']));
     }
@@ -546,14 +561,14 @@ function plugin_getadminoption_paypal()
 *
 *   @return   array   Array containing (plugin name, plugin user url, 0)
 */
-function plugin_getuseroption_paypal() 
+function plugin_getuseroption_paypal()
 {
     global $LANG_PP, $_TABLES, $ppGCart, $_USER;
 
     $retval = array();
     if (!COM_isAnonUser() &&
         DB_count($_TABLES['paypal.orders'], 'uid', $_USER['uid']) > 0) {
-        $retval[] = array($LANG_PP['purchase_history'],
+        $retval[] = array($LANG_PP['my_orders'],
                 PAYPAL_URL . '/index.php?orderhist=x');
     }
     PAYPAL_setCart();
@@ -645,7 +660,7 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
             // Allow the author to use different text for the link.  Default
             // is the stored product name.
             if (empty($autotag['parm2'])) {
-                $linktext = DB_getItem($_TABLES['paypal.products'], 
+                $linktext = DB_getItem($_TABLES['paypal.products'],
                         'name', "id = '$id'");
             } else {
                 $linktext = $autotag['parm2'];
@@ -675,8 +690,8 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
 /**
  *  Checks to see if the user has sufficient rights to view the page.
  *
- *  Check if the current user has rights (at least one of) specified by 
- *  $rights.  If not log the error, display a generic access denied message 
+ *  Check if the current user has rights (at least one of) specified by
+ *  $rights.  If not log the error, display a generic access denied message
  *  and exit.
  *
  *  @param  string  $rights     Comma-separated list of allowable rights
@@ -736,7 +751,6 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
                 'amount'        => $vars['amount'],
                 'pi_url'        => PAYPAL_URL,
                 'item_type'     => $item_type,
-                
             ) );
             $retval = $T->parse('', 'cart');
         }
@@ -805,19 +819,19 @@ function plugin_dopluginsearch_paypal(
     $query = trim(DB_escapeString(htmlspecialchars($query), ENT_QUOTES, COM_getEncodingt()));
 
     $sql = "SELECT
-                p.id, p.name as title, p.description as description, 
-                dt_add as date,  views as hits, 
+                p.id, p.name as title, p.description as description,
+                dt_add as date,  views as hits,
                 CONCAT('/{$_PP_CONF['pi_name']}/detail.php?id=',p.id,'&query=$htmlquery') as url
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id=c.cat_id
-            WHERE p.enabled = 1 
+            WHERE p.enabled = 1
             AND (c.enabled=1 OR c.enabled IS NULL)";
 
     $search = new SearchCriteria($_PP_CONF['pi_name'], $LANG_PP['blocktitle']);
-    $columns = array('p.name', 'p.short_description', 'p.description', 
+    $columns = array('p.name', 'p.short_description', 'p.description',
                     'p.keywords', 'c.cat_name', 'c.description');
-    list($sql, $ftsql) = 
+    list($sql, $ftsql) =
             $search->buildSearchSQL($keyType, $query, $columns, $sql);
     $search->setSQL($sql);
     return $search;
@@ -829,7 +843,7 @@ function plugin_dopluginsearch_paypal(
 *
 *   @return array   Array of filenames to import
 */
-function plugin_getheaderjs_paypal() 
+function plugin_getheaderjs_paypal()
 {
     $files = array(
         PAYPAL_PI_PATH . '/js/toggleEnabled.js',
@@ -879,12 +893,7 @@ function plugin_getheadercss_paypal()
 */
 function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 {
-    if (version_compare(GVERSION, '1.6.0', '<')) {
-        $file = 'config.legacy.html';
-    } else {
-        $file = 'config.html';
-    }
-    $doc_url = PAYPAL_getDocURL($file, $doclang);
+    $doc_url = PAYPAL_getDocURL('config', $doclang);
     if (empty($doc_url))
         return false;
 
@@ -912,6 +921,11 @@ function PAYPAL_getDocURL($file='', $doclang='english')
     $doc_path = PAYPAL_PI_PATH . "/docs/$doclang/";
     $doc_url = '';
 
+    if (version_compare(GVERSION, '1.6.0', '<')) {
+        $file .= '.legacy';
+    }
+    $file .= '.html';
+
     if ($file != '') {
         if (!file_exists($doc_path . $file)) {
             $doclang = 'english';
@@ -923,11 +937,10 @@ function PAYPAL_getDocURL($file='', $doclang='english')
         }
         $doc_url = PAYPAL_URL . "/docs/$doclang/";
     }
-
     return $doc_url;
 }
 
-    
+
 /**
 *   Return the items that should be removed with the plugin.
 *
@@ -945,7 +958,7 @@ function plugin_autouninstall_paypal ()
                 'paypal.currency',
                 'paypal.gateways',
                 'paypal.images',
-                'paypal.ipnlog', 
+                'paypal.ipnlog',
                 'paypal.order_items',
                 'paypal.order_log',
                 'paypal.orderstatus',
@@ -961,8 +974,8 @@ function plugin_autouninstall_paypal ()
         'groups' => array('paypal Admin'),
         // Give the full name of the feature, as in the db
         'features' => array(
-                'paypal.admin', 
-                'paypal.user', 
+                'paypal.admin',
+                'paypal.user',
                 'paypal.view'
         ),
         // Give the full name of the block, including 'phpblock_', etc
@@ -1088,7 +1101,7 @@ function phpblock_paypal_cart()
             'link_item'     => $link ? 'true' : '',
         ) );
         $T->parse('cRow', 'CartRow', true);
-        $total += $item_total;            
+        $total += $item_total;
     }
     $T->set_var(array(
         'grand_total'   => COM_numberFormat($total, 2),
@@ -1105,21 +1118,20 @@ function phpblock_paypal_cart()
 *
 *   @return string  HTML for search form
 */
-function phpblock_paypal_user()
+function phpblock_paypal_search()
 {
-    global $_CONF, $_TABLES, $LANG_PP;
+    global $_TABLES;
 
     $T = new Template(PAYPAL_PI_PATH . '/templates/');
     $T->set_file('search', 'blk_search.thtml');
 
-    $category_options = COM_optionList($_TABLES['paypal.categories'], 
-       'cat_id, cat_name', '', 1, '1=1 ' . COM_getPermSQL('AND'));
+    $category_options = COM_optionList($_TABLES['paypal.categories'],
+       'cat_id, cat_name', '', 1, '1=1 ' . SEC_buildAccessSql());
 
     $T->set_var(array(
         'category_options'  => $category_options,
         'pi_url'            => PAYPAL_URL,
     ) );
-
     $T->parse('output', 'search');
     return $T->finish($T->get_var('output'));
 }
@@ -1186,15 +1198,15 @@ function phpblock_paypal_categories()
 {
     global $_TABLES;
 
-    $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt 
+    $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
-            WHERE c.cat_id > 0 
+            WHERE c.cat_id > 0
             AND c.enabled = 1
-            AND c.parent_id = 0
-            " . COM_getPermSQL('AND', 0, 2, 'c') . "
-            GROUP BY c.cat_id
+            AND c.parent_id = 0 " .
+            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            " GROUP BY c.cat_id
             ORDER BY c.cat_name";
                 //HAVING cnt > 0
     //echo $sql;die;
@@ -1218,9 +1230,8 @@ function phpblock_paypal_categories()
         $T->parse('ItemRow', 'row', true);
     }
     $retval .= $T->parse('output', 'blk_category');
-  
-    return $retval;
 
+    return $retval;
 }
 
 
@@ -1237,25 +1248,24 @@ function phpblock_paypal_popular()
     $limit = (int)$_PP_CONF['blk_popular_limit'];
     if ($limit < 1)
         $limit = 1;
- 
+
     $sql = "SELECT DISTINCT
                 pr.id,
-                (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu 
-                    WHERE product_id = pr.id) AS cnt 
+                (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu
+                    WHERE product_id = pr.id) AS cnt
             FROM {$_TABLES['paypal.products']} pr
             LEFT JOIN {$_TABLES['paypal.categories']} c
             ON pr.cat_id=c.cat_id
-            WHERE pr.enabled=1 
+            WHERE pr.enabled=1
             AND (c.enabled=1 OR c.enabled IS NULL)
-            AND pr.show_popular = 1
-            " . COM_getPermSQL('AND', 0, 2, 'c') . "
-            HAVING cnt > 0
+            AND pr.show_popular = 1 " .
+            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            " HAVING cnt > 0
             ORDER BY cnt DESC
             LIMIT $limit";
     //echo $sql;die;
 
     $retval = PAYPAL_phpblock_product($sql);
-
     return $retval;
 }
 
@@ -1275,19 +1285,19 @@ function phpblock_paypal_recent($cat='')
     $limit = (int)$_PP_CONF['blk_popular_limit'];
     if ($limit < 1)
         $limit = 1;
- 
+
     $sql = "SELECT DISTINCT
                 pr.id,
-                (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu 
-                    WHERE product_id = pr.id) AS cnt 
+                (SELECT count(*) FROM {$_TABLES['paypal.purchases']} pu
+                    WHERE product_id = pr.id) AS cnt
             FROM {$_TABLES['paypal.products']} pr
             LEFT JOIN {$_TABLES['paypal.categories']} c
             ON pr.cat_id=c.cat_id
-            WHERE pr.enabled=1 
+            WHERE pr.enabled=1
             AND (c.enabled=1 OR c.enabled IS NULL)
-            AND pr.show_popular = 1
-            " . COM_getPermSQL('AND', 0, 2, 'c') . "
-            HAVING cnt > 0
+            AND pr.show_popular = 1 " .
+            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            " HAVING cnt > 0
             ORDER BY dt_add DESC
             LIMIT $limit";
     //echo $sql;die;
@@ -1324,7 +1334,7 @@ function PAYPAL_getCurrency()
 *
 *   @param  string $msg     Error message to display
 *   @param  string $type    Type of message, used for style and header
-*   @param  string $header  Optional header text.  
+*   @param  string $header  Optional header text.
 *   @return string          HTML for formatted error message
 */
 function PAYPAL_errorMessage($msg = '', $type = '', $header = '')
@@ -1392,18 +1402,15 @@ function PAYPAL_phpblock_product_sql($where, $limit=1)
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
             ON p.cat_id=c.cat_id
-            WHERE 
+            WHERE
                 p.enabled=1 AND (c.enabled=1 OR c.enabled IS NULL) " .
-            COM_getPermSQL('AND', 0, 2, 'c') . "
+            PAYPAL_buildAccessSql('AND', 'c.grp_access') . "
             $where
             ORDER BY RAND()
             $limit";
-    //COM_errorLog($sql);
 
     $retval = PAYPAL_phpblock_product($sql);
-
     return $retval;
-
 }
 
 
@@ -1457,7 +1464,7 @@ function PAYPAL_phpblock_product($sql)
                 'item_url'  => COM_buildUrl(PAYPAL_URL . '/detail.php?id=' .
                                 $A['id']),
                 'descrip'   => $P->short_description,
-                'price'     => $P->price > 0 ? 
+                'price'     => $P->price > 0 ?
                                 sprintf("%5.2f", $P->price) : '',
                 'currency'  => $_PP_CONF['currency'],
                 'rec_num'   => $i,      // to separate items by <hr/>
@@ -1465,7 +1472,6 @@ function PAYPAL_phpblock_product($sql)
                 'pi_url'    => PAYPAL_URL,
             ) );
 
-            
             if (!$P->hasAttributes()) {
                 $buttons = $P->PurchaseLinks();
                 $btn_txt = '';
@@ -1483,7 +1489,7 @@ function PAYPAL_phpblock_product($sql)
                 }
             }
 
-            $img = DB_getItem($_TABLES['paypal.images'], 'filename', 
+            $img = DB_getItem($_TABLES['paypal.images'], 'filename',
                     "product_id='{$A['id']}'");
             if ($img != '') {
                 $T->set_var('img_url', PAYPAL_ImageUrl($img));
@@ -1520,7 +1526,7 @@ function plugin_itemrated_paypal($id, $rating, $votes)
 {
     global $_TABLES;
 
-    $sql = "UPDATE {$_TABLES['paypal.products']} 
+    $sql = "UPDATE {$_TABLES['paypal.products']}
             SET rating = $rating, votes = $votes
             WHERE id=".$id;
     DB_query($sql);
@@ -1547,7 +1553,6 @@ function plugin_canuserrate_paypal($item_id, $uid)
     } else {
         return true;
     }
-
 }
 
 
@@ -1619,7 +1624,6 @@ function plugin_runScheduledTask_paypal()
             }
         }
     }
-
 }
 
 
@@ -1711,7 +1715,7 @@ function plugin_configmanager_select_product_tpl_ver_paypal()
     $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $opt = end(explode('/', $dir));
-        $A[$opt] = $opt; 
+        $A[$opt] = $opt;
     }
     return $A;
 }
@@ -1728,7 +1732,7 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
     $dirs = glob(PAYPAL_PI_PATH . '/templates/list/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $opt = end(explode('/', $dir));
-        $A[$opt] = $opt; 
+        $A[$opt] = $opt;
     }
     return $A;
 }
@@ -1765,15 +1769,15 @@ function PAYPAL_child_cat_product_count($parent_cat)
 
     $parent_total = 0;
 
-    $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt 
+    $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
-            WHERE c.cat_id > 0 
+            WHERE c.cat_id > 0
             AND c.enabled = 1
-            AND c.parent_id = $parent_cat
-            " . COM_getPermSQL('AND', 0, 2, 'c') . "
-            GROUP BY c.cat_id
+            AND c.parent_id = $parent_cat " .
+            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            " GROUP BY c.cat_id
             ORDER BY c.cat_name";
     //echo $sql;die;
     $result = DB_query($sql);
@@ -1809,6 +1813,30 @@ function PAYPAL_explode_opts($item, $opt_string = false)
         }
     }
     return array($item_id, $options);
+}
+
+
+/**
+*   Common function used to build group access SQL
+*   Modified version of SEC_buildAccessSql. This one allow a field name
+*   to be provided, which can include a table identifier if needed.
+*
+*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
+*   @param  string  $fld        Optional field, including table id if needed
+*   @return string  $groupsql   Formatted SQL string to be appended 
+*/
+function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
+{
+    global $_USER, $_GROUPS;
+
+    $groupsql = '';
+    if (count($_GROUPS) == 1) {
+        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
+    } else {
+        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
+    }
+
+    return $groupsql;
 }
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';

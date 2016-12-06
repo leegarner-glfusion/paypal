@@ -1332,31 +1332,4 @@ function PAYPAL_userMenu($selected = '')
     return $menu->generate();
 }
 
-
-/**
-*   Common function used to build group access SQL
-*   Modified version of SEC_buildAccessSql. This one allow a field name
-*   to be provided, which can include a table identifier if needed.
-*
-*   Retain until glFusion 1.5 compatibility is dropped, then switch to
-*   SEC_buildAccessSql()
-*
-*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
-*   @param  string  $fld        Optional field, including table id if needed
-*   @return string  $groupsql   Formatted SQL string to be appended
-*/
-function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
-{
-    global $_USER, $_GROUPS;
-
-    $groupsql = '';
-    if (count($_GROUPS) == 1) {
-        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
-    } else {
-        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
-    }
-
-    return $groupsql;
-}
-
 ?>
