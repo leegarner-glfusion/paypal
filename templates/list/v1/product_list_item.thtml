@@ -1,8 +1,7 @@
 {# begin {templatelocation} #}
 <div class="paypalProductListItem v1">
-  <div class="paypalProductListItemImage">
+  <div class="ItemImage" style="widht:{img_cell_width}px;">
 {!if small_pic}
-      <div style="width:{img_cell_width}px;">
 {!if item_url}
         <a href="{item_url}">
 {!endif}
@@ -10,13 +9,12 @@
 {!if item_url}
         </a>
 {!endif}
-      </div>
 {!else}
       &nbsp;
 {!endif}
   </div>
 
-  <div class="paypalProductListItemUrl v1">
+  <div class="ItemUrl v1">
     <div class="shortdescription">
 {!if item_url}
       <a class="itemname" href="{item_url}">{short_description}</a>
@@ -29,7 +27,7 @@
 {!endif}
   </div>
 
-  <div class="paypalProductListItemButtons">
+  <div class="ItemButtons">
 {!if price}
       <div class="paypalPrice list v1">
         <span class="paypalPrice list v1 normal">

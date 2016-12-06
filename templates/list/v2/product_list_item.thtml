@@ -1,23 +1,23 @@
 {# begin {templatelocation} #}
 <a href="{item_url}">
 <div class="paypalProductListItem v2">
-  <div class="paypalProductListItemImage2">
+  <div class="ItemImage">
     {!if small_pic}
         <img src="{small_pic}" alt="{name}" />
     {!else}
         &nbsp;
    {!endif}
   </div>
-  <div class="paypalProductListItemUrl2">
+  <div class="ItemUrl">
     <div class="shortdescription">{short_description}</div>
     {!if price}
         {!if track_onhand}
         ({qty_onhand} {$LANG_PP['available']})<br />
         {!endif}
-       <div class="paypalPrice normal v2">
+       <div class="paypalPrice list normal v2">
         {!if on_sale}
-          <span class="paypalPrice was">{price}</span>
-          <span class="paypalPrice sale" id="price" name="price">{sale_price}</span>
+          <span class="paypalPrice list was v2">{price}</span>
+          <span class="paypalPrice list sale v2" id="price" name="price">{sale_price}</span>
         {!else}
           {price}
         {!endif}
@@ -26,7 +26,9 @@
         {!endif}
       </div>
     {!endif}
-    <button type="button" class="paypalButton orange">{$LANG_PP['customize']}</button>
+    <div class="Button list v2">
+    <button type="button" class="paypalButton black">{$LANG_PP['customize']}</button>
+    </div>
   </div>
 {!if rating_bar}
   <div class="ppRatingBar list v2">{rating_bar}</div>

@@ -39,10 +39,11 @@
     color: #FFFFFF !important;
     cursor: pointer;
     font-size: small;
+    font-weight: normal;
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    text-shadow: 1px 1px #666666;
+    /*text-shadow: 1px 1px #666666;*/
     text-decoration: none;
     margin-bottom: 3px;
 }
@@ -58,14 +59,14 @@
     /*padding: 4px 7px 4px;*/
 }
 
-/*.paypalButton.red { background-color: #e50000; }*/
 .paypalButton.red { background-color: #CC6666; }
 .paypalButton.purple { background-color: #9400BF; }
-/*.button.green { background-color: #58aa00; }*/
 .paypalButton.green { background-color: #7AB61D; }
 .paypalButton.orange { background-color: #FF9C00; }
 .paypalButton.blue { background-color: #2C6DA0; }
-.paypalButton.black { background-color: #333333; }
+.paypalButton.black { background-color: #222222; }
+.paypalButton.black:hover { background-color: #333333; }
+.paypalButton.grey { background-color: #666666; }
 .paypalButton.white {
     background-color: #FFFFFF; color: #000000; text-shadow: 1px 1px #fff;
 }
@@ -157,6 +158,7 @@ div.paypalProductThumb {
 div.ppProductListOuter {
   clear:both;
   padding-top: 15px;
+  padding-bottom: 10px;
   overflow: hidden;
 }
 
@@ -179,16 +181,20 @@ div.ppProductListOuter {
   cursor: pointer;
   position:relative;
   float: left;
-  padding: 1em .5em;
+  padding: 10px 5px;
   margin: 1em 0.5em -0.5em 0.15em;
-  border: 3px outset #ddd;
-  width: 12em;
-  min-height: 18em;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  width: 160px;
+  min-height: 180px;
+  height: 240px;
 }
 
 .paypalProductListItemUrl2 div.ratingbar,
 .ppRatingBar {
-  position: absolute;
+  /*position: relative;*/
   bottom: 0;
   margin-bottom: 4px;
 }
@@ -209,6 +215,7 @@ div.ppProductListOuter {
 }
 
 .ppRatingBar.list.v2 {
+  clear:both;
   width: 100%;
 }
 
@@ -227,7 +234,7 @@ div.ppProductListOuter {
     font-weight:bold;
 }
 
-div.paypalProductListItemImage {
+div.paypalProductListItem.v1 div.ItemImage {
     float: left;
     width: 110px;
     text-decoration: none;
@@ -237,28 +244,41 @@ div.paypalProductListItemImage {
     margin: 0px 10px;
 }
 
-div.paypalProductListItemImage2 {
+div.paypalProductListItem.v2 div.ItemImage {
     text-decoration: none;
     border: 5px;
     text-align: center;
     margin: auto;
+    height: 120px;
 }
 
-div.paypalProductListItemUrl {
+div.paypalProductListItem.v1 div.ItemUrl {
     float: left;
     width: 60%;
     font-weight: bold;
 }
 
-div.paypalProductListItemUrl2 {
-    margin-top: 10px;
+div.paypalProductListItem.v2 div.ItemUrl {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: auto;
+    margin-right: auto;
     float: left;
     font-weight: bold;
     clear: both;
     font-size: 1rem;
+    width: 100%;
+    text-align: center;
 }
 
-.paypalProductListItemButtons {
+div.Button.list.v2 {
+    margin-top: 13px;
+    display:block;
+    float: right;
+    width: 70%;
+}
+
+div.paypalProductListItem.v1 div.ItemButtons {
     float:right;
     /*width:200px;*/
     text-align:right;
@@ -408,6 +428,10 @@ div.paypalProductListItemUrl2 {
 .paypalPrice.list.v1 {
     padding-bottom: 1rem;
     position: relative;
+}
+
+.paypalPrice.list.v2 {
+    text-align:center;
 }
 
 .paypalPrice.v2 {

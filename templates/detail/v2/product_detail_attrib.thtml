@@ -118,9 +118,9 @@ window.addEvent('load',
   <div class="paypalProductLgImg uk-hidden-small">
     <a id="lg_img" href="{main_img}"
       {!if is_uikit}
-      rel="slimbox">
-      {!else}
       data-uk-lightbox>
+      {!else}
+      rel="slimbox">
       {!endif}
       <img id="disp_img" class="uk-responsive-width uk-responsive-height" src="{main_img}"/>
     </a>
