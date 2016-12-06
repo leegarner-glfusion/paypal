@@ -36,13 +36,13 @@ class Attribute
 
 
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
-     *  then a new entry is being created.
-     *
-     *  @param integer $id Attributeal type ID
-     */
-    function __construct($id=0)
+    *   Constructor.
+    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   then a new entry is being created.
+    *
+    *   @param  integer $id Attributeal type ID
+    */
+    public function __construct($id=0)
     {
         $this->properties = array();
         $this->isNew = true;
@@ -75,7 +75,7 @@ class Attribute
     *   @param  string  $var    Name of property to set.
     *   @param  mixed   $value  New value for property.
     */
-    function __set($var, $value='')
+    public function __set($var, $value='')
     {
         switch ($var) {
         case 'attr_id':
@@ -114,7 +114,7 @@ class Attribute
     *   @param  string  $var    Name of property to retrieve.
     *   @return mixed           Value of property, NULL if undefined.
     */
-    function __get($var)
+    public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
             return $this->properties[$var];
@@ -129,7 +129,7 @@ class Attribute
     *
     *   @param array $row Array of values, from DB or $_POST
     */
-    function SetVars($row)
+    public function SetVars($row)
     {
         if (!is_array($row)) return;
 
@@ -144,12 +144,12 @@ class Attribute
 
 
     /**
-     *  Read a specific record and populate the local values.
-     *
-     *  @param  integer $id Attributeal ID.  Current ID is used if zero.
-     *  @return boolean     True if a record was read, False on failure
-     */
-    function Read($id = 0)
+    *   Read a specific record and populate the local values.
+    *
+    *   @param  integer $id Attributeal ID.  Current ID is used if zero.
+    *   @return boolean     True if a record was read, False on failure
+    */
+    public function Read($id = 0)
     {
         global $_TABLES;
 
@@ -175,12 +175,12 @@ class Attribute
 
 
     /**
-     *  Save the current values to the database.
-     *
-     *  @param  array   $A      Attributeal array of values from $_POST
-     *  @return boolean         True if no errors, False otherwise
-     */
-    function Save($A = array())
+    *   Save the current values to the database.
+    *
+    *   @param  array   $A      Attributeal array of values from $_POST
+    *   @return boolean         True if no errors, False otherwise
+    */
+    public function Save($A = array())
     {
         global $_TABLES, $_PP_CONF;
 
@@ -243,7 +243,7 @@ class Attribute
     *   @param  integer $attr_id    Attribute ID, empty for current object
     *   @return boolean     True on success, False on invalid ID
     */
-    function Delete($attr_id = 0)
+    public function Delete($attr_id = 0)
     {
         global $_TABLES;
 
@@ -263,11 +263,11 @@ class Attribute
 
 
     /**
-     *  Determines if the current record is valid.
-     *
-     *  @return boolean     True if ok, False when first test fails.
-     */
-    function isValidRecord()
+    *   Determines if the current record is valid.
+    *
+    *   @return boolean     True if ok, False when first test fails.
+    */
+    public function isValidRecord()
     {
         // Check that basic required fields are filled in
         if ($this->item_id == 0 ||
@@ -286,7 +286,7 @@ class Attribute
     *   @param  integer $id Attributeal ID, current record used if zero
     *   @return string      HTML for edit form
     */
-    function Edit()
+    public function Edit()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
@@ -319,7 +319,7 @@ class Attribute
         $T->set_var(array(
             'action_url'    => PAYPAL_ADMIN_URL,
             'pi_url'        => PAYPAL_URL,
-            'doc_url'       => PAYPAL_getDocURL('attribute_form.html', 
+            'doc_url'       => PAYPAL_getDocURL('attribute_form', 
                                             $_CONF['language']),
             'attr_value'    => $this->attr_value,
             'attr_price'    => $this->attr_price,
@@ -348,7 +348,7 @@ class Attribute
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    function _toggle($oldvalue, $varname, $id=0)
+    private function _toggle($oldvalue, $varname, $id=0)
     {
         global $_TABLES;
 
@@ -385,7 +385,7 @@ class Attribute
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    function toggleEnabled($oldvalue, $id=0)
+    public function toggleEnabled($oldvalue, $id=0)
     {
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
@@ -399,14 +399,13 @@ class Attribute
     }
 
 
-
     /**
     *   Add an error message to the Errors array.  Also could be used to
     *   log certain errors or perform other actions.
     *
     *   @param  string  $msg    Error message to append
     */
-    function AddError($msg)
+    public function AddError($msg)
     {
         $this->Errors[] = $msg;
     }
@@ -417,7 +416,7 @@ class Attribute
     *
     *   @return string      Formatted error messages.
     */
-    function PrintErrors()
+    public function PrintErrors()
     {
         $retval = '';
 
@@ -431,7 +430,7 @@ class Attribute
     /**
     *   Reorder all option items
     */
-    function ReOrder()
+    public function ReOrder()
     {
         global $_TABLES;
 
@@ -456,9 +455,7 @@ class Attribute
         }
 
     }
-
  
 }   // class Attribute
-
 
 ?>

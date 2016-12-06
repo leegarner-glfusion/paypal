@@ -8,7 +8,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner
 *   @package    paypal
 *   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -118,7 +118,7 @@ class PaypalIPN extends BaseIPN
 
     /**
     *   Verify the transaction with Paypal
-    *   Validate transaction by posting data back to the paypal webserver.  
+    *   Validate transaction by posting data back to the paypal webserver.
     *   The response from paypal should include 'VERIFIED' on a line by itself.
     *
     *   @uses   paypal::getActionUrl()
@@ -143,7 +143,7 @@ class PaypalIPN extends BaseIPN
         }
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->gw->getActionUrl() . 
+        curl_setopt($ch, CURLOPT_URL, $this->gw->getActionUrl() .
                 '/cgi-bin/webscr');
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_FAILONERROR, 1);
@@ -211,7 +211,7 @@ class PaypalIPN extends BaseIPN
 
         if (!$this->Verify()) {
             $logId = $this->Log(false);
-            $this->handleFailure(PAYPAL_FAILURE_VERIFY, 
+            $this->handleFailure(PAYPAL_FAILURE_VERIFY,
                             "($logId) Verification failed");
             return false;
         } else {
@@ -222,24 +222,11 @@ class PaypalIPN extends BaseIPN
         // be done after Verify() or the Paypal verification will fail.
         $this->pp_data['custom'] = $this->custom;
 
-        //if (!$this->isStatusCompleted($this->pp_data['pmt_status'])) {
-            // Not logged since this probably isn't an error
-            // $this->handleFailure(PAYPAL_FAILURE_COMPLETED, 
-            //                  "($logId) Status not complete");
-        //    return false;
-        //}
-
-        /*if (!$this->isUniqueTxnId($this->pp_data)) {
-            $this->handleFailure(PAYPAL_FAILURE_UNIQUE, 
-                            "($logId) Non-unique transaction id");
-            return false;
-        }*/
-
         switch ($this->ipn_data['txn_type']) {
         case 'web_accept':  //usually buy now
         case 'send_money':  //usually donation/send money
             // Process Buy Now & Send Money
-            $fees_paid = $this->ipn_data['tax'] + 
+            $fees_paid = $this->ipn_data['tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];
 
@@ -265,7 +252,7 @@ class PaypalIPN extends BaseIPN
                 if ($this->isSufficientFunds()) {
                     $this->handlePurchase();
                 } else {
-                    $this->handleFailure(PAYPAL_FAILURE_FUNDS, 
+                    $this->handleFailure(PAYPAL_FAILURE_FUNDS,
                                 "($logId) Insufficient funds for purchase");
                     return false;
                 }
@@ -274,7 +261,7 @@ class PaypalIPN extends BaseIPN
 
         case 'cart':
             // shopping cart
-            $fees_paid = $this->pp_data['pmt_tax'] + 
+            $fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];
             USES_paypal_class_cart();
@@ -336,7 +323,7 @@ class PaypalIPN extends BaseIPN
             if ($this->isSufficientFunds()) {
                 $this->handlePurchase();
             } else {
-                $this->handleFailure(PAYPAL_FAILURE_FUNDS, 
+                $this->handleFailure(PAYPAL_FAILURE_FUNDS,
                         "($logId) Insufficient/incorrect funds for purchase");
                 return false;
             }
@@ -349,7 +336,7 @@ class PaypalIPN extends BaseIPN
                 $this->handleRefund();
                 break;
             default:
-                $this->handleFailure(PAYPAL_FAILURE_UNKNOWN, 
+                $this->handleFailure(PAYPAL_FAILURE_UNKNOWN,
                         "($logId) Unknown transaction type");
                 return false;
                 break;

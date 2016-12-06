@@ -6,7 +6,7 @@
  *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
  *  @package    paypal
  *  @version    0.4.0
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
+ *  @license    http://opensource.org/licenses/gpl-2.0.php
  *  GNU Public License v2 or later
  *  @filesource
  */
@@ -46,10 +46,10 @@ class ppFile extends upload
         if (!$this->setPath($_PP_CONF['download_path'])) {
             return;
         }
-   
+
         // For now, this is ok.  Later maybe duplicate the $_PP_CONF array
         // for downloaded mime-types.  For some reason, upload.class.php and
-        // download.class.php have their array key=>values reversed. 
+        // download.class.php have their array key=>values reversed.
         $this->setAllowAnyMimeType(true);
         //$this->setAllowedMimeTypes($_PP_CONF['allowedextensions']);
 
@@ -68,7 +68,6 @@ class ppFile extends upload
         //}
         $this->filenames[] = $_FILES[$varname]['name'];
         $this->setFileNames($this->filenames);
-
     }
 
 
@@ -81,12 +80,8 @@ class ppFile extends upload
     */
     function uploadFiles()
     {
-        global $_TABLES;
-
         parent::uploadFiles();
-
         return $this->filenames[0];
- 
     }
 
 

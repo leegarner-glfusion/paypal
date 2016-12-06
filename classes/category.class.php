@@ -259,7 +259,7 @@ class Category
     {
         global $_TABLES, $_PP_CONF;
 
-        if ($this->cat_id <= 0)
+        if ($this->cat_id <= 1)
             return false;
 
         $this->DeleteImage(false);
@@ -357,6 +357,7 @@ class Category
                                     $this->parent_id, 0, '', 
                                     $not, $items),
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
+            'doc_url'       => PAYPAL_getDocURL('category_form'),
         ) );
 
         if ($this->image != '') {
@@ -411,7 +412,7 @@ class Category
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    function _toggle($oldvalue, $varname, $id=0)
+    private function _toggle($oldvalue, $varname, $id=0)
     {
         global $_TABLES;
 
@@ -441,13 +442,13 @@ class Category
 
 
     /**
-     *  Sets the "enabled" field to the specified value.
-     *
-     *  @param  integer $id ID number of element to modify
-     *  @param  integer $value New value to set
-     *  @return         New value, or old value upon failure
-     */
-    function toggleEnabled($oldvalue, $id=0)
+    *   Sets the "enabled" field to the specified value.
+    *
+    *   @param  integer $id ID number of element to modify
+    *   @param  integer $value New value to set
+    *   @return         New value, or old value upon failure
+    */
+    public function toggleEnabled($oldvalue, $id=0)
     {
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
@@ -462,13 +463,13 @@ class Category
 
 
     /**
-     *  Determine if this product is mentioned in any purchase records.
-     *  Typically used to prevent deletion of product records that have
-     *  dependencies.
-     *
-     *  @return boolean True if used, False if not
-     */
-    function isUsed($cat_id=0)
+    *   Determine if this product is mentioned in any purchase records.
+    *   Typically used to prevent deletion of product records that have
+    *   dependencies.
+    *
+    *   @return boolean True if used, False if not
+    */
+    public function isUsed($cat_id=0)
     {
         global $_TABLES;
 
@@ -500,7 +501,7 @@ class Category
     *
     *   @param  string  $msg    Error message to append
     */
-    function AddError($msg)
+    public function AddError($msg)
     {
         $this->Errors[] = $msg;
     }
@@ -511,7 +512,7 @@ class Category
     *
     *   @return string      Formatted error messages.
     */
-    function PrintErrors()
+    public function PrintErrors()
     {
         $retval = '';
 
@@ -555,6 +556,5 @@ class Category
     }
 
 }   // class Category
-
 
 ?>

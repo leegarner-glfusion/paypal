@@ -16,7 +16,7 @@
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.5.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -148,14 +148,14 @@ class BaseIPN
             'extras'    => $extras,
         );
     }
- 
+
 
     /**
     *   Log an instant payment notification.
     *
-    *   Logs the incoming IPN (serialized) along with the time it arrived, 
-    *   the originating IP address and whether or not it has been verified i
-    *   (caller specified).  Also inserts the txn_id separately for 
+    *   Logs the incoming IPN (serialized) along with the time it arrived,
+    *   the originating IP address and whether or not it has been verified
+    *   (caller specified).  Also inserts the txn_id separately for
     *   look-up purposes.
     *
     *   @param  boolean $verified   true if verified, false otherwise
@@ -173,11 +173,11 @@ class BaseIPN
         }
 
         // Log to database
-        $sql = "INSERT INTO {$_TABLES['paypal.ipnlog']} 
-            SET 
-                ip_addr = '{$_SERVER['REMOTE_ADDR']}', 
-                time = '{$this->sql_date}', 
-                verified = $verified, 
+        $sql = "INSERT INTO {$_TABLES['paypal.ipnlog']}
+            SET
+                ip_addr = '{$_SERVER['REMOTE_ADDR']}',
+                time = '{$this->sql_date}',
+                verified = $verified,
                 txn_id = '" . DB_escapeString($this->pp_data['txn_id']) . "',
                 gateway = '{$this->gw_id}',
                 ipn_data = '" . DB_escapeString(serialize($this->ipn_data)) . '\'';
@@ -213,7 +213,7 @@ class BaseIPN
 
 
     /**
-    *   Check that provided funds are sufficient to cover the cost of 
+    *   Check that provided funds are sufficient to cover the cost of
     *   the purchase.
     *
     *   @return boolean                 True for sufficient funds, False if not
@@ -262,7 +262,7 @@ class BaseIPN
                 }
 
             } else {
-                // It's one of our items, so grab relevant product data 
+                // It's one of our items, so grab relevant product data
                 // from product table to insert into purchase table.
                 $P = new Product($item['item_number']);
                 if (!empty($item['options'])) {
@@ -303,9 +303,9 @@ class BaseIPN
         global $_CONF, $_PP_CONF;
 
         // Check if we're supposed to send a notification
-        if ( ($this->pp_data['custom']['uid'] != 1 && 
+        if ( ($this->pp_data['custom']['uid'] != 1 &&
                     $_PP_CONF['purch_email_user']) ||
-            ($this->pp_data['custom']['uid'] == 1  && 
+            ($this->pp_data['custom']['uid'] == 1  &&
                     $_PP_CONF['purch_email_anon']) ) {
             PAYPAL_debug("Sending email to " . $this->pp_data['custom']['uid']);
 
@@ -331,7 +331,7 @@ class BaseIPN
                 if ($item['prod_type'] & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
                     $have_physical = 1;
 
-                $ext = (float)$item['quantity'] * 
+                $ext = (float)$item['quantity'] *
                         (float)$item['price'];
                 $item_total += $ext;
                 $item_descr = $item['name'];
@@ -369,7 +369,7 @@ class BaseIPN
                     $this->pp_data['gw_name'], $this->pp_data['pmt_date']);
 
             $message->set_var(array(
-                'payment_gross'     => sprintf('%6.2f', 
+                'payment_gross'     => sprintf('%6.2f',
                                     $this->pp_data['pmt_gross']),
                 'payment_items'     => sprintf('%6.2f', $item_total),
                 'tax'               => sprintf('%6.2f', $this->pp_data['pmt_tax']),
@@ -397,30 +397,30 @@ class BaseIPN
 
             // parse templates for subject/text
             $subject = trim($message->parse('output', 'subject'));
-            $message->set_var('purchase_details', 
+            $message->set_var('purchase_details',
                         $message->parse('detail', 'msg_body'));
             $user_text  = $message->parse('user_out', 'msg_user');
             $admin_text = $message->parse('admin_out', 'msg_admin');
 
             // if specified to mail attachment, do so, otherwise skip attachment
-            if ( (( is_numeric($this->pp_data['custom']['uid']) && 
+            if ( (( is_numeric($this->pp_data['custom']['uid']) &&
                         $this->pp_data['custom']['uid'] != 1 &&
                         $_PP_CONF['purch_email_user_attach'] ) ||
-                ( (!is_numeric($this->pp_data['custom']['uid']) || 
+                ( (!is_numeric($this->pp_data['custom']['uid']) ||
                         $this->pp_data['custom']['uid'] == 1) &&
                         $_PP_CONF['purch_email_anon_attach'] )) &&
                     count($files) > 0  ) {
 
                 // Make sure plugin functions are available
                 USES_paypal_functions();
-                PAYPAL_mailAttachment($this->pp_data['payer_email'], 
-                                    $subject, 
-                                    $user_text, 
+                PAYPAL_mailAttachment($this->pp_data['payer_email'],
+                                    $subject,
+                                    $user_text,
                                     $_CONF['site_email'],
                                     true,
                                     0, '', '', $files);
             } else {
-                COM_mail($this->pp_data['payer_email'], 
+                COM_mail($this->pp_data['payer_email'],
                             $subject, $user_text,
                             $_CONF['site_email'],
                             true);
@@ -430,7 +430,7 @@ class BaseIPN
             if ($_PP_CONF['purch_email_admin'] == 2 ||
                 ($have_physical && $_PP_CONF['purch_email_admin'] == 1)) {
                 PAYPAL_debug('Sending email to Admin');
-                $email_addr = empty($_PP_CONF['admin_email_addr']) ? 
+                $email_addr = empty($_PP_CONF['admin_email_addr']) ?
                         $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
                 COM_mail($email_addr, $subject, $admin_text,
                             '', true);
@@ -535,7 +535,7 @@ class BaseIPN
 
             // An invalid item number, or nothing returned for a plugin
             if (empty($A)) {
-                $this->Error("Item {$item['item_number']} not found - txn " . 
+                $this->Error("Item {$item['item_number']} not found - txn " .
                         $this->pp_data['txn_id']);
                 continue;
             }
@@ -555,7 +555,7 @@ class BaseIPN
             }
 
             // If a custom name was supplied by the gateway's IPN processor,
-            // then use that.  Otherwise, plug in the name from inventory or 
+            // then use that.  Otherwise, plug in the name from inventory or
             // the plugin, for the notification email.
             if (empty($item['name'])) {
                 $this->items[$id]['name'] = $A['short_description'];
@@ -567,28 +567,6 @@ class BaseIPN
             } else {
                 $uid = 1;       // Anonymous as a fallback
             }
-
-            /*$sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET 
-                        order_id = '{$db_order_id}',
-                        product_id = '{$item['item_number']}',
-                        description = '{$this->items[$id]['name']}',
-                        quantity = '{$item['quantity']}', 
-                        user_id = '{$this->pp_data['custom']['uid']}', 
-                        txn_type = '{$this->pp_data['custom']['transtype']}',
-                        txn_id = '{$this->pp_data['txn_id']}', 
-                        purchase_date = '{$this->sql_date}', 
-                        status = 'complete',
-                        token = '$token',
-                        price = " . (float)$item['price'] . ",
-                        options = '" . DB_escapeString($item['options']) . "'";
-
-            // add an expiration date if appropriate
-            if (is_numeric($A['expiration']) && $A['expiration'] > 0) {
-                $sql .= ", expiration = DATE_ADD('{$_PP_CONF['now']}', INTERVAL {$A['expiration']} DAY)";
-            }
-            PAYPAL_debug($sql);
-            DB_query($sql);*/
-
         }   // foreach item
 
         $status = $this->CreateOrder();
@@ -715,7 +693,7 @@ class BaseIPN
 
                 // Get the product record and custom strings
                 if (isset($item['extras']['custom']) &&
-                        is_array($item['extras']['custom']) && 
+                        is_array($item['extras']['custom']) &&
                         !empty($item['extras']['custom'])) {
                     $P = new Product($item['item_id']);
                     foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
@@ -723,15 +701,15 @@ class BaseIPN
                     }
                 }
             }
-            $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET 
+            $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET
                     order_id = '{$db_order_id}',
                     product_id = '{$item['item_number']}',
                     description = '" . DB_escapeString($item['short_description']) . "',
-                    quantity = '{$item['quantity']}', 
-                    user_id = '{$this->pp_data['custom']['uid']}', 
+                    quantity = '{$item['quantity']}',
+                    user_id = '{$this->pp_data['custom']['uid']}',
                     txn_type = '{$this->pp_data['custom']['transtype']}',
-                    txn_id = '{$this->pp_data['txn_id']}', 
-                    purchase_date = '{$this->sql_date}', 
+                    txn_id = '{$this->pp_data['txn_id']}',
+                    purchase_date = '{$this->sql_date}',
                     status = 'paid',
                     token = '" . md5(time()) . "',
                     price = " . (float)$item['price'] . ",

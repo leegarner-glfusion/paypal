@@ -394,7 +394,7 @@ abstract class PaymentGw
     *   @param  string  $id     Gateway IDa
     *   @param  string  $where  Direction to move (up or down)
     */
-    function moveRow($id, $where)
+    public static function moveRow($id, $where)
     {
         global $_TABLES;
 

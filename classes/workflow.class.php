@@ -29,7 +29,7 @@ class ppWorkflow
     *
     *   @uses   Load()
     */
-    function __construct()
+    public function __construct()
     {
         self::Init();
     }
@@ -108,7 +108,7 @@ class ppWorkflow
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    function Toggle($id, $field, $oldvalue)
+    public function Toggle($id, $field, $oldvalue)
     {
         global $_TABLES;
 
@@ -173,7 +173,7 @@ class ppWorkflow
     *   @param  string  $id     Workflow database ID
     *   @param  string  $where  Direction to move (up or down)
     */
-    public function moveRow($id, $where)
+    public static function moveRow($id, $where)
     {
         global $_TABLES;
 
@@ -182,17 +182,17 @@ class ppWorkflow
 
         switch ($where) {
         case 'up': 
-            $sql = "UPDATE {$_TABLES[self::$table]}
-                    SET orderby = orderby-11 
-                    WHERE id = '$id'";
+            $oper = '-';
             break;
-
         case 'down': 
-            $sql = "UPDATE {$_TABLES[self::$table]}
-                    SET orderby = orderby+11 
-                    WHERE id = '$id'";
-        break;
+            $oper = '+';
+            break;
+        default:
+            return;
         }
+        $sql = "UPDATE {$_TABLES[self::$table]}
+                SET orderby = orderby $oper 11 
+                WHERE id = '$id'";
         //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
@@ -248,8 +248,6 @@ class ppWorkflow
         return $view;
     }
 
-
 }   // class ppWorkflow
-
 
 ?>

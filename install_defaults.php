@@ -3,7 +3,7 @@
 *   Configuration Defaults Paypal plugin for glFusion.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.9
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
@@ -157,6 +157,8 @@ $_PP_DEFAULTS['weight_unit'] = 'lbs';   // Unit of weight measure (lb/kg)
 
 $_PP_DEFAULTS['shop_name'] = $_CONF['site_name'];
 $_PP_DEFAULTS['shop_addr'] = '';
+$_PP_DEFAULTS['shop_email'] = $_CONF['site_email'];
+
 $_PP_DEFAULTS['centerblock'] = 0;   // Enable centerblock?
 
 $_PP_DEFAULTS['track_onhand'] = 0;  // Track qty onhand?
@@ -326,7 +328,7 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 10, 100, 0, 20, true, $_PP_CONF['pi_name']);
         $c->add('shop_phone', '',
                 'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
-        $c->add('shop_email', $_PP_DEFAULTS['shop_addr'],
+        $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
 
      }
