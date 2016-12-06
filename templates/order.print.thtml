@@ -14,65 +14,63 @@
   </div>
   <div style="clear:both;"></div>
   <div id="paypalAddr">
-    {!if have_billto}
+{!if have_billto}
     <div id="paypalBilling">
       <b>{$LANG_PP['bill_to']}:</b>
       <br />
-      {!if billto_name}
+  {!if billto_name}
       {billto_name}<br />
-      {!endif}
-      {!if billto_company}
+  {!endif}
+  {!if billto_company}
       {billto_company}<br />
-      {!endif}
-      {!if billto_address1}
+  {!endif}
+  {!if billto_address1}
       {billto_address1}<br />
-      {!endif}
-      {!if billto_address2}
+  {!endif}
+  {!if billto_address2}
       {billto_address2}<br />
-      {!endif}
-      {!if billto_city}
-        {!if billto_state}
-          {billto_city},&nbsp;
-        {!else}
-          {billto_city}
-        {!endif}
-      {!endif}
-      {billto_state} {billto_zip}<br />
-      {!if billto_country}
-      {billto_country}
-      {!endif}
-    </div>
+  {!endif}
+  {!if billto_city}
+    {billto_city}
+    {!if billto_state}
+    ,&nbsp;
     {!endif}
+  {!endif}
+      {billto_state} {billto_zip}<br />
+  {!if billto_country}
+      {billto_country}
+  {!endif}
+    </div>
+{!endif}
 
-    {!if have_shipto}
+{!if have_shipto}
     <div id="paypalShipping">
       <b>{$LANG_PP['ship_to']}:</b>&nbsp;
       <br />
-      {!if shipto_name}
+  {!if shipto_name}
       {shipto_name}<br />
-      {!endif}
-      {!if shipto_company}
+  {!endif}
+  {!if shipto_company}
       {shipto_company}<br />
-      {!endif}
-      {!if shipto_address1}
+  {!endif}
+  {!if shipto_address1}
       {shipto_address1}<br />
-      {!endif}
-      {!if shipto_address2}
+  {!endif}
+  {!if shipto_address2}
       {shipto_address2}<br />
-      {!endif}
-      {!if shipto_city}
-      {!if shipto_state}
-      {shipto_city},&nbsp;
-      {!else}
+  {!endif}
+  {!if shipto_city}
       {shipto_city}
-      {!endif}
-      {shipto_state} {shipto_zip}<br />
-      {!endif}
-      {!if shipto_country}
-      {shipto_country}
-      {!endif}
-    </div>
+    {!if shipto_state}
+      ,&nbsp;
     {!endif}
+      {shipto_state} {shipto_zip}<br />
+  {!endif}
+  {!if shipto_country}
+      {shipto_country}
+  {!endif}
+    </div>
+{!endif}
   </div>
 
     <div id="paypalOrderNumber">
@@ -102,30 +100,30 @@
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
-        {!if subtotal}
+{!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
           <td class="alignright">{subtotal}</td>
         </tr>
-        {!endif}
-        {!if tax}
+{!endif}
+{!if tax}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['tax']}</td>
           <td class="alignright">{tax}</td>
         </tr>
-        {!endif}
-        {!if shipping}
+{!endif}
+{!if shipping}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['shipping']}</td>
           <td class="alignright">{shipping}</td>
         </tr>
-        {!endif}
-        {!if handling}
+{!endif}
+{!if handling}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['handling']}</td>
           <td class="alignright">{handling}</td>
         </tr>
-        {!endif}
+{!endif}
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
@@ -138,7 +136,7 @@
     {order_instr}
   </div>
   <div style="clear:both;">
-    {!if is_admin}
+{!if is_admin}
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: {purch_name} ({purch_uid})</p>
   <p>{$LANG_PP['status']}: {status}</p>
   <p>
@@ -156,17 +154,17 @@
     </tr>
     <!-- END LogMessages -->
     </table>
-    {!endif}
-  {!if pmt_method}
+{!endif}
+{!if pmt_method}
     <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
-    {!if is_admin}
+  {!if is_admin}
     {!if pmt_txn_id}
     , {$LANG_PP['trans_id']}
     {pmt_txn_id}
     {!endif}
-    {!endif}
-    </p>
   {!endif}
+    </p>
+{!endif}
   </div>
 </div>
 {# end {templatelocation} #}
