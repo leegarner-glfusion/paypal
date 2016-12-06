@@ -152,6 +152,14 @@ $INSTALL_plugin['paypal'] = array(
             'log' => 'Adding feature to the Logged-in Users group'),
 
     array(  'type' => 'block', 
+            'name' => 'paypal_search', 
+            'title' => 'Catalog Search',
+            'phpblockfn' => 'phpblock_paypal_search', 
+            'block_type' => 'phpblock',
+            'group_id' => 'admin_group_id',
+            'is_enabled' => 0),
+
+    array(  'type' => 'block', 
             'name' => 'paypal_random', 
             'title' => 'Random Product',
             'phpblockfn' => 'phpblock_paypal_random', 
@@ -201,6 +209,14 @@ $INSTALL_plugin['paypal'] = array(
             'onleft' => 1,
             'is_enabled' => 1),
 
+    array(  'type' => 'mkdir',
+            'dirs' => array(
+                $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'],
+                $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files',
+                CLASSIFIEDS_IMGPATH . '/user',
+                CLASSIFIEDS_IMGPATH . '/cat',
+            ),
+        ),
 );
 
 

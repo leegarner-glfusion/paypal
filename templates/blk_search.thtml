@@ -11,7 +11,7 @@
     <br /><br />
     {$LANG_PP['by_name']}
     <br />
-    <input type="text" name="search_name" style="width:135px;" />
+    <input type="text" name="query" style="width:135px;" />
     <br />
     <div align="center">
       <input type="submit" class="paypalButton orange" name="searchcat" 

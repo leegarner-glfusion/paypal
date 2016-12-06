@@ -472,14 +472,15 @@ function PAYPAL_do_upgrade($current_ver)
         // Add shop phone and email conf values, fix subgroup ID for shop info
         $c->add('shop_phone', '',
                 'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
-        $c->add('shop_email', $_PP_DEFAULTS['shop_addr'],
+        $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
+        // Create default path for downloads (even if not used)
+        @mkdir($_CONF['path'] . 'paypal/files', true);
         $error = PAYPAL_do_upgrade_sql('0.5.9', true);
         if ($error) {
             return $error;
         }
     }
-
     return $error;
 }
 
