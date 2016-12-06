@@ -9,7 +9,7 @@
 *   @copyright  Copyright (C) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.5.9
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -45,7 +45,7 @@ function PAYPAL_orders($admin = false, $uid = '')
     $sql = "SELECT ord.*, SUM(itm.quantity * itm.price) as ord_total,
             u.username, $isAdmin as isAdmin
         FROM {$_TABLES['paypal.orders']} AS ord
-        LEFT JOIN {$_TABLES['users']} AS u 
+        LEFT JOIN {$_TABLES['users']} AS u
             ON ord.uid = u.uid
         LEFT JOIN {$_TABLES['paypal.purchases']} AS itm
             ON ord.order_id = itm.order_id
@@ -78,14 +78,14 @@ function PAYPAL_orders($admin = false, $uid = '')
             'chkname' => 'upd_orders',
             'chkactions' => '<input name="updateorderstatus" type="image" src="'
             . PAYPAL_URL . '/images/update.png'
-            . '" style="vertical-align:text-bottom;" title="' . $LANG_PP['update_status'] 
+            . '" style="vertical-align:text-bottom;" title="' . $LANG_PP['update_status']
             . '" class="gl_mootip" />&nbsp;' . $LANG_PP['update_status'],
         );
     } else {
         $options = '';
     }
- 
-    $display = COM_startBlock('', '', 
+
+    $display = COM_startBlock('', '',
                 COM_getBlockTemplate('_admin_block', 'header'));
 
     $query_arr = array('table' => 'paypal.orders',
@@ -132,15 +132,15 @@ function PAYPAL_history($admin = false, $uid = '')
 
     $isAdmin = $admin == true ? 1 : 0;
 
-    $sql = "SELECT 
-            p.*, UNIX_TIMESTAMP(p.expiration) AS exptime, 
+    $sql = "SELECT
+            p.*, UNIX_TIMESTAMP(p.expiration) AS exptime,
             d.name, d.short_description, d.file, d.prod_type,
-            $isAdmin as isAdmin, 
+            $isAdmin as isAdmin,
             u.uid, u.username
-        FROM {$_TABLES['paypal.purchases']} AS p 
-        LEFT JOIN {$_TABLES['paypal.products']} AS d 
-            ON d.id = p.product_id 
-        LEFT JOIN {$_TABLES['users']} AS u 
+        FROM {$_TABLES['paypal.purchases']} AS p
+        LEFT JOIN {$_TABLES['paypal.products']} AS d
+            ON d.id = p.product_id
+        LEFT JOIN {$_TABLES['users']} AS u
             ON p.user_id = u.uid ";
 
     $base_url = PAYPAL_ADMIN_URL;
@@ -152,9 +152,9 @@ function PAYPAL_history($admin = false, $uid = '')
     }
 
     $header_arr = array(
-        array('text' => $LANG_PP['product_id'], 
+        array('text' => $LANG_PP['product_id'],
                 'field' => 'name', 'sort' => true),
-        array('text' => $LANG_PP['qty'], 
+        array('text' => $LANG_PP['qty'],
                 'field' => 'quantity', 'sort' => true),
         array('text' => $LANG_PP['description'],
                 'field' => 'short_description', 'sort' => true),
@@ -168,14 +168,14 @@ function PAYPAL_history($admin = false, $uid = '')
                 'field' => 'prod_type', 'sort' => true),
     );
     if ($isAdmin) {
-        $header_arr[] = array('text' => $LANG_PP['username'], 
+        $header_arr[] = array('text' => $LANG_PP['username'],
                 'field' => 'username', 'sort' => true);
     }
 
     $defsort_arr = array('field' => 'p.purchase_date',
             'direction' => 'DESC');
 
-    $display = COM_startBlock('', '', 
+    $display = COM_startBlock('', '',
                 COM_getBlockTemplate('_admin_block', 'header'));
 
     $query_arr = array('table' => 'paypal.purchases',
@@ -231,21 +231,21 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         list($item_id, $item_opts) = PAYPAL_explode_opts($A['product_id']);
         if (is_numeric($item_id)) {
             // One of our catalog items, so link to it
-            $retval = COM_createLink($fieldvalue, 
+            $retval = COM_createLink($fieldvalue,
                 PAYPAL_URL . '/index.php?detail=x&amp;id=' . $item_id);
         } else {
             // Probably came from a plugin, just show the product name
             $retval = htmlspecialchars($A['product_id'], ENT_QUOTES, COM_getEncodingt());
         }
-        break; 
+        break;
 
     case 'username':
         if ($A['isAdmin']) {
-            $retval = COM_createLink($fieldvalue, 
+            $retval = COM_createLink($fieldvalue,
                 PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $A['uid']);
         } else {
-            $retval = COM_createLink($fieldvalue, 
-                $_CONF['site_url'] . '/users.php?mode=profile&uid=' . 
+            $retval = COM_createLink($fieldvalue,
+                $_CONF['site_url'] . '/users.php?mode=profile&uid=' .
                 $A['uid']);
         }
         break;
@@ -273,7 +273,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = $LANG_PP['prod_types'][$A['prod_type']];
         //if ($fieldvalue == PP_PROD_DOWNLOAD && $A['exptime'] > time() ) {
         if ($A['file'] != '' && $A['exptime'] > time() ) {
-            $retval = COM_createLink($retval, 
+            $retval = COM_createLink($retval,
                     PAYPAL_URL . "/download.php?id={$A['product_id']}");
         }
         break;
@@ -301,7 +301,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'order_id':
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
-        $retval = COM_createLink($fieldvalue, 
+        $retval = COM_createLink($fieldvalue,
                 $base_url. '/index.php?order=' . $fieldvalue,
                 array('data-uk-tooltip' => '',
                     'title' => 'View',
@@ -332,7 +332,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 */
 function PAYPAL_ProductList($cat_id = 0, $search = '')
 {
-    global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS, 
+    global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
 
     USES_paypal_class_product();
@@ -356,7 +356,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             echo COM_refresh(PAYPAL_URL);
             exit;
         }
-            
+           
         $breadcrumbs = PAYPAL_Breadcrumbs($cat_id);
         $cat_name = $Cat->name;
         $cat_desc = $Cat->description;
@@ -364,13 +364,13 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     }
 
     // Display categories
-    if (isset($_PP_CONF['cat_columns']) && 
+    if (isset($_PP_CONF['cat_columns']) &&
             $_PP_CONF['cat_columns'] > 0) {
         $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
-            WHERE cat.enabled = '1' AND cat.parent_id = '$cat_id' 
+            WHERE cat.enabled = '1' AND cat.parent_id = '$cat_id'
                 AND prod.enabled = '1' " .
             PAYPAL_buildAccessSql('AND', 'cat.grp_access') .
             " GROUP BY cat.cat_id
@@ -416,7 +416,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             foreach ($A as $category => $info) {
                 $CT->set_var(array(
                     'category_name' => $info[0],
-                    'category_link' => PAYPAL_URL . '/index.php?category=' . 
+                    'category_link' => PAYPAL_URL . '/index.php?category=' .
                                     urlencode($category),
                     //'count'         => $info[1],
                 ) );
@@ -492,7 +492,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     $sql = " FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
-            WHERE p.enabled=1 
+            WHERE p.enabled=1
             AND p.avail_beg <= '$today' AND p.avail_end >= '$today'
             AND (
                 (c.enabled=1 " . PAYPAL_buildAccessSql('AND', 'c.grp_access') . ")
@@ -532,7 +532,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     // If applicable, limit by search string
     if (!empty($_REQUEST['search_name'])) {
         $srch = DB_escapeString($_REQUEST['search_name']);
-        $sql .= " AND (p.name like '%$srch%' OR 
+        $sql .= " AND (p.name like '%$srch%' OR
                 p.short_description like '%$srch%' OR
                 p.description like '%$srch%' OR
                 p.keywords like '%$srch%')";
@@ -632,8 +632,8 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
             // can't rate from list page, messes with product links
             $static = true;
-            $rating_box = RATING_ratingBar('paypal', $A['id'], 
-                    $P->votes, $P->rating, 
+            $rating_box = RATING_ratingBar('paypal', $A['id'],
+                    $P->votes, $P->rating,
                     $voted, 5, $static, 'sm');
             $product->set_var('rating_bar', $rating_box);
         } else {
@@ -651,7 +651,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'encrypted' => '',
-            'item_url'  => COM_buildURL(PAYPAL_URL . 
+            'item_url'  => COM_buildURL(PAYPAL_URL .
                     '/detail.php?id='. $A['id']),
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'track_onhand' => $P->track_onhand ? 'true' : '',
@@ -673,9 +673,9 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             ) );
         }
 
-        // FIXME: If a user purchased once with no expiration, this query 
+        // FIXME: If a user purchased once with no expiration, this query
         // will not operate correctly
-        /*$time = DB_getItem($_TABLES['paypal.purchases'], 
+        /*$time = DB_getItem($_TABLES['paypal.purchases'],
                     'MAX(UNIX_TIMESTAMP(expiration))',
                     "user_id = {$_USER['uid']} AND product_id ='{$A['id']}'");
         */
@@ -734,11 +734,11 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
                     $product->clear_var('price');
                 }
 
-                if ( $A['price'] > 0 && 
-                        $_USER['uid'] == 1 && 
+                if ( $A['price'] > 0 &&
+                        $_USER['uid'] == 1 &&
                         !$_PP_CONF['anon_buy'] ) {
                     $buttons .= $product->set_var('', 'login_req') . '&nbsp;';
-                } elseif ( $A['prod_type'] > PP_PROD_PHYSICAL && 
+                } elseif ( $A['prod_type'] > PP_PROD_PHYSICAL &&
                             $A['price'] == 0 ) {
                     // Free items or items purchases and not expired, download.
                     $buttons .= $product->set_var('', 'download') . '&nbsp;';
@@ -766,12 +766,12 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
 
     $pagenav_args = empty($pagenav_args) ? '' : '?'.implode('&', $pagenav_args);
     // Display pagination
-    if (isset($_PP_CONF['prod_per_page']) && 
+    if (isset($_PP_CONF['prod_per_page']) &&
             $_PP_CONF['prod_per_page'] > 0 &&
             $count > $_PP_CONF['prod_per_page'] ) {
-        $product->set_var('pagination', 
+        $product->set_var('pagination',
             COM_printPageNavigation(PAYPAL_URL . '/index.php' . $pagenav_args,
-                        $page, 
+                        $page,
                         ceil($count / $_PP_CONF['prod_per_page'])));
     } else {
         $product->set_var('pagination', '');
@@ -874,8 +874,8 @@ function X_PAYPAL_ipnlogList()
     $display = COM_startBlock('IPN History');
 
     // Get ipnlog from database
-    $sql = "SELECT * 
-            FROM {$_TABLES['paypal.ipnlog']} 
+    $sql = "SELECT *
+            FROM {$_TABLES['paypal.ipnlog']}
             ORDER BY time DESC";
     $res = DB_query($sql);
 
@@ -930,13 +930,13 @@ function X_PAYPAL_ipnlogList()
 *   @return boolean             True on success, False on Failure
 */
 function PAYPAL_mailAttachment(
-    $to, 
-    $subject, 
-    $message, 
-    $from = '', 
-    $html = false, 
-    $priority = 0, 
-    $cc = '', 
+    $to,
+    $subject,
+    $message,
+    $from = '',
+    $html = false,
+    $priority = 0,
+    $cc = '',
     $altBody = '',
     $attachments = array()
 ) {
@@ -1026,7 +1026,7 @@ function PAYPAL_mailAttachment(
 
     PAYPAL_debug('Attachments: ' . print_r($attachments, true));
     // Add attachments
-    foreach($attachments as $key => $value) { 
+    foreach($attachments as $key => $value) {
         $mail->AddAttachment($value);
     }
 
@@ -1041,7 +1041,7 @@ function PAYPAL_mailAttachment(
 /**
  *  Display a popup text message
  *
- *  @param string $msg Text to display 
+ *  @param string $msg Text to display
  */
 function PAYPAL_popupMsg($msg)
 {
@@ -1088,7 +1088,7 @@ function PAYPAL_errMsg($msg, $title = '')
 *   @return string              HTML option list, without <select> tags
 */
 function PAYPAL_recurseCats(
-        $function, $sel=0, $parent_id=0, $char='', $not='', $items='', 
+        $function, $sel=0, $parent_id=0, $char='', $not='', $items='',
         $level=0, $maxlevel=0, $prepost = array())
 {
     global $_TABLES, $_GROUPS;
@@ -1123,8 +1123,8 @@ function PAYPAL_recurseCats(
             $function = 'PAYPAL_callbackCatOptionList';
         $str .= $function($row, $sel, $parent_id, $txt);
         if ($maxlevel == 0 || $level < $maxlevel) {
-            $str .= $prepost[0] . 
-                    PAYPAL_recurseCats($function, $sel, $row['cat_id'], 
+            $str .= $prepost[0] .
+                    PAYPAL_recurseCats($function, $sel, $row['cat_id'],
                         $char."-", $not, $items, $level++, $maxlevel) .
                     $prepost[1];
         }
@@ -1269,18 +1269,18 @@ function PAYPAL_Breadcrumbs($id)
             PAYPAL_buildAccessSql();
 
         $result = DB_query($sql);
-        if (!$result) 
+        if (!$result)
             break;
 
         $row = DB_fetchArray($result, false);
-        $url = '<a href="' . PAYPAL_URL . '/index.php?category=' . 
+        $url = '<a href="' . PAYPAL_URL . '/index.php?category=' .
                 (int)$row['cat_id'] . '">' . $row['cat_name'] . '</a>';
         $A[] = $url;
 
         $parent = (int)$row['parent_id'];
         if ($parent == 0) {
-            $url = '<a href="' . 
-                    COM_buildURL(PAYPAL_URL . '/index.php') . 
+            $url = '<a href="' .
+                    COM_buildURL(PAYPAL_URL . '/index.php') .
                     '">' . $LANG_PP['home'] . '</a>';
             $A[] = $url;
             break;
@@ -1330,6 +1330,33 @@ function PAYPAL_userMenu($selected = '')
     }
     if ($selected != '') $menu->set_selected($selected);
     return $menu->generate();
+}
+
+
+/**
+*   Common function used to build group access SQL
+*   Modified version of SEC_buildAccessSql. This one allow a field name
+*   to be provided, which can include a table identifier if needed.
+*
+*   Retain until glFusion 1.5 compatibility is dropped, then switch to
+*   SEC_buildAccessSql()
+*
+*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
+*   @param  string  $fld        Optional field, including table id if needed
+*   @return string  $groupsql   Formatted SQL string to be appended
+*/
+function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
+{
+    global $_USER, $_GROUPS;
+
+    $groupsql = '';
+    if (count($_GROUPS) == 1) {
+        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
+    } else {
+        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
+    }
+
+    return $groupsql;
 }
 
 ?>
