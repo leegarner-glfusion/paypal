@@ -986,6 +986,7 @@ function plugin_autouninstall_paypal ()
                 'phpblock_paypal_popular',
                 'phpblock_paypal_cart',
                 'phpblock_paypal_recent',
+                'phpblock_paypal_search',
         ),
         // List all vars by name
         'vars'=> array('paypal_gid'),

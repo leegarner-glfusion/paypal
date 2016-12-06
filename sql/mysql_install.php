@@ -756,6 +756,9 @@ $PP_UPGRADE['0.5.9'] = array(
         CHANGE `product_id` `product_id` int(11) unsigned NOT NULL",
     "ALTER TABLE {$_TABLES['paypal.categories']}
         CHANGE `cat_name` `cat_name` varchar(128) default ''",
+    "INSERT INTO {$_TABLES['blocks']}
+        (is_enabled, name, type, title, blockorder, phpblockfn),
+        (0, 'paypal_search', 'phpblock', 9999, 'phpblock_paypal_search')",
 );
 
 ?>
