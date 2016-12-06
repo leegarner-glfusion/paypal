@@ -2,11 +2,12 @@
 /**
 *   English language file
 *
-*   @author     Lee Garner <lee@leegarner.com> @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @author     Lee Garner <lee@leegarner.com>
 *   @author     John Toro <john.toro@newroute.net>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.5.9
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -278,6 +279,16 @@ $LANG_PP = array (
 'to' => 'To',
 'terms_and_cond' => 'Terms and Conditions',
 'item_history' => 'Item Purchase History',
+'reset' => 'Reset',
+'datepicker' => 'Date Selector',
+'workflows' => 'Order Workflows',
+'statuses' => 'Order Statuses',
+'reports' => 'Reports',
+'reports_avail' => array(
+    'orderlist' => 'Order Listing',
+    'paymentlist' => 'Payment Listing',
+    ),
+'my_orders' => 'My Orders',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -369,7 +380,7 @@ $LANG_fs['paypal'] = array(
     'fs_shop'   => 'Shop Details',
 );
 
-/** 
+/**
 *   Language strings for the selection option names in the config section.
 *
 *   Item 4 is also used in functions.inc to provide a currency selector.
