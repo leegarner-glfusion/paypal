@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2012 Lee Garner
+*   @copyright  Copyright (c) 2009-2016 Lee Garner
 *   @copyright  Copyright (C) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.7
+*   @version    0.5.9
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -333,7 +333,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 function PAYPAL_ProductList($cat_id = 0, $search = '')
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS, 
-            $_IMAGE_TYPE, $_GROUPS, $LANG13, $_SYSTEM;
+            $_IMAGE_TYPE, $_GROUPS, $LANG13;
 
     USES_paypal_class_product();
     USES_paypal_class_category();
@@ -357,7 +357,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             exit;
         }
             
-        $breadcrumbs = PAYPAL_Breadcrumbs($cat);
+        $breadcrumbs = PAYPAL_Breadcrumbs($cat_id);
         $cat_name = $Cat->name;
         $cat_desc = $Cat->description;
         $cat_img_url = $Cat->ImageUrl();
@@ -370,7 +370,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
-            WHERE cat.enabled = '1' AND cat.parent_id = '$cat' 
+            WHERE cat.enabled = '1' AND cat.parent_id = '$cat_id' 
                 AND prod.enabled = '1' " .
             PAYPAL_buildAccessSql('AND', 'cat.grp_access') .
             " GROUP BY cat.cat_id
@@ -405,8 +405,9 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             $CT = new Template(PAYPAL_PI_PATH . '/templates');
             $CT->set_file(array('table'    => 'category_table.thtml',
                         'row'      => 'category_row.thtml',
-                        'category' => 'category.thtml'));
-            $CT->set_var('breadcrumbs', $breadcrumbs);
+                        'category' => 'category.thtml',
+            ) );
+            //$CT->set_var('breadcrumbs', $breadcrumbs);
             if ($cat_img_url != '') {
                 $CT->set_var('catimg_url', $cat_img_url);
             }
@@ -527,6 +528,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         $cat_list = '';
     }
 
+/*
     // If applicable, limit by search string
     if (!empty($_REQUEST['search_name'])) {
         $srch = DB_escapeString($_REQUEST['search_name']);
@@ -537,7 +539,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         //if (!$isAdmin) $sql .= " AND p.grp_access IN ($my_groups) ";
         $pagenav_args[] = 'search_name=' . urlencode($_REQUEST['search_name']);
     }
-
+*/
     // If applicable, order by
     $sql .= " ORDER BY $sql_sortby $sql_sortdir";
     //echo $sql;die;
@@ -590,7 +592,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         'currency'      => $_PP_CONF['currency'],
         'breadcrumbs'   => $breadcrumbs,
         'search_text'   => $srchitem,
-        'uikit'         => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
+        'uikit'         => $_PP_CONF['_is_uikit'] ? 'true' : '',
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
     ) );
 
@@ -601,6 +603,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     } else {
         $product->set_var('title', $LANG_PP['blocktitle']);
     }
+
     $product->set_var('sortby_options', $sortby_options);
     /*if ($sortdir == 'DESC') {
         $product->set_var('sortdir_desc_sel', ' selected="selected"');
@@ -723,6 +726,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
                     'encrypted' => '',
                     'item_url'  => $A['url'],
                     'track_onhand' => '',   // not available for plugins
+                    'small_pic' => !empty($A['image']) ? PAYPAL_ImageUrl($A['image']) : '',
                 ) );
                 if ($A['price'] > 0) {
                     $product->set_var('price', $Cur->Format($A['price']));
@@ -1263,6 +1267,7 @@ function PAYPAL_Breadcrumbs($id)
             FROM {$_TABLES['paypal.categories']}
             WHERE cat_id='$parent' " .
             PAYPAL_buildAccessSql();
+
         $result = DB_query($sql);
         if (!$result) 
             break;
@@ -1325,29 +1330,6 @@ function PAYPAL_userMenu($selected = '')
     }
     if ($selected != '') $menu->set_selected($selected);
     return $menu->generate();
-}
-
-/**
-*   Common function used to build group access SQL
-*   Modified version of SEC_buildAccessSql. This one allow a field name
-*   to be provided, which can include a table identifier if needed.
-*
-*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
-*   @param  string  $fld        Optional field, including table id if needed
-*   @return string  $groupsql   Formatted SQL string to be appended 
-*/
-function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
-{
-    global $_USER, $_GROUPS;
-
-    $groupsql = '';
-    if (count($_GROUPS) == 1) {
-        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
-    } else {
-        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
-    }
-
-    return $groupsql;
 }
 
 ?>
