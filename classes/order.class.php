@@ -659,20 +659,12 @@ class ppOrder
 
             // setup templates
             $message = new Template(PAYPAL_PI_PATH . '/templates');
-            //if ($status == '') {
-                $message->set_file(array(
-                        'subject' => 'purchase_email_subject.txt',
-                        'msg_admin' => 'purchase_email_admin.txt',
-                        'msg_user' => 'purchase_email_user.txt',
-                        'msg_body' => 'purchase_email_body.txt',
-                ) );
-/*            } else {
-                $message->set_file(array(
-                        'subject' => 'update_email_subject.txt',
-                        'msg_user' => 'update_email_user.txt',
-                        'msg_body' => 'update_email_body.txt',
-                ) );
-            }*/
+            $message->set_file(array(
+                    'subject' => 'purchase_email_subject.txt',
+                    'msg_admin' => 'purchase_email_admin.txt',
+                    'msg_user' => 'purchase_email_user.txt',
+                    'msg_body' => 'purchase_email_body.txt',
+            ) );
 
             // Add all the items to the message
             $total = (float)0;      // Track total purchase value

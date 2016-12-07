@@ -678,6 +678,8 @@ class BaseIPN
                 // to the description.  Update quantity on hand if tracking
                 // is enabled.  These actions don't apply to items from
                 // other plugins.
+                $P = new Product($item['item_id']);
+                $item['short_description'] = $P->short_description;
                 if (!empty($options)) {
                     // options is expected as CSV
                     $sql = "SELECT attr_name, attr_value
@@ -695,7 +697,6 @@ class BaseIPN
                 if (isset($item['extras']['custom']) &&
                         is_array($item['extras']['custom']) &&
                         !empty($item['extras']['custom'])) {
-                    $P = new Product($item['item_id']);
                     foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
                         $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
                     }
