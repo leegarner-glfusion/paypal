@@ -1,5 +1,7 @@
 # Paypal plugin for glFusion - Changelog
+
 ## Ver. 0.5.9
+Released 2016-12-08
 - Change upgrade function to use COM_checkVersion() for better version checking
 - Add catalog search block
 - UIKit templates
