@@ -221,7 +221,7 @@ case 'thanks':
         // Allow for missing or unknown payment gateway name
         $message = $LANG_PP['thanks_title'];
     }
-    $content .= COM_showMessageText($message, $LANG_PP['thanks_title'], true);
+    $content .= COM_showMessageText($message, $LANG_PP['thanks_title'], true, 'success');
     $view = 'productlist';
     break;
 
