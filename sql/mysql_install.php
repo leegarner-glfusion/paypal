@@ -527,6 +527,10 @@ $PP_UPGRADE['0.4.2'] = array(
         ADD `rating_enabled` tinyint(1) unsigned NOT NULL default '1'
             AFTER `comments_enabled`",
 );
+$PP_UPGRADE['0.4.3'] = array(
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
+        ADD description varchar(255) AFTER product_id",
+);
 
 $PP_UPGRADE['0.4.4'] = array(
     "ALTER TABLE {$_TABLES['paypal.purchases']}
@@ -757,8 +761,10 @@ $PP_UPGRADE['0.5.9'] = array(
     "ALTER TABLE {$_TABLES['paypal.categories']}
         CHANGE `cat_name` `cat_name` varchar(128) default ''",
     "INSERT INTO {$_TABLES['blocks']}
-        (is_enabled, name, type, title, blockorder, phpblockfn),
-        (0, 'paypal_search', 'phpblock', 9999, 'phpblock_paypal_search')",
+        (is_enabled, name, type, title, blockorder, phpblockfn)
+        VALUES
+        (0, 'paypal_search', 'phpblock', 'Search Catalog',
+            9999, 'phpblock_paypal_search')",
 );
 
 ?>

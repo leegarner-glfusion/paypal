@@ -140,10 +140,6 @@ function USES_paypal_class_userinfo()
 function USES_paypal_class_order()
 {   require_once PAYPAL_PI_PATH . '/classes/order.class.php';    }
 
-/** Upgrade functions */
-function USES_paypal_upgrade()
-{   require_once PAYPAL_PI_PATH . '/upgrade.inc.php';   }
-
 /** Import workflow handling */
 function USES_paypal_class_workflow()
 {   require_once PAYPAL_PI_PATH . '/classes/workflow.class.php';    }
@@ -296,48 +292,8 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 */
 function plugin_upgrade_paypal()
 {
-    global $_TABLES, $_PP_CONF;
-
-    $pi_name = $_PP_CONF['pi_name'];
-
-    // Get the current version, compare to the version in the plugin code
-    $current_ver = DB_getItem($_TABLES['plugins'], 'pi_version',
-        "pi_name = '$pi_name'");
-    if (!$current_ver) {
-        COM_errorLog("Error getting the $pi_name Plugin version",1);
-        return '03';
-    }
-
-    // if we're at the current version, what are we doing here?
-    if ($current_ver >= $_PP_CONF['pi_version']) {
-        COM_errorLog("Current version $current_ver is already up to date",1);
-        return '06';
-    }
-
-    // If we're still here, perform the upgrade functions.
-    USES_paypal_upgrade();
-    $error = PAYPAL_do_upgrade($current_ver);
-    if ($error) {
-        COM_errorLog("Error updating the $pi_name Plugin version",1);
-        return '04';
-    }
-
-    // now update the current version number.
-    DB_query("UPDATE {$_TABLES['plugins']} SET
-            pi_version = '{$_PP_CONF['pi_version']}',
-            pi_gl_version = '{$_PP_CONF['gl_version']}',
-            pi_homepage = '{$_PP_CONF['pi_url']}'
-        WHERE pi_name = '$pi_name'");
-
-    if (DB_error()) {
-        COM_errorLog("Error updating the $pi_name Plugin version",1);
-        return '05';
-    }
-
-    CTL_clearCache($_PP_CONF['pi_name']);
-    COM_errorLog("Succesfully updated the $pi_name Plugin!",1);
-    return true;
-
+    require_once PAYPAL_PI_PATH . '/upgrade.inc.php';
+    return PAYPAL_do_upgrade();
 }
 
 

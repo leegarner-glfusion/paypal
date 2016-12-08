@@ -24,30 +24,33 @@ require_once PAYPAL_PI_PATH . "/sql/{$_DB_dbms}_install.php";
 *   Perform the upgrade starting at the current version.
 *
 *   @since  version 0.4.0
-*   @param  string  $current_ver    Current version to be upgraded
 *   @return integer                 Error code, 0 for success
 */
-function PAYPAL_do_upgrade($current_ver)
+function PAYPAL_do_upgrade()
 {
-    global $_TABLES, $_CONF, $_PP_CONF, $_PP_DEFAULTS, $PP_UPGRADE;
+    global $_TABLES, $_CONF, $_PP_CONF, $_PP_DEFAULTS, $PP_UPGRADE, $_PLUGIN_INFO;
 
-    $error = 0;
+    if (isset($_PLUGIN_INFO[$_PP_CONF['pi_name']])) {
+        $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']];
+    } else {
+        return false;
+    }
 
     // Get the config instance, several upgrades might need it
     $c = config::get_instance();
 
-    if ($current_ver < '0.2') {
+    if (!COM_checkVersion($current_ver, '0.2')) {
         // upgrade to 0.2.2
-        $error = PAYPAL_do_upgrade_sql('0.2');
-        if ($error)
-            return $error;
+        $current_ver = '0.2.2';
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.0') {
+    if (!COM_checkVersion($current_ver, '0.4.0')) {
         // upgrade to 0.4.0
-        $error = PAYPAL_do_upgrade_sql('0.4.0');
-        if (!plugin_initconfig_paypal())
-            $error = 1;
+        $current_ver = '0.4.0';
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!plugin_initconfig_paypal()) return false;
 
         // Migrate existing categories to the new category table
         $r = DB_query("SELECT DISTINCT category
@@ -55,7 +58,7 @@ function PAYPAL_do_upgrade($current_ver)
                 WHERE category <> '' and category IS NOT NULL");
         if (DB_error()) {
             COM_errorLog("Could not retrieve old categories", 1);
-            return 1;
+            return false;
         }
         if (DB_numRows($r) > 0) {
             while ($A = DB_fetchArray($r, false)) {
@@ -64,7 +67,7 @@ function PAYPAL_do_upgrade($current_ver)
                     VALUES ('{$A['category']}')");
                 if (DB_error()) {
                     COM_errorLog("Could not add new category {$A['category']}", 1);
-                    return 1;
+                    return false;
                 }
                 $cats[$A['category']] = DB_insertID();
             }
@@ -73,7 +76,7 @@ function PAYPAL_do_upgrade($current_ver)
                     FROM {$_TABLES['paypal.products']}");
             if (DB_error()) {
                 COM_errorLog("Error retrieving category data from products", 1);
-                return 1;
+                return false;
             }
             if (DB_numRows($r) > 0) {
                 while ($A = DB_fetchArray($r, false)) {
@@ -82,7 +85,7 @@ function PAYPAL_do_upgrade($current_ver)
                         WHERE id = '{$A['id']}'");
                     if (DB_error()) {
                         COM_errorLog("Error updating prodXcat table", 1);
-                        return 1;
+                        return false;
                     }
                 }
             }
@@ -106,16 +109,13 @@ function PAYPAL_do_upgrade($current_ver)
                 COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
             }
         }
-
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.1') {
+    if (!COM_checkVersion($current_ver, '0.4.1')) {
         // upgrade to 0.4.1
-        $error = PAYPAL_do_upgrade_sql('0.4.1');
-
-        // Add new configuration items
-        if ($error)
-            return $error;
+        $current_ver = '0.4.1';
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
 
         if ($c->group_exists($_PP_CONF['pi_name'])) {
              $c->add('blk_random_limit', $_PP_DEFAULTS['blk_random_limit'],
@@ -130,30 +130,33 @@ function PAYPAL_do_upgrade($current_ver)
             $c->add('debug', $_PP_DEFAULTS['debug'],
                 'select', 0, 50, 2, 10, true, $_PP_CONF['pi_name']);
         }
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.2') {
+    if (!COM_checkVersion($current_ver, '0.4.2')) {
         // upgrade to 0.4.2
-        $error = PAYPAL_do_upgrade_sql('0.4.2');
-        if ($error)
-            return $error;
+        $current_ver = '0.4.2';
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.3') {
+    if (!COM_checkVersion($current_ver, '0.4.3')) {
         // upgrade to 0.4.3
         // this adds a field that was possibly missing in the initial
         // installation, but could have been added in the 0.4.1 update. So,
         // an error is to be expected and ignored
-       DB_query("ALTER TABLE {$_TABLES['paypal.purchases']}
-                ADD description varchar(255) AFTER product_id", 1);
+        $current_ver = '0.4.3';
+        if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
 
         if ($c->group_exists($_PP_CONF['pi_name'])) {
             $c->add('def_expiration', $_PP_DEFAULTS['def_expiration'],
                 'text', 0, 30, 0, 40, true, $_PP_CONF['pi_name']);
         }
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.4') {
+    if (!COM_checkVersion($current_ver, '0.4.4')) {
+        $current_ver = '0.4.4';
         // Remove individual block selections and combine into one
         $displayblocks = 0;
         if ($_PP_CONF['leftblocks'] == 1) $displayblocks += 1;
@@ -165,21 +168,21 @@ function PAYPAL_do_upgrade($current_ver)
                 'select', 0, 0, 13, 210, true, $_PP_CONF['pi_name']);
         $c->add('debug_ipn', $_PP_DEFAULTS['debug_ipn'],
                 'select', 0, 50, 2, 20, true, $_PP_CONF['pi_name']);
-        $error = PAYPAL_do_upgrade_sql('0.4.4');
-        if ($error)
-            return $error;
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.5') {
+    if (!COM_checkVersion($current_ver, '0.4.5')) {
+        $current_ver = '0.4.5';
         // Add notification email override
         $c->add('admin_email_addr', $_PP_DEFAULTS['admin_email_addr'],
                 'text', 0, 0, 0, 40, true, $_PP_CONF['pi_name']);
-        $error = PAYPAL_do_upgrade_sql('0.4.5');
-        if ($error)
-            return $error;
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.4.6') {
+    if (!COM_checkVersion($current_ver, '0.4.5')) {
+        $current_ver = '0.4.5';
         // Move the buy_now buttons into a separate table
         $sql = "SELECT id, buttons FROM {$_TABLES['paypal.products']}";
         $res = DB_query($sql, 1);
@@ -194,12 +197,12 @@ function PAYPAL_do_upgrade($current_ver)
             DB_query("INSERT INTO {$_TABLES['paypal.buttons']} VALUES
                 ('$id', 'paypal', '$button')", 1);
         }
-        $error = PAYPAL_do_upgrade_sql('0.4.6');
-        if ($error)
-            return $error;
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.0') {
+    if (!COM_checkVersion($current_ver, '0.5.0')) {
+        $current_ver = '0.5.0';
 
         // Perform the main database upgrades
         // The first few lines get the schema updated for elements that
@@ -209,10 +212,7 @@ function PAYPAL_do_upgrade($current_ver)
                 ADD options text after show_popular", 1);
         DB_query("ALTER TABLE {$_TABLES['paypal.purchases']}
                 ADD token varchar(40) after price", 1);
-        $error = PAYPAL_do_upgrade_sql('0.5.0');
-        if ($error) {
-            return $error;
-        }
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
 
         // Move the global PayPal-specific configurations into the config table
         $receiver_email = DB_escapeString($_PP_CONF['receiver_email'][0]);
@@ -367,26 +367,28 @@ function PAYPAL_do_upgrade($current_ver)
                     WHERE txn_id = '{$A['txn_id']}'");
             }
         }
-
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.2') {
-        $error = PAYPAL_do_upgrade_sql('0.5.2');
+    if (!COM_checkVersion($current_ver, '0.5.2')) {
+        $current_ver = '0.5.2';
+        $error = PAYPAL_do_upgrade_sql($current_ver);
         if ($error)
             return $error;
         $c->add('centerblock', $_PP_DEFAULTS['centerblock'],
                 'select', 0, 0, 2, 215, true, $_PP_CONF['pi_name']);
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.4') {
+    if (!COM_checkVersion($current_ver, '0.5.4')) {
+        $current_ver = '0.5.4';
         // Addes the currency table and formatting functions
-        $error = PAYPAL_do_upgrade_sql('0.5.4');
-        if ($error) {
-            return $error;
-        }
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.6') {
+    if (!COM_checkVersion($current_ver, '0.5.6')) {
+        $current_ver = '0.5.6';
         // SQL updates in 0.5.4 weren't included in new installation, so check
         // if they're done and add them to the upgrade process if not.
         $res = DB_query("SHOW TABLES LIKE '{$_TABLES['paypal.currency']}'",1);
@@ -402,19 +404,18 @@ function PAYPAL_do_upgrade($current_ver)
             // Add the field to the products table
             $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][2];
         }
-        $error = PAYPAL_do_upgrade_sql('0.5.6');
-        if ($error) {
-            return $error;
-        }
+        if (!PAYPAL_do_upgrade_sql('0.5.6')) return false;
 
         // Add new product defaults for onhand tracking
         $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
                 'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
         $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
                 'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.7') {
+    if (!COM_checkVersion($current_ver, '0.5.7')) {
+        $current_ver = '0.5.7';
         $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id', 
             "grp_name='{$_PP_CONF['pi_name']} Admin'");
         if ($gid < 1)
@@ -433,14 +434,12 @@ function PAYPAL_do_upgrade($current_ver)
             @mkdir($_PP_DEFAULTS['tmpdir'] . 'cache', '0755', true);
         }
 
-        $error = PAYPAL_do_upgrade_sql('0.5.7');
-        if ($error) {
-            return $error;
-        }
-
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.8') {
+    if (!COM_checkVersion($current_ver, '0.5.8')) {
+        $current_ver = '0.5.8';
         // Add terms and conditions link
         $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
                 'text', 0, 40, 2, 50, true, $_PP_CONF['pi_name']);
@@ -462,26 +461,28 @@ function PAYPAL_do_upgrade($current_ver)
         }
         // Remove Amazon Simplepay gateway file to prevent re-enabling
         @unlink(PAYPAL_PI_PATH . '/classes/gateways/amazon.class.php');
-        $error = PAYPAL_do_upgrade_sql('0.5.8', true);
-        if ($error) {
-            return $error;
-        }
+        if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if ($current_ver < '0.5.9') {
+    if (!COM_checkVersion($current_ver, '0.5.9')) {
+        $current_ver = '0.5.9';
         // Add shop phone and email conf values, fix subgroup ID for shop info
         $c->add('shop_phone', '',
                 'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
         $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
         // Create default path for downloads (even if not used)
-        @mkdir($_CONF['path'] . 'paypal/files', true);
-        $error = PAYPAL_do_upgrade_sql('0.5.9', true);
-        if ($error) {
-            return $error;
-        }
+        @mkdir($_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files', true);
+        // Remove stray .htaccess file that interferes with plugin removal
+        @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
+        if (!PAYPAL_do_upgrade_sql('0.5.9')) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
-    return $error;
+
+    CTL_clearCache($_PP_CONF['pi_name']);
+    COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
+    return true;
 }
 
 
@@ -495,15 +496,13 @@ function PAYPAL_do_upgrade($current_ver)
 *   @param  boolean $ignore_error   True to ignore SQL errors.
 *   @param  array   $sql        Array of SQL statement(s) to execute
 */
-function PAYPAL_do_upgrade_sql($version='', $ignore_error=false)
+function PAYPAL_do_upgrade_sql($version, $ignore_error=false)
 {
     global $_TABLES, $_PP_CONF, $PP_UPGRADE;
 
-    $error = 0;
-
     // If no sql statements passed in, return success
     if (!is_array($PP_UPGRADE[$version]))
-        return $error;
+        return true;
 
     // Execute SQL now to perform the upgrade
     COM_errorLog("--- Updating Paypal to version $version", 1);
@@ -513,14 +512,41 @@ function PAYPAL_do_upgrade_sql($version='', $ignore_error=false)
         if (DB_error()) {
             COM_errorLog("SQL Error during Paypal Plugin update", 1);
             if (!$ignore_error){
-                $error = 1;
-                break;
+                return false;
             }
         }
     }
     COM_errorLog("--- Paypal plugin SQL update to version $version done", 1);
-    return $error;
+    return true;
 }
 
+
+/**
+*   Update the plugin version number in the database.
+*   Called at each version upgrade to keep up to date with
+*   successful upgrades.
+*
+*   @param  string  $ver    New version to set
+*   @return boolean         True on success, False on failure
+*/
+function PAYPAL_do_set_version($ver)
+{
+    global $_TABLES, $_PP_CONF;
+
+    // now update the current version number.
+    $sql = "UPDATE {$_TABLES['plugins']} SET
+            pi_version = '{$_PP_CONF['pi_version']}',
+            pi_gl_version = '{$_PP_CONF['gl_version']}',
+            pi_homepage = '{$_PP_CONF['pi_url']}'
+        WHERE pi_name = '{$_PP_CONF['pi_name']}'";
+
+    $res = DB_query($sql, 1);
+    if (DB_error()) {
+        COM_errorLog("Error updating the {$_PP_CONF['pi_display_name']} Plugin version",1);
+        return false;
+    } else {
+        return true;
+    }
+}
 
 ?>
