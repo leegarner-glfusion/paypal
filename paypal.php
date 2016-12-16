@@ -2,7 +2,7 @@
 /**
 *   Global configuration items for the PayPal plugin.
 *   These are either static items, such as the plugin name and table
-*   definitions, or are items that don't lend themselves well to the 
+*   definitions, or are items that don't lend themselves well to the
 *   glFusion configuration system, such as allowed file types.
 *
 *   @author     Lee Garner <lee@leegarner.com>
@@ -11,7 +11,7 @@
 *   @copyright  Mark Evans <mark@glfusion.org
 *   @package    paypal
 *   @version    0.5.9
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -25,7 +25,7 @@ global $_PP_CONF;
 
 $_PP_CONF['pi_name']            = 'paypal';
 $_PP_CONF['pi_display_name']    = 'PayPal';
-$_PP_CONF['pi_version']         = '0.5.9';
+$_PP_CONF['pi_version']         = '0.5.10';
 $_PP_CONF['gl_version']         = '1.4.0';
 $_PP_CONF['pi_url']             = 'http://www.glfusion.org';
 
@@ -49,23 +49,21 @@ $_TABLES['paypal.workflows']    = $_PP_table_prefix . 'workflows';
 $_TABLES['paypal.orderstatus']  = $_PP_table_prefix . 'order_status';
 $_TABLES['paypal.order_log']    = $_PP_table_prefix . 'order_log';
 $_TABLES['paypal.currency']     = $_PP_table_prefix . 'currency';
-$_TABLES['paypal.specials']     = $_PP_table_prefix . 'specials';
 
 // Other relatively static values;
-$_PP_CONF['image_dir']  = $_CONF['path_html'] . $_PP_CONF['pi_name'] . 
+$_PP_CONF['image_dir']  = $_CONF['path_html'] . $_PP_CONF['pi_name'] .
                             '/images/products';
-$_PP_CONF['logfile']    = $_CONF['path'] . 
+$_PP_CONF['logfile']    = $_CONF['path'] .
                             "logs/{$_PP_CONF['pi_name']}_downloads.log";
-$_PP_CONF['catimgpath'] = $_CONF['path_html'] . $_PP_CONF['pi_name'] . 
+$_PP_CONF['catimgpath'] = $_CONF['path_html'] . $_PP_CONF['pi_name'] .
                             '/images/categories';
-
 
 /**
 *   Allowed extensions for downloads.
 *   Make sure that every downloadable file extension is included in this list.
-*   For security you may want to remove unused file extensions.  Also try 
+*   For security you may want to remove unused file extensions.  Also try
 *   to avoid php and phps.
-*   NOTE: extensions must be defined in 
+*   NOTE: extensions must be defined in
 *       $_CONF['path']/system/classes/downloader.class.php
 *   to be listed here.
 */

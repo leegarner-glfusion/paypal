@@ -7,15 +7,16 @@
 *   @copyright  Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009 Mark Evans <mark@glfusion.org>
 *   @package    paypal
-*   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.5.9
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
 
-if (!defined ('GVERSION')) {
+/*if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
+*/
 
 global $_DB_dbms;
 
@@ -38,187 +39,149 @@ global $LANG_PP;
 */
 $INSTALL_plugin['paypal'] = array(
     'installer' => array(
-            'type' => 'installer', 
-            'version' => '1', 
-            'mode' => 'install'),
+            'type' => 'installer',
+            'version' => '1',
+            'mode' => 'install',
+        ),
 
     'plugin' => array(
-            'type' => 'plugin', 
+            'type' => 'plugin',
             'name' => $_PP_CONF['pi_name'],
-            'ver' => $_PP_CONF['pi_version'], 
+            'ver' => $_PP_CONF['pi_version'],
             'gl_ver' => $_PP_CONF['gl_version'],
-            'url' => $_PP_CONF['pi_url'], 
-            'display' => $_PP_CONF['pi_display_name']),
+            'url' => $_PP_CONF['pi_url'],
+            'display' => $_PP_CONF['pi_display_name'],
+        ),
 
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.ipnlog'], 
-            'sql' => $_SQL['paypal.ipnlog']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.products'], 
-            'sql' => $_SQL['paypal.products']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.purchases'], 
-            'sql' => $_SQL['paypal.purchases']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.categories'], 
-            'sql' => $_SQL['paypal.categories']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.prod_attr'], 
-            'sql' => $_SQL['paypal.prod_attr']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.images'], 
-            'sql' => $_SQL['paypal.images']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.orders'], 
-            'sql' => $_SQL['paypal.orders']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.gateways'], 
-            'sql' => $_SQL['paypal.gateways']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.address'], 
-            'sql' => $_SQL['paypal.address']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.userinfo'], 
-            'sql' => $_SQL['paypal.userinfo']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.cart'], 
-            'sql' => $_SQL['paypal.cart']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.workflows'], 
-            'sql' => $_SQL['paypal.workflows']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.buttons'], 
-            'sql' => $_SQL['paypal.buttons']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.orderstatus'], 
-            'sql' => $_SQL['paypal.orderstatus']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.order_log'], 
-            'sql' => $_SQL['paypal.order_log']),
-
-    array(  'type' => 'table', 
-            'table' => $_TABLES['paypal.currency'], 
-            'sql' => $_SQL['paypal.currency']),
-
-    array(  'type' => 'group', 
-            'group' => 'paypal Admin', 
+    array(  'type' => 'group',
+            'group' => 'paypal Admin',
             'desc' => 'Users in this group can administer the PayPal plugin',
-            'variable' => 'admin_group_id', 
+            'variable' => 'admin_group_id',
             'admin' => true,
-            'addroot' => true),
+            'addroot' => true,
+        ),
 
-    array(  'type' => 'feature', 
-            'feature' => 'paypal.admin', 
+    array(  'type' => 'feature',
+            'feature' => 'paypal.admin',
             'desc' => 'Ability to administer the PayPal plugin',
-            'variable' => 'admin_feature_id'),
+            'variable' => 'admin_feature_id',
+        ),
 
-    array(  'type' => 'feature', 
-            'feature' => 'paypal.user', 
+    array(  'type' => 'feature',
+            'feature' => 'paypal.user',
             'desc' => 'Ability to use the PayPal plugin',
-            'variable' => 'user_feature_id'),
+            'variable' => 'user_feature_id',
+        ),
 
-    array(  'type' => 'feature', 
-            'feature' => 'paypal.view', 
+    array(  'type' => 'feature',
+            'feature' => 'paypal.view',
             'desc' => 'Ability to view PayPal entries',
-            'variable' => 'view_feature_id'),
+            'variable' => 'view_feature_id',
+        ),
 
-    array(  'type' => 'mapping', 
-            'group' => 'admin_group_id', 
+    array(  'type' => 'mapping',
+            'group' => 'admin_group_id',
             'feature' => 'admin_feature_id',
-            'log' => 'Adding feature to the admin group'),
+            'log' => 'Adding feature to the admin group',
+        ),
 
-    array(  'type' => 'mapping', 
-            'findgroup' => 'All Users', 
+    array(  'type' => 'mapping',
+            'findgroup' => 'All Users',
             'feature' => 'view_feature_id',
-            'log' => 'Adding feature to the All Users group'),
+            'log' => 'Adding feature to the All Users group',
+        ),
 
-    array(  'type' => 'mapping', 
-            'findgroup' => 'Logged-in Users', 
+    array(  'type' => 'mapping',
+            'findgroup' => 'Logged-in Users',
             'feature' => 'user_feature_id',
-            'log' => 'Adding feature to the Logged-in Users group'),
+            'log' => 'Adding feature to the Logged-in Users group',
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_search', 
+    array(  'type' => 'block',
+            'name' => 'paypal_search',
             'title' => 'Catalog Search',
-            'phpblockfn' => 'phpblock_paypal_search', 
+            'phpblockfn' => 'phpblock_paypal_search',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_random', 
+    array(  'type' => 'block',
+            'name' => 'paypal_random',
             'title' => 'Random Product',
-            'phpblockfn' => 'phpblock_paypal_random', 
+            'phpblockfn' => 'phpblock_paypal_random',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_categories', 
+    array(  'type' => 'block',
+            'name' => 'paypal_categories',
             'title' => 'Product Categories',
-            'phpblockfn' => 'phpblock_paypal_categories', 
+            'phpblockfn' => 'phpblock_paypal_categories',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_featured', 
+    array(  'type' => 'block',
+            'name' => 'paypal_featured',
             'title' => 'Featured Products',
-            'phpblockfn' => 'phpblock_paypal_featured', 
+            'phpblockfn' => 'phpblock_paypal_featured',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_popular', 
+    array(  'type' => 'block',
+            'name' => 'paypal_popular',
             'title' => 'Popular',
-            'phpblockfn' => 'phpblock_paypal_popular', 
+            'phpblockfn' => 'phpblock_paypal_popular',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_recent', 
+    array(  'type' => 'block',
+            'name' => 'paypal_recent',
             'title' => 'Newest Items',
-            'phpblockfn' => 'phpblock_paypal_recent', 
+            'phpblockfn' => 'phpblock_paypal_recent',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
-            'is_enabled' => 0),
+            'is_enabled' => 0,
+        ),
 
-    array(  'type' => 'block', 
-            'name' => 'paypal_cart', 
+    array(  'type' => 'block',
+            'name' => 'paypal_cart',
             'title' => 'Shopping Cart',
-            'phpblockfn' => 'phpblock_paypal_cart', 
+            'phpblockfn' => 'phpblock_paypal_cart',
             'block_type' => 'phpblock',
             'group_id' => 'admin_group_id',
             'blockorder' => 5,
             'onleft' => 1,
-            'is_enabled' => 1),
+            'is_enabled' => 1,
+        ),
 
     array(  'type' => 'mkdir',
             'dirs' => array(
                 $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'],
                 $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files',
-                CLASSIFIEDS_IMGPATH . '/user',
-                CLASSIFIEDS_IMGPATH . '/cat',
             ),
         ),
 );
 
+$tables = array(
+    'products', 'categories', 'purchases', 'ipnlog', 'cart', 'orders',
+    'prod_attr', 'images', 'gateways', 'address', 'userinfo', 'workflows',
+    'buttons', 'orderstatus', 'order_log', 'currency',
+);
+foreach ($tables as $table) {
+    $INSTALL_plugin['paypal'][] = array(
+        'type' => 'table',
+        'table' => $_TABLES['paypal.' . $table],
+        'sql' => $_SQL['paypal.'. $table],
+    );
+}
 
 /**
 *   Puts the datastructures for this plugin into the glFusion database
@@ -319,7 +282,7 @@ function plugin_postinstall_paypal()
     }
 
     // Set the paypal Admin ID
-    $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id', 
+    $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id',
             "grp_name='{$_PP_CONF['pi_name']} Admin'");
     if ($gid < 1)
         $gid = 1;        // default to Root if paypal group not found
@@ -327,6 +290,5 @@ function plugin_postinstall_paypal()
                 SET name='paypal_gid', value=$gid");
 
 }
-
 
 ?>
