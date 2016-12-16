@@ -477,8 +477,10 @@ function PAYPAL_do_upgrade()
         // Remove stray .htaccess file that interferes with plugin removal
         @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
         if (!PAYPAL_do_upgrade_sql('0.5.9')) return false;
-        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
+
+    // Final version setting
+    if (!PAYPAL_do_set_version($current_ver)) return false;
 
     CTL_clearCache($_PP_CONF['pi_name']);
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
