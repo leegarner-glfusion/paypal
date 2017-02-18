@@ -487,7 +487,7 @@ class paypal extends PaymentGw
             $vars['custom'] = $this->PrepareCustom();
             $vars['return'] = PAYPAL_URL . '/index.php?thanks=paypal';
             $vars['cancel_return'] = PAYPAL_URL;
-            $vars['amount'] = $P->price;
+            $vars['amount'] = $P->sale_price;
             $vars['undefined_quantity'] = '1';
             $vars['notify_url'] = $this->ipn_url;
 
