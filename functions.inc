@@ -404,7 +404,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     $allowed = 1;
 
     if ($allowed == 1) {
-        $delete_option = (SEC_hasRights('paypal.admin'));
+        $delete_option = plugin_isadmin_paypal();
         $retval .= CMT_userComments($id, $title, 'paypal', $order, $format,
                                      $cid, $page, $view, $delete_option,
                                      $P->comments_enabled, $_USER['uid']);
@@ -430,7 +430,7 @@ function plugin_deletecomment_paypal($cid, $id)
 {
     global $_CONF,$_FM_TABLES, $_TABLES;
 
-    if (SEC_hasRights('paypal.admin')) {
+    if (plugin_isadmin_paypal()) {
         if (CMT_deleteComment($cid, $id, 'paypal') == 0) {
             $count = DB_count($_TABLES['comments'],
                         array('sid', 'type'),
@@ -476,6 +476,21 @@ function plugin_geticon_paypal()
 }
 
 
+/**
+*   Check if this is a plugin administrator.
+*   Saves a static value to conserve calls to SEC_hasRights()
+*
+*   @return boolean     True for admins, False for regular users
+*/
+function plugin_isadmin_paypal()
+{
+    static $isadmin = NULL;
+    if ($isadmin === NULL) {
+        $isadmin = SEC_hasRights('paypal.admin');
+    }
+    return $isadmin;
+}
+
 
 /**
  *  Add an option for the plugin in the command and control area.
@@ -486,7 +501,7 @@ function plugin_cclabel_paypal()
 {
     global $_PP_CONF;
 
-    if (SEC_hasRights('paypal.admin')) {
+    if (plugin_isadmin_paypal()) {
         return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     plugin_geticon_paypal());
@@ -503,7 +518,7 @@ function plugin_getadminoption_paypal()
 {
     global $_TABLES, $_PP_CONF;
 
-    if (SEC_hasRights('paypal.admin')) {
+    if (plugin_isadmin_paypal()) {
         return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     DB_count($_TABLES['paypal.products']));
@@ -654,7 +669,7 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
-    global $_USER, $_SERVER, $LANG_PP, $_PLUGINS;
+    global $_PLUGINS;
 
     // If this plugin or a required plugin isn't available, abort gracefully
     if (!in_array('paypal', $_PLUGINS) ||
@@ -922,7 +937,6 @@ function plugin_autouninstall_paypal ()
                 'paypal.prod_attr',
                 'paypal.products',
                 'paypal.purchases',
-                'paypal.specials',
                 'paypal.userinfo',
                 'paypal.workflows',
         ),
@@ -1533,8 +1547,6 @@ function plugin_user_logout_paypal($uid)
     $Cart->Clear($uid);
 }
 
-
-
 /**
 *   Handle actions needed when the current user logs in.
 *   Merges the saved cart with any values added while browsing anonymously
@@ -1780,7 +1792,7 @@ function PAYPAL_explode_opts($item, $opt_string = false)
 *
 *   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
 *   @param  string  $fld        Optional field, including table id if needed
-*   @return string  $groupsql   Formatted SQL string to be appended 
+*   @return string  $groupsql   Formatted SQL string to be appended
 */
 function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
 {

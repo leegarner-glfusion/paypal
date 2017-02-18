@@ -338,7 +338,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     USES_paypal_class_product();
     USES_paypal_class_category();
 
-    if (SEC_hasRights('paypal.admin')) {
+    if (plugin_isadmin_paypal()) {
         $isAdmin = true;
     } else {
         $isAdmin = false;
@@ -501,6 +501,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             AND (
                 p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
                 )";
+    if (!$isAdmin) $sql .= " AND c.grp_access IN ($my_groups) ";
 
     // Add search query, if any
     if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && !isset($_REQUEST['clearsearch'])) {
@@ -528,32 +529,24 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         $cat_list = '';
     }
 
-/*
-    // If applicable, limit by search string
-    if (!empty($_REQUEST['search_name'])) {
-        $srch = DB_escapeString($_REQUEST['search_name']);
-        $sql .= " AND (p.name like '%$srch%' OR
-                p.short_description like '%$srch%' OR
-                p.description like '%$srch%' OR
-                p.keywords like '%$srch%')";
-        //if (!$isAdmin) $sql .= " AND p.grp_access IN ($my_groups) ";
-        $pagenav_args[] = 'search_name=' . urlencode($_REQUEST['search_name']);
-    }
-*/
     // If applicable, order by
     $sql .= " ORDER BY $sql_sortby $sql_sortdir";
     //echo $sql;die;
 
+    // Count products from database
+    $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
+    $x = DB_fetchArray($res, false);
+    if (isset($x['cnt']))
+        $count = (int)$x['cnt'];
+    else
+        $count = 0;
+
+    if ($count == 0) {
+        return COM_showMessageText($LANG_PP['no_products_match'], '', true);
+    }
+
     // If applicable, handle pagination of query
     if (isset($_PP_CONF['prod_per_page']) && $_PP_CONF['prod_per_page'] > 0) {
-        // Count products from database
-        $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
-        $x = DB_fetchArray($res, false);
-        if (isset($x['cnt']))
-            $count = (int)$x['cnt'];
-        else
-            $count = 0;
-
         // Make sure page requested is reasonable, if not, fix it
         if (!isset($_REQUEST['page']) || $_REQUEST['page'] <= 0) {
             $_REQUEST['page'] = 1;
@@ -1324,7 +1317,7 @@ function PAYPAL_userMenu($selected = '')
         $menu->add_menuitem($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
     }
-    if (SEC_hasRights('paypal.admin')) {
+    if (plugin_isadmin_paypal()) {
         $menu->add_menuitem($LANG_PP['mnu_admin'],
                 PAYPAL_ADMIN_URL . '/index.php');
     }

@@ -289,6 +289,7 @@ $LANG_PP = array (
     'paymentlist' => 'Payment Listing',
     ),
 'my_orders' => 'My Orders',
+'no_products_match' => 'No products match your search parameters',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
