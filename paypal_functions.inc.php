@@ -720,6 +720,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
                     'item_url'  => $A['url'],
                     'track_onhand' => '',   // not available for plugins
                     'small_pic' => !empty($A['image']) ? PAYPAL_ImageUrl($A['image']) : '',
+                    'on_sale'   => '',
                 ) );
                 if ($A['price'] > 0) {
                     $product->set_var('price', $Cur->Format($A['price']));
