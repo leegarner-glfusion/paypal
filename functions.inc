@@ -404,7 +404,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     $allowed = 1;
 
     if ($allowed == 1) {
-        $delete_option = plugin_isadmin_paypal();
+        $delete_option = plugin_ismoderator_paypal();
         $retval .= CMT_userComments($id, $title, 'paypal', $order, $format,
                                      $cid, $page, $view, $delete_option,
                                      $P->comments_enabled, $_USER['uid']);
@@ -430,7 +430,7 @@ function plugin_deletecomment_paypal($cid, $id)
 {
     global $_CONF,$_FM_TABLES, $_TABLES;
 
-    if (plugin_isadmin_paypal()) {
+    if (plugin_ismoderator_paypal()) {
         if (CMT_deleteComment($cid, $id, 'paypal') == 0) {
             $count = DB_count($_TABLES['comments'],
                         array('sid', 'type'),
@@ -478,11 +478,12 @@ function plugin_geticon_paypal()
 
 /**
 *   Check if this is a plugin administrator.
+*   There is no "moderator" for the Paypal plugin.
 *   Saves a static value to conserve calls to SEC_hasRights()
 *
 *   @return boolean     True for admins, False for regular users
 */
-function plugin_isadmin_paypal()
+function plugin_ismoderator_paypal()
 {
     static $isadmin = NULL;
     if ($isadmin === NULL) {
@@ -501,7 +502,7 @@ function plugin_cclabel_paypal()
 {
     global $_PP_CONF;
 
-    if (plugin_isadmin_paypal()) {
+    if (plugin_ismoderator_paypal()) {
         return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     plugin_geticon_paypal());
@@ -518,7 +519,7 @@ function plugin_getadminoption_paypal()
 {
     global $_TABLES, $_PP_CONF;
 
-    if (plugin_isadmin_paypal()) {
+    if (plugin_ismoderator_paypal()) {
         return array($_PP_CONF['pi_display_name'],
                     PAYPAL_ADMIN_URL . '/index.php',
                     DB_count($_TABLES['paypal.products']));

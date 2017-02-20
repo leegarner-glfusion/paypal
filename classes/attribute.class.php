@@ -6,7 +6,7 @@
  *  @copyright  Copyright (c) 2010 Lee Garner <lee@leegarner.com>
  *  @package    paypal
  *  @version    0.5.0
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
+ *  @license    http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  *  @filesource
  */
@@ -22,10 +22,6 @@ class Attribute
     *   @var array */
     var $properties;
 
-    /** Indicate whether the current user is an administrator
-    *   @var boolean */
-    var $isAdmin;
-
     /** Indicate whether the current object is a new entry or not.
     *   @var boolean */
     var $isNew;
@@ -37,7 +33,7 @@ class Attribute
 
     /**
     *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param  integer $id Attributeal type ID
@@ -63,9 +59,6 @@ class Attribute
                 $this->attr_id = 0;
             }
         }
-
-        $this->isAdmin = SEC_hasRights('paypal.admin') ? 1 : 0;
-
     }
 
 
@@ -160,8 +153,8 @@ class Attribute
             return;
         }
 
-        $result = DB_query("SELECT * 
-                    FROM {$_TABLES['paypal.prod_attr']} 
+        $result = DB_query("SELECT *
+                    FROM {$_TABLES['paypal.prod_attr']}
                     WHERE attr_id='$id'");
         if (!$result || DB_numRows($result != 1)) {
             return false;
@@ -319,15 +312,15 @@ class Attribute
         $T->set_var(array(
             'action_url'    => PAYPAL_ADMIN_URL,
             'pi_url'        => PAYPAL_URL,
-            'doc_url'       => PAYPAL_getDocURL('attribute_form', 
+            'doc_url'       => PAYPAL_getDocURL('attribute_form',
                                             $_CONF['language']),
             'attr_value'    => $this->attr_value,
             'attr_price'    => $this->attr_price,
             'product_select' => COM_optionList($_TABLES['paypal.products'],
                     'id,name', $this->item_id),
             'option_group_select' => COM_optionList(
-                        $_TABLES['paypal.prod_attr'], 
-                        'DISTINCT attr_name,attr_name', 
+                        $_TABLES['paypal.prod_attr'],
+                        'DISTINCT attr_name,attr_name',
                         $this->attr_name, 1),
             'orderby'       => $this->orderby,
             'ena_chk'       => $this->enabled == 1 ? ' checked="checked"' : '',
@@ -434,8 +427,8 @@ class Attribute
     {
         global $_TABLES;
 
-        $sql = "SELECT attr_id, orderby 
-                FROM {$_TABLES['paypal.prod_attr']} 
+        $sql = "SELECT attr_id, orderby
+                FROM {$_TABLES['paypal.prod_attr']}
                 WHERE item_id = '" . $this->item_id . "'
                 AND attr_name = '" . DB_escapeString($this->attr_name) . "'
                 ORDER BY orderby ASC;";
@@ -447,7 +440,7 @@ class Attribute
 
             if ($A['orderby'] != $order) {  // only update incorrect ones
                 $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
-                    SET orderby = '$order' 
+                    SET orderby = '$order'
                     WHERE attr_id = '{$A['attr_id']}'";
                 DB_query($sql);
             }
@@ -455,7 +448,7 @@ class Attribute
         }
 
     }
- 
+
 }   // class Attribute
 
 ?>

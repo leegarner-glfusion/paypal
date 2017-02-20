@@ -16,7 +16,7 @@ require_once '../../../lib-common.php';
 
 // This is for administrators only.  It's called by Javascript,
 // so don't try to display a message
-if (!SEC_hasRights('paypal.admin')) {
+if (!plugin_ismoderator_paypal()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the classifieds admin ajax function.");
     exit;
 }

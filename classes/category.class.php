@@ -63,7 +63,7 @@ class Category
             }
         }
 
-        $this->isAdmin = SEC_hasRights('paypal.admin') ? 1 : 0;
+        $this->isAdmin = plugin_ismoderator_paypal() ? 1 : 0;
     }
 
 

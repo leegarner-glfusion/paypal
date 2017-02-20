@@ -338,7 +338,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     USES_paypal_class_product();
     USES_paypal_class_category();
 
-    if (plugin_isadmin_paypal()) {
+    if (plugin_ismoderator_paypal()) {
         $isAdmin = true;
     } else {
         $isAdmin = false;
@@ -356,7 +356,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             echo COM_refresh(PAYPAL_URL);
             exit;
         }
-           
+
         $breadcrumbs = PAYPAL_Breadcrumbs($cat_id);
         $cat_name = $Cat->name;
         $cat_desc = $Cat->description;
@@ -420,12 +420,6 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
                                     urlencode($category),
                     //'count'         => $info[1],
                 ) );
-                /*if ($category == $cat) {
-                    $CT->set_var('curr', 'current');
-                    $cat_name = $info[0];
-                } else {
-                    $CT->set_var('curr', 'other');
-                }*/
                 $CT->parse('catrow', 'category', true);
                 if ($i % $_PP_CONF['cat_columns'] == 0) {
                     $CT->parse('categories', 'row', true);
@@ -483,9 +477,6 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         $sortby_options .= "<option value=\"$value\" $sel>$text</option>\n";
     }
 
-    //$sortby = $_PP_CONF['order'];
-    //$sortdir = 'ASC';
-
     // Get products from database. "c.enabled is null" is to allow products
     // with no category defined
     $today = $_PP_CONF['now']->toMySQL();
@@ -501,7 +492,6 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
             AND (
                 p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
                 )";
-    if (!$isAdmin) $sql .= " AND c.grp_access IN ($my_groups) ";
 
     // Add search query, if any
     if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && !isset($_REQUEST['clearsearch'])) {
@@ -536,13 +526,15 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     // Count products from database
     $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
     $x = DB_fetchArray($res, false);
-    if (isset($x['cnt']))
-        $count = (int)$x['cnt'];
-    else
-        $count = 0;
+    $count = isset($x['cnt']) ? (int)$x['cnt'] : 0;
 
+    // Display a "not found" message if count == 0
     if ($count == 0) {
-        return COM_showMessageText($LANG_PP['no_products_match'], '', true);
+        if ($_PP_CONF['_is_uikit']) {
+            return '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
+        } else {
+            return '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
+        }
     }
 
     // If applicable, handle pagination of query
@@ -1318,7 +1310,7 @@ function PAYPAL_userMenu($selected = '')
         $menu->add_menuitem($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
     }
-    if (plugin_isadmin_paypal()) {
+    if (plugin_ismoderator_paypal()) {
         $menu->add_menuitem($LANG_PP['mnu_admin'],
                 PAYPAL_ADMIN_URL . '/index.php');
     }
