@@ -1,24 +1,24 @@
 <?php
 /**
- *  Class to handle images
- *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
- *  @package    paypal
- *  @version    0.0.1
- *  @license    http://opensource.org/licenses/gpl-2.0.php 
- *  GNU Public License v2 or later
- *  @filesource
- */
+*   Class to handle images
+*
+*   @author     Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @package    paypal
+*   @version    0.0.1
+*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*               GNU Public License v2 or later
+*   @filesource
+*/
 
 // Import core glFusion upload functions
 USES_class_upload();
 
 /**
- *  Image-handling class
- *  @package paypal
- */
-class ProductImage extends upload
+*   Image-handling class
+*   @package paypal
+*/
+class ppProductImage extends upload
 {
     /** Path to actual image (without filename)
      *  @var string */

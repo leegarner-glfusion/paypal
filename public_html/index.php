@@ -348,7 +348,7 @@ case 'vieworder':
 case 'detail':
     // deprecated, should be displayed via detail.php
     USES_paypal_class_product();
-    $P = new Product($id);
+    $P = new ppProduct($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['product_detail'];

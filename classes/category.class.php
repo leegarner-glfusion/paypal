@@ -16,7 +16,7 @@
 *   Class for categories
 *   @package paypal
 */
-class Category
+class ppCategory
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -408,27 +408,17 @@ class Category
     /**
     *   Sets a boolean field to the specified value.
     *
+    *   @param  integer $oldvalue   Old value to change
+    *   @param  string  $varname    Field name to change
     *   @param  integer $id ID number of element to modify
-    *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    private function _toggle($oldvalue, $varname, $id=0)
+    private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return;
-        }
-
-        // If it's still an invalid ID, return the old value
-        if ($id < 1)
-            return $oldvalue;
-
         // Determing the new value (opposite the old)
+        $oldvalue = $oldvalue == 0 ? 0 : 1;
         $newvalue = $oldvalue == 1 ? 0 : 1;
 
         $sql = "UPDATE {$_TABLES['paypal.categories']}
@@ -436,8 +426,12 @@ class Category
                 WHERE cat_id=$id";
         //echo $sql;die;
         DB_query($sql);
-
-        return $newvalue;
+        if (DB_error()) {
+            COM_errorLog("ppCategory::_toggle() SQL error: $sql", 1);
+            return $oldvalue;
+        } else {
+            return $newvalue;
+        }
     }
 
 
@@ -448,9 +442,8 @@ class Category
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    public function toggleEnabled($oldvalue, $id=0)
+    public static function toggleEnabled($oldvalue, $id=0)
     {
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
         if ($id == 0) {
             if (is_object($this))
@@ -458,7 +451,7 @@ class Category
             else
                 return $oldvalue;
         }
-        return Category::_toggle($oldvalue, 'enabled', $id);
+        return self::_toggle($oldvalue, 'enabled', $id);
     }
 
 
@@ -555,6 +548,6 @@ class Category
         }
     }
 
-}   // class Category
+}   // class ppCategory
 
 ?>

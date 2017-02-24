@@ -16,7 +16,7 @@
  *  Class for product options
  *  @package paypal
  */
-class Attribute
+class ppAttribute
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -170,7 +170,7 @@ class Attribute
     /**
     *   Save the current values to the database.
     *
-    *   @param  array   $A      Attributeal array of values from $_POST
+    *   @param  array   $A      Array of values from $_POST
     *   @return boolean         True if no errors, False otherwise
     */
     public function Save($A = array())
@@ -231,7 +231,7 @@ class Attribute
 
     /**
     *   Delete the current category record from the database.
-    *   Callable as a static function Attribute::Delete($attr_id)
+    *   Callable as a static function ppAttribute::Delete($attr_id)
     *
     *   @param  integer $attr_id    Attribute ID, empty for current object
     *   @return boolean     True on success, False on invalid ID
@@ -341,23 +341,12 @@ class Attribute
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    private function _toggle($oldvalue, $varname, $id=0)
+    private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return;
-        }
-
-        // If it's still an invalid ID, return the old value
-        if ($id < 1)
-            return $oldvalue;
-
         // Determing the new value (opposite the old)
+        $oldvalue = $oldvalue == 0 ? 0 : 1;
         $newvalue = $oldvalue == 1 ? 0 : 1;
 
         $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
@@ -365,30 +354,26 @@ class Attribute
                 WHERE attr_id=$id";
         //echo $sql;die;
         DB_query($sql);
-
-        return $newvalue;
+        if (DB_error()) {
+            COM_errorLog("ppAttribute::_toggle() SQL error: $sql", 1);
+            return $oldvalue;
+        } else {
+            return $newvalue;
+        }
     }
 
 
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @uses   _toggle()
+    *   @uses   ppAttribute::_toggle()
     *   @param  integer $oldvalue   Original field value
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public function toggleEnabled($oldvalue, $id=0)
+    public static function toggleEnabled($oldvalue, $id=0)
     {
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->attr_id;
-            else
-                return $oldvalue;
-        }
-        return Attribute::_toggle($oldvalue, 'enabled', $id);
+        return self::_toggle($oldvalue, 'enabled', $id);
     }
 
 
@@ -449,6 +434,6 @@ class Attribute
 
     }
 
-}   // class Attribute
+}   // class ppAttribute
 
 ?>

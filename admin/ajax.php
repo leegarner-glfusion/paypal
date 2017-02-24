@@ -61,11 +61,11 @@ case 'toggle':
 
         switch ($_GET['type']) {
         case 'enabled':
-            $newval = Product::toggleEnabled($_GET['oldval'], $_GET['id']);
+            $newval = ppProduct::toggleEnabled($_GET['oldval'], $_GET['id']);
             break;
 
         case 'featured':
-            $newval = Product::toggleFeatured($_GET['oldval'], $_GET['id']);
+            $newval = ppProduct::toggleFeatured($_GET['oldval'], $_GET['id']);
             break;
 
          default:
@@ -78,7 +78,7 @@ case 'toggle':
 
         switch ($_GET['type']) {
         case 'enabled':
-            $newval = Category::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = ppCategory::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
 
          default:
@@ -91,7 +91,7 @@ case 'toggle':
 
         switch ($_GET['type']) {
         case 'enabled':
-            $newval = Attribute::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = ppAttribute::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
 
          default:
@@ -105,7 +105,7 @@ case 'toggle':
 
         switch ($_GET['type']) {
         case 'enabled':
-            $newval = PaymentGw::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = ppPaymentGw::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
 
         case 'buy_now':

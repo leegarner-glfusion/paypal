@@ -397,7 +397,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
         return $retval;
 
     USES_paypal_class_product();
-    $item = new Product($id);
+    $item = new ppProduct($id);
     if ($item->isNew)
         return $retval;
 
@@ -883,7 +883,7 @@ function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 *   Returns the URL to the file, or to the directory if no file requested.
 *
 *   @see    plugin_getconfigelementhelp_paypal()
-*   @see    Product::showForm()
+*   @see    ppProduct::showForm()
 *   @param  string  $file       HTML file
 *   @param  string  $doclang    Documentation language
 *   @return string              URL to document directory or file
@@ -1039,7 +1039,7 @@ function phpblock_paypal_cart()
         }
 
         list($item_id, $options) = explode('|', $item['item_id']);
-        $P = new Product($item_id);
+        $P = new ppProduct($item_id);
         $item_total = $item['price'] * $item['quantity'];
 
         // Store the text for each attribute and custom field in an array,
@@ -1428,7 +1428,7 @@ function PAYPAL_phpblock_product($sql)
         ));
 
         USES_paypal_class_product();
-        $P = new Product();
+        $P = new ppProduct();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
             $P->Read($A['id']);
             $T->set_var(array(

@@ -71,13 +71,13 @@ $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : '';
 
 switch ($action) {
 case 'dup_product':
-    $P = new Product($_REQUEST['id']);
+    $P = new ppProduct($_REQUEST['id']);
     $P->Duplicate();
     echo COM_refresh(PAYPAL_ADMIN_URL.'/index.php');
     break;
 
 case 'deleteproduct':
-    $P = new Product($_REQUEST['id']);
+    $P = new ppProduct($_REQUEST['id']);
     if (!$P->isUsed()) {
         $P->Delete();
     } else {
@@ -89,7 +89,7 @@ case 'deletecatimage':
     USES_paypal_class_category();
     $id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
     if ($id > 0) {
-        $C = new Category($id);
+        $C = new ppCategory($id);
         $C->DeleteImage();
         $view = 'editcat';
         $_REQUEST['id'] = $id;
@@ -100,7 +100,7 @@ case 'deletecatimage':
 
 case 'deletecat':
     USES_paypal_class_category();
-    $C = new Category($_REQUEST['cat_id']);
+    $C = new ppCategory($_REQUEST['cat_id']);
     if (!$C->isUsed()) {
         $C->Delete();
     } else {
@@ -111,12 +111,12 @@ case 'deletecat':
 
 case 'delete_img':
     $img_id = (int)$_REQUEST['img_id'];
-    Product::DeleteImage($img_id);
+    ppProduct::DeleteImage($img_id);
     $view = 'editproduct';
     break;
 
 case 'saveproduct':
-    $P = new Product($_POST['id']);
+    $P = new ppProduct($_POST['id']);
     if (!$P->Save($_POST)) {
         $content .= PAYPAL_errMsg($P->PrintErrors());
         $view = 'editproduct';
@@ -125,7 +125,7 @@ case 'saveproduct':
 
 case 'savecat':
     USES_paypal_class_category();
-    $C = new Category($_POST['cat_id']);
+    $C = new ppCategory($_POST['cat_id']);
     if (!$C->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
         $view = 'editcat';
@@ -136,7 +136,7 @@ case 'savecat':
 
 case 'saveopt':
     USES_paypal_class_attribute();
-    $Attr = new Attribute($_POST['attr_id']);
+    $Attr = new ppAttribute($_POST['attr_id']);
     if (!$Attr->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
     }
@@ -151,7 +151,7 @@ case 'saveopt':
 case 'deleteopt':
     USES_paypal_class_attribute();
     // attr_id could be via $_GET or $_POST
-    $Attr = new Attribute($_REQUEST['attr_id']);
+    $Attr = new ppAttribute($_REQUEST['attr_id']);
     $Attr->Delete();
     $view = 'attributes';
     break;
@@ -320,7 +320,7 @@ case 'ipnlog':
 
 case 'editproduct':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    $P = new Product($id);
+    $P = new ppProduct($id);
     if ($id == 0 && isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
@@ -331,7 +331,7 @@ case 'editproduct':
 case 'editcat':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
     USES_paypal_class_category();
-    $C = new Category($id);
+    $C = new ppCategory($id);
     if ($id == 0 && isset($_POST['description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $C->SetVars($_POST);
@@ -348,7 +348,7 @@ case 'attributes':
         // Delete some checked attributes
         USES_paypal_class_attribute();
         foreach ($_POST['delitem'] as $attr_id) {
-            Attribute::Delete($attr_id);
+            ppAttribute::Delete($attr_id);
         }
     }
     $content .= PAYPAL_adminlist_Attributes();
@@ -357,7 +357,7 @@ case 'attributes':
 case 'editattr':
     USES_paypal_class_attribute();
     $attr_id = isset($_REQUEST['attr_id']) ? $_REQUEST['attr_id'] : '';
-    $Attr = new Attribute($attr_id);
+    $Attr = new ppAttribute($attr_id);
     $content .= $Attr->Edit();
     break;
 
@@ -1537,7 +1537,7 @@ function PAYPAL_itemhist($item_id = '')
     global $_TABLES, $LANG_PP;
 
     if (is_numeric($item_id)) {
-        $Item = new Product($item_id);
+        $Item = new ppProduct($item_id);
         $item_desc = $Item->short_description;
     } else {
         $item_desc = $item_id;

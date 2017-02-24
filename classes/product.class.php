@@ -16,7 +16,7 @@
 *   Class for product
 *   @package paypal
 */
-class Product
+class ppProduct
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -446,7 +446,7 @@ class Product
             // Handle image uploads.  This is done last because we need
             // the product id to name the images filenames.
             if (!empty($_FILES['images'])) {
-                $U = new ProductImage($this->id, 'images');
+                $U = new ppProductImage($this->id, 'images');
                 $U->uploadFiles();
 
                 if ($U->areErrors() > 0) {
@@ -864,25 +864,14 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    private function _toggle($oldvalue, $varname, $id=0)
+    private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
-        // See if we're called with an ID, or expecting to use the
-        // current object.
         $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return;
-        }
-
-        // If it's still an invalid ID, return the old value
-        if ($id < 1)
-            return $oldvalue;
 
         // Determing the new value (opposite the old)
+        $oldvalue = $oldvalue == 1 ? 1 : 0;
         $newvalue = $oldvalue == 1 ? 0 : 1;
 
         $sql = "UPDATE {$_TABLES['paypal.products']}
@@ -908,17 +897,9 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public function toggleEnabled($oldvalue, $id=0)
+    public static function toggleEnabled($oldvalue, $id=0)
     {
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return $oldvalue;
-        }
-        return Product::_toggle($oldvalue, 'enabled', $id);
+        return self::_toggle($oldvalue, 'enabled', $id);
     }
 
 
@@ -930,17 +911,9 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public function toggleFeatured($oldvalue, $id=0)
+    public static function toggleFeatured($oldvalue, $id=0)
     {
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->id;
-            else
-                return $oldvalue;
-        }
-        return Product::_toggle($oldvalue, 'featured', $id);
+        return self::_toggle($oldvalue, 'featured', $id);
     }
 
 
@@ -1623,6 +1596,6 @@ class Product
             return $str;
     }
 
-}   // class Product
+}   // class ppProduct
 
 ?>

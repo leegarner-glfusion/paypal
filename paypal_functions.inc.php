@@ -351,7 +351,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     $cat_img_url = '';
     $display = '';
     if ($cat_id != 0) {
-        $Cat = new Category($cat_id);
+        $Cat = new ppCategory($cat_id);
         if ($Cat->isNew || !$Cat->hasAccess()) {
             echo COM_refresh(PAYPAL_URL);
             exit;
@@ -601,7 +601,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     $display .= $product->parse('', 'start');
 
     // Create an empty product object
-    $P = new Product();
+    $P = new ppProduct();
 
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds('paypal');
