@@ -101,5 +101,6 @@ $_PP_CONF['buttons'] = array(
 );
 
 $_PP_CONF['tpl_ver_detail'] = '/v1';
-
+$_PP_CONF['tmpdir'] = $_CONF['path'] . 'data/paypal/';
+$_PP_CONF['download_path'] = $_PP_CONF['tmpdir'] . 'files/';
 ?>

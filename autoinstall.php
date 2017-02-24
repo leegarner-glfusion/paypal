@@ -236,10 +236,10 @@ function plugin_postinstall_paypal()
     // 0.5.0 - download path moved under tmpdir, so both are created
     //      here.
     $paths = array(
-        $_PP_DEFAULTS['tmpdir'],
-        $_PP_DEFAULTS['tmpdir'] . 'keys',
-        $_PP_DEFAULTS['tmpdir'] . 'cache',
-        $_PP_DEFAULTS['download_path'],
+        $_PP_CONF['tmpdir'],
+        $_PP_CONF['tmpdir'] . 'keys',
+        $_PP_CONF['tmpdir'] . 'cache',
+        $_PP_CONF['download_path'],
     );
     foreach ($paths as $path) {
         COM_errorLog("Creating $path", 1);

@@ -477,11 +477,37 @@ function PAYPAL_do_upgrade()
         // Remove stray .htaccess file that interferes with plugin removal
         @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
         if (!PAYPAL_do_upgrade_sql('0.5.9')) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    // Final version setting
-    if (!PAYPAL_do_set_version($current_ver)) return false;
-
+    if (!COM_checkVersion($current_ver, '0.5.10')) {
+        $current_ver = '0.5.10';
+        // Changed working dir to a static config item, so make sure the
+        // paths are set up in case the web admin changed them
+        // Set the tmpdir to a static path, config value will be removed
+        // later.
+        $tmpdir = $_CONF['path'] . 'data/paypal/';
+        $paths = array(
+            $tmpdir,
+            $tmpdir . 'keys',
+            $tmpdir . 'cache',
+            $tmpdir . 'files',
+        );
+        foreach ($paths as $path) {
+            COM_errorLog("Creating $path", 1);
+            if (!is_dir($path)) {
+                mkdir($path, 0755, true);
+            }
+            if (!is_writable($path)) {
+                COM_errorLog("Cannot write to $path", 1);
+            }
+        }
+        // Delete config option and working-directory fieldset
+        $c->del('tmpdir', 'paypal');
+        $c->del('fs_encbtn', 'paypal');
+        if (!PAYPAL_do_set_version($current_ver)) return false;
+    }
+ 
     CTL_clearCache($_PP_CONF['pi_name']);
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
     return true;
