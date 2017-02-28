@@ -59,7 +59,7 @@ $content = '';
 $breadcrumbs = '';
 if (!empty($id)) {
     USES_paypal_class_product();
-    $P = new Product($id);
+    $P = new ppProduct($id);
     if ($P->id == $id) {
         $breadcrumbs = PAYPAL_breadCrumbs($P->cat_id);
         $content .= $P->Detail();
