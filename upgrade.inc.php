@@ -31,7 +31,13 @@ function PAYPAL_do_upgrade()
     global $_TABLES, $_CONF, $_PP_CONF, $_PP_DEFAULTS, $PP_UPGRADE, $_PLUGIN_INFO;
 
     if (isset($_PLUGIN_INFO[$_PP_CONF['pi_name']])) {
-        $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']];
+        if (is_array($_PLUGIN_INFO[$_PP_CONF['pi_name']])) {
+            // glFusion >= 1.6.6
+            $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']]['pi_version'];
+        } else {
+            // legacy
+            $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']];
+        }
     } else {
         return false;
     }
