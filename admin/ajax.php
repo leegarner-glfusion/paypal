@@ -20,19 +20,19 @@ if (!plugin_ismoderator_paypal()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the classifieds admin ajax function.");
     exit;
 }
-switch ($_GET['action']) {
+switch ($_REQUEST['action']) {
 case 'updatestatus':
-    if (!empty($_GET['order_id']) &&
-        !empty($_GET['newstatus'])) {
-        $showlog = $_GET['showlog'] == 1 ? 1 : 0;
+    if (!empty($_POST['order_id']) &&
+        !empty($_POST['newstatus'])) {
+        $showlog = $_POST['showlog'] == 1 ? 1 : 0;
         USES_paypal_class_order();
         $log_ts = '';
         $log_user = '';
         $log_msg = '';
-        $newstatus = $_GET['newstatus'];
-        $order_id = $_GET['order_id'];
-        $showlog = $_GET['showlog'] == 1 ? 1 : 0;
-        $ord = new ppOrder($_GET['order_id']);
+        $newstatus = $_POST['newstatus'];
+        $order_id = $_POST['order_id'];
+        $showlog = $_POST['showlog'] == 1 ? 1 : 0;
+        $ord = new ppOrder($_POST['order_id']);
         if ($ord->isNew) break;     // non-existant order
         if ($ord->UpdateStatus($newstatus)) {
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
@@ -42,7 +42,10 @@ case 'updatestatus':
             //echo $sql;die;
             $L = DB_fetchArray(DB_query($sql), false);
             if (!empty($L)) {
-                $L['newstatus'] = $ord->status;
+                // Add flag to indicate whether to update on-screen log
+                $L['showlog'] = $showlog;
+                $dt = new Date($L['ts'], $_CONF['timezone']);
+                $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
             }
         }
         header('Content-Type: text/xml');
@@ -55,17 +58,17 @@ case 'updatestatus':
     break;
 
 case 'toggle':
-    switch ($_GET['component']) {
+    switch ($_POST['component']) {
     case 'product':
         USES_paypal_class_product();
 
-        switch ($_GET['type']) {
+        switch ($_POST['type']) {
         case 'enabled':
-            $newval = ppProduct::toggleEnabled($_GET['oldval'], $_GET['id']);
+            $newval = ppProduct::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
         case 'featured':
-            $newval = ppProduct::toggleFeatured($_GET['oldval'], $_GET['id']);
+            $newval = ppProduct::toggleFeatured($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -76,7 +79,7 @@ case 'toggle':
     case 'category':
         USES_paypal_class_category();
 
-        switch ($_GET['type']) {
+        switch ($_POST['type']) {
         case 'enabled':
             $newval = ppCategory::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
@@ -89,7 +92,7 @@ case 'toggle':
     case 'attribute':
         USES_paypal_class_attribute();
 
-        switch ($_GET['type']) {
+        switch ($_POST['type']) {
         case 'enabled':
             $newval = ppAttribute::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
@@ -103,9 +106,9 @@ case 'toggle':
     case 'gateway':
         USES_paypal_gateway();
 
-        switch ($_GET['type']) {
+        switch ($_POST['type']) {
         case 'enabled':
-            $newval = ppPaymentGw::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = PaymentGw::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
 
         case 'buy_now':
@@ -123,7 +126,7 @@ case 'toggle':
 
     case 'workflow':
         USES_paypal_class_workflow();
-        $field = $_GET['type'];
+        $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
             $newval = ppWorkflow::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
@@ -136,7 +139,7 @@ case 'toggle':
 
     case 'orderstatus':
         USES_paypal_class_orderstatus();
-        $field = $_GET['type'];
+        $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
         case 'notify_buyer':
@@ -154,10 +157,12 @@ case 'toggle':
 
     // Common output for all toggle functions.
     $retval = array(
-        'id'    => $_GET['id'],
-        'type'  => $_GET['type'],
-        'component' => $_GET['component'],
+        'id'    => $_POST['id'],
+        'type'  => $_POST['type'],
+        'component' => $_POST['component'],
         'newval'    => $newval,
+        'statusMessage' => $newval != $_POST['oldval'] ? 
+                $LANG_PP['msg_updated'] : $LANG_PP['msg_unchanged'],
     );
 
     header('Content-Type: text/xml');

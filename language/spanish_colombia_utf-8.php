@@ -290,6 +290,8 @@ $LANG_PP = array (
     ),
 'my_orders' => 'My Orders',
 'no_products_match' => 'No products match your search parameters',
+'msg_updated' => 'Item has been updated',
+'msg_nochange' => 'Item is unchanged',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

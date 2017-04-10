@@ -549,7 +549,7 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Product::isUsed($A['id'])) {
+        if (!ppProduct::isUsed($A['id'])) {
             if ($is_uikit) {
                 $retval .= COM_createLink('',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
@@ -584,7 +584,7 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togenabled{$A['id']}\"
                 onclick='PP_toggle(this,\"{$A['id']}\",\"enabled\",".
-                "\"product\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"product\");' />" . LB;
         break;
 
     case 'featured':
@@ -598,7 +598,7 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togfeatured{$A['id']}\"
                 onclick='PP_toggle(this,\"{$A['id']}\",\"featured\",".
-                "\"product\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"product\");' />" . LB;
         break;
 
     case 'name':
@@ -960,7 +960,7 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togenabled{$A['cat_id']}\"
                 onclick='PP_toggle(this,\"{$A['cat_id']}\",\"enabled\",".
-                "\"category\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"category\");' />" . LB;
         break;
 
     case 'grp_access':
@@ -973,7 +973,7 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Category::isUsed($A['cat_id'])) {
+        if (!ppCategory::isUsed($A['cat_id'])) {
             if ($is_uikit) {
                 $retval .= COM_createLink('',
                     PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
@@ -1150,7 +1150,7 @@ function PAYPAL_getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togenabled{$A['attr_id']}\"
                 onclick='PP_toggle(this,\"{$A['attr_id']}\",\"enabled\",".
-                "\"attribute\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"attribute\");' />" . LB;
         break;
 
     case 'delete':
@@ -1308,7 +1308,7 @@ function PAYPAL_getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togenabled{$A['id']}\"
                 onclick='PP_toggle(this,\"{$A['id']}\",\"{$fieldname}\",".
-                "\"gateway\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"gateway\");' />" . LB;
         break;
 
     case 'orderby':
@@ -1491,7 +1491,7 @@ function PAYPAL_getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"{$fieldname}_check\"
                 id=\"tog{$fieldname}{$A['id']}\"
                 onclick='PP_toggle(this,\"{$A['id']}\",\"{$fieldname}\",".
-                "\"{$A['rec_type']}\",\"".PAYPAL_ADMIN_URL."\");' />" . LB;
+                "\"{$A['rec_type']}\");' />" . LB;
         break;
 
     case 'orderby':
