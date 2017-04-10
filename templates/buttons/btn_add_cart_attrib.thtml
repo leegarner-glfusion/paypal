@@ -17,7 +17,7 @@
 <!--&nbsp;&nbsp;<button type="button" class="paypalButton orange" border="0" 
     name="addcartitem" value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>-->
   &nbsp;&nbsp;<button type="button" class="paypalButton orange" border="0" 
-    onclick='ppAddToCart();' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}XX</button>
+    onclick='ppAddToCart();' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>
     </div>
   </div>
 {!if form_url}
