@@ -210,7 +210,7 @@ class ppAttribute
                 attr_name='" . DB_escapeString($this->attr_name) . "',
                 attr_value='" . DB_escapeString($this->attr_value) . "',
                 orderby='{$this->orderby}',
-                attr_price='{$this->attr_price}',
+                attr_price='" . number_format($this->attr_price, 2, '.', '') . "',
                 enabled='{$this->enabled}'";
         $sql = $sql1 . $sql2 . $sql3;
 
