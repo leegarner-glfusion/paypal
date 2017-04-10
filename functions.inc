@@ -1517,6 +1517,7 @@ function plugin_itemrated_paypal($id, $rating, $votes)
 {
     global $_TABLES;
 
+    $rating = number_format($rating, 2, '.', '');
     $sql = "UPDATE {$_TABLES['paypal.products']}
             SET rating = $rating, votes = $votes
             WHERE id=".$id;
