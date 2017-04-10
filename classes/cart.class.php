@@ -70,13 +70,9 @@ class ppCart
             }
 
             // Cart ID can be passed in, typically by IPN processors
+            // If not, get the cart based on session or user ID
             if (empty($cart_id)) {
-                if (!empty($_SESSION[PP_CART_VAR]['cart_id'])) {
-                    $cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
-                } elseif (!COM_isAnonUser()) {
-                    $uid = (int)$_USER['uid'];
-                    $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id', "cart_uid = $uid");
-                }
+                $cart_id = self::getCart();
             }
             // If a cart ID still not found, create a new one
             if (empty($cart_id)) {
@@ -91,18 +87,7 @@ class ppCart
         }
 
         $this->m_cart = array();
-        //$this->m_billto = array();
-        //$this->m_shipto = array();
         $this->m_info = array();
-
-        /*$txt = DB_getItem($_TABLES['paypal.cart'], 'cart_contents',
-                    "cart_id = '".DB_escapeString($this->m_cart_id)."'");
-        if (!empty($txt)) {
-            $cart = @unserialize($txt);
-            if ($cart) {
-                $this->m_cart = $cart['items'];
-            }
-        }*/
         $this->Load();
     }
 
@@ -186,7 +171,7 @@ class ppCart
                     'uid=' . (int)$_USER['uid']);
 
         if (!empty($txt)) {         // No saved cart
-            $saved = unserialize($txt);
+            $saved = @unserialize($txt);
             if (!$saved) return;    // Unable to unserialize
         }
 
@@ -268,10 +253,8 @@ class ppCart
                     cart = '$cart'";
         //echo $sql;die;
         DB_query($sql, 1);
-
-        // TODO: Delete cart table contents?
-
         if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);
+        // TODO: Delete cart table contents?
     }
 
 
@@ -501,7 +484,7 @@ class ppCart
 
             if (is_numeric($item_id)) {
                 // a catalog item, get the "right" price
-                $P = new Product($item_id);
+                $P = new ppProduct($item_id);
                 $item_price = $P->getPrice($attr_keys, $item['quantity']);
                 if (!empty($attr_keys)) {
                     foreach ($attr_keys as $attr_key) {
@@ -762,6 +745,34 @@ class ppCart
     {
         if ($type != 'billto') $type = 'shipto';
         return $this->m_info[$type];
+    }
+
+
+    /**
+    *   Get a cart for a given user
+    *   Gets the latest cart, and cleans up extra carts that may accumulate
+    *   due to expired sessions
+    */
+    public function getCart($uid = 0)
+    {
+        global $_USER, $_TABLES;
+
+        $cart_id = NULL;
+        $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
+
+        if (COM_isAnonUser()) {
+            if (!empty($_SESSION[PP_CART_VAR]['cart_id'])) {
+                $cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
+            }
+        } else {
+            $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
+                "cart_uid = $uid ORDER BY last_update DESC limit 1");
+            if (!empty($cart_id)) {
+                DB_query("DELETE FROM {$_TABLES['paypal.cart']}
+                    WHERE cart_id <> '" . DB_escapeString($cart_id) . "'");
+            }
+        }
+        return $cart_id;
     }
 
 }   // class ppCart
