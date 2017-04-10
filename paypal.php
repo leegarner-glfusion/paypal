@@ -26,7 +26,7 @@ global $_PP_CONF;
 $_PP_CONF['pi_name']            = 'paypal';
 $_PP_CONF['pi_display_name']    = 'PayPal';
 $_PP_CONF['pi_version']         = '0.5.10';
-$_PP_CONF['gl_version']         = '1.4.0';
+$_PP_CONF['gl_version']         = '1.6.0';
 $_PP_CONF['pi_url']             = 'http://www.glfusion.org';
 
 $_PP_table_prefix = $_DB_table_prefix . 'pp_';
