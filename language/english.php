@@ -293,6 +293,7 @@ $LANG_PP = array (
 'no_products_match' => 'No products match your search parameters',
 'msg_updated' => 'Item has been updated',
 'msg_nochange' => 'Item is unchanged',
+'msg_item_added' => 'Item has been added to your cart',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
