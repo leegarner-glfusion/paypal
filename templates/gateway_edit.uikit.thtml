@@ -1,14 +1,17 @@
 {# begin {templatelocation} #}
 <h2>{gw_description}</h2>
+{!if doc_url}
+<a href="#" onclick="popupWindow('{doc_url}', 'Help', 640, 480, 1);return false;" class="toolbar">{$LANG_PP['clk_help']}</a>
+{!endif}
 <form action="{pi_admin_url}/index.php" method="post" class="uk-form uk-form-horizontal">
   <input type="hidden" name="gw_id" value="{gw_id}" />
   <!-- BEGIN ItemRow -->
   <div class="uk-form-row">
     <label class="uk-form-label" for="{field_name}">{param_name}:
-      <span id="{field_name}" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
       {param_field}
+      <span id="{field_name}" class="tooltip_cfg tooltipstered"></span> 
     </div>
   </div>
   <!-- END ItemRow -->
@@ -23,7 +26,7 @@
 
   <div class="uk-form-row">
     <label class="uk-form-label">{$LANG_PP['txt_buttons']}:
-      <span id="txt_buttons" class="tooltip_cfg tooltipstered"></span> 
+      <span id="services" class="tooltip_cfg tooltipstered"></span> 
     </label>
     <div class="uk-form-controls">
       {svc_checkboxes}
@@ -47,4 +50,31 @@
     </div>
   </div>
 </form>
+<script type="text/javascript">
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
+});
+</script>
 {# end {templatelocation} #}
