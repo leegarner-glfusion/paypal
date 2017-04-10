@@ -31,7 +31,7 @@ case 'getAddress':
     $A = DB_fetchArray($res, false);
     //if (!empty($A)) {
     break;
-case 'addcartitem':
+/*case 'Xaddcartitem':
     USES_paypal_class_cart();
     $ppGCart = new ppCart();
     $view = 'list';
@@ -43,6 +43,27 @@ case 'addcartitem':
     $new_qty = $ppGCart->addItem($_GET['item_number'], $_GET['item_name'],
                 $_GET['item_descr'], $qty, $price, $opts);
     echo json_encode(array('qty' => $new_qty));
+    break;
+*/
+case 'addcartitem':
+COM_errorLog(print_r($_POST, true));
+    if (!isset($_POST['item_number'])) {
+        echo '';
+         exit;
+    }
+    USES_paypal_class_cart();
+    PAYPAL_setCart();
+    if (isset($_POST['_unique']) && $_POST['_unique'] &&
+            $ppGCart->Contains($_POST['item_number']) !== false) {
+        break;
+    }
+    $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
+    $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
+                $_POST['item_descr'], $qty, 
+                $_POST['amount'], $_POST['options'], $_POST['extras']);
+    $content = phpblock_paypal_cart_contents();
+    echo $content;
+    exit;
     break;
 }
 
