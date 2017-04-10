@@ -29,5 +29,6 @@ $LANG_PP_paypal = array(
 'prod_url'      => 'PayPal Url - Production',
 'sandbox_url'   => 'PayPal Url - Sandbox',
 'test_mode'     => 'Testing (Sandbox) Mode?',
+'ipn_url'       => 'IPN URL Override',
 );
 ?>

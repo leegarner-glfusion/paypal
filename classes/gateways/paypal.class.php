@@ -69,6 +69,7 @@ class paypal extends PaymentGw
             'pub_key'           => '',
             'prod_url'          => 'https://www.paypal.com',
             'sandbox_url'       => 'https://www.sandbox.paypal.com',
+            'ipn_url'           => '',
         );
 
         // Call the parent constructor to initialize the common variables.
@@ -93,6 +94,10 @@ class paypal extends PaymentGw
         $this->cert_id = $this->config['pp_cert_id'];
         $this->receiver_email = $this->config['bus_prod_email'];
 
+        // Override the default IPN URL if an override is provided
+        if (!empty($this->config['ipn_url'])) {
+            $this->ipn_url = $this->config['ipn_url'];
+        }
     }
 
 
@@ -155,7 +160,7 @@ class paypal extends PaymentGw
             $this->services[$key] = $value == 1 ? 1 : 0;
             break;*/
         }
-    }                
+    }
 
 
     /**
@@ -218,7 +223,7 @@ class paypal extends PaymentGw
             //$opt_str = '';
             list($db_item_id, $options) = explode('|', $item['item_id']);
             if (is_numeric($db_item_id)) {
-                $P = new Product($db_item_id);
+                $P = new ppProduct($db_item_id);
                 $db_item_id = DB_escapeString($db_item_id);
                 $oc = 0;
                 if (is_array($item['options'])) {
@@ -557,7 +562,7 @@ class paypal extends PaymentGw
         // phrase if not available
         $btn_text = isset($LANG_PP['buttons'][$btn_type]) ? 
                 $LANG_PP['buttons'][$btn_type] : $LANG_PP['buy_now'];
-        
+
         $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                     $this->gw_name);
         $T->set_file('btn', 'btn_' . $btn_info['tpl'] . '.thtml');
