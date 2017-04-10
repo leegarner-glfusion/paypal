@@ -1,29 +1,9 @@
 {# begin {templatelocation} #}
-<div class="paypalBlock">
-<!-- BEGIN CartRow -->
-  <div class="CartItem">
-    {quantity} x
-    {!if link_item}
-      <a href="{pi_url}/detail.php?id={item_id}">{item_name}</a>
-    {!else}
-      {item_name}
-    {!endif}
-    {!if options}
-      <div class="ItemOptions">
-        {options}
-      </div>
-    {!endif}
-  </div>
-<!-- END CartRow -->
-  <div id="CartTotal">
-    {$LANG_PP['total']}:
-    <span id="CartTotalAmount">{grand_total}</span>
-  </div>
+<div class="paypalBlock" id="ppCartBlockContents">
+  {cart_contents}
 </div>
 
 <span class="aligncenter">
-    <a href="{pi_url}/index.php?view=cart">{$LANG_PP['viewcart']}</a>
-    <!--&nbsp;-&nbsp;
-    <a href="{pi_url}/index.php?checkout=x">{$LANG_PP['checkout']}</a> -->
+  <a href="{site_url}/paypal/index.php?view=cart">{$LANG_PP['viewcart']}</a>
 </span>
 {# end {templatelocation} #}

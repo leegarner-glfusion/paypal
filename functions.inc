@@ -819,8 +819,8 @@ function plugin_getheaderjs_paypal()
 {
     $files = array(
         PAYPAL_PI_PATH . '/js/toggleEnabled.js',
+        PAYPAL_PI_PATH . '/js/addcart.js',
     );
-
     return $files;
 }
 
@@ -1006,14 +1006,34 @@ function plugin_getcommenturlid_paypal()
 /**
 *   Creates the shopping cart block, if the cart is not empty.
 *
-*   Each item in the cart is shown along with its quantity, and links
-*   to view the cart or check out.
-*
+*   @uses   phpblock_paypal_cart_contents()
 *   @return string      HTML for the shopping cart block.
 */
 function phpblock_paypal_cart()
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_TABLES;
+    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T->set_file('shopping_cart', 'blk_cart.thtml');
+    $contents = phpblock_paypal_cart_contents();
+    if ($contents == '') return '';
+    $T->set_var('cart_contents', $contents);
+    $T->parse('output', 'shopping_cart');
+    return $T->finish ($T->get_var('output'));
+}
+
+
+/**
+*   Supplies the actual content for the shopping cart block.
+*   Used to allow AJAX updates to the cart display
+*
+*   Each item in the cart is shown along with its quantity, and links
+*   to view the cart or check out.
+*
+*   @see    phpblock_paypal_cart()
+*   @return string      HTML for the shopping cart block.
+*/
+function phpblock_paypal_cart_contents()
+{
+    global $_PP_CONF, $LANG_PP;
 
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
@@ -1023,12 +1043,11 @@ function phpblock_paypal_cart()
     $cart = new ppCart();
 
     // If the cart is empty, the block isn't shown
-    if (!$cart->hasItems()) return '';
+    if (!$cart->hasItems()) return $LANG_PP['cart_empty'];
 
     $T = new Template(PAYPAL_PI_PATH . '/templates');
-    $T->set_file('shopping_cart', 'blk_cart.thtml');
-
-    $T->set_block('shopping_cart', 'CartRow', 'cRow');
+    $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');
+    $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
 
     foreach ($cart->Cart() as $id=>$item) {
         $link = true;
@@ -1037,11 +1056,9 @@ function phpblock_paypal_cart()
             $item_info = explode(':', $item['item_id']);
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
-
         list($item_id, $options) = explode('|', $item['item_id']);
         $P = new ppProduct($item_id);
-        $item_total = $item['price'] * $item['quantity'];
-
+        $item_price = $item['price'];
         // Store the text for each attribute and custom field in an array,
         // then implode around linebreaks to display them
         $opt_str = '';
@@ -1051,8 +1068,10 @@ function phpblock_paypal_cart()
             foreach ($opt_ids as $opt_id) {
                 $opt_arr[] = $P->options[$opt_id]['attr_name'] . ': '.
                         $P->options[$opt_id]['attr_value'];
+                $item_price += (float)$P->options[$opt_id]['attr_price'];
             }
         }
+        $item_total = $item_price * $item['quantity'];
         $text_names = explode('|', $P->custom);
 
         if (!empty($text_names) && is_array($item['extras']['custom'])) {
@@ -1078,7 +1097,7 @@ function phpblock_paypal_cart()
     $T->set_var(array(
         'grand_total'   => COM_numberFormat($total, 2),
     ) );
-    $T->parse('output', 'shopping_cart');
+    $T->parse('output', 'shopping_cart_contents');
     $block = $T->finish ($T->get_var('output'));
 
     return $block;
