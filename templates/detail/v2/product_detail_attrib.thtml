@@ -90,6 +90,7 @@ $(document).ready(
 window.addEvent('load',
 {!endif}
   function() {
+    
     checkForJavascript();
     ProcessForm();
 });
@@ -151,13 +152,16 @@ target="_blank" rel="slimbox[product]">
 {!endif}
 
 <div class="paypalDetailAttrib v2 uk-width-1-4">
-  <form class="uk-form" id="add_cart" action="{site_url}/paypal/index.php" method="post">
+  <form class="uk-form" method="post" id="add_cart" action="">
+{!if 0}
+action="{site_url}/paypal/index.php" method="post">
+{!endif}
     <div>
       {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
-      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
       {!else}
-      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{price}</span><span class="paypalPrice normal">{price_postfix}</span>
+      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
       {!endif}
       {!if qty_disc}
       <br /><span class="paypalQtyDisc">{qty_disc}</span>
@@ -197,17 +201,18 @@ target="_blank" rel="slimbox[product]">
   <!-- BEGIN BtnBlock -->
   {buy_now_button}<br />
   <!-- END BtnBlock -->
-{!if rating_bar}
-  <div class="ppRatingBar detail v2">{rating_bar}</div>
-{!endif}
 </div>
 
+{!if rating_bar}
+  <div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
+{!endif}
 {!if main_img}
 {# with a main image the description goes below the image and price #}
 <div id="paypalProductDesc" class="ppProductDesc v2">
   {description}
 </div>
 {!endif}
+
 
 <div class="paypalComments">
   {usercomments}

@@ -999,25 +999,6 @@ class ppProduct
             }
         }
  
-        $T->set_var(array(
-            'is_uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
-            'have_attributes'   => $this->hasAttributes(),
-            //'currency'          => $_PP_CONF['currency'],
-            'id'                => $prod_id,
-            'name'              => $name,
-            'short_description' => $s_desc,
-            'description'       => $l_desc,
-            'cur_decimals'      => $this->currency->Decimals(),
-            'price'             => $this->currency->FormatValue($act_price),
-            'orig_price'        => $this->currency->Format($this->price),
-            'on_sale'           => $onsale ? 'true' : '',
-            'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
-            'price_prefix'      => $this->currency->Pre(),
-            'price_postfix'     => $this->currency->Post(),
-            'onhand'            => $this->track_onhand ? $this->onhand : '',
-            'qty_disc'          => $qty_disc_txt,
-        ) );
-
         // Retrieve the photos and put into the template
         $sql = "SELECT img_id, filename
                 FROM {$_TABLES['paypal.images']} 
@@ -1059,6 +1040,8 @@ class ppProduct
 
         // Get the product options, if any, and set them into the form
         $cbrk = '';
+        $init_price_adj = NULL;
+        $orig_price = $this->price;
         $T->set_block('product', 'AttrSelect', 'attrSel');
         foreach ($this->options as $id=>$Attr) {
             /*if ($Attr['attr_value'] === '') {
@@ -1068,6 +1051,12 @@ class ppProduct
             }*/
             $type = 'select';
             if ($Attr['attr_name'] != $cbrk) {
+                // Adjust the price for cases where all attributes have prices
+                if ($init_price_adj !== NULL) {
+                    $act_price += $init_price_adj;
+                    $orig_price += $init_price_adj;
+                }
+                $init_price_adj = NULL;
                 if ($cbrk != '') {      // end block if not the first element
                     $T->set_var(array(
                         'attr_name' => $cbrk,
@@ -1081,10 +1070,11 @@ class ppProduct
             }
             
             if ($type == 'select') {
+                if ($init_price_adj === NULL) $init_price_adj = $Attr['attr_price'];
                 if ($Attr['attr_price'] != 0) {
                     $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
                 } else {
-                $attr_str = '';
+                    $attr_str = '';
                 }
                 $attributes .= '<option value="' . $id . '|' . 
                     $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
@@ -1099,6 +1089,10 @@ class ppProduct
             }
         }
         if ($cbrk != '') {      // finish off the last selection
+            if ($init_price_adj !== NULL) {
+                $act_price += $init_price_adj;
+                $orig_price += $init_price_adj;
+            }
             $T->set_var(array(
                 'attr_name' => $cbrk,
                 'attr_options' => $attributes,
@@ -1106,7 +1100,27 @@ class ppProduct
             ) );
             $T->parse('attrSel', 'AttrSelect', true);
         }
- 
+
+        $T->set_var(array(
+            'is_uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
+            'have_attributes'   => $this->hasAttributes(),
+            //'currency'          => $_PP_CONF['currency'],
+            'id'                => $prod_id,
+            'name'              => $name,
+            'short_description' => $s_desc,
+            'description'       => $l_desc,
+            'cur_decimals'      => $this->currency->Decimals(),
+            'init_price'        => $this->currency->FormatValue($act_price),
+            'price'             => $this->currency->FormatValue($this->price),
+            'orig_price'        => $this->currency->Format($orig_price),
+            'on_sale'           => $onsale ? 'true' : '',
+            'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
+            'price_prefix'      => $this->currency->Pre(),
+            'price_postfix'     => $this->currency->Post(),
+            'onhand'            => $this->track_onhand ? $this->onhand : '',
+            'qty_disc'          => $qty_disc_txt,
+        ) );
+
         $buttons = $this->PurchaseLinks();
         $T->set_block('product', 'BtnBlock', 'Btn');
         foreach ($buttons as $name=>$html) {
@@ -1571,6 +1585,7 @@ class ppProduct
     *   Determine if a product is available for sale based on dates
     *   Default availability dates are from 1900-01-01 to 9999-12-31
     *
+    *   @param  boolean $isadmin    True if this is an admin, can view all
     *   @return boolean True if on sale, false if not
     */
     public function isAvailable($isadmin = false)
