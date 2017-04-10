@@ -431,7 +431,6 @@ class ppAttribute
             }
             $order += $stepNumber;
         }
-
     }
 
 }   // class ppAttribute

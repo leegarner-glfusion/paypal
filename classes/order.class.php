@@ -3,10 +3,10 @@
 *   Order class for the Paypal plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.5.10
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -21,12 +21,12 @@ class ppOrder
     private $properties = array();
     private $isNew = true;
     var $no_shipping = 1;
-    private $_addr_fields = array('billto_name', 
-            'billto_company', 'billto_address1', 'billto_address2', 
+    private $_addr_fields = array('billto_name',
+            'billto_company', 'billto_address1', 'billto_address2',
             'billto_city', 'billto_state', 'billto_country', 'billto_zip',
             'shipto_name',
             'shipto_company', 'shipto_address1', 'shipto_address2',
-            'shipto_city', 'shipto_state', 'shipto_country', 
+            'shipto_city', 'shipto_state', 'shipto_country',
             'shipto_zip',
     );
 
@@ -37,7 +37,7 @@ class ppOrder
     *
     *   @param  string  $id     Optional order ID to read
     */
-    public function __construct($id='') 
+    public function __construct($id='')
     {
         global $_USER, $_PP_CONF;
 
@@ -117,7 +117,7 @@ class ppOrder
         if ($id != '') {
             $this->order_id = $id;
 
-            $sql = "SELECT * FROM {$_TABLES['paypal.orders']} 
+            $sql = "SELECT * FROM {$_TABLES['paypal.orders']}
                     WHERE order_id='{$this->order_id}'";
             $res = DB_query($sql);
             if (!$res) return false;    // requested order not found
@@ -128,7 +128,7 @@ class ppOrder
 
         // Now load the items
         $this->items = array();
-        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']} 
+        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
                 WHERE order_id = '{$this->order_id}'";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
@@ -178,7 +178,7 @@ class ppOrder
         if (!is_array($data['flags'])) {
             $data['flags'] = array('flag' => $data['flags']);
         }
-        $X = DB_fetchArray(DB_query("SELECT * 
+        $X = DB_fetchArray(DB_query("SELECT *
                     FROM {$_TABLES['paypal.products']}
                     WHERE id='".DB_escapeString($item_id)."'"), false);
         $this->items[$item_number] = array(
@@ -197,7 +197,7 @@ class ppOrder
                 $optname_arr[] = DB_getItem($_TABLES['paypal.prod_attr'],
                             'attr_value', "attr_id='".(int)$opt_id."'");
             }
-            $this->items[$item_number]['descrip'] .= 
+            $this->items[$item_number]['descrip'] .=
                     ' (' . implode(', ', $optname_arr) . ')';
         }
     }
@@ -323,7 +323,7 @@ class ppOrder
         }
 
         $order_id = DB_escapeString($order_id);
-        $status = (int)DB_getItem($_TABLES['paypal.orders'], 
+        $status = (int)DB_getItem($_TABLES['paypal.orders'],
                 'status', "order_id='$order_id'");
         if ($status == PP_STATUS_OPEN) {
             DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
@@ -368,9 +368,9 @@ class ppOrder
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
             $_SESSION[PP_CART_VAR]['order_id'] = $this->order_id;
-            $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET 
-                    order_id='{$this->order_id}', 
-                    order_date = '{$this->order_date}', 
+            $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
+                    order_id='{$this->order_id}',
+                    order_date = '{$this->order_date}',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
             $log_msg = 'Order Created';
@@ -430,8 +430,8 @@ class ppOrder
             $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
         }
         $T->set_file('order', "order$tpltype.thtml");
- 
-        $isAdmin = SEC_hasRights('paypal.admin') ? true : false;
+
+        $isAdmin = plugin_ismoderator_paypal() ? true : false;
 
         foreach ($this->_addr_fields as $fldname) {
             $T->set_var($fldname, $this->$fldname);
@@ -451,7 +451,7 @@ class ppOrder
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
-            $P = new Product($item['product_id']);
+            $P = new ppProduct($item['product_id']);
             $item_options = '';
             $opt = json_decode($item['options_text'], true);
             if ($opt) {
@@ -489,7 +489,6 @@ class ppOrder
             'pi_admin_url' => PAYPAL_ADMIN_URL,
             'total'     => sprintf('%6.2f', $total),
             'not_final' => $final ? '' : 'true',
-            //'order_date' => $this->order_date,
             'order_date' => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
@@ -502,6 +501,7 @@ class ppOrder
             'order_instr' => htmlspecialchars($this->instructions),
             'shop_name' => $_PP_CONF['shop_name'],
             'shop_addr' => $_PP_CONF['shop_addr'],
+            'shop_phone' => $_PP_CONF['shop_phone'],
         ) );
 
         if ($isAdmin) {
@@ -527,7 +527,6 @@ class ppOrder
                 ) );
                 $T->parse('Log', 'LogMessages', true);
             }
-            
         }
 
         $status = $this->status;
@@ -626,7 +625,7 @@ class ppOrder
         }
         if (empty($order_id)) return false;
         if (empty($log_user)) {
-            $log_user = COM_getDisplayName($_USER['uid']) . 
+            $log_user = COM_getDisplayName($_USER['uid']) .
                 ' (' . $_USER['uid'] . ')';
         }
 
@@ -651,170 +650,168 @@ class ppOrder
         global $_CONF, $_PP_CONF, $_TABLES;
 
         // Check if we're supposed to send a notification
-        if ( ($this->uid != 1 &&
+        if ( !($this->uid != 1 &&
                     $_PP_CONF['purch_email_user']) ||
-            ($this->uid == 1  &&
+            !($this->uid == 1  &&
                     $_PP_CONF['purch_email_anon']) ) {
-            PAYPAL_debug("Sending email to " . $this->uid);
+            return;
+        }
 
-            // setup templates
-            $message = new Template(PAYPAL_PI_PATH . '/templates');
-            $message->set_file(array(
-                    'subject' => 'purchase_email_subject.txt',
-                    'msg_admin' => 'purchase_email_admin.txt',
-                    'msg_user' => 'purchase_email_user.txt',
-                    'msg_body' => 'purchase_email_body.txt',
-            ) );
+        PAYPAL_debug("Sending email to " . $this->uid);
 
-            // Add all the items to the message
-            $total = (float)0;      // Track total purchase value
-            $files = array();       // Array of filenames, for attachments
-            $num_format = "%5.2f";
-            $item_total = 0;
-            $have_physical = 0;     // Assume no physical items.
-            $dl_links = '';         // Start with empty download links
+        // setup templates
+        $message = new Template(PAYPAL_PI_PATH . '/templates');
+        $message->set_file(array(
+            'subject' => 'purchase_email_subject.txt',
+            'msg_admin' => 'purchase_email_admin.txt',
+            'msg_user' => 'purchase_email_user.txt',
+            'msg_body' => 'purchase_email_body.txt',
+        ) );
 
-            USES_paypal_class_product();
-            foreach ($this->items as $id=>$item) {
-                if (!PAYPAL_is_plugin_item($item['product_id'])) {
-                    $P = new Product($item['product_id']);
-                    if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
-                        $have_physical = 1;
+        // Add all the items to the message
+        $total = (float)0;      // Track total purchase value
+        $files = array();       // Array of filenames, for attachments
+        $num_format = "%5.2f";
+        $item_total = 0;
+        $have_physical = 0;     // Assume no physical items.
+        $dl_links = '';         // Start with empty download links
 
-                    // Add the file to the filename array, if any. Download
-                    // links are only included if the order status is 'paid'
-                    $file = $P->file;
-                    if (!empty($file) && $this->status == 'paid') {
-                        $files[] = $file;
-                        $dl_url = PAYPAL_URL . '/download.php?';
-                        // There should always be a token, but fall back to the
-                        // product ID if there isn't
-                        if (!empty($item['token'])) {
-                            $dl_url .= 'token=' . urlencode($item['token']);
-                        } else {
-                            $dl_url .= 'id=' . $item['item_number'];
-                        }
-                        $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
+        USES_paypal_class_product();
+        foreach ($this->items as $id=>$item) {
+            if (!PAYPAL_is_plugin_item($item['product_id'])) {
+                $P = new ppProduct($item['product_id']);
+                if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+                    $have_physical = 1;
+
+                // Add the file to the filename array, if any. Download
+                // links are only included if the order status is 'paid'
+                $file = $P->file;
+                if (!empty($file) && $this->status == 'paid') {
+                    $files[] = $file;
+                    $dl_url = PAYPAL_URL . '/download.php?';
+                    // There should always be a token, but fall back to the
+                    // product ID if there isn't
+                    if (!empty($item['token'])) {
+                        $dl_url .= 'token=' . urlencode($item['token']);
+                    } else {
+                        $dl_url .= 'id=' . $item['item_number'];
                     }
+                    $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
                 }
-
-                $ext = (float)$item['quantity'] * (float)$item['price'];
-                $item_total += $ext;
-                $item_descr = isset($item['description']) ? $item['description'] : $item['descrip'];
-
-                //$message->set_block('message', 'ItemList', 'List');
-                $opts = json_decode($item['options_text'], true);
-                if ($opts) {
-                    foreach ($opts as $opt_text) {
-                        $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
-                    }
-                }
-                $message->set_block('msg_body', 'ItemList', 'List');
-                $message->set_var(array(
-                    'qty'   => $item['quantity'],
-                    'price' => sprintf($num_format, $item['price']),
-                    'ext'   => sprintf($num_format, $ext),
-                    'name'  => $item_descr,
-                    'options_text' => $options_text,
-                ) );
-                //PAYPAL_debug("Qty: {$item['quantity']} : Amount: {$item['price']} : Name: {$item['name']}", 'debug_ipn');
-                $message->parse('List', 'ItemList', true);
-
             }
 
-            // Determine if files will be attached to this message based on
-            // global config and whether there are actually any files to
-            // attach. Affects the 'files' flag in the email template and
-            // which email function is used.
-            if ( (( is_numeric($this->uid) &&
+            $ext = (float)$item['quantity'] * (float)$item['price'];
+            $item_total += $ext;
+            $item_descr = isset($item['description']) ? $item['description'] : $item['descrip'];
+
+            //$message->set_block('message', 'ItemList', 'List');
+            $opts = json_decode($item['options_text'], true);
+            if ($opts) {
+                foreach ($opts as $opt_text) {
+                    $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
+                }
+            }
+            $message->set_block('msg_body', 'ItemList', 'List');
+            $message->set_var(array(
+                'qty'   => $item['quantity'],
+                'price' => sprintf($num_format, $item['price']),
+                'ext'   => sprintf($num_format, $ext),
+                'name'  => $item_descr,
+                'options_text' => $options_text,
+            ) );
+            $message->parse('List', 'ItemList', true);
+        }
+
+        // Determine if files will be attached to this message based on
+        // global config and whether there are actually any files to
+        // attach. Affects the 'files' flag in the email template and
+        // which email function is used.
+        if ( (( is_numeric($this->uid) &&
                     $this->uid != 1 &&
                     $_PP_CONF['purch_email_user_attach'] ) ||
-                ( (!is_numeric($this->uid) ||
+            ( (!is_numeric($this->uid) ||
                     $this->uid == 1) &&
                     $_PP_CONF['purch_email_anon_attach'] )) &&
                 count($files) > 0  ) {
-                $do_send_attachments = true;
-            } else {
-                $do_send_attachments = false;
-            }
+            $do_send_attachments = true;
+        } else {
+            $do_send_attachments = false;
+        }
 
-            $total_amount = $item_total + $this->tax + $this->shipping +
+        $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
-            $user_name = COM_getDisplayName($this->uid);
-            if ($this->billto_name == '') {
-                $this->billto_name = $user_name;
-            }
+        $user_name = COM_getDisplayName($this->uid);
+        if ($this->billto_name == '') {
+            $this->billto_name = $user_name;
+        }
 
-            $message->set_var(array(
-                //'payment_gross'     => sprintf('%6.2f',
-                //                    $this->pp_data['pmt_gross']),
-                'payment_gross'     => sprintf($num_format, $total_amount),
-                'payment_items'     => sprintf($num_format, $item_total),
-                'tax'               => sprintf($num_format, $this->tax),
-                'shipping'          => sprintf($num_format, $this->shipping),
-                'handling'          => sprintf($num_format, $this->handling),
-                'payment_date'      => $_PP_CONF['now']->toMySQL(true),
-                'payer_email'       => $this->buyer_email,
-                'payer_name'        => $this->billto_name,
-                'site_name'         => $_CONF['site_name'],
-                'txn_id'            => $this->pmt_txn_id,
-                'pi_url'            => PAYPAL_URL,
-                'pi_admin_url'      => PAYPAL_ADMIN_URL,
-                'dl_links'          => $dl_links,
-                'files'             => $do_send_attachments ? 'true' : '',
-                'buyer_uid'         => $this->uid,
-                'user_name'         => $user_name,
-                'gateway_name'      => $this->pmt_method,
-                'pending'       => $this->status == 'pending' ? 'true' : '',
-                'gw_msg'        => $gw_msg,
-                'status'            => $this->status,
-                'order_instr'   => $this->instructions,
-            ) );
+        $message->set_var(array(
+            'payment_gross'     => sprintf($num_format, $total_amount),
+            'payment_items'     => sprintf($num_format, $item_total),
+            'tax'               => sprintf($num_format, $this->tax),
+            'shipping'          => sprintf($num_format, $this->shipping),
+            'handling'          => sprintf($num_format, $this->handling),
+            'payment_date'      => $_PP_CONF['now']->toMySQL(true),
+            'payer_email'       => $this->buyer_email,
+            'payer_name'        => $this->billto_name,
+            'site_name'         => $_CONF['site_name'],
+            'txn_id'            => $this->pmt_txn_id,
+            'pi_url'            => PAYPAL_URL,
+            'pi_admin_url'      => PAYPAL_ADMIN_URL,
+            'dl_links'          => $dl_links,
+            'files'             => $do_send_attachments ? 'true' : '',
+            'buyer_uid'         => $this->uid,
+            'user_name'         => $user_name,
+            'gateway_name'      => $this->pmt_method,
+            'pending'       => $this->status == 'pending' ? 'true' : '',
+            'gw_msg'        => $gw_msg,
+            'status'            => $this->status,
+            'order_instr'   => $this->instructions,
+        ) );
 
-            // parse templates for subject/text
-            $subject = trim($message->parse('output', 'subject'));
-            $message->set_var('purchase_details',
+        // parse templates for subject/text
+        $subject = trim($message->parse('output', 'subject'));
+        $message->set_var('purchase_details',
                         $message->parse('detail', 'msg_body'));
-            $user_text  = $message->parse('user_out', 'msg_user');
-            $admin_text = $message->parse('admin_out', 'msg_admin');
+        $user_text  = $message->parse('user_out', 'msg_user');
+        $admin_text = $message->parse('admin_out', 'msg_admin');
 
-            if ($this->buyer_email != '') {
-                // if specified to mail attachment, do so, otherwise skip 
-                // attachment
-                if ($do_send_attachments) {
-                    // Make sure plugin functions are available
-                    USES_paypal_functions();
-                    PAYPAL_mailAttachment($this->buyer_email,
+        if ($this->buyer_email != '') {
+            // if specified to mail attachment, do so, otherwise skip
+            // attachment
+            if ($do_send_attachments) {
+                // Make sure plugin functions are available
+                USES_paypal_functions();
+                PAYPAL_mailAttachment($this->buyer_email,
                                     $subject,
                                     $user_text,
                                     $_CONF['site_email'],
                                     true,
                                     0, '', '', $files);
-                } else {
-                    // Otherwise send a standard notification
-                    COM_emailNotification(array(
+            } else {
+                // Otherwise send a standard notification
+                COM_emailNotification(array(
                         'to' => array($this->buyer_email),
                         'from' => $_CONF['site_mail'],
                         'htmlmessage' => $user_text,
                         'subject' => $subject,
-                    ) );
-                }
+                ) );
             }
+        }
 
-            // Send a notification to the administrator, new purchases only
-            if ($status == '') {
-                if ($_PP_CONF['purch_email_admin'] == 2 ||
+        // Send a notification to the administrator, new purchases only
+        if ($status == '') {
+            if ($_PP_CONF['purch_email_admin'] == 2 ||
                     ($have_physical && $_PP_CONF['purch_email_admin'] == 1)) {
-                    PAYPAL_debug('Sending email to Admin');
-                    $email_addr = empty($_PP_CONF['admin_email_addr']) ?
+                PAYPAL_debug('Sending email to Admin');
+                $email_addr = empty($_PP_CONF['admin_email_addr']) ?
                             $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
-                    COM_emailNotification(array(
+                COM_emailNotification(array(
                         'to' => array($email_addr),
                         'from' => $_CONF['noreply_mail'],
                         'htmlmessage' => $admin_text,
                             'subject' => $subject,
-                    ) );
-                }
+                ) );
             }
         }
     }   // Notify()
@@ -842,7 +839,7 @@ class ppOrder
         global $_USER;
 
         if ($_USER['uid'] == $this->uid ||
-            SEC_hasRights('paypal.admin') ) {
+            plugin_ismoderator_paypal()) {
             return true;
         } else {
             return false;
