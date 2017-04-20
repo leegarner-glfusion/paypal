@@ -46,7 +46,7 @@ case 'addcartitem':
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
                 $_POST['item_descr'], $qty, 
-                $_POST['amount'], $_POST['options'], $_POST['extras']);
+                $_POST['base_price'], $_POST['options'], $_POST['extras']);
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
         'statusMessage' => $LANG_PP['msg_item_added'],
