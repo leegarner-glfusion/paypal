@@ -328,9 +328,10 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 /**
 *   Diaplay the product catalog items.
 *
+*   @param  integer $cat_id     Optional category ID to limit display
 *   @return string      HTML for product catalog.
 */
-function PAYPAL_ProductList($cat_id = 0, $search = '')
+function PAYPAL_ProductList($cat_id = 0)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
@@ -495,12 +496,12 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
 
     // Add search query, if any
     if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && !isset($_REQUEST['clearsearch'])) {
-        $srchitem = DB_escapeString($_REQUEST['query']);
+        $search = DB_escapeString($_REQUEST['query']);
         $fields = array('p.name', 'c.cat_name', 'p.short_description', 'p.description',
                 'p.keywords');
         $srches = array();
         foreach ($fields as $fname) {
-            $srches[] = "$fname like '%$srchitem%'";
+            $srches[] = "$fname like '%$search%'";
         }
         $srch = ' AND (' . implode(' OR ', $srches) . ')';
         $sql .= $srch;
@@ -576,7 +577,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
         'user_id'       => $_USER['uid'],
         'currency'      => $_PP_CONF['currency'],
         'breadcrumbs'   => $breadcrumbs,
-        'search_text'   => $srchitem,
+        'search_text'   => $search,
         'uikit'         => $_PP_CONF['_is_uikit'] ? 'true' : '',
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
     ) );
@@ -688,7 +689,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
     // Get products from plugins.
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
-    if ($page == 1 && empty($cat_list)) {
+    if ($page == 1 && empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
         USES_paypal_class_currency();
         $Cur = new ppCurrency($_PP_CONF['currency']);
