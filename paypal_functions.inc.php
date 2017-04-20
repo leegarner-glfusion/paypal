@@ -372,7 +372,7 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
                 ON prod.cat_id = cat.cat_id
             WHERE cat.enabled = '1' AND cat.parent_id = '$cat_id'
                 AND prod.enabled = '1' " .
-            PAYPAL_buildAccessSql('AND', 'cat.grp_access') .
+            SEC_buildAccessSql('AND', 'cat.grp_access') .
             " GROUP BY cat.cat_id
             ORDER BY cat.cat_name";
             //HAVING cnt > 0
@@ -479,14 +479,14 @@ function PAYPAL_ProductList($cat_id = 0, $search = '')
 
     // Get products from database. "c.enabled is null" is to allow products
     // with no category defined
-    $today = $_PP_CONF['now']->toMySQL();
+    $today = PAYPAL_now()->format('Y-m-d', true);
     $sql = " FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
             WHERE p.enabled=1
             AND p.avail_beg <= '$today' AND p.avail_end >= '$today'
             AND (
-                (c.enabled=1 " . PAYPAL_buildAccessSql('AND', 'c.grp_access') . ")
+                (c.enabled=1 " . SEC_buildAccessSql('AND', 'c.grp_access') . ")
                 OR c.enabled IS NULL
                 )
             AND (
@@ -1089,7 +1089,7 @@ function PAYPAL_recurseCats(
     $sql = "SELECT cat_id, cat_name, parent_id, description
         FROM {$_TABLES['paypal.categories']}
         WHERE parent_id = $parent_id " .
-        PAYPAL_buildAccessSql();
+        SEC_buildAccessSql();
 
     if (!empty($items)) {
         $sql .= " AND cat_id $not IN ($items) ";
@@ -1252,7 +1252,7 @@ function PAYPAL_Breadcrumbs($id)
         $sql = "SELECT cat_name, cat_id, parent_id
             FROM {$_TABLES['paypal.categories']}
             WHERE cat_id='$parent' " .
-            PAYPAL_buildAccessSql();
+            SEC_buildAccessSql();
 
         $result = DB_query($sql);
         if (!$result)

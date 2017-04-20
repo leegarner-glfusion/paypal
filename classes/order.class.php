@@ -43,7 +43,7 @@ class ppOrder
 
         $this->isNew = true;
         $this->uid = $_USER['uid'];
-        $this->order_date = $_PP_CONF['now']->toMySql();
+        $this->order_date = PAYPAL_now()->toMySql();
         $this->instructions = '';
         if (!empty($id)) {
             $this->order_id = $id;
@@ -751,7 +751,7 @@ class ppOrder
             'tax'               => sprintf($num_format, $this->tax),
             'shipping'          => sprintf($num_format, $this->shipping),
             'handling'          => sprintf($num_format, $this->handling),
-            'payment_date'      => $_PP_CONF['now']->toMySQL(true),
+            'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
             'payer_name'        => $this->billto_name,
             'site_name'         => $_CONF['site_name'],

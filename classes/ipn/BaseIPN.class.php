@@ -95,7 +95,7 @@ class BaseIPN
         if (is_array($A))
             $this->ipn_data = $A;
 
-        $this->sql_date = $_PP_CONF['now']->toMySQL();
+        $this->sql_date = PAYPAL_now()->toMySQL();
 
         $this->pp_data = array(
             'txn_id'        => '',

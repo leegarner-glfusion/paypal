@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2016 Lee Garner
+*   @copyright  Copyright (c) 2009-2017 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.9
+*   @version    0.5.10
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -54,6 +54,11 @@ define('PP_STATUS_PAID', 1);
 /**  Define the main $_SESSION variable name.  We store things like the
 *    shopping cart ID and previous/next page views here. */
 define('PP_CART_VAR', 'glPPcart');
+
+// Session variables for TimThumb image url, if used
+SESS_setVar($_PP_CONF['pi_name'], array(
+    'origpath'      => $_PP_CONF['image_dir'],
+));
 
 if (file_exists(PAYPAL_PI_PATH . '/config.php')) {
     /** Include local configuration overrides */
@@ -154,10 +159,6 @@ function USES_paypal_class_currency()
 
 /** Define global configuration variable to hold payment gateways */
 $_PP_CONF['gateways'] = array();
-
-/** Store the current SQL-formatted timestamp since it's used often */
-USES_class_date();
-$_PP_CONF['now'] = new Date('now', $_CONF['timezone']);
 
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
@@ -1117,7 +1118,7 @@ function phpblock_paypal_search()
     $T->set_file('search', 'blk_search.thtml');
 
     $category_options = COM_optionList($_TABLES['paypal.categories'],
-       'cat_id, cat_name', '', 1, '1=1 ' . SEC_buildAccessSql());
+       'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
 
     $T->set_var(array(
         'category_options'  => $category_options,
@@ -1196,7 +1197,7 @@ function phpblock_paypal_categories()
             WHERE c.cat_id > 0
             AND c.enabled = 1
             AND c.parent_id = 0 " .
-            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            SEC_buildAccessSql('AND', 'c.grp_access') .
             " GROUP BY c.cat_id
             ORDER BY c.cat_name";
                 //HAVING cnt > 0
@@ -1250,7 +1251,7 @@ function phpblock_paypal_popular()
             WHERE pr.enabled=1
             AND (c.enabled=1 OR c.enabled IS NULL)
             AND pr.show_popular = 1 " .
-            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            SEC_buildAccessSql('AND', 'c.grp_access') .
             " HAVING cnt > 0
             ORDER BY cnt DESC
             LIMIT $limit";
@@ -1287,7 +1288,7 @@ function phpblock_paypal_recent($cat='')
             WHERE pr.enabled=1
             AND (c.enabled=1 OR c.enabled IS NULL)
             AND pr.show_popular = 1 " .
-            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            SEC_buildAccessSql('AND', 'c.grp_access') .
             " HAVING cnt > 0
             ORDER BY dt_add DESC
             LIMIT $limit";
@@ -1395,7 +1396,7 @@ function PAYPAL_phpblock_product_sql($where, $limit=1)
             ON p.cat_id=c.cat_id
             WHERE
                 p.enabled=1 AND (c.enabled=1 OR c.enabled IS NULL) " .
-            PAYPAL_buildAccessSql('AND', 'c.grp_access') . "
+            SEC_buildAccessSql('AND', 'c.grp_access') . "
             $where
             ORDER BY RAND()
             $limit";
@@ -1766,7 +1767,7 @@ function PAYPAL_child_cat_product_count($parent_cat)
             WHERE c.cat_id > 0
             AND c.enabled = 1
             AND c.parent_id = $parent_cat " .
-            PAYPAL_buildAccessSql('AND', 'c.grp_access') .
+            SEC_buildAccessSql('AND', 'c.grp_access') .
             " GROUP BY c.cat_id
             ORDER BY c.cat_name";
     //echo $sql;die;
@@ -1807,26 +1808,20 @@ function PAYPAL_explode_opts($item, $opt_string = false)
 
 
 /**
-*   Common function used to build group access SQL
-*   Modified version of SEC_buildAccessSql. This one allow a field name
-*   to be provided, which can include a table identifier if needed.
+*   Get a date object corresponding to "now".
+*   Used to avoid creating a lot of Date objects or cluttering
+*   the global variables
 *
-*   @param  string  $clause     Optional parm 'WHERE' - default is 'AND'
-*   @param  string  $fld        Optional field, including table id if needed
-*   @return string  $groupsql   Formatted SQL string to be appended
+*   @return object      Date object
 */
-function PAYPAL_buildAccessSql($clause='AND', $fld='grp_access')
+function PAYPAL_now()
 {
-    global $_USER, $_GROUPS;
-
-    $groupsql = '';
-    if (count($_GROUPS) == 1) {
-        $groupsql .= " $clause $fld = '" . current($_GROUPS) ."'";
-    } else {
-        $groupsql .= " $clause $fld IN (" . implode(',',array_values($_GROUPS)) .")";
+    global $_CONF;
+    static $dt = NULL;
+    if ($dt === NULL) {
+        $dt = new Date('now', $_CONF['timezone']);
     }
-
-    return $groupsql;
+    return $dt;
 }
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';

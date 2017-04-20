@@ -73,7 +73,7 @@ class ppProduct
             $this->enabled = $_PP_CONF['def_enabled'];
             $this->featured = $_PP_CONF['def_featured'];
             $this->taxable = $_PP_CONF['def_taxable'];
-            $this->dt_add = $_PP_CONF['now']->toMySQL();
+            $this->dt_add = PAYPAL_now()->toMySQL();
             $this->views = 0;
             $this->rating = 0;
             $this->votes = 0;
@@ -393,7 +393,7 @@ class ppProduct
         } else {
             PAYPAL_debug('Preparing to save a new product.');
             $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET 
-                dt_add = '" . DB_escapeString($_PP_CONF['now']->toMySQL()) . "',";
+                dt_add = '" . DB_escapeString(PAYPAL_now()->toMySQL()) . "',";
             $sql3 = '';
         }
         $sql2 = "name='" . DB_escapeString($this->name) . "',
@@ -466,7 +466,7 @@ class ppProduct
                 VALUES
                     ({$prod_id}, " . (int)$cat . ")");
         }*/
-            
+
         if (empty($this->Errors)) {
             PAYPAL_debug('Update of product ' . $this->id . ' succeeded.');
             return true;
@@ -782,7 +782,7 @@ class ppProduct
                 FROM {$_TABLES['paypal.images']} 
                 WHERE product_id='" . $this->id . "'";
             $photo = DB_query($sql);
-        
+
             // save the count of photos for later use
             if ($photo) {
                 $photocount = DB_numRows($photo); 
@@ -1018,9 +1018,11 @@ class ppProduct
                                 $tpl_config['lg_img_height'] - 20
                             )
                         );
+                        $T->set_var('main_imgfile', $prow['filename']);
                     }
                     $T->set_block('product', 'Thumbnail', 'PBlock');
                     $T->set_var(array(
+                        'is_uikit' => $_PP_CONF['_is_uikit'],
                         'img_file'      => $prow['filename'],
                         'disp_img'      => PAYPAL_ImageUrl($prow['filename'],
                                 $tpl_config['lg_img_width'] - 20,
@@ -1032,6 +1034,8 @@ class ppProduct
                         //'have_photo'    => 'true',
                         'tn_width'      => $_PP_CONF['max_thumb_size'],
                         'tn_height'     => $_PP_CONF['max_thumb_size'],
+                        'session_id'    => session_id(),
+                        'small_imgfile' => $prow['filename'],
                     ) );
                     $T->parse('PBlock', 'Thumbnail', true);
                 }
@@ -1102,7 +1106,7 @@ class ppProduct
         }
 
         $T->set_var(array(
-            'is_uikit' => $_SYSTEM['framework'] == 'uikit' ? 'true' : '',
+            'is_uikit' => $_PP_CONF['_is_uikit'],
             'have_attributes'   => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
@@ -1119,6 +1123,7 @@ class ppProduct
             'price_postfix'     => $this->currency->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
+            'session_id'        => session_id(),
         ) );
 
         $buttons = $this->PurchaseLinks();
@@ -1183,9 +1188,7 @@ class ppProduct
                 WHERE id = '$prod_id'");
 
         $retval .= COM_endBlock();
-
         return $retval;
-
     }
 
 
@@ -1573,13 +1576,14 @@ class ppProduct
         if ($this->sale_price == $this->price)
             return false;
 
-        $today = $_PP_CONF['now']->toMySQL();
+        $today = PAYPAL_now()->format('Y-m-d', true);
         if ($this->sale_end < $today || $this->sale_beg > $today) {
             return false;
         } else {
             return true;
         }
     }
+
 
     /**
     *   Determine if a product is available for sale based on dates
@@ -1594,7 +1598,7 @@ class ppProduct
 
         if ($isadmin) return true;  // Admin can always view
 
-        $today = $_PP_CONF['now']->toMySQL();
+        $today = PAYPAL_now()->format('Y-m-d', true);
         if ($today < $this->avail_beg || $today > $this->avail_end) {
             return false;
         } else {
@@ -1603,6 +1607,12 @@ class ppProduct
     }
 
 
+    /**
+    *   Display the date, if present, or a blank field if effectively null.
+    *
+    *   @param  string  $str    Date string, "0000-00-00" indicates empty
+    *   @return string      Supplied date string, or "" if zeroes
+    */
     private function _InputDtFormat($str)
     {
         if ($str == '0000-00-00')

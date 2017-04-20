@@ -734,7 +734,7 @@ abstract class PaymentGw
                         user_id = '{$uid}', 
                         txn_type = '{$this->gw_id}',
                         txn_id = '', 
-                        purchase_date = '{$_PP_CONF['now']->toMySQL()}', 
+                        purchase_date = '" . PAYPAL_now()->toMySQL() . "', 
                         status = 'complete',
                         token = '$token',
                         price = " . (float)$item['price'] . ",
@@ -742,7 +742,8 @@ abstract class PaymentGw
 
             // add an expiration date if appropriate
             if (is_numeric($A['expiration']) && $A['expiration'] > 0) {
-                $sql .= ", expiration = DATE_ADD('{$_PP_CONF['now']->toMySQL()}', INTERVAL {$A['expiration']} DAY)";
+                $sql .= ", expiration = DATE_ADD('" . PAYPAL_now()->toMySQL() .
+                        "', INTERVAL {$A['expiration']} DAY)";
             }
             //echo $sql;die;
             PAYPAL_debug($sql);
