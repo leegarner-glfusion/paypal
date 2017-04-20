@@ -1,5 +1,13 @@
 # Paypal plugin for glFusion - Changelog
 
+## Ver 0.5.10
+Release TBD
+- Don't instantiate a global date object if not needed
+- Use TimThumb from lglib plugin to size and display images
+- Use AJAX to add items to cart (requires the cart block to be enabled)
+- Ensure floating-point numbers are formatted correctly for MySQL
+- Includes Sitemap V2 driver
+
 ## Ver. 0.5.9
 Released 2016-12-08
 - Change upgrade function to use COM_checkVersion() for better version checking
