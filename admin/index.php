@@ -490,13 +490,23 @@ function PAYPAL_adminlist_Product($cat_id=0)
         'has_extras' => true,
         'form_url' => PAYPAL_ADMIN_URL . '/index.php',
     );
+    $cat_id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
+    $filter = $LANG_PP['category'] . ': <select name="cat_id"
+            onchange="javascript: document.location.href=\'' .
+                PAYPAL_ADMIN_URL .
+                '/index.php?view=prodcts&amp;cat_id=\'+' .
+                'this.options[this.selectedIndex].value">' .
+        '<option value="0">' . $LANG_PP['all'] . '</option>' . LB .
+        COM_optionList($_TABLES['paypal.categories'], 'cat_id, cat_name',
+                $cat_id, 1) .
+        "</select>" . LB;
 
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
     $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Product',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
-            '', '', '', '');
+            $filter, '', '', '');
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
