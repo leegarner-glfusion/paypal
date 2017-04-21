@@ -1006,7 +1006,6 @@ class ppProduct
         //echo $sql;die;
         $img_res = DB_query($sql);
         $photo_detail = '';
-        $T->set_var('have_photo', '');     // assume no photo available
         if ($img_res && DB_numRows($img_res) > 0) {
             for ($i = 0; $prow = DB_fetchArray($img_res, false); $i++) {
                 if ($prow['filename'] != '' && 
@@ -1031,7 +1030,6 @@ class ppProduct
                         'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
                         'img_url'       => PAYPAL_URL.'/images/products',
                         'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
-                        //'have_photo'    => 'true',
                         'tn_width'      => $_PP_CONF['max_thumb_size'],
                         'tn_height'     => $_PP_CONF['max_thumb_size'],
                         'session_id'    => session_id(),
