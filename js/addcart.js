@@ -1,9 +1,5 @@
 /**
 *   Add an item to the shopping cart.
-*
-*   @param  object  cbox    Checkbox
-*   @param  string  id      Sitemap ID, e.g. plugin name
-*   @param  string  type    Type of sitemap (XML or HTML)
 */
 var ppAddToCart = function() {
     data = $("form").serialize();
@@ -14,10 +10,12 @@ var ppAddToCart = function() {
         data: data,
         success: function(result) {
             try {
-            // Set the ID of the shopping cart div
-                divid = document.getElementById("ppCartBlockContents");
-                if (result.content != '' && typeof(divid) != "undefined") {
-                    divid.innerHTML = result.content;
+                if (result.content != '') {
+                    // Update the shopping cart block if it is displayed
+                    divid = document.getElementById("ppCartBlockContents");
+                    if (divid != undefined) {
+                        divid.innerHTML = result.content;
+                    }
                     $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
                 } 
             } catch(err) {
@@ -26,4 +24,3 @@ var ppAddToCart = function() {
     });
     return false;
 };
-
