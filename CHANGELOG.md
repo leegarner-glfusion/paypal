@@ -7,6 +7,7 @@ Release TBD
 - Use AJAX to add items to cart (requires the cart block to be enabled)
 - Ensure floating-point numbers are formatted correctly for MySQL
 - Includes Sitemap V2 driver
+- Add a category selector to the product admin list
 
 ## Ver. 0.5.9
 Released 2016-12-08
