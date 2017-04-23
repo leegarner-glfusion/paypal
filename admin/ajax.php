@@ -3,9 +3,9 @@
 *   Common admistrative AJAX functions.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.5.10
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -46,6 +46,7 @@ case 'updatestatus':
                 $L['showlog'] = $showlog;
                 $dt = new Date($L['ts'], $_CONF['timezone']);
                 $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
+                $L['newstatus'] = $newstatus;
             }
         }
         header('Content-Type: text/xml');

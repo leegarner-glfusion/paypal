@@ -105,6 +105,10 @@ function PP_ordShowStatSubmit(order_id, oldvalue, newvalue)
 function PP_setStatus(order_id, newstatus)
 {
     PP_status[order_id] = newstatus;
+    sel = document.getElementById("statSelect_" + order_id);
+    if (sel != null) {
+        sel.selected = newstatus;
+    }
 }
 
 function PP_getStatus(order_id)

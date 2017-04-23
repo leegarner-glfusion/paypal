@@ -3,9 +3,9 @@
 *   Class to manage order processing statuses.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2017 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.2
+*   @version    0.5.10
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -74,6 +74,14 @@ class ppOrderStatus extends ppWorkflow
     }
 
 
+    /**
+    *   Creates the complete selection HTML for order status updates.
+    *
+    *   @param  string  $order_id   ID of order being edited
+    *   @param  integer $showlog    1 to add to the onscreen log, 0 to not
+    *   @param  string  $selected   Current order status
+    *   @return string      HTML for select block
+    */
     public static function Selection($order_id, $showlog=0, $selected = '')
     {
         global $LANG_PP, $_PP_CONF;
