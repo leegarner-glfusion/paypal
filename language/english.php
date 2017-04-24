@@ -367,6 +367,7 @@ $LANG_confignames['paypal'] = array(
     'list_tpl_ver' => 'Product List Template',
     'cache_max_age' => 'Max file cache age in seconds',
     'tc_link' => 'Link to Terms and Conditions',
+    'show_plugins' => 'Include plugin products in catalog?',
 );
 
 /** Language strings for the subgroup names in the config section */

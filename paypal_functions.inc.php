@@ -689,7 +689,8 @@ function PAYPAL_ProductList($cat_id = 0)
     // Get products from plugins.
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
-    if ($page == 1 && empty($cat_list) && empty($search)) {
+    if ($_PP_CONF['show_plugins'] && $page == 1 &&
+                empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
         USES_paypal_class_currency();
         $Cur = new ppCurrency($_PP_CONF['currency']);

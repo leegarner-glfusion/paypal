@@ -87,6 +87,11 @@ $_PP_DEFAULTS['maxPerPage'] = 10;
 $_PP_DEFAULTS['categoryColumns'] = 3;
 
 /**
+*   Include plugin products on the main catalog page? 1 = yes, 0 = no
+*/
+$_PP_DEFAULTS['show_plugins'] = 0;
+
+/**
  * Ordering of products in lists
  * Values must be a column of the produts table: 'name', 'price', 'id'
  * Values can be modified by either 'ASC' or 'DESC': 'name DESC'
@@ -226,6 +231,8 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 0, 0, 0, 150, true, $_PP_CONF['pi_name']);
         $c->add('cat_columns', $_PP_DEFAULTS['categoryColumns'],
                 'text', 0, 0, 0, 160, true, $_PP_CONF['pi_name']);
+        $c->add('show_plugins', $_PP_DEFAULTS['show_plugins'],
+                'text', 0, 0, 2, 165, true, $_PP_CONF['pi_name']);
         $c->add('ena_comments', $_PP_DEFAULTS['ena_comments'],
                 'select', 0, 0, 2, 180, true, $_PP_CONF['pi_name']);
         $c->add('ena_ratings', $_PP_DEFAULTS['ena_ratings'],

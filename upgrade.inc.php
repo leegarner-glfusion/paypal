@@ -509,8 +509,12 @@ function PAYPAL_do_upgrade()
             }
         }
         // Delete config option and working-directory fieldset
-        $c->del('tmpdir', 'paypal');
-        $c->del('fs_encbtn', 'paypal');
+        $c->del('tmpdir', $_PP_CONF['pi_name']);
+        $c->del('fs_encbtn', $_PP_CONF['pi_name']);
+        // Add option to show plugins on product page. Default to "1" during
+        // upgrade for backward compatibility
+        $c->add('show_plugins', 1, 'select', 0, 0, 2, 165, true,
+                $_PP_CONF['pi_name']);
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
  

@@ -358,6 +358,7 @@ $LANG_confignames['paypal'] = array(
     'list_tpl_ver' => 'Vorlage Produk-Liste',
     'cache_max_age' => 'Block-Zwischenspeicher (Sek.)',
     'tc_link' => 'Link zu Geschäftsbedingungen',
+    'show_plugins' => 'Include plugin products in catalog?',
 );
 
 /** Language strings for the subgroup names in the config section */
