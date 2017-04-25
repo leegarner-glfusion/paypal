@@ -168,8 +168,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
 {
     global $ppGCart;
 
-    USES_paypal_class_Cart();
-    $ppGCart = new \Paypal\Cart();
+    PAYPAL_setCart();
 
     $qty = isset($args['quantity']) ? (float)$args['quantity'] : 1;
     if (!isset($args['item_number']) || empty($args['item_number'])) {

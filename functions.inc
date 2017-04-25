@@ -162,6 +162,11 @@ $_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
 
 global $ppGCart;
 $ppGCart = NULL;
+/**
+*   Set the global cart object.
+*
+*   @return object      Global cart, for use in a local variable
+*/
 function PAYPAL_setCart()
 {
     global $ppGCart;
@@ -169,6 +174,7 @@ function PAYPAL_setCart()
         USES_paypal_class_Cart();
         $ppGCart = new \Paypal\Cart();
     }
+    return $ppGCart;
 }
 
 
@@ -271,8 +277,7 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
     // Only show if no topic is requested
     if ($_PP_CONF['centerblock'] == 1 && $topic == '') {
         USES_paypal_functions();
-        USES_paypal_class_Cart();
-        $ppGCart = new \Paypal\Cart();
+        PAYPAL_setCart();
         $display = PAYPAL_siteHeader();
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
@@ -1041,7 +1046,7 @@ function phpblock_paypal_cart_contents()
     USES_paypal_class_Cart();
     USES_paypal_class_Product();
 
-    $cart = new \Paypal\Cart();
+    $cart = PAYPAL_setCart();
 
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return $LANG_PP['cart_empty'];
@@ -1558,15 +1563,15 @@ function plugin_canuserrate_paypal($item_id, $uid)
 */
 function plugin_user_logout_paypal($uid)
 {
-    global $_PP_CONF;
+    global $_PP_CONF, $ppGCart;
 
     // Does not apply to anonymouse users or if cart is disabled
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    USES_paypal_class_Cart();
-    $Cart = new \Paypal\Cart();
-    $Cart->SaveUserCart($uid);
-    $Cart->Clear($uid);
+    PAYPAL_setCart();
+    $ppGCart->Clear($uid);
+    $ppGCart->SaveUserCart($uid);
+    $ppGCart->Clear($uid);
 }
 
 
@@ -1582,8 +1587,7 @@ function plugin_user_login_paypal($uid)
 
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    USES_paypal_class_Cart();
-    $C = new \Paypal\Cart();
+    $C = PAYPAL_setCart();
     $C->Merge();
 }
 

@@ -33,8 +33,7 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-USES_paypal_class_Cart();
-$ppGCart = new Cart();
+PAYPAL_setCart();
 
 COM_setArgNames(array('id'));
 if (isset($_GET['id'])) {

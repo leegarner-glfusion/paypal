@@ -34,8 +34,7 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-USES_paypal_class_Cart();
-$ppGCart = new Cart();
+PAYPAL_setCart();
 
 // First try to get the SEO-friendly arguments.  A single "action" and "id"
 // will probably be the most common anyway.  If that fails, go through all
