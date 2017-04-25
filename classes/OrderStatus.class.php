@@ -11,8 +11,10 @@
 *   @filesource
 */
 
+namespace Paypal;
+
 /** This is similar enough to workflow handling that we extend that class */
-USES_paypal_class_workflow();
+USES_paypal_class_Workflow();
 
 /**
 *   Class for order processing workflow items
@@ -20,7 +22,7 @@ USES_paypal_class_workflow();
 *   individually enabled or disabled.
 *   @package paypal
 */
-class ppOrderStatus extends ppWorkflow
+class OrderStatus extends Workflow
 {
     static $table = 'paypal.orderstatus';
 
@@ -88,7 +90,7 @@ class ppOrderStatus extends ppWorkflow
 
         self::Init();
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('ordstat', 'orderstatus.thtml');
         $T->set_var(array(
             'order_id'  => $order_id,
@@ -140,11 +142,11 @@ class ppOrderStatus extends ppWorkflow
         if (!DB_error()) {
             return $newvalue;
         } else {
-            COM_errorLog("ppOrderStatus::Toggle() SQL error: $sql", 1);
+            COM_errorLog("OrderStatus::Toggle() SQL error: $sql", 1);
             return $oldvalue;
         }
     }
 
-}   // class ppOrderStatus
+}   // class OrderStatus
 
 ?>

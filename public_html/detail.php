@@ -13,6 +13,8 @@
 *   @filesource
 */
 
+namespace Paypal;
+
 /** Require core glFusion code */
 require_once '../lib-common.php';
 
@@ -31,8 +33,8 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-USES_paypal_class_cart();
-$ppGCart = new ppCart();
+USES_paypal_class_Cart();
+$ppGCart = new Cart();
 
 COM_setArgNames(array('id'));
 if (isset($_GET['id'])) {
@@ -42,7 +44,7 @@ if (isset($_GET['id'])) {
 }
 
 $display = PAYPAL_siteHeader();
-$T = new Template(PAYPAL_PI_PATH . '/templates');
+$T = new \Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
 $T->set_var('title', $LANG_PP['main_title']);
 $display .= $T->parse('', 'title');
@@ -58,10 +60,10 @@ if (!empty($msg)) {
 $content = '';
 $breadcrumbs = '';
 if (!empty($id)) {
-    USES_paypal_class_product();
-    $P = new ppProduct($id);
+    USES_paypal_class_Product();
+    $P = new Product($id);
     if ($P->id == $id) {
-        $breadcrumbs = PAYPAL_breadCrumbs($P->cat_id);
+        $breadcrumbs = PAYPAL_Breadcrumbs($P->cat_id);
         $content .= $P->Detail();
     }
 }

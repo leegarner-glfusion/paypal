@@ -10,10 +10,10 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
+namespace Paypal;
 
 /** Import base gateway class */
-USES_paypal_gateway();
+USES_paypal_gateway_base();
 
 /**
 *   Class for Paypal payment gateway
@@ -223,7 +223,7 @@ class paypal extends PaymentGw
             //$opt_str = '';
             list($db_item_id, $options) = explode('|', $item['item_id']);
             if (is_numeric($db_item_id)) {
-                $P = new ppProduct($db_item_id);
+                $P = new Product($db_item_id);
                 $db_item_id = DB_escapeString($db_item_id);
                 $oc = 0;
                 if (is_array($item['options'])) {
@@ -312,7 +312,7 @@ class paypal extends PaymentGw
         }
 
         $gateway_vars = implode("\n", $gatewayVars);
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                     $this->gw_name);
         $T->set_file(array('btn' => 'btn_checkout.thtml'));
         $T->set_var('paypal_url', $this->getActionUrl());
@@ -563,10 +563,10 @@ class paypal extends PaymentGw
         $btn_text = isset($LANG_PP['buttons'][$btn_type]) ? 
                 $LANG_PP['buttons'][$btn_type] : $LANG_PP['buy_now'];
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                     $this->gw_name);
         $T->set_file('btn', 'btn_' . $btn_info['tpl'] . '.thtml');
-        //$T = new Template(PAYPAL_PI_PATH . '/templates/');
+        //$T = new \Template(PAYPAL_PI_PATH . '/templates/');
         //$T->set_file('btn', 'buttons/' . $this->gw_name . 
         //        '/btn_' . $btn_info['tpl'] . '.thtml');
 
@@ -593,7 +593,7 @@ class paypal extends PaymentGw
     {
         global $_PP_CONF, $LANG_PP;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                     $this->gw_name);
         $T->set_file('btn', 'btn_' . $type . '.thtml');
         $btn_text = isset($LANG_PP['buttons'][$type]) ? 
@@ -790,7 +790,7 @@ class paypal extends PaymentGw
     {
         global $_CONF, $LANG_PP_paypal, $_PP_CONF;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
         if ($_PP_CONF['_is_uikit']) {
             $T->set_file('tpl', 'gateway_edit.uikit.thtml');
         } else {

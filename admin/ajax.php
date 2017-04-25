@@ -10,6 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 /** Include required glFusion common functions */
 require_once '../../../lib-common.php';
@@ -17,7 +18,7 @@ require_once '../../../lib-common.php';
 // This is for administrators only.  It's called by Javascript,
 // so don't try to display a message
 if (!plugin_ismoderator_paypal()) {
-    COM_accessLog("User {$_USER['username']} tried to illegally access the classifieds admin ajax function.");
+    COM_accessLog("User {$_USER['username']} tried to illegally access the paypal admin ajax function.");
     exit;
 }
 switch ($_REQUEST['action']) {
@@ -25,14 +26,14 @@ case 'updatestatus':
     if (!empty($_POST['order_id']) &&
         !empty($_POST['newstatus'])) {
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        USES_paypal_class_order();
+        USES_paypal_class_Order();
         $log_ts = '';
         $log_user = '';
         $log_msg = '';
         $newstatus = $_POST['newstatus'];
         $order_id = $_POST['order_id'];
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        $ord = new ppOrder($_POST['order_id']);
+        $ord = new Order($_POST['order_id']);
         if ($ord->isNew) break;     // non-existant order
         if ($ord->UpdateStatus($newstatus)) {
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
@@ -44,7 +45,7 @@ case 'updatestatus':
             if (!empty($L)) {
                 // Add flag to indicate whether to update on-screen log
                 $L['showlog'] = $showlog;
-                $dt = new Date($L['ts'], $_CONF['timezone']);
+                $dt = new \Date($L['ts'], $_CONF['timezone']);
                 $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
                 $L['newstatus'] = $newstatus;
             }
@@ -61,15 +62,15 @@ case 'updatestatus':
 case 'toggle':
     switch ($_POST['component']) {
     case 'product':
-        USES_paypal_class_product();
+        USES_paypal_class_Product();
 
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = ppProduct::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = Product::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
         case 'featured':
-            $newval = ppProduct::toggleFeatured($_POST['oldval'], $_POST['id']);
+            $newval = Product::toggleFeatured($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -78,11 +79,11 @@ case 'toggle':
         break;
 
     case 'category':
-        USES_paypal_class_category();
+        USES_paypal_class_Category();
 
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = ppCategory::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Category::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
             break;
 
          default:
@@ -91,7 +92,7 @@ case 'toggle':
         break;
 
     case 'attribute':
-        USES_paypal_class_attribute();
+        USES_paypal_class_Attribute();
 
         switch ($_POST['type']) {
         case 'enabled':
@@ -105,7 +106,7 @@ case 'toggle':
        break;
 
     case 'gateway':
-        USES_paypal_gateway();
+        USES_paypal_gateway_base();
 
         switch ($_POST['type']) {
         case 'enabled':
@@ -126,11 +127,11 @@ case 'toggle':
         break;
 
     case 'workflow':
-        USES_paypal_class_workflow();
+        USES_paypal_class_Workflow();
         $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
-            $newval = ppWorkflow::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
+            $newval = Workflow::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
             break;
 
         default:
@@ -139,12 +140,12 @@ case 'toggle':
         break;
 
     case 'orderstatus':
-        USES_paypal_class_orderstatus();
+        USES_paypal_class_OrderStatus();
         $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
         case 'notify_buyer':
-            $newval = ppOrderStatus::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
+            $newval = OrderStatus::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
             break;
 
         default:

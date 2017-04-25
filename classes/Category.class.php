@@ -11,12 +11,13 @@
 *   @filesource
 */
 
+namespace Paypal;
 
 /**
 *   Class for categories
 *   @package paypal
 */
-class ppCategory
+class Category
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -323,7 +324,7 @@ class ppCategory
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         if ($_SYSTEM['framework'] == 'uikit') {
             $T->set_file('category', 'category_form.uikit.thtml');
         } else {
@@ -427,7 +428,7 @@ class ppCategory
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) {
-            COM_errorLog("ppCategory::_toggle() SQL error: $sql", 1);
+            COM_errorLog("Category::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
             return $newvalue;
@@ -548,6 +549,6 @@ class ppCategory
         }
     }
 
-}   // class ppCategory
+}   // class Category
 
 ?>

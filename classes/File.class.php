@@ -1,6 +1,6 @@
 <?php
 /**
- *  Class to handle file uploads
+ *  Class to handle file uploads for downloadable products
  *
  *  @author     Lee Garner <lee@leegarner.com>
  *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
@@ -10,6 +10,7 @@
  *  GNU Public License v2 or later
  *  @filesource
  */
+namespace Paypal;
 
 // Import core glFusion upload functions
 USES_class_upload();
@@ -18,7 +19,7 @@ USES_class_upload();
  *  Image-handling class
  *  @package paypal
  */
-class ppFile extends upload
+class File extends \upload
 {
     //var $properties;
 
@@ -32,7 +33,7 @@ class ppFile extends upload
      *  Constructor
      *  @param  string  $varname        Optional form variable name
      */
-    function ppFile($varname='uploadfile')
+    function __construct($varname='uploadfile')
     {
         global $_PP_CONF, $_CONF;
 
@@ -96,6 +97,6 @@ class ppFile extends upload
             unlink($this->getPath() . '/' . $this->filename);
     }
 
-}   // class ppFile
+}   // class File
 
 ?>

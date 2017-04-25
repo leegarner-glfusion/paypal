@@ -11,6 +11,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 /**
 *   Class for Paypal payment gateway
@@ -496,7 +497,7 @@ abstract class PaymentGw
     {
         global $LANG_PP;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
         $T->set_file(array('tpl' => 'gw_servicechk.thtml'));
         $T->set_block('tpl', 'ServiceCheckbox', 'cBox');
 
@@ -612,16 +613,16 @@ abstract class PaymentGw
         global $_TABLES, $_CONF, $_PP_CONF;
 
         USES_paypal_functions();
-        USES_paypal_class_cart();
-        USES_paypal_class_order();
-        USES_paypal_class_product();
+        USES_paypal_class_Cart();
+        USES_paypal_class_Order();
+        USES_paypal_class_Product();
 
         if (!empty($vals['cart_id'])) {
-            $cart = new ppCart($vals['cart_id']);
+            $cart = new Cart($vals['cart_id']);
             if (!$cart->hasItems()) return; // shouldn't be empty
             $items = $cart->Cart();
         } else {
-            $cart = new ppCart();
+            $cart = new Cart();
         }
 
         // Create an order record to get the order ID
@@ -773,7 +774,7 @@ abstract class PaymentGw
     {
         global $_TABLES, $_USER;
 
-        $ord = new ppOrder();
+        $ord = new Order();
         $uid = isset($A['uid']) ? (int)$A['uid'] : $_USER['uid'];
         $ord->uid = $uid;
         $ord->status = 'pending';   // so there's something in the status field
@@ -954,15 +955,15 @@ abstract class PaymentGw
     *   database each time a UserInfo object is needed. Assumes only one
     *   user's information is needed per page load.
     *
-    *   @return object  ppUserInfo object
+    *   @return object  UserInfo object
     */
     protected static function UserInfo()
     {
         static $UserInfo = NULL;
 
         if ($UserInfo === NULL) {
-            USES_paypal_class_userinfo();
-            $UserInfo = new ppUserInfo();
+            USES_paypal_class_UserInfo();
+            $UserInfo = new UserInfo();
         }
         return $UserInfo;
     }

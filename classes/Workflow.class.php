@@ -11,6 +11,7 @@
 *   @filesource
 */
 
+namespace Paypal;
 
 /**
 *   Class for workflow items
@@ -19,7 +20,7 @@
 *   are displayed during checkout and in what order they appear.
 *   @package paypal
 */
-class ppWorkflow
+class Workflow
 {
     static $table = 'paypal.workflows';
 
@@ -56,7 +57,7 @@ class ppWorkflow
 
     /**
     *   Initilize the workflow array, if not already done.
-    *   Scope is Public since it's called from ppCart's constructor
+    *   Scope is Public since it's called from Cart's constructor
     *
     *   @uses   Load()
     */
@@ -129,7 +130,7 @@ class ppWorkflow
         if (!DB_error()) {
             return $newvalue;
         } else {
-            COM_errorLog("ppWorkflow::Toggle() SQL error: $sql", 1);
+            COM_errorLog("Workflow::Toggle() SQL error: $sql", 1);
             return $oldvalue;
         }
     }
@@ -158,7 +159,7 @@ class ppWorkflow
                     WHERE id = '{$A['id']}'";
                 DB_query($sql, 1);
                 if (DB_error()) {
-                    COM_errorLog("ppWorkflow::ReOrder() SQL error: $sql", 1);
+                    COM_errorLog("Workflow::ReOrder() SQL error: $sql", 1);
                 }
             }
             $order += $stepNumber;
@@ -198,7 +199,7 @@ class ppWorkflow
         if (!DB_error()) {
             self::ReOrder();
         } else {
-            COM_errorLog("ppWorkflow::moveRow() SQL error: $sql", 1);
+            COM_errorLog("Workflow::moveRow() SQL error: $sql", 1);
         }
     }
 
@@ -248,6 +249,6 @@ class ppWorkflow
         return $view;
     }
 
-}   // class ppWorkflow
+}   // class Workflow
 
 ?>

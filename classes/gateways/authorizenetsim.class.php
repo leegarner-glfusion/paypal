@@ -14,7 +14,7 @@
 */
 
 /** Import base gateway class */
-USES_paypal_gateway();
+USES_paypal_gateway_base();
 
 /**
 *   Class for Authorize.Net payment gateway
@@ -155,7 +155,7 @@ class authorizenetsim extends PaymentGw
         $cartID = $this->cart->cartID();
         $this->AddCustom('cart_id', $cartID);
 
-        USES_paypal_class_product();
+        USES_paypal_class_Product();
         foreach ($cartItems as $item_id=>$item) {
             list($id, $optstr) = explode('|', $item_id);
             if (is_numeric($id)) {

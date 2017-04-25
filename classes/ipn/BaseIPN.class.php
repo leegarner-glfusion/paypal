@@ -20,6 +20,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 // this file can't be used on its own
 if (!defined ('GVERSION')) {
@@ -37,9 +38,9 @@ define('IPN_FAILURE_UNIQUE', 3);
 define('IPN_FAILURE_EMAIL', 4);
 define('IPN_FAILURE_FUNDS', 5);
 
-USES_paypal_class_product();
+USES_paypal_class_Product();
 PAYPAL_loadGateways();
-USES_paypal_class_order();
+USES_paypal_class_Order();
 
 /**
 *   Interface to deal with IPN transactions from a payment gateway.
@@ -116,7 +117,8 @@ class BaseIPN
         );
 
         // Create a gateway object to get some of the config values
-        $this->gw = new $this->gw_id;
+        $classname = '\\Paypal\\' . $this->gw_id;
+        $this->gw = new $classname;
     }
 
 
@@ -310,7 +312,7 @@ class BaseIPN
             PAYPAL_debug("Sending email to " . $this->pp_data['custom']['uid']);
 
             // setup templates
-            $message = new Template(PAYPAL_PI_PATH . '/templates');
+            $message = new \Template(PAYPAL_PI_PATH . '/templates');
             $message->set_file(array(
                     'subject' => 'purchase_email_subject.txt',
 //                    'message' => 'purchase_email_message.txt',
@@ -572,10 +574,12 @@ class BaseIPN
         $status = $this->CreateOrder();
         if ($status == 0) {
             $this->Order->Notify();
+        } else {
+            COM_errorLog('Error creating order: ' . print_r($status,true));
         }
 
         // Update the order status to Paid
-        //ppOrder::UpdateStatus($this->gw->getPaidStatus($prod_types),
+        //Order::UpdateStatus($this->gw->getPaidStatus($prod_types),
         //            $order_id, false);
 
     }  // function handlePurchase
@@ -601,7 +605,7 @@ class BaseIPN
         $order_id = DB_getItem($_TABLES['paypal.orders'], 'order_id',
             "pmt_txn_id='" . DB_escapeString($this->pp_data['txn_id']) . "'");
         if (!empty($order_id)) {
-            $this->Order = new ppOrder($order_id);
+            $this->Order = new Order($order_id);
             if ($this->Order->order_id != '') {
                 $this->Order->log_user = $this->gw->Description();
                 $this->Order->UpdateStatus($this->pp_data['status']);
@@ -609,11 +613,11 @@ class BaseIPN
             return 2;
         }
 
-        $this->Order = new ppOrder();
+        $this->Order = new Order();
 
-        USES_paypal_class_cart();
+        USES_paypal_class_Cart();
         if (isset($this->pp_data['custom']['cart_id'])) {
-            $cart = new ppCart($this->pp_data['custom']['cart_id']);
+            $cart = new Cart($this->pp_data['custom']['cart_id']);
             if (!$_PP_CONF['sys_test_ipn'] && !$cart->hasItems()) {
                 return 1; // shouldn't normally be empty except during testing
             }
@@ -628,8 +632,8 @@ class BaseIPN
                 $this->pp_data['status'] : 'pending';
 
         if ($uid > 1) {
-            USES_paypal_class_userinfo();
-            $U = new ppUserInfo($uid);
+            USES_paypal_class_UserInfo();
+            $U = new UserInfo($uid);
         }
 
         // Get the billing and shipping addresses from the cart record,
@@ -767,7 +771,7 @@ class BaseIPN
                 . "'");
         }
 
-        $Order = new ppOrder($order_id);
+        $Order = new Order($order_id);
         if ($Order->order_id == '') {
             return false;
         }

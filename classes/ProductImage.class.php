@@ -10,6 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 // Import core glFusion upload functions
 USES_class_upload();
@@ -18,7 +19,7 @@ USES_class_upload();
 *   Image-handling class
 *   @package paypal
 */
-class ppProductImage extends upload
+class ProductImage extends \upload
 {
     /** Path to actual image (without filename)
      *  @var string */

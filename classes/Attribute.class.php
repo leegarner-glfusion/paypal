@@ -10,13 +10,13 @@
  *              GNU Public License v2 or later
  *  @filesource
  */
-
+namespace Paypal;
 
 /**
  *  Class for product options
  *  @package paypal
  */
-class ppAttribute
+class Attribute
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -231,7 +231,7 @@ class ppAttribute
 
     /**
     *   Delete the current category record from the database.
-    *   Callable as a static function ppAttribute::Delete($attr_id)
+    *   Callable as a static function Attribute::Delete($attr_id)
     *
     *   @param  integer $attr_id    Attribute ID, empty for current object
     *   @return boolean     True on success, False on invalid ID
@@ -289,7 +289,7 @@ class ppAttribute
             return PAYPAL_errMsg($LANG_PP['todo_noproducts']);
         }
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         if ($_SYSTEM['disable_jquery_slimbox']) {
             $T->set_file('attrform', 'attribute_form.uikit.thtml');
         } else {
@@ -355,7 +355,7 @@ class ppAttribute
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) {
-            COM_errorLog("ppAttribute::_toggle() SQL error: $sql", 1);
+            COM_errorLog("Attribute::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
             return $newvalue;
@@ -366,7 +366,7 @@ class ppAttribute
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @uses   ppAttribute::_toggle()
+    *   @uses   Attribute::_toggle()
     *   @param  integer $oldvalue   Original field value
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
@@ -422,7 +422,6 @@ class ppAttribute
         $order = 10;
         $stepNumber = 10;
         while ($A = DB_fetchArray($result, false)) {
-
             if ($A['orderby'] != $order) {  // only update incorrect ones
                 $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
                     SET orderby = '$order'
@@ -433,6 +432,6 @@ class ppAttribute
         }
     }
 
-}   // class ppAttribute
+}   // class Attribute
 
 ?>

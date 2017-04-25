@@ -11,11 +11,13 @@
 *   @filesource
 */
 
+namespace Paypal;
+
 /**
 *   Order class
 *   @package    paypal
 */
-class ppOrder
+class Order
 {
     public $items = array();
     private $properties = array();
@@ -214,8 +216,8 @@ class ppOrder
             // If set, the user has selected an existing address.  Read
             // that value and use it's values.
             $_SESSION[PP_CART_VAR]['billing'] = $A['useaddress'];
-            USES_paypal_class_userinfo();
-            $A = ppUserInfo::getAddress($A['useaddress']);
+            USES_paypal_class_UserInfo();
+            $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
         } else {
             // form vars have this prefix
@@ -242,12 +244,12 @@ class ppOrder
     */
     public function setShipping($A)
     {
-        USES_paypal_class_userinfo();
+        USES_paypal_class_UserInfo();
 
         if (isset($A['useaddress'])) {
             // If set, read and use an existing address
             $_SESSION[PP_CART_VAR]['shipping'] = $A['useaddress'];
-            $A = ppUserInfo::getAddress($A['useaddress']);
+            $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
         } else {
             // form vars have this prefix
@@ -418,12 +420,12 @@ class ppOrder
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
 
-        USES_paypal_class_product();
+        USES_paypal_class_Product();
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         if ($tpl == 'print') {
             $tpltype = '.print';
         } else {
@@ -442,8 +444,8 @@ class ppOrder
         // Get the workflows so we sho the relevant info.
         if (!isset($_PP_CONF['workflows']) ||
             !is_array($_PP_CONF['workflows'])) {
-            USES_paypal_class_workflow();
-            ppWorkflow::Load();
+            USES_paypal_class_Workflow();
+            Workflow::Load();
         }
         foreach ($_PP_CONF['workflows'] as $key => $value) {
             $T->set_var('have_' . $value, 'true');
@@ -451,7 +453,7 @@ class ppOrder
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
-            $P = new ppProduct($item['product_id']);
+            $P = new Product($item['product_id']);
             $item_options = '';
             $opt = json_decode($item['options_text'], true);
             if ($opt) {
@@ -481,7 +483,7 @@ class ppOrder
             }
         }
 
-        $dt = new Date($this->order_date, $_CONF['timezone']);
+        $dt = new \Date($this->order_date, $_CONF['timezone']);
         $total = $subtotal + $this->shipping + $this->handling + $this->tax;
         $T->set_var(array(
             'pi_url'    => PAYPAL_URL,
@@ -505,11 +507,11 @@ class ppOrder
         ) );
 
         if ($isAdmin) {
-            USES_paypal_class_orderstatus();
+            USES_paypal_class_OrderStatus();
             $T->set_var(array(
                 'purch_name' => COM_getDisplayName($this->uid),
                 'purch_uid' => $this->uid,
-                'stat_update' => ppOrderStatus::Selection($this->order_id, 1, $this->status),
+                'stat_update' => OrderStatus::Selection($this->order_id, 1, $this->status),
                 'status' => $this->status,
             ) );
 
@@ -531,9 +533,9 @@ class ppOrder
 
         $status = $this->status;
         if ($this->pmt_method != '') {
-        //if ($status & PP_STATUS_PAID) {
             if (USES_paypal_gateway($this->pmt_method)) {
-                $gw = new $this->pmt_method;
+                $cls = '\\Paypal\\' . $this->pmt_method;
+                $gw = new $cls;
                 $pmt_method = $gw->Description();
             } else {
                 $pmt_method = $this->pmt_method;
@@ -570,8 +572,8 @@ class ppOrder
 
         // Need to get the order statuses to see if we should notify
         // the buyer
-        USES_paypal_class_orderstatus();
-        $OrdStat = new ppOrderStatus();
+        USES_paypal_class_OrderStatus();
+        $OrdStat = new OrderStatus();
 
         $order_id = $this->order_id;
         $oldstatus = $this->status;
@@ -650,17 +652,16 @@ class ppOrder
         global $_CONF, $_PP_CONF, $_TABLES;
 
         // Check if we're supposed to send a notification
-        if ( !($this->uid != 1 &&
-                    $_PP_CONF['purch_email_user']) ||
-            !($this->uid == 1  &&
-                    $_PP_CONF['purch_email_anon']) ) {
+        if ( ($this->uid > 1 &&
+                    $_PP_CONF['purch_email_user'] == 0) ||
+            ($this->uid == 1  &&
+                    $_PP_CONF['purch_email_anon'] == 0) ) {
             return;
         }
-
         PAYPAL_debug("Sending email to " . $this->uid);
 
         // setup templates
-        $message = new Template(PAYPAL_PI_PATH . '/templates');
+        $message = new \Template(PAYPAL_PI_PATH . '/templates');
         $message->set_file(array(
             'subject' => 'purchase_email_subject.txt',
             'msg_admin' => 'purchase_email_admin.txt',
@@ -676,10 +677,10 @@ class ppOrder
         $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
 
-        USES_paypal_class_product();
+        USES_paypal_class_Product();
         foreach ($this->items as $id=>$item) {
             if (!PAYPAL_is_plugin_item($item['product_id'])) {
-                $P = new ppProduct($item['product_id']);
+                $P = new Product($item['product_id']);
                 if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
                     $have_physical = 1;
 

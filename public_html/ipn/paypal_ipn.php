@@ -6,11 +6,12 @@
 *   @copyright  Copyright (c) 2011-2014 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-   
+namespace Paypal;
+
 /** Import core glFusion functions */
 require_once '../../lib-common.php';
 

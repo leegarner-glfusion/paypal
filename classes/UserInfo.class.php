@@ -10,13 +10,14 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 /**
 *   Class for user info such as addresses
 *   @since  0.5.0
 *   @package paypal
 */
-class ppUserInfo
+class UserInfo
 {
     /** User ID
     *   @var integer */
@@ -241,7 +242,7 @@ class ppUserInfo
         if ($type != 'billto') $type = 'shipto';
         if (empty($this->formaction)) $this->formaction = 'save' . $type;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         if ($_PP_CONF['_is_uikit']) {
             $T->set_file('address', 'address.uikit.thtml');
         } else {
@@ -335,19 +336,29 @@ class ppUserInfo
     }
 
 
+    /**
+    *   Provide a public method to set the private formaction variable
+    *
+    *   @param  string  $action     Value to set as form action
+    */
     public function setFormAction($action)
     {
         $this->formaction = $action;
     }
 
 
+    /**
+    *   Add a hidden form value
+    *
+    *   @param  string  $name   Name of form variable
+    *   @param  string  $value  Value of variable
+    */
     public function addFormVar($name, $value)
     {
         $this->extravars[] = '<input type="hidden" name="' . $name . 
                 '" value="' . $value . '" />';
     }
 
-}   // class ppUserInfo
-
+}   // class UserInfo
 
 ?>

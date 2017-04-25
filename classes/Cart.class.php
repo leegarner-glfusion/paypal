@@ -21,14 +21,15 @@
 *       by Josh Pendergrass <cendent AT syndicate-gaming DOT com>
 */
 
+namespace Paypal;
 
-USES_paypal_class_workflow();
+USES_paypal_class_Workflow();
 
 /**
 *   Shopping cart class
 *   @package paypal
 */
-class ppCart
+class Cart
 {
     /** Shopping cart contents.
         @var array */
@@ -61,7 +62,7 @@ class ppCart
         // Don't use session-based carts for paypal IPN, for those
         // we just want an empty cart that can be read.
         if ($interactive) {
-            ppWorkflow::Init();
+            Workflow::Init();
             if (!isset($_SESSION[PP_CART_VAR])) {
                 $_SESSION[PP_CART_VAR] = array(
                     'cart_id' => '',
@@ -324,7 +325,7 @@ class ppCart
     *   Called from the View Cart form to update any quantities that have
     *   changed.
     *
-    *   @see    ppCart::UpdateQty()
+    *   @see    Cart::UpdateQty()
     *   @param  array   $items  Array if items as itemID=>newQty
     *   @return array           Updated cart contents
     */
@@ -344,7 +345,7 @@ class ppCart
 
     /**
     *   Update the quantity for a cart item.
-    *   Since this may be called by ppCart::UpdateAllQty, the $save parameter
+    *   Since this may be called by Cart::UpdateAllQty, the $save parameter
     *   may be false to keep from updating the DB after every save.  In that
     *   case, it's up to the caller to promptly save the cart.
     *
@@ -415,8 +416,8 @@ class ppCart
         DB_query($sql);
         if ($del_order && isset($_SESSION[PP_CART_VAR]['order_id']) &&
             !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-            USES_paypal_class_order();
-            ppOrder::Delete($_SESSION[PP_CART_VAR]['order_id']);
+            USES_paypal_class_Order();
+            Order::Delete($_SESSION[PP_CART_VAR]['order_id']);
         }
         $this->m_cart = array();
         unset($_SESSION[PP_CART_VAR]);
@@ -438,12 +439,12 @@ class ppCart
     {
         global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
 
-        USES_paypal_class_product();
-        USES_paypal_class_currency();
+        USES_paypal_class_Product();
+        USES_paypal_class_Currency();
 
-        $currency = new ppCurrency();
+        $currency = new Currency();
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         
         $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
         $T->set_file('cart', $checkout ? "order$tpltype.thtml" :
@@ -469,8 +470,7 @@ class ppCart
         // Get the workflows so we show the relevant info.
         if (!isset($_PP_CONF['workflows']) ||
             !is_array($_PP_CONF['workflows'])) {
-            USES_paypal_class_workflow();
-            ppWorkflow::Load();
+            Workflow::Load();
         }
 
         $T->set_block('cart', 'ItemRow', 'iRow');
@@ -484,7 +484,7 @@ class ppCart
 
             if (is_numeric($item_id)) {
                 // a catalog item, get the "right" price
-                $P = new ppProduct($item_id);
+                $P = new Product($item_id);
                 $item_price = $P->getPrice($attr_keys, $item['quantity']);
                 if (!empty($attr_keys)) {
                     foreach ($attr_keys as $attr_key) {
@@ -607,13 +607,13 @@ class ppCart
                 if (!PaymentGw::Supports('checkout', $gw_info)) {
                     continue;
                 }
-                $gw_name = $gw_info['id'];
+                $gw_name = '\\Paypal\\' . $gw_info['id'];
                 $gateway = new $gw_name();
                 $gateway_vars .= '<div class="paypalCheckoutButton">' .
                     $gateway->CheckoutButton($this) . '</div>';
             }
         } else {
-            $L = new Template(PAYPAL_PI_PATH . '/templates/buttons');
+            $L = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
             $L->set_file('login', 'btn_login_req.thtml');
             $L->parse('login_btn', 'login');
             $gateway_vars = $L->finish($L->get_var('login_btn'));
@@ -775,6 +775,6 @@ class ppCart
         return $cart_id;
     }
 
-}   // class ppCart
+}   // class Cart
 
 ?>

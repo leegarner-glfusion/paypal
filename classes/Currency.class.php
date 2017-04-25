@@ -1,5 +1,4 @@
 <?php
-//  $Id: currency.class.php 7511 2014-06-10 21:28:44Z lgarner $
 /**
 *   Class to handle currency display
 *
@@ -11,9 +10,9 @@
 *              GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
-
-class ppCurrency
+class Currency
 {
     var $defaultCurrency;
     private $prefixes = array();

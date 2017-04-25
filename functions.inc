@@ -94,16 +94,12 @@ function USES_paypal_reports()
 {   require_once PAYPAL_PI_PATH . '/reports.inc.php';  }
 
 /** Import product class */
-function USES_paypal_class_product()
-{   require_once PAYPAL_PI_PATH . '/classes/product.class.php';  }
+function USES_paypal_class_Product()
+{   require_once PAYPAL_PI_PATH . '/classes/Product.class.php';  }
 
 /** Import category class */
-function USES_paypal_class_category()
-{   require_once PAYPAL_PI_PATH . '/classes/category.class.php';  }
-
-/** Import CSS-based menu */
-function USES_paypal_class_menu()
-{   require_once PAYPAL_PI_PATH . '/classes/menu.class.php';  }
+function USES_paypal_class_Category()
+{   require_once PAYPAL_PI_PATH . '/classes/Category.class.php';  }
 
 /** Import IPN handler class.
 *   Imports only the required IPN class.
@@ -126,36 +122,36 @@ function USES_paypal_class_categoryimage()
 {   require_once PAYPAL_PI_PATH . '/classes/CategoryImage.class.php';   }
 
 /** Import image handling class for categories */
-function USES_paypal_class_attribute()
-{   require_once PAYPAL_PI_PATH . '/classes/attribute.class.php';   }
+function USES_paypal_class_Attribute()
+{   require_once PAYPAL_PI_PATH . '/classes/Attribute.class.php';   }
 
 /** Import file upload handling class */
-function USES_paypal_class_ppFile()
-{   require_once PAYPAL_PI_PATH . '/classes/ppFile.class.php';   }
+function USES_paypal_class_File()
+{   require_once PAYPAL_PI_PATH . '/classes/File.class.php';   }
 
 /** Import shopping cart class */
-function USES_paypal_class_cart()
-{   require_once PAYPAL_PI_PATH . '/classes/cart.class.php';    }
+function USES_paypal_class_Cart()
+{   require_once PAYPAL_PI_PATH . '/classes/Cart.class.php';    }
 
 /** Import user information class */
-function USES_paypal_class_userinfo()
+function USES_paypal_class_UserInfo()
 {   require_once PAYPAL_PI_PATH . '/classes/UserInfo.class.php';    }
 
 /** Import order class */
-function USES_paypal_class_order()
-{   require_once PAYPAL_PI_PATH . '/classes/order.class.php';    }
+function USES_paypal_class_Order()
+{   require_once PAYPAL_PI_PATH . '/classes/Order.class.php';    }
 
 /** Import workflow handling */
-function USES_paypal_class_workflow()
-{   require_once PAYPAL_PI_PATH . '/classes/workflow.class.php';    }
+function USES_paypal_class_Workflow()
+{   require_once PAYPAL_PI_PATH . '/classes/Workflow.class.php';    }
 
 /** Import order status workflow handling */
-function USES_paypal_class_orderstatus()
-{   require_once PAYPAL_PI_PATH . '/classes/orderstatus.class.php'; }
+function USES_paypal_class_OrderStatus()
+{   require_once PAYPAL_PI_PATH . '/classes/OrderStatus.class.php'; }
 
 /** Import currency class */
-function USES_paypal_class_currency()
-{   require_once PAYPAL_PI_PATH . '/classes/currency.class.php';    }
+function USES_paypal_class_Currency()
+{   require_once PAYPAL_PI_PATH . '/classes/Currency.class.php';    }
 
 /** Define global configuration variable to hold payment gateways */
 $_PP_CONF['gateways'] = array();
@@ -170,8 +166,8 @@ function PAYPAL_setCart()
 {
     global $ppGCart;
     if ($ppGCart === NULL) {
-        USES_paypal_class_cart();
-        $ppGCart = new ppCart();
+        USES_paypal_class_Cart();
+        $ppGCart = new \Paypal\Cart();
     }
 }
 
@@ -189,6 +185,15 @@ function USES_paypal_class_report($name='')
 
 
 /**
+*   Import the payment gateway base class
+*/
+function USES_paypal_gateway_base()
+{
+    require_once PAYPAL_PI_PATH . '/classes/PaymentGw.class.php';
+}
+
+
+/**
 *   Import a single payment gateway.
 *   This function imports the requested gateway, regardless of whether
 *   it's enabled in the configuration.
@@ -197,14 +202,10 @@ function USES_paypal_class_report($name='')
 *   @param  string  $gw_name    Name of gateway (class file) to import
 *   @return boolean             True on success, False on failure
 */
-function USES_paypal_gateway($gw_name='')
+function USES_paypal_gateway($gw_name)
 {
-    if ($gw_name == '') {
-        $classfile = PAYPAL_PI_PATH . '/classes/paymentgw.class.php';
-    } else {
-        $classfile = PAYPAL_PI_PATH . '/classes/gateways/' .
+    $classfile = PAYPAL_PI_PATH . '/classes/gateways/' .
                     $gw_name . '.class.php';
-    }
 
     if (is_file($classfile)) {
         require_once $classfile;
@@ -233,7 +234,7 @@ function PAYPAL_loadGateways($all = false)
     }
 
     // Include the base gateway class
-    require_once PAYPAL_PI_PATH . '/classes/paymentgw.class.php';
+    USES_paypal_gateway_base();
 
     // Load the enabled gateways
     $sql = "SELECT id, enabled, services
@@ -250,7 +251,6 @@ function PAYPAL_loadGateways($all = false)
             $_PP_CONF['gateways'][] = $A;
         }
     }
-
 }
 
 
@@ -271,8 +271,8 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
     // Only show if no topic is requested
     if ($_PP_CONF['centerblock'] == 1 && $topic == '') {
         USES_paypal_functions();
-        USES_paypal_class_cart();
-        $ppGCart = new ppCart();
+        USES_paypal_class_Cart();
+        $ppGCart = new \Paypal\Cart();
         $display = PAYPAL_siteHeader();
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
@@ -397,8 +397,8 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     if (!plugin_commentsupport_paypal())
         return $retval;
 
-    USES_paypal_class_product();
-    $item = new ppProduct($id);
+    USES_paypal_class_Product();
+    $item = new \Paypal\Product($id);
     if ($item->isNew)
         return $retval;
 
@@ -688,7 +688,7 @@ function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 *   This function is deprecated, but is kept to avoid completely breaking
 *   if some plugin that calls this function is still in place.
 *
-*   Plugins should call PLG_invokeService('paypal, 'genButton'...) instead.
+*   Plugins should call LGLIB_invokeService('paypal, 'genButton'...) instead.
 *
 *   Provided $vars should include:
 *       'item_number', 'item_name', 'amount', and optionally 'item_type'
@@ -884,7 +884,7 @@ function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 *   Returns the URL to the file, or to the directory if no file requested.
 *
 *   @see    plugin_getconfigelementhelp_paypal()
-*   @see    ppProduct::showForm()
+*   @see    \Paypal\Product::showForm()
 *   @param  string  $file       HTML file
 *   @param  string  $doclang    Documentation language
 *   @return string              URL to document directory or file
@@ -1038,10 +1038,10 @@ function phpblock_paypal_cart_contents()
 
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
-    USES_paypal_class_cart();
-    USES_paypal_class_product();
+    USES_paypal_class_Cart();
+    USES_paypal_class_Product();
 
-    $cart = new ppCart();
+    $cart = new \Paypal\Cart();
 
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return $LANG_PP['cart_empty'];
@@ -1058,7 +1058,7 @@ function phpblock_paypal_cart_contents()
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
         list($item_id, $options) = explode('|', $item['item_id']);
-        $P = new ppProduct($item_id);
+        $P = new \Paypal\Product($item_id);
         $item_price = $item['price'];
         // Store the text for each attribute and custom field in an array,
         // then implode around linebreaks to display them
@@ -1307,7 +1307,7 @@ function phpblock_paypal_recent($cat='')
 *   This function is deprecated, but is kept to avoid completely breaking
 *   if some plugin that calls this function is still in place.
 *
-*   Plugins should call PLG_invokeService('paypal, 'getCurrency'...) instead.
+*   Plugins should call LGLIB_invokeService('paypal, 'getCurrency'...) instead.
 *
 *   @deprecated 0.5.0
 *   @return string      Our configured currency code.
@@ -1447,8 +1447,8 @@ function PAYPAL_phpblock_product($sql)
             'btn_details' => 'buttons/btn_details.thtml',
         ));
 
-        USES_paypal_class_product();
-        $P = new ppProduct();
+        USES_paypal_class_Product();
+        $P = new \Paypal\Product();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
             $P->Read($A['id']);
             $T->set_var(array(
@@ -1552,7 +1552,7 @@ function plugin_canuserrate_paypal($item_id, $uid)
 /**
 *   Save the current user's shopping cart
 *
-*   @uses   ppCart::SaveUserCart()
+*   @uses   Cart::SaveUserCart()
 *   @since  version 0.5.0
 *   @param  integer $uid    User ID (not really used
 */
@@ -1563,11 +1563,12 @@ function plugin_user_logout_paypal($uid)
     // Does not apply to anonymouse users or if cart is disabled
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    USES_paypal_class_cart();
-    $Cart = new ppCart();
+    USES_paypal_class_Cart();
+    $Cart = new \Paypal\Cart();
     $Cart->SaveUserCart($uid);
     $Cart->Clear($uid);
 }
+
 
 /**
 *   Handle actions needed when the current user logs in.
@@ -1581,8 +1582,8 @@ function plugin_user_login_paypal($uid)
 
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    USES_paypal_class_cart();
-    $C = new ppCart();
+    USES_paypal_class_Cart();
+    $C = new \Paypal\Cart();
     $C->Merge();
 }
 
@@ -1736,10 +1737,10 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
 */
 function plugin_configmanager_select_currency_paypal()
 {
-    USES_paypal_class_currency();
+    USES_paypal_class_Currency();
 
     $A = array();
-    $tmp = ppCurrency::GetAll();
+    $tmp = \Paypal\Currency::GetAll();
     foreach ($tmp as $code => $data) {
         $A["{$code} - {$data['name']}"] = $code;
     }

@@ -11,12 +11,13 @@
 *   @filesource
 */
 
+namespace Paypal;
 
 /**
 *   Class for product
 *   @package paypal
 */
-class ppProduct
+class Product
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -52,11 +53,11 @@ class ppProduct
     {
         global $_PP_CONF;
 
-        USES_paypal_class_currency();
+        USES_paypal_class_Currency();
 
         $this->properties = array();
         $this->isNew = true;
-        $this->currency = new ppCurrency($_PP_CONF['currency']);
+        $this->currency = new Currency($_PP_CONF['currency']);
 
         $id = (int)$id;
         if ($id < 1) {
@@ -347,8 +348,8 @@ class ppProduct
     public function Save($A = '')
     {
         global $_TABLES, $_PP_CONF;
-        USES_paypal_class_productimage();
-        USES_paypal_class_ppFile();
+        USES_paypal_class_ProductImage();
+        USES_paypal_class_File();
 
         if (is_array($A)) {
             $this->SetVars($A);
@@ -363,7 +364,7 @@ class ppProduct
         // there is a valid filename for a download product
         // No weight or shipping for downloads
         if (!empty($_FILES['uploadfile']['tmp_name'])) {
-            $F = new ppFile('uploadfile');
+            $F = new File('uploadfile');
             $filename = $F->uploadFiles();
             if ($F->areErrors() > 0) {
                 $this->Errors[] = $F->printErrors(true);
@@ -446,7 +447,7 @@ class ppProduct
             // Handle image uploads.  This is done last because we need
             // the product id to name the images filenames.
             if (!empty($_FILES['images'])) {
-                $U = new ppProductImage($this->id, 'images');
+                $U = new ProductImage($this->id, 'images');
                 $U->uploadFiles();
 
                 if ($U->areErrors() > 0) {
@@ -631,7 +632,7 @@ class ppProduct
         }
         $id = $this->id;
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         if ($_SYSTEM['framework'] == 'uikit') {
             $T->set_file('product', 'product_form.uikit.thtml');
         } else {
@@ -681,7 +682,7 @@ class ppProduct
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
             'cat_select'    => PAYPAL_recurseCats(
-                                'PAYPAL_callbackCatOptionList', 
+                                '\Paypal\PAYPAL_callbackCatOptionList', 
                                 $this->cat_id), 
             'currency'      => $_PP_CONF['currency'],
             'pi_url'        => PAYPAL_URL,
@@ -881,7 +882,7 @@ class ppProduct
         // Ignore SQL errors since varname is indeterminate
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("ppProduct::_toggle() SQL error: $sql", 1);
+            COM_errorLog("Product::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
             return $newvalue;
@@ -964,7 +965,7 @@ class ppProduct
         // Set the template dir based on the configured template version
         $tpl_dir = PAYPAL_PI_PATH . '/templates/detail/' .
                 $_PP_CONF['product_tpl_ver'];
-        $T = new Template($tpl_dir);
+        $T = new \Template($tpl_dir);
         $T->set_file('product', 'product_detail_attrib.thtml');
 
         $name = $this->name;
@@ -1262,7 +1263,7 @@ class ppProduct
             ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) ) 
             ) {
                 // Free, or unexpired downloads for non-anymous
-                $T = new Template(PAYPAL_PI_PATH . '/templates');
+                $T = new \Template(PAYPAL_PI_PATH . '/templates');
                 $T->set_file('download', 'buttons/btn_download.thtml');
                 $T->set_var('pi_url', PAYPAL_URL);
                 $T->set_var('id', $this->id);
@@ -1278,7 +1279,7 @@ class ppProduct
         } elseif ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
                 !$this->hasAttributes() && $this->price > 0) {
             // Requires login before purchasing
-            $T = new Template(PAYPAL_PI_PATH . '/templates');
+            $T = new \Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('login_req', 'buttons/btn_login_req.thtml');
             $buttons['login'] = $T->parse('', 'login_req');
 
@@ -1291,7 +1292,7 @@ class ppProduct
                     if (!PaymentGw::Supports($this->btn_type, $gw_info)) {
                         continue;
                     }
-                    $gw_name = $gw_info['id'];
+                    $gw_name = '\\Paypal\\' . $gw_info['id'];
                     $gw = new $gw_name();
                     $buttons[$gw->Name()] = $gw->ProductButton($this);
                 }
@@ -1311,7 +1312,7 @@ class ppProduct
             // test one template
                 $tpl_add_cart = 'btn_add_cart_attrib.thtml';
 
-            $T = new Template(PAYPAL_PI_PATH . '/templates');
+            $T = new \Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('cart', 'buttons/' . $tpl_add_cart);
             $T->set_var(array(
                 'item_name'     => htmlspecialchars($this->name),
@@ -1458,7 +1459,7 @@ class ppProduct
                     WHERE id = '{$this->id}'";
             DB_query($sql, 1);
             if (DB_error()) {
-                COM_errorLog("ppProduct::handlePurchase() SQL errror: $sql", 1);
+                COM_errorLog("Product::handlePurchase() SQL errror: $sql", 1);
                 $status = 1;
             }
         }
@@ -1619,6 +1620,6 @@ class ppProduct
             return $str;
     }
 
-}   // class ppProduct
+}   // class Product
 
 ?>

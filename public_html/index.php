@@ -15,6 +15,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 /** Require core glFusion code */
 require_once '../lib-common.php';
@@ -33,8 +34,8 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-USES_paypal_class_cart();
-$ppGCart = new ppCart();
+USES_paypal_class_Cart();
+$ppGCart = new Cart();
 
 // First try to get the SEO-friendly arguments.  A single "action" and "id"
 // will probably be the most common anyway.  If that fails, go through all
@@ -94,10 +95,10 @@ case 'checkout':
         $ppGCart->setInstructions($_POST['order_instr']);
     }
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        USES_paypal_class_workflow();
-        USES_paypal_class_userinfo();
+        USES_paypal_class_Workflow();
+        USES_paypal_class_UserInfo();
         // Start with the first view.
-        //$view = ppWorkflow::getNextView();
+        //$view = Workflow::getNextView();
         $view = 'checkoutcart';
 
         // See what workflow elements we already have.
@@ -105,8 +106,8 @@ case 'checkout':
             switch ($wf_name) {
             case 'billto':
             case 'shipto':
-                if (!(ppUserInfo::isValidAddress($ppGCart->getAddress($wf_name)) == '')) {
-                    //$view = ppWorkflow::getNextView($wf_name);
+                if (!(UserInfo::isValidAddress($ppGCart->getAddress($wf_name)) == '')) {
+                    //$view = Workflow::getNextView($wf_name);
                     $view = $wf_name;
                     break 2;    // exit switch and foreach
                 }
@@ -122,16 +123,16 @@ case 'checkout':
 case 'savebillto':
 case 'saveshipto':
     $addr_type = substr($action, 4);   // get 'billto' or 'shipto'
-    USES_paypal_class_userinfo();
-    USES_paypal_class_workflow();
-    $status = ppUserInfo::isValidAddress($_POST);
+    USES_paypal_class_UserInfo();
+    USES_paypal_class_Workflow();
+    $status = UserInfo::isValidAddress($_POST);
     if ($status != '') {
         $content .= PAYPAL_errMsg($status, $LANG_PP['invalid_form']);
         $view = $addr_type;
         break;
     }
 
-    $U = new ppUserInfo();
+    $U = new UserInfo();
     if ($U->uid > 1) {
         $addr_id = $U->SaveAddress($_POST, $addr_type);
         if ($addr_id[0] < 0) {
@@ -144,13 +145,13 @@ case 'saveshipto':
             $_POST['useaddress'] = $addr_id[0];
         }
     }
-    $view = ppWorkflow::getNextView($addr_type);
+    $view = Workflow::getNextView($addr_type);
     $ppGCart->setAddress($_POST, $addr_type);
     break;
 
 case 'addcartitem':
 case 'addcartitem_x':   // using the image submit button, such as Paypal's
-    USES_paypal_class_cart();
+    USES_paypal_class_Cart();
     $view = 'productlist';
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
             $ppGCart->Contains($_POST['item_number']) !== false) {
@@ -176,8 +177,8 @@ case 'delcartitem':
     $ppGCart->Remove($_GET['id']);
     /*if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
         !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-        //USES_paypal_class_order();
-        //ppOrder::delCartItem($_GET['id'], $_SESSION[PP_CART_VAR]['order_id']);
+        //USES_paypal_class_Order();
+        //Order::delCartItem($_GET['id'], $_SESSION[PP_CART_VAR]['order_id']);
         $ppGCart->Remove($_GET['id']);
     }*/
     $view = 'cart';
@@ -197,10 +198,11 @@ case 'emptycart':
 case 'thanks':
     $ppGCart->Clear(false);
     if (!empty($actionval) && USES_paypal_gateway($actionval)) {
-        $gw = new $actionval();
+        $classname = '\\Paypal\\' . $actionval;
+        $gw = new $classname();
         $tVars = $gw->thanksVars();
         if (!empty($tVars)) {
-            $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
+            $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
             $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
             $T->set_var(array(
                 'site_name'     => $_CONF['site_name'],
@@ -229,7 +231,7 @@ case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
         $ppGCart->Clear();
-        $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
+        $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
         $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
         $T->set_var(array(
             'site_name'     => $_CONF['site_name'],
@@ -256,7 +258,8 @@ case 'processorder':
     $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : '';
     $status = USES_paypal_gateway($gw_name);
     if ($status) {
-        $gw = new $gw_name;
+        $classname = '\\Paypal\\' . $gw_name;
+        $gw = new $classname;
         $output = $gw->handlePurchase($_POST);
         if (!empty($output)) {
             $content .= $output;
@@ -266,10 +269,10 @@ case 'processorder':
         $view = 'thanks';
         $ppGCart->Clear(false);
         if (USES_paypal_gateway($actionval)) {
-            $gw = new $actionval();
+            $gw = new $actionval;
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
-                $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
+                $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
                 $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
                 $T->set_var(array(
                     'site_name'     => $_CONF['site_name'],
@@ -310,16 +313,16 @@ case 'history':
 case 'billto':
 case 'shipto':
     if (COM_isAnonUser()) COM_404();
-    USES_paypal_class_userinfo();
-    $U = new ppUserInfo();
+    USES_paypal_class_UserInfo();
+    $U = new UserInfo();
     $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
     $content .= $U->AddressForm($view, $A);
     break;
 
 case 'order':
     if (COM_isAnonUser()) COM_404();
-    USES_paypal_class_order();
-    $order = new ppOrder($actionval);
+    USES_paypal_class_Order();
+    $order = new Order($actionval);
     if ($order->canView()) {
         $content .= $order->View(true);
     } else {
@@ -328,8 +331,8 @@ case 'order':
     break;
 
 case 'printorder':
-    USES_paypal_class_order();
-    $order = new ppOrder($actionval);
+    USES_paypal_class_Order();
+    $order = new Order($actionval);
     if ($order->canView()) {
         echo $order->View(true, 'print');
         exit;
@@ -347,8 +350,8 @@ case 'vieworder':
 
 case 'detail':
     // deprecated, should be displayed via detail.php
-    USES_paypal_class_product();
-    $P = new ppProduct($id);
+    USES_paypal_class_Product();
+    $P = new Product($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['product_detail'];
@@ -369,12 +372,12 @@ case 'viewcart':
 case 'checkoutcart':
     // Need to create an order or save the cart, so IPN class
     // can access the data. For now, use the cart.
-    /*USES_paypal_class_order();
+    /*USES_paypal_class_Order();
     if (empty($_SESSION[PP_CART_VAR]['invoice'])) {
-        $Ord = new ppOrder();
+        $Ord = new Order();
         $Ord->CreateFromCart($ppGCart);
     } else {
-        $Ord = new ppOrder($_SESSION[PP_CART_VAR]['invoice']);
+        $Ord = new Order($_SESSION[PP_CART_VAR]['invoice']);
     }*/
     $ppGCart->Save();   // make sure it's saved to the DB
     $content .= $ppGCart->View(true);
@@ -397,7 +400,7 @@ case 'none':
 }
 
 $display = PAYPAL_siteHeader();
-$T = new Template(PAYPAL_PI_PATH . '/templates');
+$T = new \Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
 $T->set_var('title', $page_title);
 $display .= $T->parse('', 'title');

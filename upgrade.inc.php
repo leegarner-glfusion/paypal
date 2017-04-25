@@ -307,7 +307,7 @@ function PAYPAL_do_upgrade()
         $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}";
         $res = DB_query($sql);
         if ($res && DB_numRows($res) > 0) {
-            USES_paypal_class_order();
+            USES_paypal_class_Order();
             while ($A = DB_fetchArray($res, false)) {
                 $dt_tm = explode(' ', $A['purchase_date']);
                 list($y, $m, $d) = explode('-', $dt_tm[0]);
@@ -348,7 +348,7 @@ function PAYPAL_do_upgrade()
                     }
                 }
 
-                $ord = new ppOrder($order_id);
+                $ord = new \Paypal\Order($order_id);
                 $ord->uid = $A['user_id'];
                 $ord->order_date = DB_escapeString($A['purchase_date']);
                 $ord->status = PP_STATUS_PAID;

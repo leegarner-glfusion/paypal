@@ -8,6 +8,7 @@ Release TBD
 - Ensure floating-point numbers are formatted correctly for MySQL
 - Includes Sitemap V2 driver
 - Add a category selector to the product admin list
+- Implement namespace, standardize file and class names
 
 ## Ver. 0.5.9
 Released 2016-12-08

@@ -12,6 +12,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 // this file can't be used on its own
 if (!defined ('GVERSION')) {
@@ -264,15 +265,15 @@ class PaypalIPN extends BaseIPN
             $fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];
-            USES_paypal_class_cart();
+            USES_paypal_class_Cart();
             if (empty($this->pp_data['custom']['cart_id'])) {
                 $this->handleFailure(NULL, 'Missing Cart ID');
                 return false;
             }
             // Create a cart and read the info from the cart table.
             // Actual items purchased and prices will come from the IPN.
-            $ppCart = new ppCart($this->pp_data['custom']['cart_id']);
-            $Cart = $ppCart->Cart();
+            $Cart = new Cart($this->pp_data['custom']['cart_id']);
+            $Cart = $Cart->Cart();
             $items = array();
             for ($i = 1; $i <= $this->ipn_data['num_cart_items']; $i++) {
 

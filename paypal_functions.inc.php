@@ -13,8 +13,9 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
-USES_paypal_class_orderstatus();
+USES_paypal_class_OrderStatus();
 
 /**
 *   Order History View.
@@ -102,7 +103,7 @@ function PAYPAL_orders($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getPurchaseHistoryField',
+    $display .= ADMIN_list('paypal', '\\Paypal\\PAYPAL_getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -192,7 +193,7 @@ function PAYPAL_history($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getPurchaseHistoryField',
+    $display .= ADMIN_list('paypal', '\\Paypal\\PAYPAL_getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -216,7 +217,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
     static $dt = NULL;
-    if ($dt === NULL) $dt = new Date('now', $_USER['tzid']);
+    if ($dt === NULL) $dt = new \Date('now', $_USER['tzid']);
 
     $retval = '';
 
@@ -291,7 +292,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'status':
         if ($A['isAdmin'] && is_array($LANG_PP['orderstatus'])) {
-            $retval = ppOrderStatus::Selection($A['order_id'], 0, $fieldvalue);
+            $retval = OrderStatus::Selection($A['order_id'], 0, $fieldvalue);
         } elseif (isset($LANG_PP['orderstatus'][$fieldvalue])) {
             $retval = $LANG_PP['orderstatus'][$fieldvalue];
         } else {
@@ -336,8 +337,8 @@ function PAYPAL_ProductList($cat_id = 0)
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
 
-    USES_paypal_class_product();
-    USES_paypal_class_category();
+    USES_paypal_class_Product();
+    USES_paypal_class_Category();
 
     if (plugin_ismoderator_paypal()) {
         $isAdmin = true;
@@ -352,7 +353,7 @@ function PAYPAL_ProductList($cat_id = 0)
     $cat_img_url = '';
     $display = '';
     if ($cat_id != 0) {
-        $Cat = new ppCategory($cat_id);
+        $Cat = new Category($cat_id);
         if ($Cat->isNew || !$Cat->hasAccess()) {
             echo COM_refresh(PAYPAL_URL);
             exit;
@@ -403,7 +404,7 @@ function PAYPAL_ProductList($cat_id = 0)
         $i = 1;
         $catrows = count($A);
         if ($catrows > 0) {
-            $CT = new Template(PAYPAL_PI_PATH . '/templates');
+            $CT = new \Template(PAYPAL_PI_PATH . '/templates');
             $CT->set_file(array('table'    => 'category_table.thtml',
                         'row'      => 'category_row.thtml',
                         'category' => 'category.thtml',
@@ -560,7 +561,7 @@ function PAYPAL_ProductList($cat_id = 0)
 
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
-    $product = new Template(PAYPAL_PI_PATH . '/templates');
+    $product = new \Template(PAYPAL_PI_PATH . '/templates');
     $product->set_file(array(
         'start'   => 'product_list_start.thtml',
         'end'     => 'product_list_end.thtml',
@@ -602,7 +603,7 @@ function PAYPAL_ProductList($cat_id = 0)
     $display .= $product->parse('', 'start');
 
     // Create an empty product object
-    $P = new ppProduct();
+    $P = new \Paypal\Product();
 
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds('paypal');
@@ -692,8 +693,8 @@ function PAYPAL_ProductList($cat_id = 0)
     if ($_PP_CONF['show_plugins'] && $page == 1 &&
                 empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
-        USES_paypal_class_currency();
-        $Cur = new ppCurrency($_PP_CONF['currency']);
+        USES_paypal_class_Currency();
+        $Cur = new Currency($_PP_CONF['currency']);
         $product->clear_var('rating_bar');  // no ratings for plugins (yet)
         foreach ($_PLUGINS as $pi_name) {
             $status = LGLIB_invokeService($pi_name, 'getproducts',
@@ -795,12 +796,12 @@ function PAYPAL_ipnlogSingle($id, $txn_id)
     $ipn = @unserialize($A['ipn_data']);
 
     if (USES_paypal_gateway($A['gateway'])) {
-
-        $gw = new $A['gateway'];
+        $cls = '\\Paypal\\' . $A['gateway'];
+        $gw = new $cls;
         $vals = $gw->ipnlogVars($ipn);
 
         // Create ipnlog template
-        $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
+        $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
         $T->set_file(array('ipnlog' => 'ipnlog_detail.thtml'));
 
         // Display the specified ipnlog row
@@ -868,7 +869,7 @@ function X_PAYPAL_ipnlogList()
     $res = DB_query($sql);
 
     // Create ipnlog template
-    $ipnlog = new Template($_CONF['path'] . 'plugins/paypal/templates');
+    $ipnlog = new \Template($_CONF['path'] . 'plugins/paypal/templates');
     $ipnlog->set_file(array('ipnlog' => 'ipnlog_item.thtml',
                             'start'  => 'ipnlog_start.thtml',
                             'end'    => 'ipnlog_end.thtml') );
@@ -1257,7 +1258,7 @@ function PAYPAL_Breadcrumbs($id)
             SEC_buildAccessSql();
 
         $result = DB_query($sql);
-        if (!$result)
+        if (!$result || DB_numRows($result) == 0)
             break;
 
         $row = DB_fetchArray($result, false);

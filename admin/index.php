@@ -13,6 +13,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
+namespace Paypal;
 
 /** Import Required glFusion libraries */
 require_once('../../../lib-common.php');
@@ -29,7 +30,7 @@ PAYPAL_access_check('paypal.admin');
 
 USES_paypal_functions();
 USES_lib_admin();
-USES_paypal_class_product();
+USES_paypal_class_Product();
 
 $is_uikit = $_SYSTEM['framework'] == 'uikit' ? true : false;
 
@@ -71,13 +72,13 @@ $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : '';
 
 switch ($action) {
 case 'dup_product':
-    $P = new ppProduct($_REQUEST['id']);
+    $P = new Product($_REQUEST['id']);
     $P->Duplicate();
     echo COM_refresh(PAYPAL_ADMIN_URL.'/index.php');
     break;
 
 case 'deleteproduct':
-    $P = new ppProduct($_REQUEST['id']);
+    $P = new Product($_REQUEST['id']);
     if (!$P->isUsed()) {
         $P->Delete();
     } else {
@@ -86,10 +87,10 @@ case 'deleteproduct':
     break;
 
 case 'deletecatimage':
-    USES_paypal_class_category();
+    USES_paypal_class_Category();
     $id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
     if ($id > 0) {
-        $C = new ppCategory($id);
+        $C = new Category($id);
         $C->DeleteImage();
         $view = 'editcat';
         $_REQUEST['id'] = $id;
@@ -99,8 +100,8 @@ case 'deletecatimage':
     break;
 
 case 'deletecat':
-    USES_paypal_class_category();
-    $C = new ppCategory($_REQUEST['cat_id']);
+    USES_paypal_class_Category();
+    $C = new Category($_REQUEST['cat_id']);
     if (!$C->isUsed()) {
         $C->Delete();
     } else {
@@ -111,12 +112,12 @@ case 'deletecat':
 
 case 'delete_img':
     $img_id = (int)$_REQUEST['img_id'];
-    ppProduct::DeleteImage($img_id);
+    Product::DeleteImage($img_id);
     $view = 'editproduct';
     break;
 
 case 'saveproduct':
-    $P = new ppProduct($_POST['id']);
+    $P = new Product($_POST['id']);
     if (!$P->Save($_POST)) {
         $content .= PAYPAL_errMsg($P->PrintErrors());
         $view = 'editproduct';
@@ -124,8 +125,8 @@ case 'saveproduct':
     break;
 
 case 'savecat':
-    USES_paypal_class_category();
-    $C = new ppCategory($_POST['cat_id']);
+    USES_paypal_class_Category();
+    $C = new Category($_POST['cat_id']);
     if (!$C->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
         $view = 'editcat';
@@ -135,7 +136,7 @@ case 'savecat':
     break;
 
 case 'saveopt':
-    USES_paypal_class_attribute();
+    USES_paypal_class_Attribute();
     $Attr = new ppAttribute($_POST['attr_id']);
     if (!$Attr->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
@@ -149,7 +150,7 @@ case 'saveopt':
     break;
 
 case 'deleteopt':
-    USES_paypal_class_attribute();
+    USES_paypal_class_Attribute();
     // attr_id could be via $_GET or $_POST
     $Attr = new ppAttribute($_REQUEST['attr_id']);
     $Attr->Delete();
@@ -203,12 +204,12 @@ case 'gwmove':
 case 'wfmove':
     switch ($_GET['type']) {
     case 'workflow':
-        USES_paypal_class_workflow();
-        ppWorkflow::moveRow($_GET['id'], $actionval);
+        USES_paypal_class_Workflow();
+        Workflow::moveRow($_GET['id'], $actionval);
         break;
     case 'orderstatus':
-        USES_paypal_class_orderstatus();
-        ppOrderStatus::moveRow($_GET['id'], $actionval);
+        USES_paypal_class_OrderStatus();
+        OrderStatus::moveRow($_GET['id'], $actionval);
         break;
     }
     $view = 'wfadmin';
@@ -254,7 +255,7 @@ case 'attrcopy':
 
 case 'runreport':
     $reportname = isset($_POST['reportname']) ? $_POST['reportname'] : '';
-    if (USES_paypal_class_report($reportname)) {
+    if (USES_paypal_class_Report($reportname)) {
         $R = new $reportname();
         $content .= $R->Render();
         exit;
@@ -275,7 +276,7 @@ case 'history':
 case 'orderhist':
     // Show all purchases
     if (isset($_POST['upd_orders']) && is_array($_POST['upd_orders'])) {
-        USES_paypal_class_order();
+        USES_paypal_class_Order();
         $i = 0;
         foreach ($_POST['upd_orders'] as $order_id) {
             if (!isset($_POST['newstatus'][$order_id]) ||
@@ -283,7 +284,7 @@ case 'orderhist':
                 $_POST['newstatus'][$order_id] == $_POST['oldstatus'][$order_id]) {
                 continue;
             }
-            $ord = new ppOrder($order_id);
+            $ord = new Order($order_id);
             $ord->UpdateStatus($_POST['newstatus'][$order_id]);
             $i++;
         }
@@ -298,8 +299,8 @@ case 'itemhist':
     break;
 
 case 'order':
-    USES_paypal_class_order();
-    $order = new ppOrder($actionval);
+    USES_paypal_class_Order();
+    $order = new Order($actionval);
     $content .= $order->View(true);
     break;
 
@@ -320,7 +321,7 @@ case 'ipnlog':
 
 case 'editproduct':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    $P = new ppProduct($id);
+    $P = new Product($id);
     if ($id == 0 && isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
@@ -330,8 +331,8 @@ case 'editproduct':
 
 case 'editcat':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    USES_paypal_class_category();
-    $C = new ppCategory($id);
+    USES_paypal_class_Category();
+    $C = new Category($id);
     if ($id == 0 && isset($_POST['description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $C->SetVars($_POST);
@@ -346,7 +347,7 @@ case 'catlist':
 case 'attributes':
     if (isset($_POST['delbutton_x']) && is_array($_POST['delitem'])) {
         // Delete some checked attributes
-        USES_paypal_class_attribute();
+        USES_paypal_class_Attribute();
         foreach ($_POST['delitem'] as $attr_id) {
             ppAttribute::Delete($attr_id);
         }
@@ -355,7 +356,7 @@ case 'attributes':
     break;
 
 case 'editattr':
-    USES_paypal_class_attribute();
+    USES_paypal_class_Attribute();
     $attr_id = isset($_REQUEST['attr_id']) ? $_REQUEST['attr_id'] : '';
     $Attr = new ppAttribute($attr_id);
     $content .= $Attr->Edit();
@@ -391,7 +392,7 @@ case 'reports':
     break;
 
 case 'configreport':
-    if (USES_paypal_class_report($actionval)) {
+    if (USES_paypal_class_Report($actionval)) {
         $R = new $actionval();
         $content .= $R->showForm();
     }
@@ -504,7 +505,7 @@ function PAYPAL_adminlist_Product($cat_id=0)
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Product',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Product',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', '', '');
 
@@ -559,7 +560,7 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!ppProduct::isUsed($A['id'])) {
+        if (!Product::isUsed($A['id'])) {
             if ($is_uikit) {
                 $retval .= COM_createLink('',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
@@ -726,7 +727,7 @@ function PAYPAL_adminMenu($view='')
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
 //                    'text' => $LANG_PP['reports']);
 
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T = new \Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('title', 'paypal_title.thtml');
     $T->set_var('title',
         $LANG_PP['admin_title'] . ' (Ver. ' . $_PP_CONF['pi_version'] . ')');
@@ -793,7 +794,7 @@ function PAYPAL_adminlist_IPNLog()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_IPNLog',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_IPNLog',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -868,7 +869,7 @@ function PAYPAL_adminlist_Category()
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
     // Actually used by PAYPAL_getAdminField_Category()
-    USES_paypal_class_category();
+    USES_paypal_class_Category();
 
     $sql = "SELECT
                 cat.cat_id, cat.cat_name, cat.description, cat.enabled,
@@ -918,7 +919,7 @@ function PAYPAL_adminlist_Category()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Category',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Category',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -983,7 +984,7 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!ppCategory::isUsed($A['cat_id'])) {
+        if (!Category::isUsed($A['cat_id'])) {
             if ($is_uikit) {
                 $retval .= COM_createLink('',
                     PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
@@ -1097,12 +1098,12 @@ function PAYPAL_adminlist_Attributes()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Attribute',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Attribute',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', $options, '');
 
     // Create the "copy attributes" form at the bottom
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T = new \Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('copy_attr_form', 'copy_attributes_form.thtml');
     $T->set_var(array(
         'src_product'       => $product_selection,
@@ -1250,7 +1251,7 @@ function PAYPAL_adminList_Gateway()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Gateway',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Gateway',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1405,7 +1406,7 @@ function PAYPAL_adminlist_Workflow()
         $_GET['query_limit'] = 20;
 
     $display .= "<h2>{$LANG_PP['workflows']}</h2>\n";
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Workflow',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1463,7 +1464,7 @@ function PAYPAL_adminlist_OrderStatus()
 
     $display .= "<h2>{$LANG_PP['statuses']}</h2>\n";
     $display .= $LANG_PP['admin_hdr_wfstatus'] . "\n";
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_Workflow',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1547,7 +1548,7 @@ function PAYPAL_itemhist($item_id = '')
     global $_TABLES, $LANG_PP;
 
     if (is_numeric($item_id)) {
-        $Item = new ppProduct($item_id);
+        $Item = new Product($item_id);
         $item_desc = $Item->short_description;
     } else {
         $item_desc = $item_id;
@@ -1590,7 +1591,7 @@ function PAYPAL_itemhist($item_id = '')
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= $LANG_PP['item_history'] . ': ' . $item_desc;
-    $display .= ADMIN_list('paypal', 'PAYPAL_getAdminField_itemhist',
+    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_itemhist',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));

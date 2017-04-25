@@ -56,10 +56,11 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
         if (!empty($_PP_CONF['gateways'])) {    // Should be at least one
             // Get the first gateway that supports the button type
             foreach ($_PP_CONF['gateways'] as $gw_info) {
-                if (PaymentGw::Supports($btn_type, $gw_info) &&
-                        PaymentGw::Supports('external', $gw_info) &&
-                        class_exists($gw_info['id'])) {
-                    $gw = new $gw_info['id'];
+                $classname = '\\Paypal\\' . $gw_info['id'];
+                if (\Paypal\PaymentGw::Supports($btn_type, $gw_info) &&
+                        \Paypal\PaymentGw::Supports('external', $gw_info) &&
+                        class_exists($classname)) {
+                    $gw = new $classname;
                     $output[] = $gw->ExternalButton($args, $btn_type);
                 }
             }
@@ -69,7 +70,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
     // Now create an add-to-cart button, if requested.
     if (isset($args['add_cart']) && $_PP_CONF['ena_cart'] == 1) {
         if (!isset($args['item_type'])) $args['item_type'] = PP_PROD_VIRTUAL;
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('cart', 'buttons/btn_add_cart.thtml');
         $T->set_var(array(
                 'item_name'     => $args['item_name'],
@@ -166,8 +167,8 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
 {
     global $ppGCart;
 
-    USES_paypal_class_cart();
-    $ppGCart = new ppCart();
+    USES_paypal_class_Cart();
+    $ppGCart = new \Paypal\Cart();
 
     $qty = isset($args['quantity']) ? (float)$args['quantity'] : 1;
     if (!isset($args['item_number']) || empty($args['item_number'])) {
@@ -228,8 +229,8 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
 
     if (!is_array($args)) $args = array('amount' => $args);
     $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
-    USES_paypal_class_currency();
-    $Cur = new ppCurrency($_PP_CONF['currency']);
+    USES_paypal_class_Currency();
+    $Cur = new \Paypal\Currency($_PP_CONF['currency']);
     $output = $Cur->Format($amount);
     return PLG_RET_OK;
 }
