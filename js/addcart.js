@@ -1,8 +1,8 @@
 /**
 *   Add an item to the shopping cart.
 */
-var ppAddToCart = function() {
-    data = $("form").serialize();
+var ppAddToCart = function(frm_id) {
+    data = $("#"+frm_id).serialize();
     $.ajax({
         type: "POST",
         dataType: "json",
