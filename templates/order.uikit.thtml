@@ -151,8 +151,13 @@
   </div>
 
   <div id="orderInstructions"><span class="orderInstructionsTitle">{$LANG_PP['order_instr']}:</span><br />
+{!if order_instr}
     {order_instr}
+{!else}
+    <span class="orderInstructions">{$LANG_PP['none']}</span>
+{!endif}
   </div>
+  <hr />
   <div style="clear:both;">
   {!if checkout}
     <div>

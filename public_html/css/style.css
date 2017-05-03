@@ -249,7 +249,7 @@ div.paypalProductListItem.v2 div.ItemImage {
     border: 5px;
     text-align: center;
     margin: auto;
-    height: 120px;
+    max-height: 120px;
 }
 
 div.paypalProductListItem.v1 div.ItemUrl {
@@ -475,6 +475,10 @@ div.paypalProductListItem.v1 div.ItemButtons {
     margin-bottom: 2px;
 }
 
+.paypalProductLgImg.v2 {
+    margin-bottom: 2px;
+}
+
 .alignright {
     text-align: right;
 }
@@ -499,7 +503,9 @@ div.paypalProductSearch {
 .orderInstructionsTitle {
     font-weight: bold;
 }
-
+.orderInstructions {
+    font-style: italic;
+}
 table.paypalViewCartTable {
     width: 500px;
 }
