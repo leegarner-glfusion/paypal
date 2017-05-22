@@ -79,13 +79,13 @@
         {!if is_uikit}
         <a href="{img_url}/{img_file}" data-uk-lightbox="{group:'product'}">
           <img src="{thumb_url}" border="0"
-              alt="{$LANG_PP[click_to_enlarge]}" 
+              alt="{$LANG_PP[click_to_enlarge]}"
               title="{$LANG_PP[click_to_enlarge]}"
               data-uk-tooltip />
         {!else}
         <a href="{img_url}/{img_file}" target="_blank" rel="slimbox[product]">
           <img src="{thumb_url}" border="0"
-              alt="{$LANG_PP[click_to_enlarge]}" 
+              alt="{$LANG_PP[click_to_enlarge]}"
               title="{$LANG_PP[click_to_enlarge]}"
               class="gl_mootip" />
         {!endif}
@@ -169,16 +169,9 @@ function checkForJavascript()
         e.style.display = "inline";
 }
 
-{!if is_uikit}
-$(document).ready(
-{!else}
-window.addEvent('load',
-{!endif}
-  function() {
+$(document).ready(function() {
     checkForJavascript();
     ProcessForm();
 });
- 
 </script>
-
 {# end {templatelocation} #}
