@@ -4,11 +4,11 @@
 *   This is used to supply PayPal functions to other plugins.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2017 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.1
+*   @version    0.5.10
 *   @since      version 0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -112,7 +112,7 @@ function service_getCurrency_paypal($args, &$output, &$svc_msg)
 /**
 *   API function to return the url to a Paypal item.
 *   This returns the url to a Paypal-controlled item, such as the
-*   IPN transaction data.  This is meant to provide a backlink for other 
+*   IPN transaction data.  This is meant to provide a backlink for other
 *   plugins to use with their products.
 *
 *   @param  array   $args       Array of item information, at least 'type'
@@ -138,7 +138,8 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
         }
         break;
     case 'checkout':
-        $url = PAYPAL_URL . '/index.php?checkout=x';
+    case 'cart':
+        $url = PAYPAL_URL . '/index.php?view=cart';
         break;
     }
 
@@ -149,7 +150,6 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
         $output = '';
         return PLG_RET_ERROR;
     }
-
 }
 
 
