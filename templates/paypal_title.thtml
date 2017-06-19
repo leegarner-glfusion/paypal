@@ -1,4 +1,7 @@
 {# begin {templatelocation} #}
+{!if is_admin}
+<script type="text/javascript" src="{site_url}/paypal/js/toggleEnabled.js"></script >
+{!endif}
 <h2>{title}</h2>
 {todo}
 {# end {templatelocation} #}
