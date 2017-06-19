@@ -51,10 +51,6 @@ define('PP_COMMENTS_DISABLED',  -1);
 define('PP_STATUS_OPEN', 0);
 define('PP_STATUS_PAID', 1);
 
-/**  Define the main $_SESSION variable name.  We store things like the
-*    shopping cart ID and previous/next page views here. */
-define('PP_CART_VAR', 'glPPcart');
-
 // Session variables for TimThumb image url, if used
 SESS_setVar($_PP_CONF['pi_name'], array(
     'origpath'      => $_PP_CONF['image_dir'],
@@ -159,6 +155,7 @@ $_PP_CONF['gateways'] = array();
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
 $_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
+$_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
 global $ppGCart;
 $ppGCart = NULL;
@@ -278,14 +275,13 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
     if ($_PP_CONF['centerblock'] == 1 && $topic == '') {
         USES_paypal_functions();
         PAYPAL_setCart();
-        $display = PAYPAL_siteHeader();
+        $display = \Paypal\siteHeader();
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
         $T->set_var('title', $LANG_PP['main_title']);
         $display .= $T->parse('', 'title');
-        $display .= PAYPAL_userMenu('');
-        $display .= PAYPAL_ProductList();
-        $display .= PAYPAL_siteFooter();
+        $display .= \Paypal\ProductList();
+        $display .= \Paypal\siteFooter();
     }
     return $display;
 }
@@ -314,7 +310,13 @@ function plugin_getmenuitems_paypal() {
     $menuitems = array();
     if (SEC_hasRights('paypal.user,paypal.admin,paypal.view', 'OR') &&
             $_PP_CONF['menuitem']) {
-        $menuitems[$LANG_PP['mnu_paypal']] = PAYPAL_URL . '/index.php';
+        $a = preg_replace(
+            '/\{(.*)\}/i',
+            '<i class="' . PP_getIcon('${1}', '') . '"></i>',
+            $LANG_PP['mnu_paypal']);
+
+        //$menuitems[$LANG_PP['mnu_paypal']] = PAYPAL_URL . '/index.php';
+        $menuitems[$a] = PAYPAL_URL . '/index.php';
     }
     return $menuitems;
 }
@@ -824,7 +826,7 @@ function plugin_dopluginsearch_paypal(
 function plugin_getheaderjs_paypal()
 {
     $files = array(
-        PAYPAL_PI_PATH . '/js/toggleEnabled.js',
+//        PAYPAL_PI_PATH . '/js/toggleEnabled.js',
         PAYPAL_PI_PATH . '/js/addcart.js',
     );
     return $files;
@@ -1827,6 +1829,23 @@ function PAYPAL_now()
         $dt = new Date('now', $_CONF['timezone']);
     }
     return $dt;
+}
+
+
+/**
+*   Get an icon from the CSS icon set, either UIkit or FontAwesome
+*
+*   @param  string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
+*   @param  string  $style  Style name from local CSS
+*   @return string      Class names for icon
+*/
+function PP_getIcon($name, $style='info')
+{
+    global $_PP_CONF;
+
+    if ($style != '')
+        $style = ' pp-icon-' . $style;
+    return $_PP_CONF['_iconset'] . '-' . $name . $style;
 }
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';

@@ -26,7 +26,7 @@ $LANG_PP = array (
 'featured_product'  => 'Featured Product',
 'popular_product'   => 'Popular Products',
 'product_categories' => 'Product Categories',
-'mnu_paypal'        => 'Products',
+'mnu_paypal'        => 'Products {shopping-cart}',
 'mnu_admin'         => 'Admin',
 'product'           => 'Product Name/SKU',
 'qty'               => 'Qty',
@@ -295,6 +295,7 @@ $LANG_PP = array (
 'msg_nochange' => 'Item is unchanged',
 'msg_item_added' => 'Item has been added to your cart',
 'all' => 'All',
+'print' => 'Print',
 );
 if ($_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
