@@ -63,12 +63,7 @@ class Cart
         // we just want an empty cart that can be read.
         if ($interactive) {
             Workflow::Init();
-            if (!isset($_SESSION[PP_CART_VAR])) {
-                $_SESSION[PP_CART_VAR] = array(
-                    'cart_id' => '',
-                    //'items' => array(),
-                );
-            }
+            self::initSession();
 
             // Cart ID can be passed in, typically by IPN processors
             // If not, get the cart based on session or user ID
@@ -444,15 +439,12 @@ class Cart
 
         $currency = new Currency();
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        
-        $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
-        $T->set_file('cart', $checkout ? "order$tpltype.thtml" :
-                "viewcart$tpltype.thtml");
         if (!isset($this->m_cart) ||
                 empty($this->m_cart)) {
             return $LANG_PP['cart_empty'];
         }
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
+        $T->set_file('cart', $checkout ? 'order.thtml' : 'viewcart.thtml');
 
         if ($checkout) {
             foreach ($_PP_CONF['workflows'] as $key => $value) {
@@ -540,6 +532,8 @@ class Cart
                 'item_quantity' => $item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_link'     => is_numeric($item_id) ? 'true' : '',
+                'iconset'       => $_PP_CONF['_iconset'],
+                'is_uikit'      => $_PP_CONF['_is_uikit'],
             ) );
             $T->parse('iRow', 'ItemRow', true);
 
@@ -773,6 +767,59 @@ class Cart
             }
         }
         return $cart_id;
+    }
+
+
+    /**
+    *   Create the Paypal session var if it doesn't exist
+    */
+    public static function initSession()
+    {
+        if (!isset($_SESSION['glPPcart'])) {
+            $_SESSION['glPPcart'] = array(
+                'cart_id' => '',
+                //'items' => array(),
+            );
+        }
+    }
+
+
+    /**
+    *   Add a session variable.
+    *
+    *   @param  string  $key    Name of variable
+    *   @param  mixed   $value  Value to set
+    */
+    public static function setSession($key, $value)
+    {
+        $_SESSION['glPPcart'][$key] = $value;
+    }
+
+
+    /**
+    *   Retrieve a session variable
+    *
+    *   @param  string  $key    Name of variable
+    *   @return mixed       Variable value, or NULL if it is not set
+    */
+    public static function getSession($key)
+    {
+        if (isset($_SESSION['glPPcart'][$key])) {
+            return $_SESSION['glPPcart'][$key];
+        } else {
+            return NULL;
+        }
+    }
+
+
+    /**
+    *   Remove a session variable
+    *
+    *   @param  string  $key    Name of variable
+    */
+    public static function clearSession($key)
+    {
+        unset($_SESSION['glPPcart'][$key]);
     }
 
 }   // class Cart
