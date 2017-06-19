@@ -342,7 +342,8 @@ case 'printorder':
 
 case 'vieworder':
     if (COM_isAnonUser()) COM_404();
-    $_SESSION[PP_CART_VAR]['prevpage'] = $view;
+    //$_SESSION[PP_CART_VAR]['prevpage'] = $view;
+    Cart::setSession('prevpage', $view);
     $content .= $ppGCart->View(true);
     $page_title = $LANG_PP['view_order'];
     break;
@@ -385,9 +386,9 @@ case 'checkoutcart':
 case 'productlist':
 default:
     if (isset($_REQUEST['category'])) {
-        $content .= PAYPAL_ProductList($_REQUEST['category']);
+        $content .= ProductList($_REQUEST['category']);
     } else {
-        $content .= PAYPAL_ProductList();
+        $content .= ProductList();
     }
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['main_title'];
@@ -398,7 +399,7 @@ case 'none':
     break;
 }
 
-$display = PAYPAL_siteHeader();
+$display = siteHeader();
 $T = new \Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
 $T->set_var('title', $page_title);
@@ -410,9 +411,8 @@ if (!empty($msg)) {
     $display .= COM_endBlock('blockfooter-message.thtml');
 }
 $display .= LGLIB_showAllMessages();
-//$display .= PAYPAL_userMenu($menu_opt);
 $display .= $content;
-$display .= PAYPAL_siteFooter();
+$display .= siteFooter();
 echo $display;
 
 ?>

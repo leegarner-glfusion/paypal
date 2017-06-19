@@ -103,12 +103,11 @@ function PAYPAL_orders($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\\Paypal\\PAYPAL_getPurchaseHistoryField',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
-
 }
 
 
@@ -193,12 +192,11 @@ function PAYPAL_history($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\\Paypal\\PAYPAL_getPurchaseHistoryField',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
-
 }
 
 
@@ -212,7 +210,7 @@ function PAYPAL_history($admin = false, $uid = '')
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
+function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
@@ -332,7 +330,7 @@ function PAYPAL_getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 *   @param  integer $cat_id     Optional category ID to limit display
 *   @return string      HTML for product catalog.
 */
-function PAYPAL_ProductList($cat_id = 0)
+function ProductList($cat_id = 0)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
@@ -359,7 +357,7 @@ function PAYPAL_ProductList($cat_id = 0)
             exit;
         }
 
-        $breadcrumbs = PAYPAL_Breadcrumbs($cat_id);
+        $breadcrumbs = Category::Breadcrumbs($cat_id);
         $cat_name = $Cat->name;
         $cat_desc = $Cat->description;
         $cat_img_url = $Cat->ImageUrl();
@@ -511,7 +509,7 @@ function PAYPAL_ProductList($cat_id = 0)
     // If applicable, limit by category
     if (!empty($_REQUEST['category'])) {
         $cat_list = $_REQUEST['category'];
-        $cat_list .=  PAYPAL_recurseCats('PAYPAL_callbackCatCommaList', 0,
+        $cat_list .=  PAYPAL_recurseCats(__NAMESPACE__ . '\callbackCatCommaList', 0,
                 $_REQUEST['category']);
         if (!empty($cat_list)) {
             $sql .= " AND c.cat_id IN ($cat_list)";
@@ -603,7 +601,7 @@ function PAYPAL_ProductList($cat_id = 0)
     $display .= $product->parse('', 'start');
 
     // Create an empty product object
-    $P = new \Paypal\Product();
+    $P = new Product();
 
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds('paypal');
@@ -796,7 +794,7 @@ function PAYPAL_ipnlogSingle($id, $txn_id)
     $ipn = @unserialize($A['ipn_data']);
 
     if (USES_paypal_gateway($A['gateway'])) {
-        $cls = '\\Paypal\\' . $A['gateway'];
+        $cls = __NAMESPACE__ . '\\' . $A['gateway'];
         $gw = new $cls;
         $vals = $gw->ipnlogVars($ipn);
 
@@ -1039,7 +1037,6 @@ function PAYPAL_popupMsg($msg)
     $msg = htmlspecialchars($msg, ENT_QUOTES, COM_getEncodingt());
     $popup = COM_showMessageText($msg);
     return $popup;
-
 }
 
 
@@ -1107,9 +1104,9 @@ function PAYPAL_recurseCats(
     while ($row = DB_fetchArray($result, false)) {
         $txt = $char . $row['cat_name'];
         $selected = $row['cat_id'] == $sel ? 'selected="selected"' : '';
-
-        if (!function_exists($function))
-            $function = 'PAYPAL_callbackCatOptionList';
+        if (!function_exists($function)) {
+            $function = __NAMESPACE__ . '\callbackCatOptionList';
+        }
         $str .= $function($row, $sel, $parent_id, $txt);
         if ($maxlevel == 0 || $level < $maxlevel) {
             $str .= $prepost[0] .
@@ -1133,7 +1130,7 @@ function PAYPAL_recurseCats(
 *   @param  string  $txt    Different text to use for category name.
 *   @return string          Option list element for a category
 */
-function PAYPAL_callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
+function callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
 {
     return ',' . $A['cat_id'];
 }
@@ -1148,7 +1145,7 @@ function PAYPAL_callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
 *   @param  string  $txt    Different text to use for category name.
 *   @return string          Option list element for a category
 */
-function PAYPAL_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
+function callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
 {
     if ($sel > 0 && $A['cat_id'] == $sel) {
         $selected = 'selected="selected"';
@@ -1169,7 +1166,6 @@ function PAYPAL_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
     $str .= $txt;
     $str .= "</option>\n";
     return $str;
-
 }
 
 
@@ -1180,7 +1176,7 @@ function PAYPAL_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
 *   @param  string  $meta   Optional header code
 *   @return string          HTML for site header, from COM_siteHeader()
 */
-function PAYPAL_siteHeader($title='', $meta='')
+function siteHeader($title='', $meta='')
 {
     global $_PP_CONF, $LANG_PP;
 
@@ -1208,7 +1204,7 @@ function PAYPAL_siteHeader($title='', $meta='')
 *
 *   @return string      HTML for site footer, from COM_siteFooter()
 */
-function PAYPAL_siteFooter()
+function siteFooter()
 {
     global $_PP_CONF;
 
@@ -1228,97 +1224,6 @@ function PAYPAL_siteFooter()
     }
 
     return $retval;
-}
-
-
-/**
-*   Create the breadcrumb display, with links.
-*
-*   @param  integer $id ID of current category
-*   @return string      Location string ready for display
-*/
-function PAYPAL_Breadcrumbs($id)
-{
-    global $_TABLES, $LANG_PP;
-
-    $A = array();
-    $location = '';
-
-    $id = (int)$id;
-    if ($id < 1) {
-        return $location;
-    } else {
-        $parent = $id;
-    }
-
-    while (true) {
-        $sql = "SELECT cat_name, cat_id, parent_id
-            FROM {$_TABLES['paypal.categories']}
-            WHERE cat_id='$parent' " .
-            SEC_buildAccessSql();
-
-        $result = DB_query($sql);
-        if (!$result || DB_numRows($result) == 0)
-            break;
-
-        $row = DB_fetchArray($result, false);
-        $url = '<a href="' . PAYPAL_URL . '/index.php?category=' .
-                (int)$row['cat_id'] . '">' . $row['cat_name'] . '</a>';
-        $A[] = $url;
-
-        $parent = (int)$row['parent_id'];
-        if ($parent == 0) {
-            $url = '<a href="' .
-                    COM_buildURL(PAYPAL_URL . '/index.php') .
-                    '">' . $LANG_PP['home'] . '</a>';
-            $A[] = $url;
-            break;
-        }
-    }
-
-    $B = array_reverse($A);
-    $location = implode(' :: ', $B);
-    return $location;
-}
-
-
-function PAYPAL_clearNextView()
-{
-    $_SESSION[PP_CART_VAR]['prevpage'] = '';
-}
-
-
-/**
-*   Create the tabbed user menu.
-*   Provides a common menu creation for user-facing files such as index.php
-*   and detail.php
-*
-*   @deprecated 0.5.7
-*   @param  string  $selected   Currently-select menu option text
-*   @return string              HTML for tabbed menu
-*/
-function PAYPAL_userMenu($selected = '')
-{
-    global $LANG_PP, $ppGCart;
-
-    USES_class_navbar();
-
-    $menu = new navbar();
-    $menu->add_menuitem($LANG_PP['product_list'], PAYPAL_URL . '/index.php');
-    if (!COM_isAnonUser()) {
-        $menu->add_menuitem($LANG_PP['purchase_history'],
-                PAYPAL_URL . '/index.php?view=history');
-    }
-    if ($ppGCart->hasItems()) {
-        $menu->add_menuitem($LANG_PP['viewcart'],
-                PAYPAL_URL . '/index.php?view=cart');
-    }
-    if (plugin_ismoderator_paypal()) {
-        $menu->add_menuitem($LANG_PP['mnu_admin'],
-                PAYPAL_ADMIN_URL . '/index.php');
-    }
-    if ($selected != '') $menu->set_selected($selected);
-    return $menu->generate();
 }
 
 ?>

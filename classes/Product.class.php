@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace Paypal;
 
 /**
@@ -682,7 +681,7 @@ class Product
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
             'cat_select'    => PAYPAL_recurseCats(
-                                '\Paypal\PAYPAL_callbackCatOptionList', 
+                                __NAMESPACE__ . '\PAYPAL_callbackCatOptionList', 
                                 $this->cat_id), 
             'currency'      => $_PP_CONF['currency'],
             'pi_url'        => PAYPAL_URL,
@@ -714,6 +713,7 @@ class Product
             'sale_end'      => $this->_InputDtFormat($this->sale_end),
             'avail_beg'     => $this->avail_beg,
             'avail_end'     => $this->avail_end,
+            'iconset'       => $_PP_CONF['_iconset'],
             //'limit_availability_chk' => $this->limit_availability ? 'checked="checked"' : '',
         ) );
 
@@ -1275,14 +1275,12 @@ class Product
             // Do nothing but show the download link (see above).
             // Make sure the add_cart button isn't shown, either.
             $add_cart = false;
-
         } elseif ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
                 !$this->hasAttributes() && $this->price > 0) {
             // Requires login before purchasing
             $T = new \Template(PAYPAL_PI_PATH . '/templates');
             $T->set_file('login_req', 'buttons/btn_login_req.thtml');
             $buttons['login'] = $T->parse('', 'login_req');
-
         } else {
             // Normal buttons for everyone else
             if ($this->canBuyNow() && $this->btn_type != '') {
@@ -1292,7 +1290,7 @@ class Product
                     if (!PaymentGw::Supports($this->btn_type, $gw_info)) {
                         continue;
                     }
-                    $gw_name = '\\Paypal\\' . $gw_info['id'];
+                    $gw_name = __NAMESPACE__ . '\\' . $gw_info['id'];
                     $gw = new $gw_name();
                     $buttons[$gw->Name()] = $gw->ProductButton($this);
                 }

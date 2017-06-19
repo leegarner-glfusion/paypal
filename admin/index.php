@@ -32,8 +32,6 @@ USES_paypal_functions();
 USES_lib_admin();
 USES_paypal_class_Product();
 
-$is_uikit = $_SYSTEM['framework'] == 'uikit' ? true : false;
-
 $content = '';
 
 // Get the message to the admin, if any
@@ -376,6 +374,7 @@ case 'gwedit':
     PAYPAL_loadGateways(true);
     $gwid = isset($_GET['gw_id']) ? $_GET['gw_id'] : '';
     if (DB_count($_TABLES['paypal.gateways'], 'id', $gwid) > 0) {
+        $gwid = __NAMESPACE__ . '\\' . $gwid;
         $gw = new $gwid();
         $content .= $gw->Configure();
     }
@@ -505,7 +504,7 @@ function PAYPAL_adminlist_Product($cat_id=0)
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Product',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Product',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', '', '');
 
@@ -524,61 +523,37 @@ function PAYPAL_adminlist_Product($cat_id=0)
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $is_uikit;
+    global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
 
     $retval = '';
 
     switch($fieldname) {
     case 'copy':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL . "/index.php?dup_product=x&amp;id={$A['id']}",
-                array('class' => 'uk-icon-clone')
-            );
-        } else {
-            $retval .= COM_createLink(
-                $icon_arr['copy'],
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                '-clone pp-icon-info tooltip" title="' . $LANG_ADMIN['copy'] . '"></i>',
                 PAYPAL_ADMIN_URL . "/index.php?dup_product=x&amp;id={$A['id']}"
-            );
-        }
+        );
         break;
 
     case 'edit':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL . "/index.php?editproduct=x&amp;id={$A['id']}",
-                array('class' => 'uk-icon-edit')
-            );
-        } else {
-            $retval .= COM_createLink(
-                $icon_arr['edit'],
-                PAYPAL_ADMIN_URL . "/index.php?editproduct=x&amp;id={$A['id']}"
-            );
-        }
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+            '-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL . "/index.php?editproduct=x&amp;id={$A['id']}"
+        );
         break;
 
     case 'delete':
         if (!Product::isUsed($A['id'])) {
-            if ($is_uikit) {
-                $retval .= COM_createLink('',
+            $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
-                    array('class' => 'uk-icon-trash-o pp-icon-danger',
-                    'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => 'Delete this item',
-                    )
-                );
-            } else {
-                $retval .= COM_createLink(
-                    $icon_arr['delete'],
-                    PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
-                    array('class'=>'gl_mootip',
-                    'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => 'Delete this item',
-                    )
-                );
-            }
+                array(
+                    'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
+                    'title' => $LANG_PP['q_del_item'],
+                )
+            );
         } else {
             $retval = '';
         }
@@ -600,11 +575,11 @@ function PAYPAL_getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'featured':
         if ($fieldvalue == '1') {
-                $switch = ' checked="checked"';
-                $enabled = 1;
+            $switch = ' checked="checked"';
+            $enabled = 1;
         } else {
-                $switch = '';
-                $enabled = 0;
+            $switch = '';
+            $enabled = 0;
         }
         $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                 id=\"togfeatured{$A['id']}\"
@@ -729,8 +704,10 @@ function PAYPAL_adminMenu($view='')
 
     $T = new \Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('title', 'paypal_title.thtml');
-    $T->set_var('title',
-        $LANG_PP['admin_title'] . ' (Ver. ' . $_PP_CONF['pi_version'] . ')');
+    $T->set_var(array(
+        'title' => $LANG_PP['admin_title'] . ' (Ver. ' . $_PP_CONF['pi_version'] . ')',
+        'is_admin' => true,
+    ) );
     $todo_arr = PAYPAL_adminTodo();
     foreach ($todo_arr as $item_todo) {
         $todo_list .= "<li>$item_todo</li>" . LB;
@@ -794,7 +771,7 @@ function PAYPAL_adminlist_IPNLog()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_IPNLog',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_IPNLog',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -813,7 +790,7 @@ function PAYPAL_adminlist_IPNLog()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
 
@@ -868,7 +845,7 @@ function PAYPAL_adminlist_Category()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
-    // Actually used by PAYPAL_getAdminField_Category()
+    // Actually used by \Paypal\getAdminField_Category()
     USES_paypal_class_Category();
 
     $sql = "SELECT
@@ -919,7 +896,7 @@ function PAYPAL_adminlist_Category()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Category',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Category',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -938,26 +915,19 @@ function PAYPAL_adminlist_Category()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES, $is_uikit;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
 
     $retval = '';
     static $grp_names = array();
 
     switch($fieldname) {
     case 'edit':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL . "/index.php?editcat=x&amp;id={$A['cat_id']}",
-                array('class' => 'uk-icon-edit')
-            );
-        } else {
-            $retval .= COM_createLink(
-                $icon_arr['edit'],
-                PAYPAL_ADMIN_URL . "/index.php?editcat=x&amp;id={$A['cat_id']}"
-            );
-        }
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+            '-edit pp-icon-info tooltip" title="' . $LANG_PP['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL . "/index.php?editcat=x&amp;id={$A['cat_id']}"
+        );
         break;
 
     case 'enabled':
@@ -985,25 +955,14 @@ function PAYPAL_getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         if (!Category::isUsed($A['cat_id'])) {
-            if ($is_uikit) {
-                $retval .= COM_createLink('',
-                    PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
-                    array('class'=>'uk-icon-trash-o pp-icon-danger',
+            $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-trash-o pp-icon-danger tooltip"></i>',
+                PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
+                array(
                     'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => 'Delete this item',
-                    'data-uk-tooltip' => ''
-                    )
-                );
-            } else {
-                $retval .= COM_createLink(
-                    $icon_arr['delete'],
-                    PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
-                    array('class'=>'gl_mootip',
-                    'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => 'Delete this item',
-                    )
-                );
-            }
+                    'title' => $LANG_PP['q_del_item'],
+                )
+            );
         }
         break;
 
@@ -1098,7 +1057,7 @@ function PAYPAL_adminlist_Attributes()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Attribute',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Attribute',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', $options, '');
 
@@ -1128,26 +1087,18 @@ function PAYPAL_adminlist_Attributes()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $is_uikit;
+    global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
 
     $retval = '';
 
     switch($fieldname) {
     case 'edit':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL . "/index.php?editattr=x&amp;attr_id={$A['attr_id']}",
-                array('class' => 'uk-icon-edit')
-            );
-        } else {
-            $retval .=  COM_createLink(
-                $icon_arr['edit'],
-                PAYPAL_ADMIN_URL .
-                    "/index.php?editattr=x&amp;attr_id={$A['attr_id']}"
-            );
-        }
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+                PAYPAL_ADMIN_URL . "/index.php?editattr=x&amp;attr_id={$A['attr_id']}"
+        );
         break;
 
     case 'enabled':
@@ -1165,25 +1116,14 @@ function PAYPAL_getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
-                array('class'=>'uk-icon-trash-o pp-icon-danger',
-                    'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => 'Delete this item',
-                    'data-uk-tooltip' => '',
-                )
-            );
-        } else {
-            $retval .= COM_createLink(
-                $icon_arr['delete'],
-                PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
-                array('class'=>'gl_mootip',
-                'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
+            array(
+                'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
                 'title' => 'Delete this item',
-                )
-            );
-        }
+            )
+        );
         break;
 
     default:
@@ -1251,7 +1191,7 @@ function PAYPAL_adminList_Gateway()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Gateway',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Gateway',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1286,26 +1226,19 @@ function PAYPAL_adminList_Gateway()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $is_uikit;
+    global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
 
     $retval = '';
 
     switch($fieldname) {
     case 'edit':
-        if ($is_uikit) {
-            $retval .= COM_createLink('',
-                PAYPAL_ADMIN_URL .
-                    "/index.php?gwedit=x&amp;gw_id={$A['id']}",
-                array('class' => 'uk-icon-edit')
-            );
-        } else {
-            $retval .= COM_createLink($icon_arr['edit'],
-                PAYPAL_ADMIN_URL .
-                    "/index.php?gwedit=x&amp;gw_id={$A['id']}"
-            );
-        }
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                '-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL .
+                "/index.php?gwedit=x&amp;gw_id={$A['id']}"
+        );
         break;
 
     case 'enabled':
@@ -1323,34 +1256,24 @@ function PAYPAL_getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'orderby':
-        $retval = COM_createLink(
-                '<img src="' . PAYPAL_URL .
-                '/images/up.png" height="16" width="16" border="0" />',
+        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-up pp-icon-info"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?gwmove=up&id=' . $A['id']
             ) .
-            COM_createLink(
-                '<img src="' . PAYPAL_URL .
-                    '/images/down.png" height="16" width="16" border="0" />',
+            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-down pp-icon-info"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?gwmove=down&id=' . $A['id']
             );
         break;
 
     case 'delete':
-        if ($is_uikit) {
-            $retval = COM_createLink('',
-                PAYPAL_ADMIN_URL. '/index.php?gwdelete=x&amp;id=' . $A['id'],
-                array('onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
-                    'class' => 'uk-icon-trash-o pp-icon-danger'
-                )
-            );
-        } else {
-            $retval = COM_createLink(
-                $icon_arr['delete'],
-                PAYPAL_ADMIN_URL. '/index.php?gwdelete=x&amp;id=' . $A['id'],
-                array('onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
-                )
-            );
-        }
+        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            PAYPAL_ADMIN_URL. '/index.php?gwdelete=x&amp;id=' . $A['id'],
+            array(
+                'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
+            )
+        );
         break;
 
     default:
@@ -1406,7 +1329,7 @@ function PAYPAL_adminlist_Workflow()
         $_GET['query_limit'] = 20;
 
     $display .= "<h2>{$LANG_PP['workflows']}</h2>\n";
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Workflow',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1464,7 +1387,7 @@ function PAYPAL_adminlist_OrderStatus()
 
     $display .= "<h2>{$LANG_PP['statuses']}</h2>\n";
     $display .= $LANG_PP['admin_hdr_wfstatus'] . "\n";
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_Workflow',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1483,7 +1406,7 @@ function PAYPAL_adminlist_OrderStatus()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP;
 
@@ -1591,7 +1514,7 @@ function PAYPAL_itemhist($item_id = '')
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= $LANG_PP['item_history'] . ': ' . $item_desc;
-    $display .= ADMIN_list('paypal', '\Paypal\PAYPAL_getAdminField_itemhist',
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_itemhist',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -1609,7 +1532,7 @@ function PAYPAL_itemhist($item_id = '')
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function PAYPAL_getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP;
 

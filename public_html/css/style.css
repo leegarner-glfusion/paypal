@@ -223,6 +223,7 @@ div.ppProductListOuter {
   position: relative;
   clear: both;
   padding-top: 10px;
+  text-align: center;
 }
 
 .ppRatingBar.detail {
@@ -550,5 +551,20 @@ div.ppTOCLink {
 
 form.frm_buy_now {
     clear:left;
+}
+.pp-icon-ok {
+    color: green;
+}
+.pp-icon-danger {
+    color: red;
+}
+.pp-icon-warning {
+    color: #FFD300;
+}
+.pp-icon-info {
+    color: #0077dd;
+}
+.pp-icon-unknown {
+    color: #530E53;
 }
 

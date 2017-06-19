@@ -249,7 +249,6 @@ class Category
         } else {
             return false;
         }
-
     }   // function Save()
 
 
@@ -354,7 +353,7 @@ class Category
             'description'   => $this->description,
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'parent_sel'    => PAYPAL_recurseCats(
-                                    'PAYPAL_callbackCatOptionList',
+                                    __NAMESPACE__ . '\callbackCatOptionList',
                                     $this->parent_id, 0, '', 
                                     $not, $items),
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
@@ -547,6 +546,61 @@ class Category
         } else {
             $retval = '';
         }
+    }
+
+
+    /**
+    *   Create the breadcrumb display, with links.
+    *   Creating a static breadcrumb field in the category record won't
+    *   work because of the group access control. If a category is
+    *   encountered that the current user can't access, it is simply
+    *   skipped.
+    *
+    *   @param  integer $id ID of current category
+    *   @return string      Location string ready for display
+    */
+    public static function Breadcrumbs($id)
+    {
+        global $_TABLES, $LANG_PP;
+
+        $A = array();
+        $location = '';
+
+        $id = (int)$id;
+        if ($id < 1) {
+            return $location;
+        } else {
+            $parent = $id;
+        }
+
+        while (true) {
+            $sql = "SELECT cat_name, cat_id, parent_id, grp_access
+                FROM {$_TABLES['paypal.categories']}
+                WHERE cat_id='$parent'";
+
+            $result = DB_query($sql);
+            if (!$result || DB_numRows($result) == 0)
+                break;
+
+            $row = DB_fetchArray($result, false);
+            $parent = (int)$row['parent_id'];
+            if (!SEC_inGroup($row['grp_access'])) {
+                continue;
+            }
+            $A[] = COM_createLink($row['cat_name'],
+                    COM_buildUrl(PAYPAL_URL . '/index.php?category=' .
+                        (int)$row['cat_id']));
+            if ($parent == 0) {
+                break;
+            }
+        }
+
+        // Always add link to shop home
+        $A[] = COM_createLink($LANG_PP['home'],
+                COM_buildURL(PAYPAL_URL . '/index.php'));
+        $B = array_reverse($A);
+        $location = implode(' :: ', $B);
+        return $location;
     }
 
 }   // class Category

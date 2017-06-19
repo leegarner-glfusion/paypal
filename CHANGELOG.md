@@ -2,7 +2,7 @@
 
 ## Ver 0.5.10
 Release TBD
-- Don't instantiate a global date object if not needed
+- Don&apos;t instantiate a global date object if not needed
 - Use TimThumb from lglib plugin to size and display images
 - Use AJAX to add items to cart (requires the cart block to be enabled)
 - Ensure floating-point numbers are formatted correctly for MySQL
