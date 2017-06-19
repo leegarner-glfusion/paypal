@@ -13,7 +13,7 @@
       <th class="aligncenter">{$LANG_PP['price']}</th>
       <th class="aligncenter">{$LANG_PP['quantity']}</th>
       <th class="aligncenter">{$LANG_PP['total']}</th>
-      <th class="aligncenter">{$LANG_PP['delete']}</th>
+      <th class="aligncenter"></th>
     </tr>
     <!-- BEGIN ItemRow -->
     <tr>
@@ -43,8 +43,8 @@
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">
-        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><img
-            src="{layout_url}/images/admin/delete.png"></a>
+        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><i
+            class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
       </td>
       <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
       <input type="hidden" name="item_number_{pp_id}" value="{item_id}">

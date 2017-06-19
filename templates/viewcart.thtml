@@ -43,8 +43,8 @@
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">
-        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><img
-            src="{layout_url}/images/admin/delete.png"></a>
+        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><i
+            class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
       </td>
       <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
       <input type="hidden" name="item_number_{pp_id}" value="{item_id}">
@@ -60,6 +60,15 @@
       <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
     </div>
   <input type="hidden" name="custom" value='{custom}' />
+{!if is_uikit}
+  <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">
+    <i class="{iconset}-refresh"></i>&nbsp;{$LANG_PP['update_cart']}</button>
+  <button style="float:none;" type="submit" class="uk-button uk-button-danger" name="emptycart">
+    <i class="{iconset}-trash-o"></i>&nbsp;{$LANG_PP['empty_cart']}</button>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
+    <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
+{!else}
   <input type="submit" class="paypalButton blue" name="updatecart" 
         value="{$LANG_PP['update_cart']}" />
   <input type="submit" class="paypalButton red" name="emptycart"
@@ -67,6 +76,7 @@
   &nbsp;&nbsp;&nbsp;&nbsp;
   <input id="submit" type="submit" class="paypalButton green" name="checkout" 
         value="{$LANG_PP['checkout']} >>" />
+{!endif}
 </form>
 {!if tc_link}
 <div class="ppTOCLink">
