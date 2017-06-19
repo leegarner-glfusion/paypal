@@ -9,6 +9,7 @@ Release TBD
 - Includes Sitemap V2 driver
 - Add a category selector to the product admin list
 - Implement namespace, standardize file and class names
+- Handle redirect after add-to-cart via ajax
 
 ## Ver. 0.5.9
 Released 2016-12-08

@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2010 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.4.6
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -45,11 +45,13 @@ case 'addcartitem':
     }
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
-                $_POST['item_descr'], $qty, 
+                $_POST['item_descr'], $qty,
                 $_POST['base_price'], $_POST['options'], $_POST['extras']);
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
         'statusMessage' => $LANG_PP['msg_item_added'],
+        'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url'] ?
+                $_POST['_ret_url'] : '',
     );
     echo json_encode($A);
     exit;
