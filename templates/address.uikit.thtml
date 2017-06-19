@@ -57,12 +57,12 @@ function removeAddress(id)
   <input type="hidden" name="order_id" value="{order_id}" />
   {# This is recruited for the country and State Field #}
   <input type="hidden" value="countrySelect" name="cs_config_country_field" id="cs_config_country_field">
-  <input type="hidden" value="stateSelect"   name="cs_config_state_field"   id="cs_config_state_field">
+  <input type="hidden" value="stateSelect" name="cs_config_state_field" id="cs_config_state_field">
   <input type="hidden" value="countryDefault" name="cs_config_country_default" id="cs_config_country_default">
-  <input type="hidden" value="stateDefault"   name="cs_config_state_default"   id="cs_config_state_default">
+  <input type="hidden" value="stateDefault" name="cs_config_state_default" id="cs_config_state_default">
   <input type="hidden" value="{country}" name="countryDefault" id="countryDefault">
-  <input type="hidden" value="{state}" name="stateDefault"   id="stateDefault">
-  <SCRIPT type="text/javascript" SRC="{pi_url}/js/country_state.js"></SCRIPT>
+  <input type="hidden" value="{state}" name="stateDefault" id="stateDefault">
+  <script type="text/javascript" src="{pi_url}/js/country_state.js"></script>
 
 {!if have_addresses}
   <div class="paypalContent">
@@ -128,6 +128,9 @@ function removeAddress(id)
       required
 {!endif}
       type="text" id="address1" name="address1" size="60" value="{address1}" />
+{!if req_street}
+      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+{!endif}
     </div>
   </div>
 
@@ -153,6 +156,9 @@ function removeAddress(id)
         id="countrySelect" name="country" 
             onchange='updateState(this.id)' class="paypalStateSelect">
       </select>
+{!if req_country}
+      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+{!endif}
     </div>
   </div>
 {!else}
@@ -168,7 +174,10 @@ function removeAddress(id)
       required
 {!endif}
       type="text" id="city" name="city" size="60" value="{city}" />
+{!if req_city}
+      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
+{!endif}
   </div>
 {!else}
   <input type="hidden" id="city" name="city" value="" />
@@ -179,11 +188,11 @@ function removeAddress(id)
     <label class="uk-form-label" for="state">{$LANG_PP['state']}</label>
     <div class="uk-form-controls">
       <select
-{!if req_state}
-        required
-{!endif}
         id="stateSelect" name="state" class="paypalStateSelect"">
       </select>
+{!if req_state}
+      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+{!endif}
     </div>
   </div>
 {!else}
@@ -199,6 +208,9 @@ function removeAddress(id)
         required
 {!endif}
         type="text" id="zip" name="zip" size="60" value="{zip}" />
+{!if req_postal}
+      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+{!endif}
     </div>
   </div>
 {!else}

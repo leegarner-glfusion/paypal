@@ -5,8 +5,10 @@
 <script type="text/javascript">
 function PPupdateImage(disp_img, lg_img)
 {
-    document.getElementById("disp_img").src = disp_img;
-    document.getElementById("lg_img").href = lg_img;
+    document.getElementById("disp_img").src = "{site_url}/lglib/img.php?src=" +
+        disp_img + "&plugin=paypal&sess={session_id}&width=460&height=460";
+//    document.getElementById("disp_img").src = disp_img;
+//    document.getElementById("lg_img").href = lg_img;
 }
 </script>
 {!if have_attributes}
@@ -84,17 +86,10 @@ function checkForJavascript()
         e.style.display = "inline";
 }
 
-{!if is_uikit}
-$(document).ready(
-{!else}
-window.addEvent('load',
-{!endif}
-  function() {
-    
+$(document).ready(function() {
     checkForJavascript();
     ProcessForm();
 });
- 
 </script>
 {!endif}
 
@@ -116,31 +111,23 @@ window.addEvent('load',
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
 <div class="paypalProductDetail uk-width-1-2" id="product-image">
-  <div class="paypalProductLgImg uk-hidden-small">
-    <a id="lg_img" href="{main_img}"
-      {!if is_uikit}
-      data-uk-lightbox>
-      {!else}
-      rel="slimbox">
-      {!endif}
-      <img id="disp_img" class="uk-responsive-width uk-responsive-height" src="{main_img}"/>
-    </a>
+  <div class="uk-hidden-small uk-responsive-height">
+    <img id="disp_img" class="uk-responsive-width uk-responsive-height"
+        src="{site_url}/lglib/img.php?src={main_imgfile}&plugin=paypal&sess={session_id}&width=460&height=460" />
   </div>
   <div class="paypalProductThumbWrapper">
     <!-- BEGIN Thumbnail -->
     <div class="paypalProductThumb v2" style="width:{tn_width}px; height:{tn_height}px;" >
       {!if thumb_url}
-      <a href="{img_url}/{img_file}" 
+      <a href="{img_url}/{img_file}"
       {!if is_uikit}
 data-uk-lightbox="{group:'product'}">
       {!else}
 target="_blank" rel="slimbox[product]">
       {!endif}
-        <img src="{thumb_url}" border="0" 
-              alt="{$LANG_PP[click_to_enlarge]}"
-              onmouseover="javascript:PPupdateImage('{disp_img}','{lg_img}');"
-              title="{$LANG_PP[click_to_enlarge]}"
-              class="gl_mootip" />
+        <img src="{site_url}/lglib/img.php?src={small_imgfile}&plugin=paypal&sess={session_id}&width=125&height=125" border="0" alt="{$LANG_PP[click_to_enlarge]}" title="{$LANG_PP[click_to_enlarge]}"
+            class="tooltip"
+            onmouseover="javascript:PPupdateImage('{small_imgfile}','{lg_img}');" />
       </a>
       {!endif}
     </div>
@@ -152,7 +139,7 @@ target="_blank" rel="slimbox[product]">
 {!endif}
 
 <div class="paypalDetailAttrib v2 uk-width-1-4">
-  <form class="uk-form" method="post" id="add_cart" action="">
+  <form class="uk-form" method="post" id="add_cart" action="javascript:void()">
 {!if 0}
 action="{site_url}/paypal/index.php" method="post">
 {!endif}
@@ -190,7 +177,7 @@ action="{site_url}/paypal/index.php" method="post">
       </div>
       <!-- END CustAttrib -->
     </div>
- 
+
 {!if onhand}
     <div id="paypalOnhand">
       {onhand} {$LANG_PP['available']}

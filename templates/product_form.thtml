@@ -14,12 +14,13 @@
     <legend>{$LANG_PP['product_info']}</legend>
 
     <p>
-      <label><font color="red">*</font>{$LANG_PP['product']}:
+      <label>{$LANG_PP['product']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_name', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="name" value="{name}" size="40" 
         maxlength="255" />
+      <i class="{iconset}-warning pp-icon-danger tooltip" title="{$LANG_PP['required']}"></i>
     </p>
 
     <p>
@@ -34,12 +35,13 @@
     </p>
 
     <p>
-      <label><font color="red">*</font>{$LANG_PP['short_description']}:
+      <label>{$LANG_PP['short_description']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_short_descrip', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <input type="text" name="short_description" value="{short_description}" 
-          size="40" maxlength="255" />
+        size="40" maxlength="255" />
+      <i class="{iconset}-warning pp-icon-danger tooltip" title="{$LANG_PP['required']}"></i>
     </p>
 
     <!--<p>
@@ -82,25 +84,17 @@
         <a href="#" onclick="popupWindow('{doc_url}#desc_sale_price', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-      <img src="{layout_url}/images/delete.png" onclick="PP_resetSale();" />
+      <i class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['reset']}" onclick="PP_resetSale();" ></i>
       <input type="text" id="sale_price" name="sale_price" value="{sale_price}" size="12" 
         maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
       {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
               value="{sale_beg}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg" 
-              id="sale_beg_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />&nbsp;&nbsp;
+        <i class="{iconset}-calendar tooltip" id="sale_beg_trigger"
+              title="{$LANG_PP['datepicker']}"></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="sale_end" name="sale_end" size="12"
               value="{sale_end}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg"
-              id="sale_end_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />
+        <i class="{iconset}-calendar tooltip" id="sale_end_trigger"
+              title="{$LANG_PP['datepicker']}"></i>
     </p>
 
     <div>
@@ -301,23 +295,15 @@
        <a href="#" onclick="popupWindow('{doc_url}#desc_avail_dates', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png"
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
-        <img src="{layout_url}/images/delete.png" onclick="PP_resetAvailDates();"/>
+        <i class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['reset']}" onclick="PP_resetAvailDates();"></i>
         {$LANG_PP['from']}: <input type="text" id="avail_beg" name="avail_beg" size="12"
               value="{avail_beg}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg" 
-              id="avail_beg_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />&nbsp;&nbsp;
+        <i class="{iconset}-calendar tooltip" id="avail_beg_trigger"
+              title="{$LANG_PP['datepicker']}"></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="avail_end" name="avail_end" size="12"
               value="{avail_end}" maxlength="12" />
-            <img src="{site_url}/images/datepicker.jpg"
-              id="avail_end_trigger"
-              style="cursor: pointer;"
-              alt="Date Selector"
-              title="Date Selector"
-              />
+        <i class="{iconset}-calendar tooltip" id="avail_end_trigger"
+              title="{$LANG_PP['datepicker']}"></i>
     </p>
 
     <div id="qty_discounts">
@@ -345,7 +331,7 @@
     </div>
 
   </fieldset>
-  <font color="red">*</font>{$LANG_PP['ind_req_fld']}<br />
+  <i class="{iconset}-warning pp-icon-danger tooltip" title="{$LANG_PP['required']}"></i><br />
   {$LANG_PP['del_item_instr']}
 
   <div align="center">
@@ -362,7 +348,7 @@
 </form>
 
 <script type="text/javascript">
-window.addEvent('load', function() {
+$(document).ready(function() {
   PP_changeProdType('{prod_type}');
   PP_changeShippingType('{shipping_type}');
   PP_showOversell({track_onhand});

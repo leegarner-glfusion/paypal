@@ -19,7 +19,7 @@
       </label>
       <div class="uk-form-controls">
         <input required type="text" id="name" name="name" value="{name}" size="40" maxlength="255" />
-        <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+        <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
       </div>
     </div>
 
@@ -42,7 +42,7 @@
       <div class="uk-form-controls">
         <input required type="text" name="short_description" id="short_desc" value="{short_description}" 
           size="40" maxlength="255" />
-        <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+        <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
       </div>
     </div>
 
@@ -82,16 +82,16 @@
         <span id="sale_price" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
-      <i class="uk-icon uk-icon-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetSale();" ></i>
+      <i class="{iconset}-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetSale();" ></i>
       <input type="text" id="sale_price" name="sale_price" value="{sale_price}" size="12" 
         maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
       {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
               value="{sale_beg}" maxlength="12" />
-            <i class="uk-icon-calendar" id="sale_beg_trigger"
+            <i class="{iconset}-calendar" id="sale_beg_trigger"
               title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="sale_end" name="sale_end" size="12"
               value="{sale_end}" maxlength="12" />
-            <i class="uk-icon-calendar" id="sale_end_trigger"
+            <i class="{iconset}-calendar" id="sale_end_trigger"
               title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>
       </div>
     </div>
@@ -334,21 +334,21 @@
         <span id="avail_dates" class="tooltip_cfg tooltipstered"></span> 
       </label>
       <div class="uk-form-controls">
-        <i class="uk-icon uk-icon-trash pp-icon-danger" data-uk-tooltip title="{$LANG_PP['reset']}" onclick="PP_resetAvailDates();"></i>
+        <i class="{iconset}-trash pp-icon-danger" data-uk-tooltip title="{$LANG_PP['reset']}" onclick="PP_resetAvailDates();"></i>
         {$LANG_PP['from']}: <input type="text" id="avail_beg" name="avail_beg" size="12"
               value="{avail_beg}" maxlength="12" />
-            <i class="uk-icon-calendar" id="avail_beg_trigger"
+            <i class="{iconset}-calendar" id="avail_beg_trigger"
               title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>&nbsp;&nbsp;
         {$LANG_PP['to']}: <input type="text" id="avail_end" name="avail_end" size="12"
               value="{avail_end}" maxlength="12" />
-            <i class="uk-icon-calendar" id="avail_end_trigger"
+            <i class="{iconset}-calendar" id="avail_end_trigger"
               title="{$LANG_PP['datepicker']}" data-uk-tooltip></i>
       </div>
     </div>
 
  </fieldset>
   <p>
-  <i class="uk-icon uk-icon-warning pp-icon-warning"></i> {$LANG_PP['ind_req_fld']}<br />
+  <i class="{iconset}-warning pp-icon-danger"></i> {$LANG_PP['ind_req_fld']}<br />
   {$LANG_PP['del_item_instr']}
   </p>
 

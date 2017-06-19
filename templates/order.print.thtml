@@ -148,7 +148,7 @@
     </tr>
     <!-- BEGIN LogMessages -->
     <tr>
-      <td class="nowrap" title="{log_ts_tip}">{log_ts}</td>
+      <td style="white-space:nowrap;" title="{log_ts_tip}">{log_ts}</td>
       <td>{log_username}</td>
       <td>{log_msg}</td>
     </tr>

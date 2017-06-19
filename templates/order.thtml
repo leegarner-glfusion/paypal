@@ -5,8 +5,7 @@
 {!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
-        title="Print" class="uk-icon-print">
-      <img src="{layout_url}/images/print.png" />
+        title="{$LANG_PP['print']}"><i class="{iconset}-print title="{LANG_PP['print']}"></i>
     </a>
   </div>
 {!endif}
@@ -158,11 +157,19 @@
   <div style="clear:both;">
   {!if checkout}
     <div>
+{!if is_uikit}
+      <button class="uk-button uk-button-primary" type="submit" name="viewcart"
+        value="{$LANG_PP['update_cart']}"
+        onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['update_cart']}</button>
+      <button type="submit" class="uk-button uk-button-danger" name="emptycart"
+        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';">{$LANG_PP['empty_cart']}</button>
+{!else}
       <input class="paypalButton blue" type="submit" name="viewcart"
         value="{$LANG_PP['update_cart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';" />
   <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
+{!endif}
     </div>
     <div class="paypalOrderButtons">
       {gateway_vars}

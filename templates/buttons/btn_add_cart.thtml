@@ -1,5 +1,6 @@
 {# begin {templatelocation} #}
-<form id="{frm_id}" style="display:inline;" action="{pi_url}/index.php" method="post">
+<form id="{frm_id}" action="{pi_url}/index.php" method="post">
+<!--<form id="{frm_id}" style="display:inline;" action="{pi_url}/index.php" method="post">-->
   <input type="hidden" name="item_name" value="{item_name}" />
   <input type="hidden" name="item_number" value="{item_number}" />
   <input type="hidden" name="item_descr" value="{short_description}" />
