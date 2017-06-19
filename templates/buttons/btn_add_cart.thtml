@@ -24,6 +24,6 @@
     <input type="hidden" name="_ret_url" value="{_ret_url}" />
   {!endif}
   <button type="button" class="paypalButton orange" border="0" 
-    onclick='ppAddToCart("{frm_id}");' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>
+    onclick='ppAddToCart("{frm_id}");return false;' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>
 </form>
 {# end {templatelocation} #}
