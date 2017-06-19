@@ -50,7 +50,7 @@ case 'addcartitem':
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
         'statusMessage' => $LANG_PP['msg_item_added'],
-        'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url'] ?
+        'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url']) ?
                 $_POST['_ret_url'] : '',
     );
     echo json_encode($A);
