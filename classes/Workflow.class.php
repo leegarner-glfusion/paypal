@@ -229,8 +229,9 @@ class Workflow
         }
 
         if ($curr_key > -1) {
-            $_SESSION[PP_CART_VAR]['prevpage'] = 
-                    $_PP_CONF['workflows'][$curr_key];
+            Cart::setSession('prevpage', $_PP_CONF['workflows'][$curr_key]);
+            //$_SESSION[PP_CART_VAR]['prevpage'] = 
+            //        $_PP_CONF['workflows'][$curr_key];
         }
         if (isset($_PP_CONF['workflows'][$curr_key + 1])) {
             $view = $_PP_CONF['workflows'][$curr_key + 1];

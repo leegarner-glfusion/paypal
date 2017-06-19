@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace Paypal;
 
 /**
@@ -215,7 +214,9 @@ class Order
         if (isset($A['useaddress'])) {
             // If set, the user has selected an existing address.  Read
             // that value and use it's values.
-            $_SESSION[PP_CART_VAR]['billing'] = $A['useaddress'];
+            //$_SESSION[PP_CART_VAR]['billing'] = $A['useaddress'];
+            USES_paypal_class_cart();
+            Cart::setSession('billing', $A['useaddress']);
             USES_paypal_class_UserInfo();
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
@@ -248,7 +249,9 @@ class Order
 
         if (isset($A['useaddress'])) {
             // If set, read and use an existing address
-            $_SESSION[PP_CART_VAR]['shipping'] = $A['useaddress'];
+            //$_SESSION[PP_CART_VAR]['shipping'] = $A['useaddress'];
+            USES_paypal_class_cart();
+            Cart::setSession('shipping', $A['useaddress']);
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
         } else {
@@ -277,6 +280,7 @@ class Order
     function SetVars($A)
     {
         if (!is_array($A)) return false;
+        USES_paypal_class_cart();
 
         $this->uid      = (int)$A['uid'];
         $this->status   = $A['status'];
@@ -297,11 +301,13 @@ class Order
         if (isset($A['order_id']) && !empty($A['order_id'])) {
             $this->order_id = $A['order_id'];
             $this->isNew = false;
-            $_SESSION[PP_CART_VAR]['order_id'] = $A['order_id'];
+            //$_SESSION[PP_CART_VAR]['order_id'] = $A['order_id'];
+            Cart::setSession('order_id', $A['order_id']);
         } else {
             $this->order_id = '';
             $this->isNew = true;
-            $_SESSION[PP_CART_VAR]['order_id'] = '';
+            //$_SESSION[PP_CART_VAR]['order_id'] = '';
+            Cart::clearSession('order_id');
         }
     }
 
@@ -316,12 +322,15 @@ class Order
         global $_TABLES;
 
         if ($order_id == '') {
-            if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
+            /*if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
                 !empty($_SESSION[PP_CART_VAR]['order_id'])) {
                 $order_id = $_SESSION[PP_CART_VAR]['order_id'];
             } else {
                 return;
-            }
+            }*/
+            USES_paypal_class_cart();
+            $order_id = Cart::getSession('order_id');
+            if (!$order_id) return;
         }
 
         $order_id = DB_escapeString($order_id);
@@ -362,6 +371,7 @@ class Order
     public function Save()
     {
         global $_TABLES, $_PP_CONF;
+        USES_paypal_class_cart();
 
         if ($this->isNew) {
             // Shouldn't have an empty order ID, but double-check
@@ -369,7 +379,8 @@ class Order
             if ($this->billto_name == '') {
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
-            $_SESSION[PP_CART_VAR]['order_id'] = $this->order_id;
+            //$_SESSION[PP_CART_VAR]['order_id'] = $this->order_id;
+            Cart::setSession('order_id', $this->order_id);
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
                     order_date = '{$this->order_date}',
