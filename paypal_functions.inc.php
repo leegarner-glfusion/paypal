@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2016 Lee Garner
+*   @copyright  Copyright (c) 2009-2017 Lee Garner
 *   @copyright  Copyright (C) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.9
+*   @version    0.5.10
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -358,7 +358,7 @@ function ProductList($cat_id = 0)
         }
 
         $breadcrumbs = Category::Breadcrumbs($cat_id);
-        $cat_name = $Cat->name;
+        $cat_name = $Cat->cat_name;
         $cat_desc = $Cat->description;
         $cat_img_url = $Cat->ImageUrl();
     }

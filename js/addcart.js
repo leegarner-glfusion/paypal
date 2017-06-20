@@ -17,6 +17,7 @@ var ppAddToCart = function(frm_id) {
                         divid.innerHTML = result.content;
                     }
                     $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+                    // If a return URL is provided, redirect to that page
                     if (result.ret_url != '') {
                         window.location.href = result.ret_url;
                     }
