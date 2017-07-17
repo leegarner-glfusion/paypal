@@ -482,7 +482,7 @@ function PAYPAL_do_upgrade()
         @mkdir($_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files', true);
         // Remove stray .htaccess file that interferes with plugin removal
         @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
-        if (!PAYPAL_do_upgrade_sql('0.5.9')) return false;
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
@@ -518,6 +518,16 @@ function PAYPAL_do_upgrade()
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
  
+    if (!COM_checkVersion($current_ver, '0.5.11')) {
+        $current_ver = '0.5.11';
+        // Make sure a "uid" key doesn't exist in this table.
+        // This will fail if it already doesn't exist, so ignore any error
+        DB_query("ALTER TABLE {$_TABLES['paypal.address']}
+                DROP KEY `uid`", 1);
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
+    }
+
     CTL_clearCache($_PP_CONF['pi_name']);
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
     return true;

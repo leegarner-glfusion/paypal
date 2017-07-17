@@ -25,7 +25,7 @@ $pp_config = config::get_instance();
 $_PP_CONF= $pp_config->get_config('paypal');
 
 /** Include paypal config file  */
-require_once dirname(__FILE__) . '/paypal.php';
+require_once __DIR__ . '/paypal.php';
 
 $_PP_CONF['datetime_fmt'] = 'Y-m-d H:i:s T';
 

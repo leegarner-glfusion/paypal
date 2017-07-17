@@ -333,7 +333,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `billto_city` varchar(255) DEFAULT NULL,
   `billto_state` varchar(255) DEFAULT NULL,
   `billto_country` varchar(255) DEFAULT NULL,
-  `billto_zip` varchar(255) DEFAULT NULL,
+  `billto_zip` varchar(40) DEFAULT NULL,
   `shipto_name` varchar(255) DEFAULT NULL,
   `shipto_company` varchar(255) DEFAULT NULL,
   `shipto_address1` varchar(255) DEFAULT NULL,
@@ -341,7 +341,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `shipto_city` varchar(255) DEFAULT NULL,
   `shipto_state` varchar(255) DEFAULT NULL,
   `shipto_country` varchar(255) DEFAULT NULL,
-  `shipto_zip` varchar(255) DEFAULT NULL,
+  `shipto_zip` varchar(40) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `buyer_email` varchar(255) DEFAULT NULL, 
   `tax` decimal(5,2) unsigned DEFAULT NULL,
@@ -364,7 +364,7 @@ $_SQL['paypal.address'] = "CREATE TABLE `{$_TABLES['paypal.address']}` (
   `city` varchar(255) DEFAULT NULL,
   `state` varchar(255) DEFAULT NULL,
   `country` varchar(255) DEFAULT NULL,
-  `zip` varchar(255) DEFAULT NULL,
+  `zip` varchar(40) DEFAULT NULL,
   `billto_def` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `shipto_def` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -578,7 +578,7 @@ $PP_UPGRADE['0.5.0'] = array(
       `billto_city` varchar(255) DEFAULT NULL,
       `billto_state` varchar(255) DEFAULT NULL,
       `billto_country` varchar(255) DEFAULT NULL,
-      `billto_zip` varchar(255) DEFAULT NULL,
+      `billto_zip` varchar(40) DEFAULT NULL,
       `shipto_name` varchar(255) DEFAULT NULL,
       `shipto_company` varchar(255) DEFAULT NULL,
       `shipto_address1` varchar(255) DEFAULT NULL,
@@ -586,7 +586,7 @@ $PP_UPGRADE['0.5.0'] = array(
       `shipto_city` varchar(255) DEFAULT NULL,
       `shipto_state` varchar(255) DEFAULT NULL,
       `shipto_country` varchar(255) DEFAULT NULL,
-      `shipto_zip` varchar(255) DEFAULT NULL,
+      `shipto_zip` varchar(40) DEFAULT NULL,
       `phone` varchar(30) DEFAULT NULL,
       `tax` decimal(5,2) unsigned DEFAULT NULL,
       `shipping` decimal(5,2) unsigned DEFAULT NULL,
@@ -605,7 +605,7 @@ $PP_UPGRADE['0.5.0'] = array(
       `city` varchar(255) DEFAULT NULL,
       `state` varchar(255) DEFAULT NULL,
       `country` varchar(255) DEFAULT NULL,
-      `zip` varchar(255) DEFAULT NULL,
+      `zip` varchar(40) DEFAULT NULL,
       `billto_def` tinyint(1) unsigned NOT NULL DEFAULT '0',
       `shipto_def` tinyint(1) unsigned NOT NULL DEFAULT '0',
       PRIMARY KEY (`id`) )",
@@ -765,6 +765,14 @@ $PP_UPGRADE['0.5.9'] = array(
         VALUES
         (0, 'paypal_search', 'phpblock', 'Search Catalog',
             9999, 'phpblock_paypal_search')",
+);
+$PP_UPGRADE['0.5.11'] = array(
+    "ALTER TABLE {$_TABLES['paypal.address']}
+        CHANGE `zip` `zip` varchar(40) DEFAUlT NULL,
+        ADD KEY `uid` (`uid`,`zip`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        CHANGE `billto_zip` `billto_zip` varchar(40) DEFAULT NULL,
+        CHANGE `shipto_zip` `shipto_zip` varchar(40) DEFAULT NULL",
 );
 
 ?>
