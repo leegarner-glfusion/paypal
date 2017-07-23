@@ -1,7 +1,7 @@
 # Paypal plugin for glFusion - Changelog
 
 ## Ver 0.5.11
-Release TBD
+Release 2017-07-23
 - Change zip code field to varchar(40)
 
 ## Ver 0.5.10
