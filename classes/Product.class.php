@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -43,7 +43,7 @@ class Product
 
     /**
      *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
+     *  Reads in the specified class, if $id is set.  If $id is zero,
      *  then a new entry is being created.
      *
      *  @param integer $id Optional type ID
@@ -300,8 +300,8 @@ class Product
             return false;
         }
 
-        $result = DB_query("SELECT * 
-                    FROM {$_TABLES['paypal.products']} 
+        $result = DB_query("SELECT *
+                    FROM {$_TABLES['paypal.products']}
                     WHERE id='$id'");
         if (!$result || DB_numRows($result) != 1) {
             return false;
@@ -310,7 +310,7 @@ class Product
             // Get the category.  For now, only one is supported
             /*$row['categories'] = array();
             $c_res = DB_query(
-                    "SELECT cat_id 
+                    "SELECT cat_id
                     FROM {$_TABLES['paypal.prodXcat']}
                     WHERE prod_id={$row['id']}");
             while ($A = DB_fetchArray($c_res, false)) {
@@ -320,15 +320,15 @@ class Product
             $this->isNew = false;
 
             // Now get the product attributes
-            $sql = "SELECT * FROM {$_TABLES['paypal.prod_attr']} 
+            $sql = "SELECT * FROM {$_TABLES['paypal.prod_attr']}
                     WHERE item_id = '$id' AND enabled = 1
                     ORDER BY attr_name, orderby ASC";
             $result = DB_query($sql);
             $this->options = array();
             while ($A = DB_fetchArray($result, false)) {
                 $this->options[$A['attr_id']] = array(
-                    'attr_name' => $A['attr_name'], 
-                    'attr_value' => $A['attr_value'], 
+                    'attr_name' => $A['attr_name'],
+                    'attr_value' => $A['attr_value'],
                     'attr_price' => $A['attr_price'],
                 );
             }
@@ -392,7 +392,7 @@ class Product
             $sql3 = " WHERE id='{$this->id}'";
         } else {
             PAYPAL_debug('Preparing to save a new product.');
-            $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET 
+            $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET
                 dt_add = '" . DB_escapeString(PAYPAL_now()->toMySQL()) . "',";
             $sql3 = '';
         }
@@ -458,23 +458,14 @@ class Product
             self::DeleteButtons($this->id);
         }
 
-        // Update the category crossref
-        /*DB_delete($_TABLES['paypal.prodXcat'], 'prod_id', $prod_id);
-        foreach ($this->categories as $cat) {
-            DB_query("INSERT INTO {$_TABLES['paypal.prodXcat']}
-                    (prod_id, cat_id)
-                VALUES
-                    ({$prod_id}, " . (int)$cat . ")");
-        }*/
-
         if (empty($this->Errors)) {
             PAYPAL_debug('Update of product ' . $this->id . ' succeeded.');
+            PLG_itemSaved($this->id, $_PP_CONF['pi_name']);
             return true;
         } else {
             PAYPAL_debug('Update of product ' . $this->id . ' failed.');
             return false;
         }
-
     }
 
 
@@ -509,6 +500,7 @@ class Product
         DB_delete($_TABLES['paypal.products'], 'id', $this->id);
         DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $this->id);
         self::DeleteButtons($this->id);
+        PLG_itemDeleted($this->id, $_PP_CONF['pi_name']);
         $this->id = 0;
         return true;
     }
@@ -586,7 +578,7 @@ class Product
                 // Must have an expiration period for downloads
                 $this->Errors[] = $LANG_PP['err_missing_exp'];
             }
-        } elseif ($this->prod_type == PP_PROD_PHYSICAL && 
+        } elseif ($this->prod_type == PP_PROD_PHYSICAL &&
                 $this->price < 0.01) {
             // Paypal won't accept a zero amount, so non-downloadable items
             // must have a positive price.  Use "Other Virtual" for free items.
@@ -658,7 +650,7 @@ class Product
 
         // Add the current product ID to the form if it's an existing product.
         if ($id > 0) {
-            $T->set_var('id', '<input type="hidden" name="id" value="' . 
+            $T->set_var('id', '<input type="hidden" name="id" value="' .
                         $this->id .'" />');
             $retval = COM_startBlock($LANG_PP['edit'] . ': ' . $this->name);
 
@@ -681,11 +673,11 @@ class Product
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
             'cat_select'    => PAYPAL_recurseCats(
-                                __NAMESPACE__ . '\PAYPAL_callbackCatOptionList', 
-                                $this->cat_id), 
+                                __NAMESPACE__ . '\PAYPAL_callbackCatOptionList',
+                                $this->cat_id),
             'currency'      => $_PP_CONF['currency'],
             'pi_url'        => PAYPAL_URL,
-            'doc_url'       => PAYPAL_getDocURL('product_form', 
+            'doc_url'       => PAYPAL_getDocURL('product_form',
                                             $_CONF['language']),
             'prod_type'     => $this->prod_type,
             'weight'        => $this->weight,
@@ -693,13 +685,13 @@ class Product
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'tax_chk'       => $this->taxable == 1 ? 'checked="checked"' : '',
             'show_random_chk'  => $this->show_random == 1 ? 'checked="checked"' : '',
-            'show_popular_chk' => $this->show_popular == 1 ? 
+            'show_popular_chk' => $this->show_popular == 1 ?
                                     'checked="checked"' : '',
             'ship_sel_' . $this->shipping_type => 'selected="selected"',
             'shipping_type' => $this->shipping_type,
             'track_onhand'  => $this->track_onhand,
             'shipping_amt'  => sprintf('%.2f', $this->shipping_amt),
-            'sel_comment_' . $this->comments_enabled => 
+            'sel_comment_' . $this->comments_enabled =>
                                     'selected="selected"',
             'rating_chk'    => $this->rating_enabled == 1 ?
                                     'checked="checked"' : '',
@@ -731,7 +723,7 @@ class Product
             }
             $T->set_var(array(
                 'btn_type'  => $key,
-                'btn_chk'   => $key == $this->btn_type || 
+                'btn_chk'   => $key == $this->btn_type ||
                         ($this->isNew && $checked) ? 'checked="checked"' : '',
                 'btn_name'  => $LANG_PP['buttons'][$key],
             ));
@@ -745,7 +737,7 @@ class Product
             $T->set_var(array(
                 'type_val'  => $value,
                 'type_txt'  => $text,
-                'type_sel'  => $this->prod_type == $value ? 'checked="checked"' : '' 
+                'type_sel'  => $this->prod_type == $value ? 'checked="checked"' : ''
             ));
             $T->parse('ProdType', 'ProdTypeRadio', true);
         }
@@ -769,8 +761,8 @@ class Product
             $T->set_var('candelete', 'true');
         }
 
-        // Set up the photo fields.  Use $photocount defined above.  
-        // If there are photos, read the $photo result.  Otherwise, 
+        // Set up the photo fields.  Use $photocount defined above. 
+        // If there are photos, read the $photo result.  Otherwise,
         // or if this is a new ad, just clear the photo area
         $T->set_block('product', 'PhotoRow', 'PRow');
         $i = 0;
@@ -779,14 +771,14 @@ class Product
         // existing product entry.
         $photocount = 0;
         if ($this->id != NULL) {
-            $sql = "SELECT img_id, filename 
-                FROM {$_TABLES['paypal.images']} 
+            $sql = "SELECT img_id, filename
+                FROM {$_TABLES['paypal.images']}
                 WHERE product_id='" . $this->id . "'";
             $photo = DB_query($sql);
 
             // save the count of photos for later use
             if ($photo) {
-                $photocount = DB_numRows($photo); 
+                $photocount = DB_numRows($photo);
             }
 
             // While we're checking the ID, set it as a hidden value
@@ -796,11 +788,11 @@ class Product
             $T->set_var('product_id', '');
         }
 
-        // If there are any images, retrieve and display the thumbnails. 
+        // If there are any images, retrieve and display the thumbnails.
         if ($photocount > 0) {
             while ($prow = DB_fetchArray($photo)) {
                 $i++;
-                $T->set_var('img_url', 
+                $T->set_var('img_url',
                     PAYPAL_URL . "/images/products/{$prow['filename']}");
                 $T->set_var('thumb_url', PAYPAL_ImageUrl($prow['filename']));
                 $T->set_var('seq_no', $i);
@@ -836,7 +828,7 @@ class Product
         /*$str = '';
         while ($A = DB_fetchArray($res, false)) {
             $str .= "<div><b>{$A['cat_name']}</b><br/>
-                    <ul>" . 
+                    <ul>" .
                     PAYPAL_recurseCats('prodform_catoption', 0, $A['cat_id'],
                       '', '', '',
                       0, 0, array('<ol>', '</ol>')) .
@@ -846,7 +838,7 @@ class Product
 
         $retval .= $T->parse('output', 'product');
 
-        /*@setcookie($_CONF['cookie_name'].'fckeditor', 
+        /*@setcookie($_CONF['cookie_name'].'fckeditor',
                 SEC_createTokenGeneral('advancededitor'),
                 time() + 1200, $_CONF['cookie_path'],
                 $_CONF['cookiedomain'], $_CONF['cookiesecure']);
@@ -955,6 +947,14 @@ class Product
 
         USES_lib_comments();
 
+        $cacheName = $_CONF_PP['pi_name'] . '__';
+        /*$cacheInstance = $cacheName . CACHE_security_hash() . '__' . $_CONF['theme'];
+
+        $retval = CACHE_check_instance($cacheInstance, 0);
+        if ($retval) {
+            return $retval;
+        }*/
+
         $prod_id = $this->id;
         if ($prod_id < 1 || !$this->enabled ||!$this->isAvailable()) {
             return PAYPAL_errorMessage($LANG_PP['invalid_product_id'], 'info');
@@ -999,17 +999,17 @@ class Product
                 $T->parse('cAttr', 'CustAttrib', true);
             }
         }
- 
+
         // Retrieve the photos and put into the template
         $sql = "SELECT img_id, filename
-                FROM {$_TABLES['paypal.images']} 
+                FROM {$_TABLES['paypal.images']}
                 WHERE product_id='$prod_id'";
         //echo $sql;die;
         $img_res = DB_query($sql);
         $photo_detail = '';
         if ($img_res && DB_numRows($img_res) > 0) {
             for ($i = 0; $prow = DB_fetchArray($img_res, false); $i++) {
-                if ($prow['filename'] != '' && 
+                if ($prow['filename'] != '' &&
                     file_exists("{$_PP_CONF['image_dir']}/{$prow['filename']}")) {
                     if ($i == 0) {
                         $T->set_var('main_img',
@@ -1071,7 +1071,7 @@ class Product
                 $cbrk = $Attr['attr_name'];
                 $attributes = '';
             }
-            
+           
             if ($type == 'select') {
                 if ($init_price_adj === NULL) $init_price_adj = $Attr['attr_price'];
                 if ($Attr['attr_price'] != 0) {
@@ -1079,12 +1079,12 @@ class Product
                 } else {
                     $attr_str = '';
                 }
-                $attributes .= '<option value="' . $id . '|' . 
+                $attributes .= '<option value="' . $id . '|' .
                     $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
-                    $Attr['attr_value'] . $attr_str . 
+                    $Attr['attr_value'] . $attr_str .
                     '</option>' . LB;
             /*} else {
-                $attributes .= "<input type=\"hidden\" name=\"on{$i}\" 
+                $attributes .= "<input type=\"hidden\" name=\"on{$i}\"
                         value=\"{$Attr['attr_name']}\">\n";
                 $attributes .= $Attr['attr_name'] . ':</td>
                     <td><input class="uk-contrast uk-form" type"text" name="os' . $i. '" value="" size="32" /></td></tr>';
@@ -1138,7 +1138,7 @@ class Product
         }
 
         // Show the user comments if enabled globally and for this product
-        if (plugin_commentsupport_paypal() && 
+        if (plugin_commentsupport_paypal() &&
                 $this->comments_enabled != PP_COMMENTS_DISABLED) {
                 // if enabled or closed
             if ($_CONF['commentsloginrequired'] == 1 && COM_isAnonUser()) {
@@ -1164,8 +1164,8 @@ class Product
                 $static = 1;
                 $voted = 0;
             }
-            $rating_box = RATING_ratingBar('paypal', $prod_id, 
-                    $this->votes, $this->rating, 
+            $rating_box = RATING_ratingBar('paypal', $prod_id,
+                    $this->votes, $this->rating,
                     $voted, 5, $static, 'sm');
             $T->set_var('rating_bar', $rating_box);
         } else {
@@ -1187,6 +1187,7 @@ class Product
                 WHERE id = '$prod_id'");
 
         $retval .= COM_endBlock();
+        CACHE_create_instance($cacheInstance, $retval, 0);
         return $retval;
     }
 
@@ -1234,7 +1235,7 @@ class Product
         return $retval;
     }
 
-        
+       
     /**
     *   Gets the purchase links appropriate for the product.
     *   May be Paypal buttons, login-required link, or download button.
@@ -1254,13 +1255,13 @@ class Product
 
         // Get the free download button, if this is a downloadable product
         // already purchased and not expired
-        $exptime = DB_getItem($_TABLES['paypal.purchases'], 
+        $exptime = DB_getItem($_TABLES['paypal.purchases'],
                 'MAX(UNIX_TIMESTAMP(expiration))',
                 "user_id = {$_USER['uid']} AND product_id = '" .
                 DB_escapeString($this->id) . "'");
 
-        if ($this->prod_type == PP_PROD_DOWNLOAD && 
-            ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) ) 
+        if ($this->prod_type == PP_PROD_DOWNLOAD &&
+            ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) )
             ) {
                 // Free, or unexpired downloads for non-anymous
                 $T = new \Template(PAYPAL_PI_PATH . '/templates');

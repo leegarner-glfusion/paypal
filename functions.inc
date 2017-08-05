@@ -1597,6 +1597,7 @@ function plugin_user_login_paypal($uid)
 /**
 *   Run scheduled tasks.
 *   1. Delete old carts that aren't assigned to any user.
+*   2. Call PLG_itemDeleted to notify plugins that an item is not available
 */
 function plugin_runScheduledTask_paypal()
 {
@@ -1621,6 +1622,16 @@ function plugin_runScheduledTask_paypal()
                 }
             }
         }
+    }
+
+    $where = " WHERE enabled = 1 AND avail_end < '" .
+            PAYPAL_now()->format('Y-m-d', true) . "'";
+    $sql = "SELECT id FROM {$_TABLES['paypal.products']} $where";
+    $res = DB_query($sql);
+    while ($A = DB_fetchArray($res, false)) {
+        PLG_itemDeleted($A['item_id'], $A['type']);
+        DB_query("UPDATE {$_TABLES['paypal.products']}
+                SET enabled = 0 $where");
     }
 }
 
@@ -1849,5 +1860,158 @@ function PP_getIcon($name, $style='info')
 }
 
 require_once PAYPAL_PI_PATH . '/services.inc.php';
+
+/**
+*   Provides the getItemInfo function for products
+*
+*   @param  string  $id         Product ID
+*   @param  string  $fields     Comma-separated list of fields to return
+*   @param  integer $uid        User ID
+*   @param  array   $options    Not used
+*   @return array           Array of product information
+*/
+function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
+{
+    global $_TABLES, $_CONF, $LANG_PP;
+
+    $properties = explode(',', $what);
+    $fields = array();
+    $retval = array();
+    $buildingIndex = false;
+    foreach ($properties as $p) {
+        switch ($p) {
+        case 'id':
+            $fields[] = 'p.id';
+            break;
+        case 'title':
+            $fields[] = 'p.name';
+            break;
+        case 'excerpt':
+        case 'introtext':
+            $fields[] = 'p.short_description';
+        case 'description':
+        case 'bodytext':
+            $fields[] = 'p.description';
+            break;
+        case 'searchidx':
+            $buildingIndex = true;
+            $fields[] = 'p.name';
+            $fields[] = 'p.keywords';
+        case 'content':
+            $fields[] = 'p.short_description';
+            $fields[] = 'p.description';
+            break;
+        case 'date':
+            $fields[] = 'UNIX_TIMESTAMP(p.dt_add) as unixtime';
+            break;
+        case 'price':
+            $fields[] = 'p.price';
+            break;
+        case 'search_index':
+            $buildingIndex = true;
+            break;
+        case 'perms':
+            $fields[] = 'c.grp_access';
+            break;
+        }
+    }
+    if (count($fields) == 0) {
+        return $retval;
+    }
+    $fields = array_unique($fields);
+    $fields = implode(',', $fields);
+    $retval = array();
+    $sql = "SELECT $fields
+             FROM {$_TABLES['paypal.products']} p
+            LEFT JOIN {$_TABLES['paypal.categories']} c
+                ON c.cat_id = p.cat_id ";
+    if ($id == '*') {
+        if ( $buildingSearchIndex ) {
+            $today = date('Y-m-d');
+            $where = " WHERE enabled = 1 AND avail_beg <= '$today' AND avail_end >= '$today' ";
+        } else {
+            $where = ' WHERE 1=1 ';
+        }
+    } else {
+        $where = " WHERE (p.id = '" . DB_escapeString($id) . "')";
+    }
+    if ($uid > 0) {
+        $where .= SEC_buildAccessSql($clause = 'AND', $field = 'c.grp_access');
+    }
+    $sql .= $where;
+    $res = DB_query($sql);
+
+    $props = array();
+    while ($A = DB_fetchArray($res, false)) {
+        foreach ($properties as $p) {
+            switch ($p) {
+            case 'introtext':
+                $props[$p] = $A['short_description'];
+                break;
+            case 'bodytext':
+                $props[$p] = $A['description'];
+                break;
+            case 'title':
+                $props[$p] = $A['name'];
+                break;
+            case 'searchidx':
+                $props[$p] = $A['name'] . ' ' .
+                        $A['short_description'] . ' ' .
+                        $A['description'] . ' ' .
+                        $A['keywords'];
+                break;
+            case 'content':
+                $props[$p] = $A['short_description'] . ' ' .
+                            $A['description'];
+                break;
+            case 'date':
+                $props[$p] = $A['unixtime'];
+                break;
+            case 'perms':
+                $props['perms'] = array(
+                    'owner_id' => 2,    // admin
+                    'group_id' => $A['grp_access'],
+                    'perm_owner' => 3,
+                    'perm_group' => 2,
+                    'perm_members' => 1,
+                    'perm_anon' => 1,
+                );
+                break;
+            default:
+                $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
+                break;
+            }
+        }
+        $props['url'] = COM_buildUrl($_CONF['site_url'] .
+                    '/paypal/detail.php?id=' . urlencode($A['id']));
+        $mapped = array();
+        foreach ($props as $key => $value) {
+            if ($id == '*') {
+                if ($value != '') {
+                    $mapped[$key] = $value;
+                }
+            } else {
+                $mapped[$key] = $value;
+            }
+        }
+
+        if ($id == '*') {
+            $retval[] = $mapped;
+        } else {
+            $retval = $mapped;
+            break;
+        }
+    }
+
+    if (($id != '*') && (count($retval) == 1)) {
+        $tRet = array_values($retval);
+        $retval = $tRet[0];
+    }
+    if ($retval === '' || (is_array($retval) && count($retval) == 0)) {
+        return NULL;
+    } else {
+        return $retval;
+    }
+}
 
 ?>
