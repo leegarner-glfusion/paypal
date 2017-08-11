@@ -52,6 +52,7 @@ case 'addcartitem':
         'statusMessage' => $LANG_PP['msg_item_added'],
         'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url']) ?
                 $_POST['_ret_url'] : '',
+        'unique' => isset($_POST['_unique']) ? true : false,
     );
     echo json_encode($A);
     exit;

@@ -9,8 +9,8 @@
   <input type="hidden" name="base_price" value="{amount}" />
   <input type="hidden" name="custom" value='{custom}' />
   <input type="hidden" name="flags" value='{flags}' />
-{!if unique}
-  <input type="hidden" name="unique" value='{unique}' />
+{!if _unique}
+  <input type="hidden" name="_unique" value='{_unique}' />
 {!endif}
   {!if have_tax}
     <input type="hidden" name="options[tax]" value="{tax}" />
@@ -23,7 +23,7 @@
   {!if _ret_url}
     <input type="hidden" name="_ret_url" value="{_ret_url}" />
   {!endif}
-  <button type="button" class="paypalButton orange" border="0" 
+  <button id="{frm_id}_add_cart_btn" type="button" class="paypalButton {btn_cls}" border="0" {btn_disabled}
     onclick='ppAddToCart("{frm_id}");return false;' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>
 </form>
 {# end {templatelocation} #}

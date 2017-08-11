@@ -44,7 +44,7 @@ if (!defined ('GVERSION')) {
 */
 function service_genButton_paypal($args, &$output, &$svc_msg)
 {
-    global $_CONF, $_PP_CONF;
+    global $_CONF, $_PP_CONF, $ppGCart;
 
     $btn_type = isset($args['btn_type']) ? $args['btn_type'] : '';
     $output = array();
@@ -70,6 +70,18 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
     // Now create an add-to-cart button, if requested.
     if (isset($args['add_cart']) && $_PP_CONF['ena_cart'] == 1) {
         if (!isset($args['item_type'])) $args['item_type'] = PP_PROD_VIRTUAL;
+        $btn_cls = 'orange';
+        $btn_disabled = '';
+        if (isset($args['unique'])) {
+            // If items may only be added to the cart once, check that
+            // this one isn't already there
+            USES_paypal_class_Cart();
+            PAYPAL_setCart();
+            if ($ppGCart->Contains($args['item_number']) !== false) {
+                $btn_cls = 'grey';
+                $btn_disabled = 'disabled="disabled"';
+            }
+        }
         $T = new \Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('cart', 'buttons/btn_add_cart.thtml');
         $T->set_var(array(
@@ -83,10 +95,11 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 'tax'           => isset($args['tax']) ? $args['tax'] : 0,
                 'quantity'      => isset($args['quantity']) ? $args['quantity'] : '',
                 '_ret_url'      => isset($args['_ret_url']) ? $args['_ret_url'] : '',
-                '_unique'    => isset($args['unique']) ? 1 : 0,
-                'frm_id'    => md5($args['item_name'] . rand()),
+                '_unique'       => isset($args['unique']) ? 1 : 0,
+                'frm_id'        => md5($args['item_name'] . rand()),
+                'btn_cls'       => $btn_cls,
+                'btn_disabled'  => $btn_disabled,
         ) );
-
         $output['add_cart'] = $T->parse('', 'cart');
     }
     return PLG_RET_OK;

@@ -15,6 +15,11 @@ var ppAddToCart = function(frm_id) {
                     divid = document.getElementById("ppCartBlockContents");
                     if (divid != undefined) {
                         divid.innerHTML = result.content;
+                        if (result.unique) {
+                            var btn_id = frm_id + '_add_cart_btn';
+                            document.getElementById(btn_id).disabled = true;
+                            document.getElementById(btn_id).className = 'paypalButton grey';
+                        }
                     }
                     $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
                     // If a return URL is provided, redirect to that page
