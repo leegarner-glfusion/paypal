@@ -195,7 +195,6 @@ case 'emptycart':
     break;
 
 case 'thanks':
-    $ppGCart->Clear(false);
     if (!empty($actionval) && USES_paypal_gateway($actionval)) {
         $classname = '\\Paypal\\' . $actionval;
         $gw = new $classname();
@@ -229,7 +228,6 @@ case 'thanks':
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
-        $ppGCart->Clear();
         $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
         $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
         $T->set_var(array(
