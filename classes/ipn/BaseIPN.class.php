@@ -231,7 +231,6 @@ class BaseIPN
         $payment_gross = (float)$this->pp_data['pmt_gross'];
 
         foreach ($this->items as $id => $item) {
-
             // If the item number is numeric, assume it's an
             // inventory item.  Otherwise, it should be a plugin-supplied
             // item with the item number like pi_name:item_number:options
@@ -250,7 +249,6 @@ class BaseIPN
                     // received just "plugin_name" as complete item number
                     $pi_info = array($item['item_number']);
                 }
-
                 // Try to call the plugin's function to get product info.
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
                     $pi_info, $A, $svc_msg);
@@ -365,8 +363,9 @@ class BaseIPN
 
             }
 
-            if (!empty($files))
+            if (!empty($files)) {
                 $message->set_var('files', 'true');
+            }
             $gw_msg = sprintf($LANG_PP['pmt_made_via'],
                     $this->pp_data['gw_name'], $this->pp_data['pmt_date']);
 
@@ -483,7 +482,6 @@ class BaseIPN
                     $pi_info = array($item['item_number']);
                 }
                 PAYPAL_debug('BaseIPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
-
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
                         $pi_info, $A, $svc_msg);
 
@@ -513,7 +511,8 @@ class BaseIPN
             } else {
                 PAYPAL_debug("Paypal item " . $item['item_number']);
                 $P = new Product($item['item_number']);
-                $A = array('name' => $P->name,
+                $A = array(
+                    'name' => $P->name,
                     'short_description' => $P->short_description,
                     'expiration' => $P->expiration,
                     'prod_type' => $P->prod_type,

@@ -7,7 +7,7 @@
 *   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -25,7 +25,7 @@ abstract class PaymentGw
     *   This is for configurable properties of the gateway- URL, testing
     *   mode, etc.  Charactistics of the gateway itself (order, enabled, name)
     *   are held in protected class variables below.
-    *   
+    *
     *   @var array
     */
     protected $properties;
@@ -243,11 +243,11 @@ abstract class PaymentGw
         $item_id = DB_escapeString($item_id);
         $btn_value = DB_escapeString($btn_value);
 
-        $sql = "INSERT INTO {$_TABLES['paypal.buttons']} 
+        $sql = "INSERT INTO {$_TABLES['paypal.buttons']}
                 (item_id, gw_name, button)
             VALUES
                 ('{$item_id}', '{$this->gw_name}', '{$btn_value}')
-            ON DUPLICATE KEY UPDATE 
+            ON DUPLICATE KEY UPDATE
                 button = '{$btn_value}'";
         DB_query($sql);
     }
@@ -370,8 +370,8 @@ abstract class PaymentGw
     {
         global $_TABLES;
 
-        $sql = "SELECT id, orderby 
-                FROM {$_TABLES['paypal.gateways']} 
+        $sql = "SELECT id, orderby
+                FROM {$_TABLES['paypal.gateways']}
                 ORDER BY orderby ASC;";
         $result = DB_query($sql);
 
@@ -380,7 +380,7 @@ abstract class PaymentGw
         while ($A = DB_fetchArray($result, false)) {
             if ($A['orderby'] != $order) {  // only update incorrect ones
                 $sql = "UPDATE {$_TABLES['paypal.gateways']}
-                    SET orderby = '$order' 
+                    SET orderby = '$order'
                     WHERE id = '" . DB_escapeString($A['id']) . "'";
                 DB_query($sql);
             }
@@ -403,7 +403,7 @@ abstract class PaymentGw
         case 'up':
             $oper = '-';
             break;
-        case 'down': 
+        case 'down':
             $oper = '+';
             break;
         default:
@@ -414,7 +414,7 @@ abstract class PaymentGw
         if (!empty($oper)) {
             $id = DB_escapeString($id);
             $sql = "UPDATE {$_TABLES['paypal.gateways']}
-                    SET orderby = orderby $oper 11 
+                    SET orderby = orderby $oper 11
                     WHERE id = '$id'";
             //echo $sql;die;
             DB_query($sql);
@@ -447,7 +447,7 @@ abstract class PaymentGw
         global $_TABLES;
 
         // Only install the gateway if it isn't already installed
-        $id = DB_getItem($_TABLES['paypal.gateways'], 'id', 
+        $id = DB_getItem($_TABLES['paypal.gateways'], 'id',
                 "id='{$this->gw_name}'");
         if (empty($id)) {
             if (is_array($this->config)) {
@@ -718,7 +718,7 @@ abstract class PaymentGw
             $items[$id]['prod_type'] = $A['prod_type'];
 
             // If a custom name was supplied by the gateway's IPN processor,
-            // then use that.  Otherwise, plug in the name from inventory or 
+            // then use that.  Otherwise, plug in the name from inventory or
             // the plugin, for the notification email.
             if (empty($item['name'])) {
                 $items[$id]['name'] = $A['short_description'];
@@ -727,15 +727,15 @@ abstract class PaymentGw
             // Add the purchase to the paypal purchase table
             $uid = isset($vals['uid']) ? (int)$vals['uid'] : $_USER['uid'];
 
-            $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET 
+            $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET
                         order_id = '{$db_order_id}',
                         product_id = '{$item_number}',
                         description = '{$items[$id]['name']}',
-                        quantity = '{$item['quantity']}', 
-                        user_id = '{$uid}', 
+                        quantity = '{$item['quantity']}',
+                        user_id = '{$uid}',
                         txn_type = '{$this->gw_id}',
-                        txn_id = '', 
-                        purchase_date = '" . PAYPAL_now()->toMySQL() . "', 
+                        txn_id = '',
+                        purchase_date = '" . PAYPAL_now()->toMySQL() . "',
                         status = 'complete',
                         token = '$token',
                         price = " . (float)$item['price'] . ",
@@ -751,12 +751,6 @@ abstract class PaymentGw
             DB_query($sql);
 
         }   // foreach item
-
-        // If this was a user's cart, then clear that also
-        if (isset($vals['cart_id']) && !empty($vals['cart_id'])) {
-            DB_delete($_TABLES['paypal.cart'], 'cart_id', $vals['cart_id']);
-        }
-
     }
 
 
@@ -973,7 +967,7 @@ abstract class PaymentGw
     //  The following functions MUST be declared in each derived class.
     //  There is no way that these can deliver reasonable default behavior.
     //  Technically, __set() is optional; you can populate the $properties array
-    //  manually or use actual local variables, but to reference your 
+    //  manually or use actual local variables, but to reference your
     //  gateway's undefined local variables as $this->varname you'll need a
     //  __set() function.  Otherwise, they'll be created on demand, but
     //  retrieved via our __get() function which only looks at the local
