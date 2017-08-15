@@ -193,12 +193,11 @@ class paypal extends PaymentGw
             'upload'    => '1',
             'cancel_return' => PAYPAL_URL.'/index.php?view=cart',
             'return'    => PAYPAL_URL.'/index.php?thanks=paypal',
-            'rm'        => '2',
+            'rm'        => '1',     // simple GET return url
             'paymentaction' => 'sale',
             'notify_url' => $this->ipn_url,
             'currency_code'  => $this->currency_code,
             'custom'    => str_replace('"', '\'', serialize($custom_arr)),
-            //'invoice'   => COM_makeSid(),
         );
 
         $address = $cart->getAddress('shipto');
@@ -624,6 +623,7 @@ class paypal extends PaymentGw
             'custom'        => $this->PrepareCustom(),
             'return'        => isset($attribs['return']) ? $attribs['return'] :
                             PAYPAL_URL . '/index.php?thanks=paypal',
+            'rm'            => 1,
             'notify_url'    => $this->ipn_url,
             'amount'        => $amount,
         );
@@ -700,7 +700,6 @@ class paypal extends PaymentGw
             $gateway_vars .= '<input type="hidden" name="' . $name . 
                         '" value="' . $value . '" />' . "\n";
         }
-
         $T->set_var('paypal_url', $this->getActionUrl());
         $T->set_var('btn_text', $btn_text);
         $T->set_var('gateway_vars', $gateway_vars);
