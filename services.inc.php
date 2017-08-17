@@ -68,7 +68,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
     }
 
     // Now create an add-to-cart button, if requested.
-    if (isset($args['add_cart']) && $_PP_CONF['ena_cart'] == 1) {
+    if (isset($args['add_cart']) && $args['add_cart'] && $_PP_CONF['ena_cart'] == 1) {
         if (!isset($args['item_type'])) $args['item_type'] = PP_PROD_VIRTUAL;
         $btn_cls = 'orange';
         $btn_disabled = '';
