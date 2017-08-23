@@ -1889,8 +1889,12 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
         case 'excerpt':
         case 'introtext':
             $fields[] = 'p.short_description';
-        case 'description':
+            break;
         case 'bodytext':
+            $fields[] = 'p.description';
+            break;
+        case 'description':
+            $fields[] = 'p.short_description';
             $fields[] = 'p.description';
             break;
         case 'searchidx':
@@ -1950,6 +1954,9 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
                 break;
             case 'bodytext':
                 $props[$p] = $A['description'];
+                break;
+            case 'description':
+                $props[$p] = $A['short_description'] . ' ' . $A['description'];
                 break;
             case 'title':
                 $props[$p] = $A['name'];
