@@ -550,16 +550,6 @@ abstract class PaymentGw
             if ($gw_info['enabled'] == 1 &&
                     isset($gw_info['services'][$btn_type]))
                 $retval = true;
-        /*} elseif (is_object($this)) {
-            // Otherwise, if this is an object, check its own services array
-            if ($this->enabled == 0 || 
-                    !isset($this->services[$btn_type]) ||
-                    $this->services[$btn_type] == 0) {
-                return false;
-            } else {
-                return true;
-            }
-        */
         }
         return $retval;
     }
@@ -701,7 +691,6 @@ abstract class PaymentGw
 
             // An invalid item number, or nothing returned for a plugin
             if (empty($A)) {
-                //$this->Error("Item {$item['item_number']} not found"); 
                 continue;
             }
 
@@ -905,7 +894,7 @@ abstract class PaymentGw
 
     /**
     *   Get the values to show in the "Thank You" message when a customer
-    *   returns to our site.  This example is from PayPal, whicgh includes
+    *   returns to our site.  This example is from PayPal, which includes
     *   purchase variables in a $_POST.  The returned array should be
     *   formatted as shown.  There are no parameters, any data will be
     *   via $_GET or $_POST.
