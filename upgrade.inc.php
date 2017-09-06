@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.9
+*   @version    0.5.12
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -41,6 +41,7 @@ function PAYPAL_do_upgrade()
     } else {
         return false;
     }
+    $installed_ver = plugin_chkVersion_payal();
 
     // Get the config instance, several upgrades might need it
     $c = config::get_instance();
@@ -526,6 +527,16 @@ function PAYPAL_do_upgrade()
                 DROP KEY `uid`", 1);
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, '0.5.12')) {
+        $current_ver = '0.5.12';
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, $installed_ver)) {
+        if (!PAYPAL_do_set_version($installed_ver)) return false;
     }
 
     CTL_clearCache($_PP_CONF['pi_name']);

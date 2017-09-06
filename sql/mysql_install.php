@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.7
+*   @version    0.5.12
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -220,7 +220,6 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `featured` tinyint(1) unsigned DEFAULT '0',
   `dt_add` datetime NOT NULL,
   `views` int(4) unsigned DEFAULT '0',
-  `comments` int(5) unsigned DEFAULT '0',
   `comments_enabled` tinyint(1) DEFAULT '0',
   `rating_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `buttons` text,
@@ -773,6 +772,9 @@ $PP_UPGRADE['0.5.11'] = array(
     "ALTER TABLE {$_TABLES['paypal.orders']}
         CHANGE `billto_zip` `billto_zip` varchar(40) DEFAULT NULL,
         CHANGE `shipto_zip` `shipto_zip` varchar(40) DEFAULT NULL",
+);
+$PP_UPGRADE['0.5.12'] = array(
+    "ALTER TABLE {$_TABLES['paypal.products']} DROP comments",
 );
 
 ?>

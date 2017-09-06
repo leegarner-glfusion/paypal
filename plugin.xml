@@ -2,11 +2,10 @@
     <id>paypal</id>
     <name>Paypal</name>
     <description>Provides a product catalog and PayPal interface for selling physical and virtual products.</description>
-    <version>0.5.11</version>
+    <version>0.5.12</version>
     <glfusionversion>1.6.0</glfusionversion>
-    <phpversion>5.3.0</phpversion>
+    <phpversion>5.6.0</phpversion>
     <url>http://www.glfusion.org</url>
     <maintainer>Lee Garner</maintainer>
-    <dataproxydriver>paypal.class.php</dataproxydriver>
     <requires>lglib</requires>
 </plugin>

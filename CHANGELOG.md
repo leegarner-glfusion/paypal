@@ -1,11 +1,15 @@
 # Paypal plugin for glFusion - Changelog
 
+## Ver 0.5.12
+Released TBD
+- Removed unused comment counter field
+
 ## Ver 0.5.11
 Release 2017-07-23
 - Change zip code field to varchar(40)
 
 ## Ver 0.5.10
-Release 2016-12-16
+Released 2016-12-16
 - Don&apos;t instantiate a global date object if not needed
 - Use TimThumb from lglib plugin to size and display images
 - Use AJAX to add items to cart (requires the cart block to be enabled)

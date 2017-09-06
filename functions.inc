@@ -347,7 +347,7 @@ function plugin_commentsupport_paypal()
 */
 function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 {
-    global $_CONF, $LANG03, $_TABLES;
+    global $LANG03;
 
     // Without comment support, we shouldn't get here unless something
     // nefarious is going on, but just in case...
@@ -368,14 +368,6 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
                     'paypal', $LANG03[14], $postmode)
             . COM_siteFooter();
     } else {        // success - update the comment counter for this item
-        $comments = (int)DB_count($_TABLES['comments'],
-                        array('type', 'sid'),
-                        array('paypal', $id));
-
-        DB_query("UPDATE {$_TABLES['paypal.products']}
-                SET comments = $comments
-                WHERE id = $id", 1);
-
         return COM_refresh(COM_buildUrl(PAYPAL_URL . "/detail.php?id=$id"));
     }
 }
