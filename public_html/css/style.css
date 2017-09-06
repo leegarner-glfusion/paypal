@@ -203,6 +203,7 @@ div.ppProductListOuter {
   position: relative;
   text-align:center;
   padding-top: 14px;
+  float: left;
 }
 
 .ppRatingBar.list.v1 {

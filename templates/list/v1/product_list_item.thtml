@@ -1,6 +1,14 @@
 {# begin {templatelocation} #}
 <div class="paypalProductListItem v1">
-  <div class="ItemImage" style="widht:{img_cell_width}px;">
+  <div class="ItemUrl v1">
+    <div class="shortdescription">
+{!if item_url}
+      <a class="itemname" href="{item_url}">{short_description}</a>
+{!else}
+      {short_description}
+{!endif}
+    </div>
+  <div class="ItemImage" style="width:{img_cell_width}px;">
 {!if small_pic}
 {!if item_url}
         <a href="{item_url}">
@@ -14,14 +22,7 @@
 {!endif}
   </div>
 
-  <div class="ItemUrl v1">
-    <div class="shortdescription">
-{!if item_url}
-      <a class="itemname" href="{item_url}">{short_description}</a>
-{!else}
-      {short_description}
-{!endif}
-    </div>
+
 {!if rating_bar}
     <div class="uk-hidden-small ppRatingBar list v1">{rating_bar}</div>
 {!endif}
@@ -31,7 +32,7 @@
 {!if price}
       <div class="paypalPrice list v1">
         <span class="paypalPrice list v1 normal">
-{!if track_onhand}
+{!if Xtrack_onhand}
         ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
 {!endif}
         {price}</span>
