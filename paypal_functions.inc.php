@@ -381,20 +381,18 @@ function ProductList($cat_id = 0)
         $res = DB_query($sql);
         $A = array();
         while ($C = DB_fetchArray($res, false)) {
-            $A[$C['cat_id']] = array($C['cat_name'], $C['cnt']);
+            $A[$C['cat_id']] = array(
+                'name' => $C['cat_name'],
+                'count' => $C['cnt'],
+            );
         }
 
         // Now get categories from plugins
         foreach ($_PLUGINS as $pi_name) {
-            $function = 'USES_' . $pi_name . '_paypal';
-            if (function_exists($function)) {
-                $function();
-                $function = 'plugin_paypal_getcategories_' . $pi_name;
-                if (function_exists($function)) {
-                    $pi_cats = $function();
-                    foreach ($pi_cats as $catid => $data) {
-                        $A[$catid] = $data;
-                    }
+            $pi_cats = PLG_callFunctionForOnePlugin('plugin_paypal_getcategories_' . $pi_name);
+            if (is_array($pi_cats) && !empty($pi_cats)) {
+                foreach ($pi_cats as $data) {
+                    $A[] = $data;
                 }
             }
         }
@@ -414,11 +412,15 @@ function ProductList($cat_id = 0)
 
             $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
             foreach ($A as $category => $info) {
+                if (isset($info['url'])) {
+                    $url = $info['url'];
+                } else {
+                    $url = PAYPAL_URL . '/index.php?category=' . urlencode($category);
+                }
                 $CT->set_var(array(
-                    'category_name' => $info[0],
-                    'category_link' => PAYPAL_URL . '/index.php?category=' .
-                                    urlencode($category),
-                    //'count'         => $info[1],
+                    'category_name' => $info['name'],
+                    'category_link' => $url,
+                    //'count'         => $info['count'],
                 ) );
                 $CT->parse('catrow', 'category', true);
                 if ($i % $_PP_CONF['cat_columns'] == 0) {
@@ -434,8 +436,6 @@ function ProductList($cat_id = 0)
         }
     }
 
-    //$sortdir = $_REQUEST['sortdir'] == 'DESC' ? 'DESC' : 'ASC';
-    //$sql_sortdir = $sortdir;
     $sortby = isset($_REQUEST['sortby']) ? $_REQUEST['sortby'] : $_PP_CONF['order'];
     switch ($sortby){
     case 'price_l2h':   // price, low to high
