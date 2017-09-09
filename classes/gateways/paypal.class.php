@@ -733,13 +733,13 @@ class paypal extends PaymentGw
 
     /**
     *   Get the values to show in the "Thank You" message when a customer
-    *   returns to our site.  Paypal includes purchase variables in a $_POST.
+    *   returns to our site.
     *
     *   @uses   getMainUrl()
     *   @uses   PaymentGw::Description()
     *   @return array       Array of name=>value pairs
     */
-    public function thanksVars()
+    public function DEPR_thanksVars()
     {
         $R = array(
             'payment_date'  => $_POST['payment_date'],
