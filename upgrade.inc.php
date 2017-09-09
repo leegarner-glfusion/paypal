@@ -41,7 +41,7 @@ function PAYPAL_do_upgrade()
     } else {
         return false;
     }
-    $installed_ver = plugin_chkVersion_payal();
+    $installed_ver = plugin_chkVersion_paypal();
 
     // Get the config instance, several upgrades might need it
     $c = config::get_instance();
