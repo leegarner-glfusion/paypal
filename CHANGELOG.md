@@ -2,10 +2,12 @@
 
 ## Ver 0.5.12
 Released TBD
+- Implement class autoloader, refactor gateway classes
+- Change post to get for redirect from Paypal
 - Removed unused comment counter field
 
 ## Ver 0.5.11
-Release 2017-07-23
+Released 2017-07-23
 - Change zip code field to varchar(40)
 
 ## Ver 0.5.10

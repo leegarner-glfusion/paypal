@@ -12,7 +12,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal;
 
 /** Require core glFusion code */
 require_once '../lib-common.php';
@@ -41,8 +40,8 @@ if (isset($_GET['id'])) {
     $id = COM_applyFilter(COM_getArgument('id'));
 }
 
-$display = siteHeader();
-$T = new \Template(PAYPAL_PI_PATH . '/templates');
+$display = Paypal\siteHeader();
+$T = new Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
 $T->set_var('title', $LANG_PP['main_title']);
 $display .= $T->parse('', 'title');
@@ -56,11 +55,9 @@ if (!empty($msg)) {
 $content = '';
 $breadcrumbs = '';
 if (!empty($id)) {
-    USES_paypal_class_Product();
-    USES_paypal_class_Category();
-    $P = new Product($id);
+    $P = new Paypal\Product($id);
     if ($P->id == $id) {
-        $breadcrumbs = Category::Breadcrumbs($P->cat_id);
+        $breadcrumbs = Paypal\Category::Breadcrumbs($P->cat_id);
         $content .= $P->Detail();
     }
 }
@@ -73,7 +70,7 @@ if (empty($breadcrumbs)) {
 
 $display .= $breadcrumbs;
 $display .= $content;
-$display .= siteFooter();
+$display .= Paypal\siteFooter();
 echo $display;
 
 ?>

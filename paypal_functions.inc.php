@@ -15,8 +15,6 @@
 */
 namespace Paypal;
 
-USES_paypal_class_OrderStatus();
-
 /**
 *   Order History View.
 *   Displays the purchase history for the current user.  Admins
@@ -26,7 +24,7 @@ USES_paypal_class_OrderStatus();
 *   @param  integer $uid    User ID to view, current user by default
 *   @return string          HTML for order list
 */
-function PAYPAL_orders($admin = false, $uid = '')
+function listOrders($admin = false, $uid = '')
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
 
@@ -120,7 +118,7 @@ function PAYPAL_orders($admin = false, $uid = '')
 *   @param  integer $uid    User ID to view, current user by default
 *   @return string          HTML for order list
 */
-function PAYPAL_history($admin = false, $uid = '')
+function history($admin = false, $uid = '')
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
 
@@ -334,9 +332,6 @@ function ProductList($cat_id = 0)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
-
-    USES_paypal_class_Product();
-    USES_paypal_class_Category();
 
     if (plugin_ismoderator_paypal()) {
         $isAdmin = true;
@@ -691,7 +686,6 @@ function ProductList($cat_id = 0)
     if ($_PP_CONF['show_plugins'] && $page == 1 &&
                 empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
-        USES_paypal_class_Currency();
         $Cur = new Currency($_PP_CONF['currency']);
         $product->clear_var('rating_bar');  // no ratings for plugins (yet)
         foreach ($_PLUGINS as $pi_name) {
@@ -778,7 +772,7 @@ function ProductList($cat_id = 0)
  *  @param  string  $txn_id Transaction ID from Paypal
  *  @return string          HTML of the ipnlog row specified by $id
  */
-function PAYPAL_ipnlogSingle($id, $txn_id)
+function ipnlogSingle($id, $txn_id)
 {
     global $_TABLES, $_CONF, $LANG_PP;
 
@@ -793,9 +787,8 @@ function PAYPAL_ipnlogSingle($id, $txn_id)
     // Allow all serialized data to be available to the template
     $ipn = @unserialize($A['ipn_data']);
 
-    if (USES_paypal_gateway($A['gateway'])) {
-        $cls = __NAMESPACE__ . '\\' . $A['gateway'];
-        $gw = new $cls;
+    $gw = Gateway::getInstance($A['gateway']);
+    if ($gw !== NULL) {
         $vals = $gw->ipnlogVars($ipn);
 
         // Create ipnlog template

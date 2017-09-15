@@ -18,7 +18,7 @@ require_once '../../lib-common.php';
 USES_paypal_functions();
 
 /** Import IPN class */
-USES_paypal_class_ipn('paypal');
+IPN::getInstance('paypal');
 
 if ($_PP_CONF['debug_ipn'] == 1) {
     // Get the complete IPN message prior to any processing
@@ -27,7 +27,7 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 }
 
 // Process IPN request
-$ipn = new PaypalIPN($_POST);
+$ipn = IPN::getInstance('paypal', $_POST);
 $ipn->Process();
 
 // Finished (this isn't necessary...but heck...why not?)

@@ -36,7 +36,7 @@ if (!defined ('GVERSION')) {
 *   desired.  $args['add_cart'] simply needs to be set to get an add-to-cart
 *   button.
 *
-*   @uses   PaymentGw::ExternalButton()
+*   @uses   Gateway::ExternalButton()
 *   @param  array   $args       Array of item information
 *   @param  array   &$output    Pointer to output array
 *   @param  array   &$svc_msg   Unused
@@ -52,17 +52,9 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
     // Create the immediate purchase button, if requested.  As soon as a
     // gateway supplies the requested button type, break from the loop.
     if (!empty($btn_type)) {
-        PAYPAL_loadGateways();      // load all gateways
-        if (!empty($_PP_CONF['gateways'])) {    // Should be at least one
-            // Get the first gateway that supports the button type
-            foreach ($_PP_CONF['gateways'] as $gw_info) {
-                $classname = '\\Paypal\\' . $gw_info['id'];
-                if (\Paypal\PaymentGw::Supports($btn_type, $gw_info) &&
-                        \Paypal\PaymentGw::Supports('external', $gw_info) &&
-                        class_exists($classname)) {
-                    $gw = new $classname;
-                    $output[] = $gw->ExternalButton($args, $btn_type);
-                }
+        foreach (Paypal\Gateway::getall() as $gw) {
+            if ($gw->Supports('external') && $gw->Supports($btn_type)) {
+                $output[] = $gw->ExternalButton($args, $btn_type);
             }
         }
     }
@@ -75,7 +67,6 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
         if (isset($args['unique'])) {
             // If items may only be added to the cart once, check that
             // this one isn't already there
-            USES_paypal_class_Cart();
             PAYPAL_setCart();
             if ($ppGCart->Contains($args['item_number']) !== false) {
                 $btn_cls = 'grey';
@@ -119,6 +110,11 @@ function service_getCurrency_paypal($args, &$output, &$svc_msg)
 
     $output = $_PP_CONF['currency'];
     return PLG_RET_OK;
+}
+function plugin_getCurrency_paypal()
+{
+    global $_PP_CONF;
+    return $_PP_CONF['currency'];
 }
 
 
@@ -242,10 +238,17 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
 
     if (!is_array($args)) $args = array('amount' => $args);
     $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
-    USES_paypal_class_Currency();
-    $Cur = new \Paypal\Currency($_PP_CONF['currency']);
+    $Cur = new Paypal\Currency($_PP_CONF['currency']);
     $output = $Cur->Format($amount);
     return PLG_RET_OK;
+}
+function plugin_formatAmount_paypal($amount)
+{
+    global $_PP_CONF;
+
+    $amount = (float)$amount;
+    $Cur = new Paypal\Currency($_PP_CONF['currency']);
+    return $Cur->Format($amount);
 }
 
 ?>

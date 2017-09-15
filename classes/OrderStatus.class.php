@@ -13,9 +13,6 @@
 
 namespace Paypal;
 
-/** This is similar enough to workflow handling that we extend that class */
-USES_paypal_class_Workflow();
-
 /**
 *   Class for order processing workflow items
 *   Order statuses are defined in the database and can be re-ordered and 

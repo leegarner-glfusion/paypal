@@ -35,7 +35,7 @@ require_once 'BaseIPN.class.php';
 *   @since 0.5.0
 *   @package paypal
 */
-class PaypalIPN extends BaseIPN
+class paypalIPN extends BaseIPN
 {
     /**
     *   Variable to hold unserialized custom data

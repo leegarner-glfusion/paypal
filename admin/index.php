@@ -13,7 +13,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal;
 
 /** Import Required glFusion libraries */
 require_once('../../../lib-common.php');
@@ -30,7 +29,6 @@ PAYPAL_access_check('paypal.admin');
 
 USES_paypal_functions();
 USES_lib_admin();
-USES_paypal_class_Product();
 
 $content = '';
 
@@ -70,13 +68,13 @@ $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : '';
 
 switch ($action) {
 case 'dup_product':
-    $P = new Product($_REQUEST['id']);
+    $P = new Paypal\Product($_REQUEST['id']);
     $P->Duplicate();
     echo COM_refresh(PAYPAL_ADMIN_URL.'/index.php');
     break;
 
 case 'deleteproduct':
-    $P = new Product($_REQUEST['id']);
+    $P = new Paypal\Product($_REQUEST['id']);
     if (!$P->isUsed()) {
         $P->Delete();
     } else {
@@ -85,10 +83,9 @@ case 'deleteproduct':
     break;
 
 case 'deletecatimage':
-    USES_paypal_class_Category();
     $id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
     if ($id > 0) {
-        $C = new Category($id);
+        $C = new Paypal\Category($id);
         $C->DeleteImage();
         $view = 'editcat';
         $_REQUEST['id'] = $id;
@@ -98,8 +95,7 @@ case 'deletecatimage':
     break;
 
 case 'deletecat':
-    USES_paypal_class_Category();
-    $C = new Category($_REQUEST['cat_id']);
+    $C = new Paypal\Category($_REQUEST['cat_id']);
     if (!$C->isUsed()) {
         $C->Delete();
     } else {
@@ -110,12 +106,12 @@ case 'deletecat':
 
 case 'delete_img':
     $img_id = (int)$_REQUEST['img_id'];
-    Product::DeleteImage($img_id);
+    Paypal\Product::DeleteImage($img_id);
     $view = 'editproduct';
     break;
 
 case 'saveproduct':
-    $P = new Product($_POST['id']);
+    $P = new Paypal\Product($_POST['id']);
     if (!$P->Save($_POST)) {
         $content .= PAYPAL_errMsg($P->PrintErrors());
         $view = 'editproduct';
@@ -123,8 +119,7 @@ case 'saveproduct':
     break;
 
 case 'savecat':
-    USES_paypal_class_Category();
-    $C = new Category($_POST['cat_id']);
+    $C = new Paypal\Category($_POST['cat_id']);
     if (!$C->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
         $view = 'editcat';
@@ -134,8 +129,7 @@ case 'savecat':
     break;
 
 case 'saveopt':
-    USES_paypal_class_Attribute();
-    $Attr = new ppAttribute($_POST['attr_id']);
+    $Attr = new Paypal\Attribute($_POST['attr_id']);
     if (!$Attr->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
     }
@@ -148,9 +142,8 @@ case 'saveopt':
     break;
 
 case 'deleteopt':
-    USES_paypal_class_Attribute();
     // attr_id could be via $_GET or $_POST
-    $Attr = new ppAttribute($_REQUEST['attr_id']);
+    $Attr = new Paypal\Attribute($_REQUEST['attr_id']);
     $Attr->Delete();
     $view = 'attributes';
     break;
@@ -162,11 +155,8 @@ case 'resetbuttons':
 
 case 'gwinstall':
     $gwname = $_GET['gwname'];
-    $gwpath = PAYPAL_PI_PATH . '/classes/gateways/' . $gwname . '.class.php';
-    if (is_file($gwpath)) {
-        PAYPAL_loadGateways();
-        require_once $gwpath;
-        $gw = new $gwname();
+    $gw = Paypal\Gateway::getInstance($gwname);
+    if ($gw !== NULL) {
         if ($gw->Install()) {
             $msg[] = "Gateway \"$gwname\" installed successfully";
         } else {
@@ -177,37 +167,34 @@ case 'gwinstall':
     break;
 
 case 'gwdelete':
-    PAYPAL_loadGateways(true);
-    $gw_id = $_GET['id'];
-    $gw = new $gw_id();
-    $status = $gw->Remove();
+    $gw = Paypal\Gateway::getInstance($_GET['id']);
+    if ($gw !== NULL) {
+        $status = $gw->Remove();
+    }
     $view = 'gwadmin';
     break;
 
 case 'gwsave':
     // Save a payment gateway configuration
-    PAYPAL_loadGateways(true);
-    $gw_id = $_POST['gw_id'];
-    $gw = new $gw_id();
-    $status = $gw->SaveConfig($_POST);
+    $gw = Paypal\Gateway::getInstance($_POST['gw_id']);
+    if ($gw !== NULL) {
+        $status = $gw->SaveConfig($_POST);
+    }
     $view = 'gwadmin';
     break;
 
 case 'gwmove':
-    PAYPAL_loadGateways();  // just need the PaymentGw class
-    PaymentGw::moveRow($_GET['id'], $actionval);
+    Paypal\Gateway::moveRow($_GET['id'], $actionval);
     $view = 'gwadmin';
     break;
 
 case 'wfmove':
     switch ($_GET['type']) {
     case 'workflow':
-        USES_paypal_class_Workflow();
-        Workflow::moveRow($_GET['id'], $actionval);
+        Paypal\Workflow::moveRow($_GET['id'], $actionval);
         break;
     case 'orderstatus':
-        USES_paypal_class_OrderStatus();
-        OrderStatus::moveRow($_GET['id'], $actionval);
+        Paypal\OrderStatus::moveRow($_GET['id'], $actionval);
         break;
     }
     $view = 'wfadmin';
@@ -268,13 +255,12 @@ default:
 //PAYPAL_debug('Admin view: ' . $action);
 switch ($view) {
 case 'history':
-    $content .= PAYPAL_history(true);
+    $content .= Paypal\history(true);
     break;
 
 case 'orderhist':
     // Show all purchases
     if (isset($_POST['upd_orders']) && is_array($_POST['upd_orders'])) {
-        USES_paypal_class_Order();
         $i = 0;
         foreach ($_POST['upd_orders'] as $order_id) {
             if (!isset($_POST['newstatus'][$order_id]) ||
@@ -282,14 +268,14 @@ case 'orderhist':
                 $_POST['newstatus'][$order_id] == $_POST['oldstatus'][$order_id]) {
                 continue;
             }
-            $ord = new Order($order_id);
+            $ord = new Paypal\Order($order_id);
             $ord->UpdateStatus($_POST['newstatus'][$order_id]);
             $i++;
         }
         $msg[] = sprintf($LANG_PP['updated_x_orders'], $i);
     }
     $uid = isset($_REQUEST['uid']) ? $_REQUEST['uid'] : 0;
-    $content .= PAYPAL_orders(true, $uid);
+    $content .= Paypal\listOrders(true, $uid);
     break;
 
 case 'itemhist':
@@ -297,8 +283,7 @@ case 'itemhist':
     break;
 
 case 'order':
-    USES_paypal_class_Order();
-    $order = new Order($actionval);
+    $order = new Paypal\Order($actionval);
     $content .= $order->View(true);
     break;
 
@@ -309,7 +294,7 @@ case 'ipnlog':
                     COM_applyFilter($_REQUEST['txn_id']) : '';
     switch ($op) {
     case 'single':
-        $content .= PAYPAL_ipnlogSingle($log_id, $txn_id);
+        $content .= Paypal\ipnlogSingle($log_id, $txn_id);
         break;
     default:
         $content .= PAYPAL_adminlist_IPNLog();
@@ -319,7 +304,7 @@ case 'ipnlog':
 
 case 'editproduct':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    $P = new Product($id);
+    $P = new Paypal\Product($id);
     if ($id == 0 && isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
@@ -329,8 +314,7 @@ case 'editproduct':
 
 case 'editcat':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    USES_paypal_class_Category();
-    $C = new Category($id);
+    $C = new Paypal\Category($id);
     if ($id == 0 && isset($_POST['description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $C->SetVars($_POST);
@@ -345,24 +329,22 @@ case 'catlist':
 case 'attributes':
     if (isset($_POST['delbutton_x']) && is_array($_POST['delitem'])) {
         // Delete some checked attributes
-        USES_paypal_class_Attribute();
         foreach ($_POST['delitem'] as $attr_id) {
-            ppAttribute::Delete($attr_id);
+            Paypal\Attribute::Delete($attr_id);
         }
     }
     $content .= PAYPAL_adminlist_Attributes();
     break;
 
 case 'editattr':
-    USES_paypal_class_Attribute();
     $attr_id = isset($_REQUEST['attr_id']) ? $_REQUEST['attr_id'] : '';
-    $Attr = new ppAttribute($attr_id);
+    $Attr = new Paypal\Attribute($attr_id);
     $content .= $Attr->Edit();
     break;
 
 case 'other':
     $content .= '<a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?resetbuttons=x' . '">Reset All Buttons</a>' . "\n";
+            '/index.php?resetbuttons=x' . '">' . $LANG_PP['resetbuttons'] . "</a>\n";
     break;
 
 case 'gwadmin':
@@ -370,12 +352,8 @@ case 'gwadmin':
     break;
 
 case 'gwedit':
-    // Load all installed gateways, not just enabled ones
-    PAYPAL_loadGateways(true);
-    $gwid = isset($_GET['gw_id']) ? $_GET['gw_id'] : '';
-    if (DB_count($_TABLES['paypal.gateways'], 'id', $gwid) > 0) {
-        $gwid = __NAMESPACE__ . '\\' . $gwid;
-        $gw = new $gwid();
+    $gw = Paypal\Gateway::getInstance($_GET['gw_id']);
+    if ($gw !== NULL) {
         $content .= $gw->Configure();
     }
     break;
@@ -545,7 +523,7 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Product::isUsed($A['id'])) {
+        if (!Paypal\Product::isUsed($A['id'])) {
             $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
                     '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
@@ -702,7 +680,7 @@ function PAYPAL_adminMenu($view='')
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
 //                    'text' => $LANG_PP['reports']);
 
-    $T = new \Template(PAYPAL_PI_PATH . '/templates');
+    $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('title', 'paypal_title.thtml');
     $T->set_var(array(
         'title' => $LANG_PP['admin_title'] . ' (Ver. ' . $_PP_CONF['pi_version'] . ')',
@@ -845,9 +823,6 @@ function PAYPAL_adminlist_Category()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
-    // Actually used by \Paypal\getAdminField_Category()
-    USES_paypal_class_Category();
-
     $sql = "SELECT
                 cat.cat_id, cat.cat_name, cat.description, cat.enabled,
                 cat.grp_access, parent.cat_name as pcat
@@ -884,7 +859,7 @@ function PAYPAL_adminlist_Category()
 
     $query_arr = array('table' => 'paypal.categories',
         'sql' => $sql,
-        'query_fields' => array('cat.name', 'cat.description'),
+        'query_fields' => array('cat.cat_name', 'cat.description'),
         'default_filter' => 'WHERE 1=1',
     );
 
@@ -954,7 +929,7 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Category::isUsed($A['cat_id'])) {
+        if (!Paypal\Category::isUsed($A['cat_id'])) {
             $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
                     '-trash-o pp-icon-danger tooltip"></i>',
                 PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
@@ -1062,7 +1037,7 @@ function PAYPAL_adminlist_Attributes()
             $filter, '', $options, '');
 
     // Create the "copy attributes" form at the bottom
-    $T = new \Template(PAYPAL_PI_PATH . '/templates');
+    $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('copy_attr_form', 'copy_attributes_form.thtml');
     $T->set_var(array(
         'src_product'       => $product_selection,
@@ -1431,14 +1406,12 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     case 'orderby':
         $url = PAYPAL_ADMIN_URL .
             "/index.php?id={$A['id']}&amp;type={$A['rec_type']}&amp;wfmove=";
-        $retval = COM_createLink(
-                '<img src="' . PAYPAL_URL .
-                '/images/up.png" height="16" width="16" border="0" />',
+        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-up pp-icon-info"></i>',
                 $url . 'up'
             ) .
-            COM_createLink(
-                '<img src="' . PAYPAL_URL .
-                    '/images/down.png" height="16" width="16" border="0" />',
+            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-down pp-icon-info"></i>',
                 $url . 'down'
             );
         break;
@@ -1471,7 +1444,7 @@ function PAYPAL_itemhist($item_id = '')
     global $_TABLES, $LANG_PP;
 
     if (is_numeric($item_id)) {
-        $Item = new Product($item_id);
+        $Item = new Paypal\Product($item_id);
         $item_desc = $Item->short_description;
     } else {
         $item_desc = $item_id;
@@ -1503,11 +1476,11 @@ function PAYPAL_itemhist($item_id = '')
         'default_filter' => '',
     );
 
-    $text_arr = array(
+/*    $text_arr = array(
         'has_extras' => true,
         'form_url' => PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $item_id,
     );
-
+*/
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 

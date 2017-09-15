@@ -38,16 +38,14 @@ define('IPN_FAILURE_UNIQUE', 3);
 define('IPN_FAILURE_EMAIL', 4);
 define('IPN_FAILURE_FUNDS', 5);
 
-USES_paypal_class_Product();
 PAYPAL_loadGateways();
-USES_paypal_class_Order();
 
 /**
 *   Interface to deal with IPN transactions from a payment gateway.
 *
 *   @package paypal
 */
-class BaseIPN
+class IPN
 {
     /** Standard IPN data items required for all IPN types.
     *   @var array */
@@ -186,7 +184,7 @@ class BaseIPN
         // Ignore DB error in order to not block IPN
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("BaseIPN::Log() SQL error: $sql", 1);
+            COM_errorLog("Paypal\IPN::Log() SQL error: $sql", 1);
         }
         return DB_insertId();
     }
@@ -481,7 +479,7 @@ class BaseIPN
                 } else {
                     $pi_info = array($item['item_number']);
                 }
-                PAYPAL_debug('BaseIPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
+                PAYPAL_debug('Paypal\\IPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
                 $status = LGLIB_invokeService($pi_info[0], 'productinfo',
                         $pi_info, $A, $svc_msg);
 
@@ -493,7 +491,7 @@ class BaseIPN
                     $this->items[$id]['name'] = $A['name'];
                     $this->items[$id]['short_description'] = $A['short_description'];
                 }
-                PAYPAL_debug("BaseIPN::handlePurchase() Got name " . $this->items[$id]['name']);
+                PAYPAL_debug("Paypal\\IPN::handlePurchase() Got name " . $this->items[$id]['name']);
                 $vars = array(
                         'item' => $item,
                         'ipn_data' => $this->pp_data,
@@ -875,6 +873,28 @@ class BaseIPN
         COM_errorLog($this->gw_id. ' IPN Exception: ' . $str, 1);
     }
 
-}   // class BaseIPN
+
+    /**
+    *   Instantiate and return an IPN class
+    *
+    *   @param  string  $name   Gateway name, e.g. paypal
+    *   @param  array   $vars   Gateway variables to be passed to the IPN
+    *   @return object          IPN handler object
+    */
+    public static function getInstance($name, $vars=array())
+    {
+        static $ipn = NULL;
+        if ($ipn === NULL) {
+            $file = __DIR__ . '/ipn/' . $name . '_ipn.class.php';
+            if (file_exists($file)) {
+                include_once $file;
+                $cls = __NAMESPACE__ . '\\' . $name . '_ipn';
+                $ipn = new $cls($vars);
+            }
+        }
+        return $ipn;
+    }
+
+}   // class IPN
 
 ?>

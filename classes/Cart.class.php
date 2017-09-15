@@ -20,10 +20,7 @@
 *   Based partially on work done for the unreleased "ecommerce" plugin
 *       by Josh Pendergrass <cendent AT syndicate-gaming DOT com>
 */
-
 namespace Paypal;
-
-USES_paypal_class_Workflow();
 
 /**
 *   Shopping cart class
@@ -411,7 +408,6 @@ class Cart
         DB_query($sql);
         if ($del_order && isset($_SESSION[PP_CART_VAR]['order_id']) &&
             !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-            USES_paypal_class_Order();
             Order::Delete($_SESSION[PP_CART_VAR]['order_id']);
         }
         $this->m_cart = array();
@@ -433,9 +429,6 @@ class Cart
     public function View($checkout = false)
     {
         global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
-
-        USES_paypal_class_Product();
-        USES_paypal_class_Currency();
 
         $currency = new Currency();
 
@@ -596,15 +589,11 @@ class Cart
 
         $gateway_vars = '';
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
-            PAYPAL_loadGateways();
-            foreach ($_PP_CONF['gateways'] as $gw_info) {
-                if (!PaymentGw::Supports('checkout', $gw_info)) {
-                    continue;
+            foreach (Gateway::getAll() as $gw) {
+                if ($gw->Supports('checkout')) {
+                    $gateway_vars .= '<div class="paypalCheckoutButton">' .
+                        $gw->CheckoutButton($this) . '</div>';
                 }
-                $gw_name = '\\Paypal\\' . $gw_info['id'];
-                $gateway = new $gw_name();
-                $gateway_vars .= '<div class="paypalCheckoutButton">' .
-                    $gateway->CheckoutButton($this) . '</div>';
             }
         } else {
             $L = new \Template(PAYPAL_PI_PATH . '/templates/buttons');

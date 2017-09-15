@@ -82,75 +82,23 @@ if (empty($_USER['uid']) || $_USER['uid'] < 2) {
     $_USER['fullname'] = 'Anonymous';
 }
 
+spl_autoload_register(function ($class)
+{
+    if (strpos($class, 'Paypal\\') === 0) {
+        $class = str_replace('Paypal\\', '', $class);
+        $path = __DIR__ . '/classes/' . $class . '.class.php';
+        if (file_exists($path)) {
+            include $path;
+        }
+    }
+});
+
 /** Import plugin-specific functions */
 function USES_paypal_functions()
 {   require_once PAYPAL_PI_PATH . '/paypal_functions.inc.php';  }
 
 function USES_paypal_reports()
 {   require_once PAYPAL_PI_PATH . '/reports.inc.php';  }
-
-/** Import product class */
-function USES_paypal_class_Product()
-{   require_once PAYPAL_PI_PATH . '/classes/Product.class.php';  }
-
-/** Import category class */
-function USES_paypal_class_Category()
-{   require_once PAYPAL_PI_PATH . '/classes/Category.class.php';  }
-
-/** Import IPN handler class.
-*   Imports only the required IPN class.
-*
-*   @param  string  $gateway    Gateway being used.
-*/
-function USES_paypal_class_ipn($gateway='paypal')
-{
-    $filename = PAYPAL_PI_PATH . '/classes/ipn/' . $gateway . '_ipn.class.php';
-    if (is_file($filename))
-        require_once $filename;
-}
-
-/** Import image handling class for products */
-function USES_paypal_class_productimage()
-{   require_once PAYPAL_PI_PATH . '/classes/ProductImage.class.php';   }
-
-/** Import image handling class for categories */
-function USES_paypal_class_categoryimage()
-{   require_once PAYPAL_PI_PATH . '/classes/CategoryImage.class.php';   }
-
-/** Import image handling class for categories */
-function USES_paypal_class_Attribute()
-{   require_once PAYPAL_PI_PATH . '/classes/Attribute.class.php';   }
-
-/** Import file upload handling class */
-function USES_paypal_class_File()
-{   require_once PAYPAL_PI_PATH . '/classes/File.class.php';   }
-
-/** Import shopping cart class */
-function USES_paypal_class_Cart()
-{   require_once PAYPAL_PI_PATH . '/classes/Cart.class.php';    }
-
-/** Import user information class */
-function USES_paypal_class_UserInfo()
-{   require_once PAYPAL_PI_PATH . '/classes/UserInfo.class.php';    }
-
-/** Import order class */
-function USES_paypal_class_Order()
-{   require_once PAYPAL_PI_PATH . '/classes/Order.class.php';    }
-
-/** Import workflow handling */
-function USES_paypal_class_Workflow()
-{   require_once PAYPAL_PI_PATH . '/classes/Workflow.class.php';    }
-
-/** Import order status workflow handling */
-function USES_paypal_class_OrderStatus()
-{   require_once PAYPAL_PI_PATH . '/classes/OrderStatus.class.php'; }
-
-/** Import currency class */
-function USES_paypal_class_Currency()
-{   require_once PAYPAL_PI_PATH . '/classes/Currency.class.php';    }
-
-/** Define global configuration variable to hold payment gateways */
-$_PP_CONF['gateways'] = array();
 
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
@@ -168,8 +116,7 @@ function PAYPAL_setCart()
 {
     global $ppGCart;
     if ($ppGCart === NULL) {
-        USES_paypal_class_Cart();
-        $ppGCart = new \Paypal\Cart();
+        $ppGCart = new Paypal\Cart();
     }
     return $ppGCart;
 }
@@ -183,76 +130,6 @@ function USES_paypal_class_report($name='')
         return true;
     } else {
         return false;
-    }
-}
-
-
-/**
-*   Import the payment gateway base class
-*/
-function USES_paypal_gateway_base()
-{
-    require_once PAYPAL_PI_PATH . '/classes/PaymentGw.class.php';
-}
-
-
-/**
-*   Import a single payment gateway.
-*   This function imports the requested gateway, regardless of whether
-*   it's enabled in the configuration.
-*   If the gateway name is omitted, then only the base class is imported.
-*
-*   @param  string  $gw_name    Name of gateway (class file) to import
-*   @return boolean             True on success, False on failure
-*/
-function USES_paypal_gateway($gw_name)
-{
-    $classfile = PAYPAL_PI_PATH . '/classes/gateways/' .
-                    $gw_name . '.class.php';
-
-    if (is_file($classfile)) {
-        require_once $classfile;
-        return true;
-    } else {
-        return false;
-    }
-}
-
-
-/**
-*   Import the payment gateways.
-*
-*   All installed gateways can be loaded (for administration), or only
-*   the enabled gateways can be loaded (the default).
-*
-*   @param  boolean $all    True to get all gateways, False for only enabled
-*/
-function PAYPAL_loadGateways($all = false)
-{
-    global $_PP_CONF, $_TABLES;
-
-    // Might be called multiple times, only needs to populate the array once.
-    if (!empty($_PP_CONF['gateways'])) {
-        return;
-    }
-
-    // Include the base gateway class
-    USES_paypal_gateway_base();
-
-    // Load the enabled gateways
-    $sql = "SELECT id, enabled, services
-            FROM {$_TABLES['paypal.gateways']}";
-    // If not loading all gateways, get just then enabled ones
-    if (!$all) $sql .= ' WHERE enabled=1';
-    $sql .= ' ORDER BY orderby';
-    $res = DB_query($sql);
-    while ($A = DB_fetchArray($res, false)) {
-        // For each available gateway, load its class file and add it
-        // to the global array
-        if (USES_paypal_gateway($A['id'])) {
-            $A['services'] = @unserialize($A['services']);
-            $_PP_CONF['gateways'][] = $A;
-        }
     }
 }
 
@@ -396,8 +273,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     if (!plugin_commentsupport_paypal())
         return $retval;
 
-    USES_paypal_class_Product();
-    $item = new \Paypal\Product($id);
+    $item = new Paypal\Product($id);
     if ($item->isNew)
         return $retval;
 
@@ -693,7 +569,7 @@ function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 *       'item_number', 'item_name', 'amount', and optionally 'item_type'
 *
 *   @deprecated version 0.5.0
-*   @uses   PaymentGw::ExternalButton()
+*   @uses   Gateway::ExternalButton()
 *   @param  string  $btn_type   Type of button (buy_now, add_to_cart, etc.)
 *   @param  array   $vars       Associative array of input variables
 *   @param  string  $item_type  Optional type indicator (physical, virtual)
@@ -727,18 +603,9 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
             $retval = $T->parse('', 'cart');
         }
     } else {
-        PAYPAL_loadGateways();
-        $gw_id = '';
-        if (!empty($_PP_CONF['gateways'])) {
-
-            // Get the first gateway that supports the button type
-            foreach ($_PP_CONF['gateways'] as $gw_info) {
-                if ($gw_info[$btn_type] == 1 && class_exists($gw_info['id'])) {
-                    $gw = new $gw_info['id'];
-                    $retval = $gw->ExternalButton($vars, $btn_type);
-                    break;
-                }
-            }
+        foreach (Paypal\Gateway::getAll() as $gw) {
+            $retval = $gw->ExternalButton($vars, $btn_type);
+            break;
         }
     }
     return $retval;
@@ -976,9 +843,18 @@ function plugin_autouninstall_paypal ()
 */
 function plugin_enablestatechange_paypal($enabled)
 {
-    global $_TABLES;
+    global $_TABLES, $_PLUGINS;
 
     $enabled = $enabled == true ? 1 : 0;
+COM_errorLog("In plugin_enablestatechange_paypal - $enabled");
+    // If trying to enable the plugin but lgLib is not available,
+    // take no action and return
+    if ($enabled && !in_array('lglib', $_PLUGINS)) {
+        // Re-disable the plugin
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'paypal');
+        $enabled = 0;
+    }
+
     if ($enabled == 0) {
         $blockfns = array('phpblock_paypal_');
 
@@ -988,6 +864,26 @@ function plugin_enablestatechange_paypal($enabled)
                     WHERE phpblockfn like '{$blockfn}%'"
                     );
         }
+    }
+}
+
+
+/**
+*   Receives notification of anothe plugin's deletion
+*
+*   @param  mixed   $id     Item ID
+*   @param  string  $type   Plugin Name
+*/
+function plugin_itemdeleted_paypal($id, $type)
+{
+    global $_TABLES;
+
+    // If the lgLib plugin is disabled or removed, disable thie plugin
+    if ($type == 'lglib' && $id == '*') {
+        plugin_enablestatechange_paypal(false);
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'paypal');
+        unset($_POST['enabledplugins']['paypal']);
+        unset($_POST['pluginarray']['paypal']);
     }
 }
 
@@ -1037,9 +933,6 @@ function phpblock_paypal_cart_contents()
 
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
-    USES_paypal_class_Cart();
-    USES_paypal_class_Product();
-
     $cart = PAYPAL_setCart();
 
     // If the cart is empty, the block isn't shown
@@ -1057,7 +950,7 @@ function phpblock_paypal_cart_contents()
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
         list($item_id, $options) = explode('|', $item['item_id']);
-        $P = new \Paypal\Product($item_id);
+        $P = new Paypal\Product($item_id);
         $item_price = $item['price'];
         // Store the text for each attribute and custom field in an array,
         // then implode around linebreaks to display them
@@ -1095,7 +988,7 @@ function phpblock_paypal_cart_contents()
         $total += $item_total;
     }
     $T->set_var(array(
-        'grand_total'   => COM_numberFormat($total, 2),
+        'grand_total' => COM_numberFormat($total, 2),
     ) );
     $T->parse('output', 'shopping_cart_contents');
     $block = $T->finish ($T->get_var('output'));
@@ -1446,8 +1339,7 @@ function PAYPAL_phpblock_product($sql)
             'btn_details' => 'buttons/btn_details.thtml',
         ));
 
-        USES_paypal_class_Product();
-        $P = new \Paypal\Product();
+        $P = new Paypal\Product();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
             $P->Read($A['id']);
             $T->set_var(array(
@@ -1746,10 +1638,8 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
 */
 function plugin_configmanager_select_currency_paypal()
 {
-    USES_paypal_class_Currency();
-
     $A = array();
-    $tmp = \Paypal\Currency::GetAll();
+    $tmp = Paypal\Currency::GetAll();
     foreach ($tmp as $code => $data) {
         $A["{$code} - {$data['name']}"] = $code;
     }

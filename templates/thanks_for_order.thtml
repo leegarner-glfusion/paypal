@@ -1,11 +1,7 @@
 {# begin {templatelocation} #}
 Thank you for your purchase from {site_name}.<br />
-Payment of {mc_gross} {currency} was made via {gateway_name} on {payment_date}
-{!if completed}
- and a receipt for your purchase has been emailed to you
-{!endif}
+Payment was made via {gateway_name} and a receipt for your purchase has been emailed to you
 .<p />
 You may log into your account at <a href="{gateway_url}">{gateway_url}</a>
  to view details of this transaction.<br />
-Your payment is {payment_status}.
 {# end {templatelocation} #}

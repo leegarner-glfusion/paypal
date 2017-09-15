@@ -52,8 +52,6 @@ class Product
     {
         global $_PP_CONF;
 
-        USES_paypal_class_Currency();
-
         $this->properties = array();
         $this->isNew = true;
         $this->currency = new Currency($_PP_CONF['currency']);
@@ -347,8 +345,6 @@ class Product
     public function Save($A = '')
     {
         global $_TABLES, $_PP_CONF;
-        USES_paypal_class_ProductImage();
-        USES_paypal_class_File();
 
         if (is_array($A)) {
             $this->SetVars($A);
@@ -1286,14 +1282,10 @@ class Product
             // Normal buttons for everyone else
             if ($this->canBuyNow() && $this->btn_type != '') {
                 // Gateway buy-now buttons only used if no options
-                PAYPAL_loadGateways();
-                foreach ($_PP_CONF['gateways'] as $gw_info) {
-                    if (!PaymentGw::Supports($this->btn_type, $gw_info)) {
-                        continue;
+                foreach (Gateway::getAll() as $gw) {
+                    if ($gw->Supports($this->btn_type)) {
+                        $buttons[$gw->Name()] = $gw->ProductButton($this);
                     }
-                    $gw_name = __NAMESPACE__ . '\\' . $gw_info['id'];
-                    $gw = new $gw_name();
-                    $buttons[$gw->Name()] = $gw->ProductButton($this);
                 }
             }
         }

@@ -12,15 +12,12 @@
 */
 namespace Paypal;
 
-/** Import base gateway class */
-USES_paypal_gateway_base();
-
 /**
 *   Class for Paypal payment gateway
 *   @since 0.5.0
 *   @package paypal
 */
-class paypal extends PaymentGw
+class paypal extends Gateway
 {
 
     /** Business e-mail to be used for creating buttons
@@ -115,7 +112,7 @@ class paypal extends PaymentGw
     /**
     *   Magic "setter" function
     *
-    *   @see    PaymentGw::__get()
+    *   @see    Gateway::__get()
     *   @param  string  $key    Name of property to set
     *   @param  mixed   $value  New value for property
     */
@@ -166,7 +163,7 @@ class paypal extends PaymentGw
     /**
     *   Get the form variables for the purchase button.
     *
-    *   @uses   PaymentGw::_Supports()
+    *   @uses   Gateway::_Supports()
     *   @uses   _encButton()
     *   @uses   getActionUrl()
     *   @return string      HTML for purchase button
@@ -459,8 +456,8 @@ class paypal extends PaymentGw
     *
     *   @uses   gwButtonType()
     *   @uses   PrepareCustom()
-    *   @uses   PaymentGw::_ReadButton()
-    *   @uses   PaymentGw::_SaveButton()
+    *   @uses   Gateway::_ReadButton()
+    *   @uses   Gateway::_SaveButton()
     *   @param  object  $P      Product Item object
     *   @return string          HTML code for the button.
     */
@@ -736,7 +733,7 @@ class paypal extends PaymentGw
     *   returns to our site.
     *
     *   @uses   getMainUrl()
-    *   @uses   PaymentGw::Description()
+    *   @uses   Gateway::Description()
     *   @return array       Array of name=>value pairs
     */
     public function DEPR_thanksVars()
@@ -782,7 +779,7 @@ class paypal extends PaymentGw
     /**
     *   Present the configuration form for this gateway.
     *
-    *   @uses   PaymentGw::getServiceCheckboxes
+    *   @uses   Gateway::getServiceCheckboxes
     *   @return string      HTML for the configuration form.
     */
     public function Configure()

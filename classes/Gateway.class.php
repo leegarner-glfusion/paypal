@@ -19,7 +19,7 @@ namespace Paypal;
 *   @package paypal
 *   @since  0.5.0
 */
-abstract class PaymentGw
+abstract class Gateway
 {
     /** Property fields.  Accessed via __set() and __get().
     *   This is for configurable properties of the gateway- URL, testing
@@ -101,6 +101,8 @@ abstract class PaymentGw
     protected $postback_url = NULL;
 
 
+    private static $gateways = array();
+
     /**
     *   Constructor.
     *   Initializes variables.
@@ -113,8 +115,9 @@ abstract class PaymentGw
     *   to limit the services provided.
     *
     *   @uses   AddCustom()
+    *   @param  array   $A  Optional array of fields, used with getInstance()
     */
-    function __construct()
+    function __construct($A = array())
     {
         global $_PP_CONF, $_TABLES, $_USER;
 
@@ -137,12 +140,13 @@ abstract class PaymentGw
             );
         }
 
-        $A = array();
-        $sql = "SELECT *
+        if (empty($A)) {
+            $sql = "SELECT *
                 FROM {$_TABLES['paypal.gateways']}
                 WHERE id = '" . DB_escapeString($this->gw_name) . "'";
-        $res = DB_query($sql);
-        if ($res) $A = DB_fetchArray($res, false);
+            $res = DB_query($sql);
+            if ($res) $A = DB_fetchArray($res, false);
+        }
         if (!empty($A)) {
             $this->orderby = (int)$A['orderby'];
             $this->enabled = (int)$A['enabled'];
@@ -515,10 +519,9 @@ abstract class PaymentGw
 
 
     /**
-    *   Check if a gateway from the $_PP_CONF array supports a button type.
-    *   The $gw_info parameter should be the array of info for a single gateway
-    *   if only that gateway is to be checked.
+    *   Check if the current gateway supports a specific button type
     *
+    *   @uses   self::Supports()
     *   @param  string  $btn_type   Button type to check
     *   @param  array   $gw_info    Array from $_PP_CONF, empty to check current
     *   @return boolean             True if the button is supported
@@ -542,7 +545,7 @@ abstract class PaymentGw
     *   @param  array   $gw_info    Array from $_PP_CONF, empty to check current
     *   @return boolean             True if the button is supported
     */
-    public static function Supports($btn_type, $gw_info = '')
+    public static function XSupports($btn_type, $gw_info = '')
     {
         $retval = false;
         if (is_array($gw_info)) {
@@ -552,6 +555,11 @@ abstract class PaymentGw
                 $retval = true;
         }
         return $retval;
+    }
+
+    public function Supports($btn_type)
+    {
+        return isset($this->services[$btn_type]) ? true : false;
     }
 
 
@@ -603,9 +611,6 @@ abstract class PaymentGw
         global $_TABLES, $_CONF, $_PP_CONF;
 
         USES_paypal_functions();
-        USES_paypal_class_Cart();
-        USES_paypal_class_Order();
-        USES_paypal_class_Product();
 
         if (!empty($vals['cart_id'])) {
             $cart = new Cart($vals['cart_id']);
@@ -945,7 +950,6 @@ abstract class PaymentGw
         static $UserInfo = NULL;
 
         if ($UserInfo === NULL) {
-            USES_paypal_class_UserInfo();
             $UserInfo = new UserInfo();
         }
         return $UserInfo;
@@ -1018,6 +1022,59 @@ abstract class PaymentGw
     */
     abstract public function Configure();
 
+
+    /**
+    *   Get an instance of a gateway.
+    *   Supports reading multiple gateways, but only one is normally needed.
+    *
+    *   @param  string  $gw_name    Gateway name, or '_enabled' for all enabled
+    *   @param  array   $A          Optional array of fields and values
+    *   @return object              Gateway object
+    */
+    public static function getInstance($gw_name, $A=array())
+    {
+        global $_TABLES, $_PP_CONF;
+        static $gateways = array();
+
+        if (!isset(self::$gateways[$gw_name])) {
+            $filename = __DIR__ . '/gateways/' . $gw_name . '.class.php';
+            if (file_exists($filename)) {
+                include_once $filename;
+                $gw = __NAMESPACE__ . '\\' . $gw_name;
+                $gateways[$gw_name] = new $gw($A);
+            } else {
+                $gateways[$gw_name] = NULL;
+            }
+        }
+        return $gateways[$gw_name];
+    }
+
+
+    public static function getAll($enabled = true)
+    {
+        global $_TABLES, $_PP_CONF;
+
+        static $gateways = array();
+        $key = $enabled ? 1 : 0;
+
+        if (!isset($gateways[$key])) {
+            $gateways[$key] = array();
+
+            // Load the gateways
+            $sql = "SELECT id, enabled, services
+                FROM {$_TABLES['paypal.gateways']}";
+            // If not loading all gateways, get just then enabled ones
+            if ($enabled) $sql .= ' WHERE enabled=1';
+            $sql .= ' ORDER BY orderby';
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                // For each available gateway, load its class file and add it
+                // to the static array
+                $gateways[$key][] = self::getInstance($A['id'], $A);
+            }
+        }
+        return $gateways[$key];
+    }
 
 }   // class PaymentGw
 

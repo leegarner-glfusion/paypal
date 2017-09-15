@@ -37,7 +37,6 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
          exit;
     }
-    USES_paypal_class_Cart();
     PAYPAL_setCart();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
             $ppGCart->Contains($_POST['item_number']) !== false) {

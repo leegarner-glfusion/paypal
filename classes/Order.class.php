@@ -144,7 +144,7 @@ class Order
     *
     *   @param  array   $A      Array of item_id=>item_data
     */
-    public function setItems($A)
+    public function XXsetItems($A)
     {
         global $_TABLES;
 
@@ -169,7 +169,7 @@ class Order
     *   @param  mixed   $item_number    Item number, may be string or integer
     *   @param  array   $data           Array of item information
     */
-    public function AddItem($item_number, $data)
+    public function XXAddItem($item_number, $data)
     {
         global $_TABLES;
 
@@ -215,9 +215,7 @@ class Order
             // If set, the user has selected an existing address.  Read
             // that value and use it's values.
             //$_SESSION[PP_CART_VAR]['billing'] = $A['useaddress'];
-            USES_paypal_class_cart();
             Cart::setSession('billing', $A['useaddress']);
-            USES_paypal_class_UserInfo();
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
         } else {
@@ -245,12 +243,9 @@ class Order
     */
     public function setShipping($A)
     {
-        USES_paypal_class_UserInfo();
-
         if (isset($A['useaddress'])) {
             // If set, read and use an existing address
             //$_SESSION[PP_CART_VAR]['shipping'] = $A['useaddress'];
-            USES_paypal_class_cart();
             Cart::setSession('shipping', $A['useaddress']);
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
@@ -280,7 +275,6 @@ class Order
     function SetVars($A)
     {
         if (!is_array($A)) return false;
-        USES_paypal_class_cart();
 
         $this->uid      = (int)$A['uid'];
         $this->status   = $A['status'];
@@ -328,7 +322,6 @@ class Order
             } else {
                 return;
             }*/
-            USES_paypal_class_cart();
             $order_id = Cart::getSession('order_id');
             if (!$order_id) return;
         }
@@ -371,7 +364,6 @@ class Order
     public function Save()
     {
         global $_TABLES, $_PP_CONF;
-        USES_paypal_class_cart();
 
         if ($this->isNew) {
             // Shouldn't have an empty order ID, but double-check
@@ -431,8 +423,6 @@ class Order
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
 
-        USES_paypal_class_Product();
-
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
@@ -455,7 +445,6 @@ class Order
         // Get the workflows so we sho the relevant info.
         if (!isset($_PP_CONF['workflows']) ||
             !is_array($_PP_CONF['workflows'])) {
-            USES_paypal_class_Workflow();
             Workflow::Load();
         }
         foreach ($_PP_CONF['workflows'] as $key => $value) {
@@ -518,7 +507,6 @@ class Order
         ) );
 
         if ($isAdmin) {
-            USES_paypal_class_OrderStatus();
             $T->set_var(array(
                 'purch_name' => COM_getDisplayName($this->uid),
                 'purch_uid' => $this->uid,
@@ -544,9 +532,8 @@ class Order
 
         $status = $this->status;
         if ($this->pmt_method != '') {
-            if (USES_paypal_gateway($this->pmt_method)) {
-                $cls = '\\Paypal\\' . $this->pmt_method;
-                $gw = new $cls;
+            $gw = Gateway::getInstance($this->pmt_method);
+            if ($gw !== NULL) {
                 $pmt_method = $gw->Description();
             } else {
                 $pmt_method = $this->pmt_method;
@@ -583,7 +570,6 @@ class Order
 
         // Need to get the order statuses to see if we should notify
         // the buyer
-        USES_paypal_class_OrderStatus();
         $OrdStat = new OrderStatus();
 
         $order_id = $this->order_id;
@@ -688,7 +674,6 @@ class Order
         $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
 
-        USES_paypal_class_Product();
         foreach ($this->items as $id=>$item) {
             if (!PAYPAL_is_plugin_item($item['product_id'])) {
                 $P = new Product($item['product_id']);
@@ -718,6 +703,7 @@ class Order
 
             //$message->set_block('message', 'ItemList', 'List');
             $opts = json_decode($item['options_text'], true);
+            $options_text = '';
             if ($opts) {
                 foreach ($opts as $opt_text) {
                     $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
