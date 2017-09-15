@@ -29,7 +29,16 @@ var ppAddToCart = function(frm_id) {
                 } 
             } catch(err) {
             }
+            blk_setvis_paypal_cart(result.content == "" ? "none" : "block");
         }
     });
     return false;
 };
+
+function blk_setvis_paypal_cart(newvis)
+{
+    blk = document.getElementById("paypal_cart");
+    if (typeof(blk) != 'undefined' && blk != null) {
+        blk.style.display = newvis;
+    }
+}

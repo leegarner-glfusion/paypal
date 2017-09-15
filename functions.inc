@@ -910,8 +910,11 @@ function phpblock_paypal_cart()
     $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
     $contents = phpblock_paypal_cart_contents();
-    if ($contents == '') return '';
-    $T->set_var('cart_contents', $contents);
+    $vis = empty($contents) ? 'none' : 'block';
+    $T->set_var(array(
+        'cart_contents' => $contents,
+        'visibility'    => $vis,
+    ) );
     $T->parse('output', 'shopping_cart');
     return $T->finish ($T->get_var('output'));
 }
@@ -936,7 +939,7 @@ function phpblock_paypal_cart_contents()
     $cart = PAYPAL_setCart();
 
     // If the cart is empty, the block isn't shown
-    if (!$cart->hasItems()) return $LANG_PP['cart_empty'];
+    if (!$cart->hasItems()) return '';
 
     $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');

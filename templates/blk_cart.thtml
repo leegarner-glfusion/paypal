@@ -7,3 +7,7 @@
   <a href="{site_url}/paypal/index.php?view=cart">{$LANG_PP['viewcart']}</a>
 </span>
 {# end {templatelocation} #}
+<script type="text/javascript">
+// Set the initial block visibility when the page is displayed
+blk_setvis_paypal_cart("{visibility}");
+</script>
