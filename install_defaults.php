@@ -138,6 +138,7 @@ $_PP_DEFAULTS['debug'] = 0;
 $_PP_DEFAULTS['def_taxable'] = 1;
 $_PP_DEFAULTS['def_enabled'] = 1;
 $_PP_DEFAULTS['def_featured'] = 0;
+$_PP_DEFAULTS['def_oversell'] = 0;
 
 // Limits on number of products shown in blocks:
 $_PP_DEFAULTS['blk_random_limit'] = 1;

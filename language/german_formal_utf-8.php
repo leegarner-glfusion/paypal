@@ -420,7 +420,7 @@ $LANG_configselects['paypal'] = array(
     13 => array('Keine Blöcke' => 0, 'Linke Blöcke' => 1, 'Rechte Blöcke' => 2, 'Linke & Rechte Blöcke' => 3),
     14 => array('Nicht verfügbar' => 0, 'Optional' => 1, 'Erforderlich' => 2),
     15 => array('Pfund' => 'lbs', 'Kilogramm' => 'kgs'),
-    16 => array('Anzeigen mit Bestellmöglichkeit' => 0, 'Anzeigen ohne Bestellmöglichkeit' => 2, 'Nicht mehr anzeigen' => 2),
+    16 => array('Anzeigen mit Bestellmöglichkeit' => 0, 'Anzeigen ohne Bestellmöglichkeit' => 1, 'Nicht mehr anzeigen' => 2),
 );
 
 

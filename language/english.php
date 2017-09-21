@@ -430,7 +430,7 @@ $LANG_configselects['paypal'] = array(
     14 => array('Not Available' => 0, 'Optional' => 1, 'Required' => 2),
     15 => array('Pounds' => 'lbs', 'Kilograms' => 'kgs'),
     16 => array('Allow Backordering' => 0,
-            'Keep in Catalog, Prevent Sales' => 2,
+            'Show in Catalog, Prevent Sales' => 1,
             'Hide from Catalog' => 2),
 );
 
