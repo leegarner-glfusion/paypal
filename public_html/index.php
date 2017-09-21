@@ -126,7 +126,7 @@ case 'saveshipto':
         break;
     }
 
-    $U = new UserInfo();
+    $U = new Paypal\UserInfo();
     if ($U->uid > 1) {
         $addr_id = $U->SaveAddress($_POST, $addr_type);
         if ($addr_id[0] < 0) {
@@ -195,7 +195,7 @@ case 'thanks':
         if ($gw !== NULL) {
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
-                $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
+                $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
                 $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
                 $T->set_var(array(
                     'site_name'     => $_CONF['site_name'],
@@ -218,7 +218,7 @@ case 'thanks':
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
-        $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
+        $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
         $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
         $T->set_var(array(
             'site_name'     => $_CONF['site_name'],
