@@ -90,6 +90,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 'frm_id'        => md5($args['item_name'] . rand()),
                 'btn_cls'       => $btn_cls,
                 'btn_disabled'  => $btn_disabled,
+                'iconset'       => $_PP_CONF['_iconset'],
         ) );
         $output['add_cart'] = $T->parse('', 'cart');
     }

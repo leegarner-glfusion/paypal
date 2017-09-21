@@ -569,8 +569,8 @@ class paypal extends Gateway
         $T->set_var('paypal_url', $this->getActionUrl());
         $T->set_var('btn_text', $btn_text);
         $T->set_var('gateway_vars', $gateway_vars);
+        $T->set_var('iconset', $_PP_CONF['_iconset']);
         $retval = $T->parse('', 'btn');
-
         return $retval;
     }
 

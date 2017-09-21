@@ -103,7 +103,7 @@ function USES_paypal_reports()
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
 $_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
-$_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon' : 'fa fa';
+$_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon uk-icon' : 'fa fa';
 
 global $ppGCart;
 $ppGCart = NULL;

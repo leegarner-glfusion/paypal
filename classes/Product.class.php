@@ -1314,6 +1314,7 @@ class Product
                 'form_url'  => $this->hasAttributes() ? '' : 'true',
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
+                'iconset'   => $_PP_CONF['_iconset'],
             ) );
             $buttons['add_cart'] = $T->parse('', 'cart');
         }
