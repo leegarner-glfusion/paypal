@@ -105,7 +105,7 @@ $(document).ready(function() {
   </a>
   {!endif}
   </h1>
-  {# {name}&nbsp;&nbsp;{edit_icon} #}
+  {name}
 </div>
 
 <div style="clear:both;margin-top:20px;"></div>
