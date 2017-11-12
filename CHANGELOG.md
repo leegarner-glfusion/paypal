@@ -5,6 +5,7 @@ Released TBD
 - Implement class autoloader, refactor gateway classes
 - Change post to get for redirect from Paypal
 - Removed unused comment counter field
+- Remove configured file download path, use data/paypal/files always.
 
 ## Ver 0.5.11
 Released 2017-07-23

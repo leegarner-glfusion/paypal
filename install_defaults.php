@@ -107,10 +107,6 @@ $_PP_DEFAULTS['img_max_width'] = 800;
 $_PP_DEFAULTS['img_max_height'] = 600;
 $_PP_DEFAULTS['max_image_size'] = 4194304;
 
-// Determine whether to use the internal CSS tabbed menu or the
-// default glFusion version
-//$_PP_DEFAULTS['use_css_menu'] = 0;
-
 // Max size for file uploads, in MB
 $_PP_DEFAULTS['max_file_size'] = 8;
 
@@ -120,12 +116,6 @@ $_PP_DEFAULTS['ena_comments'] = 1;
 // Enable ratings?
 $_PP_DEFAULTS['ena_ratings'] = 1;
 $_PP_DEFAULTS['anon_can_rate'] = 0;
-
-// Temporary work path when creating buttons
-//$_PP_DEFAULTS['tmpdir'] = $_CONF['path'] . 'data/paypal/';
-
-// Path to downloadable files
-//$_PP_DEFAULTS['download_path'] = $_PP_DEFAULTS['tmpdir'] . 'files/';
 
 // Control which blocks to display- both by default
 $_PP_DEFAULTS['displayblocks'] = 3;
@@ -262,16 +252,8 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 0, 10, 0, 40, true, $_PP_CONF['pi_name']);
         $c->add('img_max_height', $_PP_DEFAULTS['img_max_height'],
                 'text', 0, 10, 0, 50, true, $_PP_CONF['pi_name']);
-        $c->add('download_path', $_PP_DEFAULTS['download_path'],
-                'text', 0, 10, 0, 60, true, $_PP_CONF['pi_name']);
         $c->add('max_file_size', $_PP_DEFAULTS['max_file_size'],
                 'text', 0, 10, 0, 70, true, $_PP_CONF['pi_name']);
-
-//        // Working directory, formerly Encrypted Button Support
-//        $c->add('fs_encbtn', NULL, 'fieldset', 0, 20, NULL, 0, true, 
-//                $_PP_CONF['pi_name']);
-//        $c->add('tmpdir', $_PP_DEFAULTS['tmpdir'],
-//                'text', 0, 20, 0, 80, true, $_PP_CONF['pi_name']);
 
         $c->add('fs_prod_defaults', NULL, 'fieldset', 0, 30, NULL, 0, true, 
                 $_PP_CONF['pi_name']);

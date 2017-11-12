@@ -531,6 +531,7 @@ function PAYPAL_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.5.12')) {
         $current_ver = '0.5.12';
+        $c->del('download_path', $_PP_CONF['pi_name']);
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
