@@ -43,9 +43,11 @@ case 'addcartitem':
         break;
     }
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
+    $options = isset($_POST['options']) ? $_POST['options'] : array();
+    $extras = isset($_POST['extras']) ? $_POST['extras'] : array();
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
                 $_POST['item_descr'], $qty,
-                $_POST['base_price'], $_POST['options'], $_POST['extras']);
+                $_POST['base_price'], $options, $extras);
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
         'statusMessage' => $LANG_PP['msg_item_added'],

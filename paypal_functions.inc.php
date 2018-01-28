@@ -300,13 +300,16 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
         $retval = COM_createLink($fieldvalue,
                 $base_url. '/index.php?order=' . $fieldvalue,
-                array('data-uk-tooltip' => '',
-                    'title' => 'View',
-                    'class' => 'gl_mootip',
+                array('data-uk-tooltip' => '{delay:500}',
+                    'title' => $LANG_PP['vieworder'],
                 )
         );
-        $retval .= '&nbsp;&nbsp;<a href="' . PAYPAL_URL . '/index.php?printorder=' . $fieldvalue . '" target="_blank" class="uk-icon-mini uk-icon-print gl_mootip"
-            title="Print" data-uk-tooltip>';
+        $retval .= '&nbsp;&nbsp;' . COM_createLink('<i class="uk-icon-mini uk-icon-print gl_mootip"></i>',
+                PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
+                array('data-uk-tooltip' => '{delay:500}',
+                    'title' => $LANG_PP['print'],
+                )
+        );
         if (!$_PP_CONF['_is_uikit']) {
             $retval .= '(print)';
         }
@@ -488,6 +491,7 @@ function ProductList($cat_id = 0)
                 p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
                 )";
 
+    $search = '';
     // Add search query, if any
     if (isset($_REQUEST['query']) && !empty($_REQUEST['query']) && !isset($_REQUEST['clearsearch'])) {
         $search = DB_escapeString($_REQUEST['query']);
@@ -608,6 +612,13 @@ function ProductList($cat_id = 0)
         $prodrows++;
 
         $P->Read($A['id']);
+        if ( @in_array($P->id, $ratedIds)) {
+            $static = true;
+            $voted = 1;
+        } else {
+            $static = 0;
+            $voted = 0;
+        }
 
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
             // can't rate from list page, messes with product links
@@ -835,9 +846,7 @@ function ipnlogSingle($id, $txn_id)
         $ipn_data = "Error decoding IPN transaction data";
     }
     $T->set_var('raw', $ipn_data);
-    $display .= $T->parse('output', 'ipnlog');
-
-    return $display;
+    return $T->parse('output', 'ipnlog');
 }
 
 
@@ -1155,7 +1164,7 @@ function callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
     if ($txt == '')
         $txt = $A['cat_name'];
 
-    $str = "<option value=\"{$A['cat_id']}\" $style $selected $disabled>";
+    $str = "<option value=\"{$A['cat_id']}\" $style $selected>";
     $str .= $txt;
     $str .= "</option>\n";
     return $str;
@@ -1206,7 +1215,7 @@ function siteFooter()
     switch($_PP_CONF['displayblocks']) {
     case 2 : // right only
     case 3 : // left and right
-        $retval .= COM_siteFooter(true);
+        $retval .= COM_siteFooter();
         break;
 
     case 0: // none

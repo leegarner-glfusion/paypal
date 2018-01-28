@@ -297,7 +297,7 @@ $LANG_PP = array (
 'print' => 'Print',
 'resetbuttons' => 'Clear Encrypted Button Cache',
 );
-if ($_PP_CONF['ena_ratings']) {
+if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
 }
 

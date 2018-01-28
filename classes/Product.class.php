@@ -125,6 +125,8 @@ class Product
         case 'weight':
         case 'shipping_amt':
         case 'sale_price':
+        case '_act_price':      // actual price, sale or nonsale
+        case '_orig_price':     // original price
             // Float values
             $this->properties[$var] = (float)$value;
             break;
@@ -479,7 +481,7 @@ class Product
     {
         global $_TABLES, $_PP_CONF;
 
-        if ($this->id <= 0 || $this->isUsed())
+        if ($this->id <= 0 || self::isUsed($this->id))
             return false;
 
         // Locate and delete photos
@@ -657,7 +659,7 @@ class Product
         }
 
         $T->set_var(array(
-            'post_options'  => $post_options,
+            //'post_options'  => $post_options,
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
             'category'      => $this->cat_id,
             'short_description' => htmlspecialchars($this->short_description, ENT_QUOTES, COM_getEncodingt()),
@@ -753,7 +755,7 @@ class Product
             $T->parse('OptRow', 'OptionRow', true);
         }*/
 
-        if (!$this->isUsed()) {
+        if (!self::isUsed($this->id)) {
             $T->set_var('candelete', 'true');
         }
 
@@ -915,15 +917,11 @@ class Product
     *
     *   @return boolean True if used, False if not
     */
-    public function isUsed($item_id = 0)
+    public static function isUsed($item_id = 0)
     {
         global $_TABLES;
 
-        if ($item_id == 0 && is_object($this)) {
-            $item_id = $this->id;
-        }
         $item_id = (int)$item_id;
-
         if (DB_count($_TABLES['paypal.purchases'], 'product_id', $item_id) > 0) {
             return true;
         } else {
@@ -943,7 +941,7 @@ class Product
 
         USES_lib_comments();
 
-        $cacheName = $_CONF_PP['pi_name'] . '__';
+        $cacheName = $_PP_CONF['pi_name'] . '__';
         /*$cacheInstance = $cacheName . CACHE_security_hash() . '__' . $_CONF['theme'];
 
         $retval = CACHE_check_instance($cacheInstance, 0);
@@ -976,7 +974,7 @@ class Product
         }
 
         $onsale = $this->isOnSale();
-        $act_price = $onsale ? $this->sale_price : $this->price;
+        $this->_act_price = $onsale ? $this->sale_price : $this->price;
 
         $qty_disc_txt = '';
         foreach ($this->qty_discounts as $qty=>$pct) {
@@ -1040,7 +1038,7 @@ class Product
         // Get the product options, if any, and set them into the form
         $cbrk = '';
         $init_price_adj = NULL;
-        $orig_price = $this->price;
+        $this->_orig_price = $this->price;
         $T->set_block('product', 'AttrSelect', 'attrSel');
         foreach ($this->options as $id=>$Attr) {
             /*if ($Attr['attr_value'] === '') {
@@ -1052,8 +1050,8 @@ class Product
             if ($Attr['attr_name'] != $cbrk) {
                 // Adjust the price for cases where all attributes have prices
                 if ($init_price_adj !== NULL) {
-                    $act_price += $init_price_adj;
-                    $orig_price += $init_price_adj;
+                    $this->act_price += $init_price_adj;
+                    $this->_orig_price += $init_price_adj;
                 }
                 $init_price_adj = NULL;
                 if ($cbrk != '') {      // end block if not the first element
@@ -1089,8 +1087,8 @@ class Product
         }
         if ($cbrk != '') {      // finish off the last selection
             if ($init_price_adj !== NULL) {
-                $act_price += $init_price_adj;
-                $orig_price += $init_price_adj;
+                $this->_act_price += $init_price_adj;
+                $this->_orig_price += $init_price_adj;
             }
             $T->set_var(array(
                 'attr_name' => $cbrk,
@@ -1109,9 +1107,9 @@ class Product
             'short_description' => $s_desc,
             'description'       => $l_desc,
             'cur_decimals'      => $this->currency->Decimals(),
-            'init_price'        => $this->currency->FormatValue($act_price),
+            'init_price'        => $this->currency->FormatValue($this->_act_price),
             'price'             => $this->currency->FormatValue($this->price),
-            'orig_price'        => $this->currency->Format($orig_price),
+            'orig_price'        => $this->currency->Format($this->_orig_price),
             'on_sale'           => $onsale ? 'true' : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => $this->currency->Pre(),
@@ -1153,7 +1151,7 @@ class Product
             if (in_array($prod_id, $PP_ratedIds)) {
                 $static = true;
                 $voted = 1;
-            } elseif (plugin_canuserrate_paypal($A['id'], $_USER['uid'])) {
+            } elseif (plugin_canuserrate_paypal($this->id, $_USER['uid'])) {
                 $static = 0;
                 $voted = 0;
             } else {
@@ -1183,7 +1181,7 @@ class Product
                 WHERE id = '$prod_id'");
 
         $retval .= COM_endBlock();
-        CACHE_create_instance($cacheInstance, $retval, 0);
+        //CACHE_create_instance($cacheInstance, $retval, 0);
         return $retval;
     }
 

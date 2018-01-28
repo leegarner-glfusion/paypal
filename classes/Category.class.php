@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.8
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -38,7 +38,7 @@ class Category
 
     /**
      *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
+     *  Reads in the specified class, if $id is set.  If $id is zero,
      *  then a new entry is being created.
      *
      *  @param integer $id Optional type ID
@@ -134,9 +134,11 @@ class Category
         $this->description = $row['description'];
         $this->enabled = $row['enabled'];
         $this->cat_name = $row['cat_name'];
-        $this->keywords = $row['keywords'];
-        $this->image = $row['image'];
         $this->grp_access = $row['grp_access'];
+
+        if ($fromDB) {
+            $this->image = $row['image'];
+        }
     }
 
 
@@ -157,10 +159,10 @@ class Category
             return;
         }
 
-        $result = DB_query("SELECT * 
-                    FROM {$_TABLES['paypal.categories']} 
+        $result = DB_query("SELECT *
+                    FROM {$_TABLES['paypal.categories']}
                     WHERE cat_id='$id'");
-        if (!$result || DB_numRows($result != 1)) {
+        if (!$result || DB_numRows($result) != 1) {
             return false;
         } else {
             $row = DB_fetchArray($result, false);
@@ -186,18 +188,18 @@ class Category
         }
 
         // Handle image uploads.
-        // We don't want to delete the existing image if one isn't 
-        // uploaded, we should leave it unchanged.  So we'll first 
+        // We don't want to delete the existing image if one isn't
+        // uploaded, we should leave it unchanged.  So we'll first
         // retrieve the existing image filename, if any.
         if (!$this->isNew) {
-            $img_filename = DB_getItem($_TABLES['paypal.categories'], 
+            $img_filename = DB_getItem($_TABLES['paypal.categories'],
                         'image', "cat_id='" . $this->cat_id . "'");
         } else {
             // New entry, assume no image
             $img_filename = '';
         }
         if (is_uploaded_file($_FILES['imagefile']['tmp_name'])) {
-            $img_filename =  rand(100,999) .  "_" . 
+            $img_filename =  rand(100,999) .  "_" .
                      COM_sanitizeFilename($_FILES['imagefile']['name'], true);
             $status = IMG_resizeImage($_FILES['imagefile']['tmp_name'],
                     $_PP_CONF['catimgpath']."/$img_filename",
@@ -354,18 +356,18 @@ class Category
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'parent_sel'    => PAYPAL_recurseCats(
                                     __NAMESPACE__ . '\callbackCatOptionList',
-                                    $this->parent_id, 0, '', 
+                                    $this->parent_id, 0, '',
                                     $not, $items),
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
             'doc_url'       => PAYPAL_getDocURL('category_form'),
         ) );
 
         if ($this->image != '') {
-            $T->set_var('img_url', PAYPAL_PI_URL . '/images/categories/' . 
+            $T->set_var('img_url', PAYPAL_PI_URL . '/images/categories/' .
                 $this->image);
         }
 
-        if (!$this->isUsed()) {
+        if (!self::isUsed($this->id)) {
             $T->set_var('can_delete', 'true');
         }
 
@@ -375,7 +377,7 @@ class Category
         foreach ($LANG_PP['buttons'] as $key=>$value) {
             $T->set_var(array(
                 'btn_type'  => $key,
-                'btn_chk'   => isset($this->buttons[$key]) ? 
+                'btn_chk'   => isset($this->buttons[$key]) ?
                                 'checked="checked"' : '',
                 'btn_name'  => $value,
             ));
@@ -385,16 +387,16 @@ class Category
         // If there's an image for this category, display it and offer
         // a link to delete it
         if ($this->image != '') {
-            $T->set_var('img_url', 
+            $T->set_var('img_url',
                     PAYPAL_URL . '/images/categories/' . $this->image);
-            $T->set_var('del_img_url', 
-                    PAYPAL_ADMIN_URL . '/index.php?action=delete_img&amp;img_id=' . 
+            $T->set_var('del_img_url',
+                    PAYPAL_ADMIN_URL . '/index.php?action=delete_img&amp;img_id=' .
                         $prow['img_id']. '&amp;id=' . $this->id);
         }
 
         $retval .= $T->parse('output', 'category');
 
-        @setcookie($_CONF['cookie_name'].'fckeditor', 
+        @setcookie($_CONF['cookie_name'].'fckeditor',
                 SEC_createTokenGeneral('advancededitor'),
                 time() + 1200, $_CONF['cookie_path'],
                 $_CONF['cookiedomain'], $_CONF['cookiesecure']);
@@ -462,15 +464,11 @@ class Category
     *
     *   @return boolean True if used, False if not
     */
-    public function isUsed($cat_id=0)
+    public static function isUsed($cat_id=0)
     {
         global $_TABLES;
 
-        if ($cat_id == 0 && is_object($this)) {
-            $cat_id = $this->cat_id;
-        } else {
-            $cat_id = (int)$cat_id;
-        }
+        $cat_id = (int)$cat_id;
 
         // Check if any products are under this category
         if (DB_count($_TABLES['paypal.products'], 'cat_id', $cat_id) > 0) {
@@ -478,13 +476,11 @@ class Category
         }
 
         // Check if any categories are under this one.
-        if (DB_count($_TABLES['paypal.categories'], 
+        if (DB_count($_TABLES['paypal.categories'],
                         'parent_id', $cat_id) > 0) {
             return true;
         }
-
         return false;
-
     }
 
 
@@ -540,7 +536,7 @@ class Category
         global $_CONF, $_PP_CONF;
 
         if ($this->image != '' &&
-                is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] . 
+                is_file($_CONF['path_html'] . $_PP_CONF['pi_name'] .
                 '/images/categories/' . $A['image'])) {
             $retval = PAYPAL_URL . '/images/categories/' . $this->image;
         } else {

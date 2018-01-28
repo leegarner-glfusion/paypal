@@ -36,6 +36,7 @@ define('PAYPAL_URL', "{$_CONF['site_url']}/{$_PP_CONF['pi_name']}");
 /** Define URL to plugin admin interface */
 define('PAYPAL_ADMIN_URL',
         "{$_CONF['site_admin_url']}/plugins/{$_PP_CONF['pi_name']}");
+define('PP_CART_VAR', 'ppGCart');
 
 // Define product types
 define('PP_PROD_PHYSICAL',  1);
@@ -107,6 +108,7 @@ $_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon uk-icon' : 'fa fa';
 
 global $ppGCart;
 $ppGCart = NULL;
+
 /**
 *   Set the global cart object.
 *
@@ -944,7 +946,7 @@ function phpblock_paypal_cart_contents()
     $T = new Template(PAYPAL_PI_PATH . '/templates');
     $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
-
+    $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
         $link = true;
         // See if this is a plugin item, will have a ':' in the item number
@@ -952,7 +954,12 @@ function phpblock_paypal_cart_contents()
             $item_info = explode(':', $item['item_id']);
             if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
-        list($item_id, $options) = explode('|', $item['item_id']);
+        if (strpos($item['item_id'], '|')) {
+            list($item_id, $options) = explode('|', $item['item_id']);
+        } else {
+            $item_id = $item['item_id'];
+            $options = '';
+        }
         $P = new Paypal\Product($item_id);
         $item_price = $item['price'];
         // Store the text for each attribute and custom field in an array,
@@ -970,7 +977,7 @@ function phpblock_paypal_cart_contents()
         $item_total = $item_price * $item['quantity'];
         $text_names = explode('|', $P->custom);
 
-        if (!empty($text_names) && is_array($item['extras']['custom'])) {
+        if (!empty($text_names) && isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
             foreach ($item['extras']['custom'] as $id=>$val) {
                 $opt_arr[] = $text_names[$id] . ': ' . $val;
             }
@@ -1458,7 +1465,6 @@ function plugin_user_logout_paypal($uid)
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
     PAYPAL_setCart();
-    $ppGCart->Clear($uid);
     $ppGCart->SaveUserCart($uid);
     $ppGCart->Clear($uid);
 }
@@ -1610,7 +1616,8 @@ function plugin_configmanager_select_product_tpl_ver_paypal()
     $A = array();
     $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
-        $opt = end(explode('/', $dir));
+        $tmp = explode('/', $dir);
+        $opt = end($tmp);
         $A[$opt] = $opt;
     }
     return $A;
@@ -1627,7 +1634,8 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
     $A = array();
     $dirs = glob(PAYPAL_PI_PATH . '/templates/list/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
-        $opt = end(explode('/', $dir));
+        $tmp = explode('/', $dir);
+        $opt = end($tmp);
         $A[$opt] = $opt;
     }
     return $A;
@@ -1647,6 +1655,51 @@ function plugin_configmanager_select_currency_paypal()
         $A["{$code} - {$data['name']}"] = $code;
     }
     return $A;
+}
+
+
+/*   Displays account information in the user's profile.
+*
+*   @param  integer $uid    User ID whose profile is being displayed
+*   @param  object  &$T     Pointer to template object
+*   @return string          HTML to include in profile page
+*/
+function plugin_profilevariablesdisplay_paypal($uid, &$T)
+{
+    global $_TABLES, $_USER, $_PP_CONF;
+
+    $retval = '';
+
+    // Make sure that a valid UID was passed in.
+    if (empty($uid) || (!plugin_ismoderator_paypal() && $uid != $_USER['uid'])) {
+        return '';
+    }
+
+    $LT = new \Template(__DIR__ . '/templates/');
+    $LT->set_file(array(
+        'block' => 'profileblock.thtml',
+    ));
+    $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
+    $U = Paypal\UserInfo::getInstance($uid);
+    if ($U->gc_bal > 0) {
+        $LT->set_var('gc_bal', $U->gc_bal);
+    }
+    if (!empty($U->cart)) {
+        $cart = true;
+        $LT->set_var('cart', true);
+    } else {
+        $cart = false;
+    }
+    $ord_count = DB_count($_TABLES['paypal.orders'], "uid = $uid");
+    $LT->set_var('orders', $ord_count);
+
+    // Only display the template if there's something to show
+    if ($ord_count > 0 || $cart || $U->gc_bal > 0) {
+        $LT->parse('output', 'block');
+        $existingFields = $T->get_var('plugin_fields');
+        $T->set_var('plugin_fields',
+                $existingFields . $T->finish($LT->get_var('output')));
+    }
 }
 
 
@@ -1696,8 +1749,12 @@ function PAYPAL_child_cat_product_count($parent_cat)
 */
 function PAYPAL_explode_opts($item, $opt_string = false)
 {
-    list($item_id, $options) = explode('|', $item);
-
+    if (strpos($item, '|')) {
+        list($item_id, $options) = explode('|', $item);
+    } else {
+        $item_id = $item;
+        $options = NULL;
+    }
     if ($options === NULL) $options = '';
     if (!$opt_string) {
         if (empty($options)) {

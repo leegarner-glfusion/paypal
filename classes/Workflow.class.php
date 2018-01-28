@@ -39,7 +39,7 @@ class Workflow
     /**
     *   Load the workflows into the global workflow array.
     */
-    public function Load()
+    public static function Load()
     {
         global $_TABLES, $_PP_CONF;
 
@@ -61,7 +61,7 @@ class Workflow
     *
     *   @uses   Load()
     */
-    public function Init()
+    public static function Init()
     {
         global $_PP_CONF;
 

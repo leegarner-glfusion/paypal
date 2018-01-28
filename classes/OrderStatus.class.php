@@ -38,7 +38,7 @@ class OrderStatus extends Workflow
     /**
     *   Load the orderstatus into the global workflow array.
     */
-    public function Load()
+    public static function Load()
     {
         global $_PP_CONF, $_TABLES;
 
@@ -62,7 +62,7 @@ class OrderStatus extends Workflow
     *
     *   @uses   Load()
     */
-    public function Init($force=false)
+    public static function Init($force=false)
     {
         global $_PP_CONF;
 

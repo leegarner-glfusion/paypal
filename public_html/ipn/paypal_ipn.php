@@ -15,11 +15,6 @@ namespace Paypal;
 /** Import core glFusion functions */
 require_once '../../lib-common.php';
 
-USES_paypal_functions();
-
-/** Import IPN class */
-IPN::getInstance('paypal');
-
 if ($_PP_CONF['debug_ipn'] == 1) {
     // Get the complete IPN message prior to any processing
     COM_errorLog("Recieved IPN:", 1);

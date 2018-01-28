@@ -11,7 +11,7 @@
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.5.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -47,11 +47,12 @@ if (!empty($action)) {
 } else {
     $expected = array(
         // Actions
-        'updatecart', 'checkout', 'searchcat', 
-        'savebillto', 'saveshipto', 
+        'updatecart', 'checkout', 'searchcat',
+        'savebillto', 'saveshipto',
         'updatecart', 'emptycart',
         'addcartitem', 'addcartitem_x', 'checkoutcart',
-        'processorder', 'thanks', 'action', 
+        'processorder', 'thanks', 'action',
+        'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
     );
@@ -130,8 +131,8 @@ case 'saveshipto':
     if ($U->uid > 1) {
         $addr_id = $U->SaveAddress($_POST, $addr_type);
         if ($addr_id[0] < 0) {
-            if (!empty($addr_id[1])) 
-                $content .= PAYPAL_errorMessage($addr_id[1], 'alert', 
+            if (!empty($addr_id[1]))
+                $content .= PAYPAL_errorMessage($addr_id[1], 'alert',
                         $LANG_PP['missing_fields']);
             $view = $addr_type;
             break;
@@ -152,7 +153,7 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
     }
     $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
     $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
-                $_POST['item_descr'], $qty, 
+                $_POST['item_descr'], $qty,
                 $_POST['amount'], $_POST['options'], $_POST['extras']);
     if (isset($_POST['_ret_url'])) {
         COM_refresh($_POST['_ret_url']);
@@ -191,7 +192,7 @@ case 'thanks':
     // Allow for no thanksVars function
     $message = $LANG_PP['thanks_title'];
     if (!empty($actionval)) {
-        $gw = Paypal\Gateway($actionval);
+        $gw = Paypal\Gateway::getInstance($actionval);
         if ($gw !== NULL) {
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
@@ -215,6 +216,16 @@ case 'thanks':
     $view = 'productlist';
     break;
 
+case 'redeem':
+    if (COM_isAnonUser()) {
+        $content .= 'Must be a valid user';
+        break;
+    }
+    $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
+    $uid = $_USER['uid'];
+    Paypal\Coupon::Redeem($code);
+    break;
+    
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
@@ -227,8 +238,7 @@ case 'action':      // catch all the "?action=" urls
             'mc_gross'      => $_POST['mc_gross'],
             'paypal_url'    => $_PP_CONF['paypal_url'],
         ) );
-    
-        $content .= COM_showMessageText($T->parse('output', 'msg'), 
+        $content .= COM_showMessageText($T->parse('output', 'msg'),
                     $LANG_PP['thanks_title'], true);
         $view = 'productlist';
         break;
@@ -290,7 +300,7 @@ switch ($view) {
 case 'orderhist':
 case 'history':
     if (COM_isAnonUser()) COM_404();
-    $content .= PAYPAL_orders();
+    $content .= \Paypal\listOrders();
     $menu_opt = $LANG_PP['purchase_history'];
     $page_title = $LANG_PP['purchase_history'];
     break;
@@ -349,6 +359,7 @@ case 'viewcart':
         COM_refresh(PAYPAL_URL . '/index.php');
         exit;
     }
+    $page_title = $LANG_PP['viewcart'];
     break;
 
 case 'checkoutcart':
@@ -384,7 +395,7 @@ case 'none':
 $display = Paypal\siteHeader();
 $T = new Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
-$T->set_var('title', $page_title);
+//$T->set_var('title', $page_title);
 $display .= $T->parse('', 'title');
 if (!empty($msg)) {
     //msg block

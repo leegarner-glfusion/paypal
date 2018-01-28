@@ -408,6 +408,7 @@ function PAYPAL_adminlist_Product($cat_id=0)
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
+    $display = '';
     $sql = "SELECT
                 p.id, p.name, p.short_description, p.description, p.price,
                 p.prod_type, p.enabled, p.featured,
@@ -823,6 +824,7 @@ function PAYPAL_adminlist_Category()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
+    $display = '';
     $sql = "SELECT
                 cat.cat_id, cat.cat_name, cat.description, cat.enabled,
                 cat.grp_access, parent.cat_name as pcat
@@ -1476,6 +1478,7 @@ function PAYPAL_itemhist($item_id = '')
         'default_filter' => '',
     );
 
+    $text_arr = array();
 /*    $text_arr = array(
         'has_extras' => true,
         'form_url' => PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $item_id,

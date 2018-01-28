@@ -73,7 +73,7 @@ $LANG_PP = array (
 'verified'          => 'Verified',
 'ipn_data'          => 'Full IPN Data',
 'viewcart'          => 'View Cart',
-'vieworder'         => 'Confirm Order',
+'vieworder'         => 'View Order',
 'images'            => 'Images',
 'cat_image'         => 'Category Image',
 'click_to_enlarge'  => 'Click to Enlarge Image',
@@ -297,8 +297,9 @@ $LANG_PP = array (
 'all' => 'All',
 'print' => 'Print',
 'resetbuttons' => 'Clear Encrypted Button Cache',
+'orderhist_item' => 'View the order history for this item',
 );
-if ($_PP_CONF['ena_ratings']) {
+if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
 }
 

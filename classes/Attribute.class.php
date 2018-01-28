@@ -156,7 +156,7 @@ class Attribute
         $result = DB_query("SELECT *
                     FROM {$_TABLES['paypal.prod_attr']}
                     WHERE attr_id='$id'");
-        if (!$result || DB_numRows($result != 1)) {
+        if (!$result || DB_numRows($result) != 1) {
             return false;
         } else {
             $row = DB_fetchArray($result, false);

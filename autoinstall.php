@@ -4,7 +4,7 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Mark Evans <mark@glfusion.org>
-*   @copyright  Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009 Mark Evans <mark@glfusion.org>
 *   @package    paypal
 *   @version    0.5.9
@@ -13,25 +13,20 @@
 *   @filesource
 */
 
-/*if (!defined ('GVERSION')) {
-    die ('This file can not be used on its own.');
-}
-*/
-
 global $_DB_dbms;
 
 /** Include plugin configuration */
-require_once $_CONF['path'].'plugins/paypal/paypal.php';
+require_once __DIR__  . '/paypal.php';
 /** Include database queries */
-require_once $_CONF['path'].'plugins/paypal/sql/'.$_DB_dbms.'_install.php';
+require_once __DIR__ . '/sql/'.$_DB_dbms.'_install.php';
 /** Include default values */
-require_once $_CONF['path'].'plugins/paypal/install_defaults.php';
+require_once __DIR__ . '/install_defaults.php';
 
 $language = $_CONF['language'];
-if (!is_file($_CONF['path'].'plugins/paypal/language/' . $language . '.php')) {
+if (!is_file(__DIR__  . '/language/' . $language . '.php')) {
     $language = 'english';
 }
-require_once $_CONF['path'].'plugins/paypal/language/' . $language . '.php';
+require_once __DIR__ . '/language/' . $language . '.php';
 global $LANG_PP;
 
 /**
@@ -288,7 +283,6 @@ function plugin_postinstall_paypal()
         $gid = 1;        // default to Root if paypal group not found
     DB_query("INSERT INTO {$_TABLES['vars']}
                 SET name='paypal_gid', value=$gid");
-
 }
 
 ?>

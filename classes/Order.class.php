@@ -133,7 +133,11 @@ class Order
                 WHERE order_id = '{$this->order_id}'";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $this->items[] = $A;
+            $this->items[$A['id']] = $A;
+            $X = DB_fetchArray(DB_query("SELECT *
+                    FROM {$_TABLES['paypal.products']}
+                    WHERE id='".DB_escapeString($A['id'])."'"), false);
+            $this->items[$A['id']]['data'] = $X;
         }
         return true;
     }
