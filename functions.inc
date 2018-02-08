@@ -1819,7 +1819,7 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
     $properties = explode(',', $what);
     $fields = array();
     $retval = array();
-    $buildingIndex = false;
+    $buildingSearchIndex = false;
     foreach ($properties as $p) {
         switch ($p) {
         case 'id':
@@ -1840,7 +1840,7 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
             $fields[] = 'p.description';
             break;
         case 'searchidx':
-            $buildingIndex = true;
+            $buildingSearchIndex = true;
             $fields[] = 'p.name';
             $fields[] = 'p.keywords';
         case 'content':
@@ -1854,7 +1854,7 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
             $fields[] = 'p.price';
             break;
         case 'search_index':
-            $buildingIndex = true;
+            $buildingSearchIndex = true;
             break;
         case 'perms':
             $fields[] = 'c.grp_access';
@@ -1866,6 +1866,7 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
     }
     $fields = array_unique($fields);
     $fields = implode(',', $fields);
+
     $retval = array();
     $sql = "SELECT $fields
              FROM {$_TABLES['paypal.products']} p
@@ -1884,6 +1885,10 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
     if ($uid > 0) {
         $where .= SEC_buildAccessSql($clause = 'AND', $field = 'c.grp_access');
     }
+    if (isset($options['cat_id'])) {
+        $where .= ' AND p.cat_id = ' . (int)$options['cat_id'];
+    }
+
     $sql .= $where;
     $res = DB_query($sql);
 
