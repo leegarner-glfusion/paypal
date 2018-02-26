@@ -1,4 +1,15 @@
 <?php
+/**
+*   Sitemap driver for the Paypal plugin
+*
+*   @author     Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2017-2018 Lee Garner
+*   @package    paypal
+*   @version    0.5.10
+*   @license    http://opensource.org/licenses/gpl-2.0.php
+*               GNU Public License v2 or later
+*   @filesource
+*/
 
 class sitemap_paypal extends sitemap_base
 {
@@ -27,29 +38,22 @@ class sitemap_paypal extends sitemap_base
     {
         global $_TABLES, $_USER;
 
-       $entries = array();
-        $sql = "SELECT * FROM {$_TABLES['paypal.products']} p
-                LEFT JOIN {$_TABLES['paypal.categories']} c
-                    ON p.cat_id = c.cat_id "
-            . SEC_buildAccessSql('WHERE', 'c.grp_access');
+        $entries = array();
+        $opts = array();
         if ($cat_id > 0) {
-            $sql .= ' AND p.cat_id = ' . (int)$cat_id;
+            $opts['cat_id'] = $cat_id;
         }
-        $result = DB_query($sql, 1);
-        if (DB_error()) {
-            COM_errorLog("sitemap_paypal::getItems() SQL error: $sql");
-            return $entries;
-        }
-        while ($A = DB_fetchArray($result, false)) {
-            $entries[] = array(
-                'id'    => $A['id'],
-                'title' => $A['short_description'],
-                'uri'   => COM_buildURL(
-                    PAYPAL_URL . '/index.php?detail=detail&amp;id='
-                    . rawurlencode($A['id'])),
-                'date'  => strtotime($A['dt_add']),
-                'image_uri' => false,
-            );
+        $items = PLG_getItemInfo('paypal', '*', 'id,title,date,url', $_USER['uid'], $opts);
+        if (is_array($items)) {
+            foreach ($items as $A) {
+                $entries[] = array(
+                    'id'    => $A['id'],
+                    'title' => $A['title'],
+                    'uri'   => $A['url'],
+                    'date'  => $A['date'],
+                    'image_uri' => false,
+                );
+            }
         }
         return $entries;
     }
