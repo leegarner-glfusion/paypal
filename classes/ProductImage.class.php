@@ -160,11 +160,10 @@ class ProductImage extends \upload
             if (!empty($url)) {
                 $this->goodfiles[] = $filename;
             } else {
-                $this->_addError("MakeThumbs() : $filename - $msg");
+                $this->_addError(__FUNCTION__ . ': ' . $filename);
             }
         }
         return '';
-
     }   // function MakeThumbs()
 
 
@@ -270,12 +269,9 @@ class ProductImage extends \upload
             $msg = "<li>upload_failed_msg</li>\n";
             break;
         }
-
         return $msg;
-
     }
 
-
-}   // class Image
+}   // class ProductImage
 
 ?>
