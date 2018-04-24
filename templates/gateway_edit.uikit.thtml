@@ -60,7 +60,7 @@ $(document).ready(function() {
         iconDesktop: true,
         iconTouch: true,
         functionBefore: function(origin, continueTooltip) {
-            continueTooltip();
+            //continueTooltip();
             var attrHref = ConfigDocUrl;
             var ajobj = $(this);
             $.get(attrHref, function(data) {
@@ -72,6 +72,7 @@ $(document).ready(function() {
                     origin.tooltipster('content', 'No Help Text Found');
                     console.log('Unable to find help text for desc_%s',confVar);
                 }
+                continueTooltip();
             });
         }
     });
