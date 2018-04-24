@@ -65,6 +65,7 @@ foreach($expected as $provided) {
 }
 
 $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : '';
+$view = 'productlist';
 
 switch ($action) {
 case 'dup_product':
@@ -74,12 +75,13 @@ case 'dup_product':
     break;
 
 case 'deleteproduct':
-    $P = new Paypal\Product($_REQUEST['id']);
-    if (!$P->isUsed()) {
+    $P = Paypal\Product::getInstance($_REQUEST['id']);
+    if (!Paypal\Product::isUsed($_REQUEST['id'])) {
         $P->Delete();
     } else {
-        $content .= "Product has purchase records, can't delete.";
+        COM_setMsg(sprintf($LANG_PP['no_del_item'], $P->name), 'error');
     }
+    echo COM_refresh(PAYPAL_ADMIN_URL);
     break;
 
 case 'deletecatimage':
@@ -95,13 +97,15 @@ case 'deletecatimage':
     break;
 
 case 'deletecat':
-    $C = new Paypal\Category($_REQUEST['cat_id']);
-    if (!$C->isUsed()) {
-        $C->Delete();
+    $C = Paypal\Category::getInstance($_REQUEST['cat_id']);
+    if ($C->parent_id == 0) {
+        COM_setMsg($LANG_PP['dscp_root_cat'], 'error');
+    } elseif (Paypal\Category::isUsed($_REQUEST['cat_id'])) {
+        COM_setMsg(sprintf($LANG_PP['no_del_cat'], $C->cat_name), 'error');
     } else {
-        $content .= "Category has related products, can't delete.";
+        $C->Delete();
     }
-    $view = 'catlist';
+    echo COM_refresh(PAYPAL_ADMIN_URL . '/index.php?catlist');
     break;
 
 case 'delete_img':
@@ -113,7 +117,7 @@ case 'delete_img':
 case 'saveproduct':
     $P = new Paypal\Product($_POST['id']);
     if (!$P->Save($_POST)) {
-        $content .= PAYPAL_errMsg($P->PrintErrors());
+        $content .= Paypal\PAYPAL_errMsg($P->PrintErrors());
         $view = 'editproduct';
     }
     break;
@@ -121,7 +125,7 @@ case 'saveproduct':
 case 'savecat':
     $C = new Paypal\Category($_POST['cat_id']);
     if (!$C->Save($_POST)) {
-        $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
+        $content .= PAYPAL_popupMsg($C->PrintErrors());
         $view = 'editcat';
     } else {
         $view = 'catlist';
@@ -205,17 +209,11 @@ case 'attrcopy':
     $src_prod = (int)$_POST['src_prod'];
     $dest_prod = (int)$_POST['dest_prod'];
     $dest_cat = (int)$_POST['dest_cat'];
+    $del_existing = isset($_POST['del_existing_attr']) ? true : false;
+    $done_prods = array();
 
     // Nothing to do if no source product selected
     if ($src_prod < 1) break;
-
-    if ($dest_prod > 0 && $dest_prod != $src_prod) {
-        $sql = "INSERT IGNORE INTO {$_TABLES['paypal.prod_attr']}
-            SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
-            FROM {$_TABLES['paypal.prod_attr']}
-            WHERE item_id = $src_prod";
-        DB_query($sql);
-    }
 
     // Copy product attributes to all products in a category.
     // Ignore the source product, which may or may not be in the category.
@@ -227,6 +225,10 @@ case 'attrcopy':
         if ($res) {
             while ($A = DB_fetchArray($res, false)) {
                 $dest_prod = (int)$A['id'];
+                $done_prods[] = $dest_prod;     // track for later
+                if ($del_existing) {
+                    DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $dest_prod);
+                }
                 $sql = "INSERT IGNORE INTO {$_TABLES['paypal.prod_attr']}
                 SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
                 FROM {$_TABLES['paypal.prod_attr']}
@@ -235,7 +237,20 @@ case 'attrcopy':
             }
         }
     }
-    echo COM_refresh(COM_buildUrl(PAYPAL_ADMIN_URL . '/index.php?attributes=x'));
+
+    // If a target product was selected, it's not the same as the source, and hasn't
+    // already been done as part of the category, then update the target product also.
+    if ($dest_prod > 0 && $dest_prod != $src_prod && !in_array($dest_prod, $done_prods)) {
+        if ($del_existing) {
+            DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $dest_prod);
+        }
+        $sql = "INSERT IGNORE INTO {$_TABLES['paypal.prod_attr']}
+            SELECT NULL, $dest_prod, attr_name, attr_value, orderby, attr_price, enabled
+            FROM {$_TABLES['paypal.prod_attr']}
+            WHERE item_id = $src_prod";
+        DB_query($sql);
+    }
+    echo COM_refresh(PAYPAL_ADMIN_URL . '/index.php?attributes=x');
     break;
 
 case 'runreport':
@@ -573,7 +588,11 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'prod_type':
-        $retval = $LANG_PP['prod_types'][$A['prod_type']];
+        if (isset($LANG_PP['prod_types'][$A['prod_type']])) {
+            $retval = $LANG_PP['prod_types'][$A['prod_type']];
+        } else {
+            $retval = '';
+        }
         break;
 
     case 'cat_name':
@@ -822,7 +841,7 @@ function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
 */
 function PAYPAL_adminlist_Category()
 {
-    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $LANG_PP_HELP;
 
     $display = '';
     $sql = "SELECT
@@ -849,7 +868,9 @@ function PAYPAL_adminlist_Category()
                 'field' => 'pcat', 'sort' => true),
         array('text' => $LANG_PP['visible_to'],
                 'field' => 'grp_access', 'sort' => false),
-        array('text' => $LANG_ADMIN['delete'],
+        array('text' => $LANG_ADMIN['delete'] .
+                    '&nbsp;<i class="uk-icon uk-icon-question-circle" data-uk-tooltip title="' .
+                    $LANG_PP_HELP['hlp_cat_delete'] . '"></i>',
                 'field' => 'delete', 'sort' => false,
                 'align' => 'center'),
     );
@@ -867,7 +888,7 @@ function PAYPAL_adminlist_Category()
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => PAYPAL_ADMIN_URL . '/index.php',
+        'form_url' => PAYPAL_ADMIN_URL . '/index.php?catlist=x',
     );
 
     if (!isset($_REQUEST['query_limit']))
@@ -894,7 +915,7 @@ function PAYPAL_adminlist_Category()
 */
 function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 {
-    global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
+    global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES, $LANG_ADMIN;
 
     $retval = '';
     static $grp_names = array();
@@ -936,8 +957,9 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
                     '-trash-o pp-icon-danger tooltip"></i>',
                 PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
                 array(
-                    'onclick'=>'return confirm(\'Do you really want to delete this item?\');',
-                    'title' => $LANG_PP['q_del_item'],
+                    'onclick'=>"return confirm('{$LANG_PP['q_del_item']}');",
+                    'title' => $LANG_ADMIN['delete'],
+                    'data-uk-tooltip' => '',
                 )
             );
         }
