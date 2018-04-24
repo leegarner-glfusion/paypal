@@ -42,6 +42,8 @@ define('PP_CART_VAR', 'ppGCart');
 define('PP_PROD_PHYSICAL',  1);
 define('PP_PROD_DOWNLOAD',  2);
 define('PP_PROD_VIRTUAL',   4);
+define('PP_PROD_COUPON',    8);
+define('PP_PROD_PLUGIN',    16);
 
 // Define comment status
 define('PP_COMMENTS_ENABLED',   0);
@@ -54,16 +56,16 @@ define('PP_STATUS_PAID', 1);
 
 // Session variables for TimThumb image url, if used
 SESS_setVar($_PP_CONF['pi_name'], array(
-    'origpath'      => $_PP_CONF['image_dir'],
+    'origpath' => $_PP_CONF['image_dir'],
 ));
 
-if (file_exists(PAYPAL_PI_PATH . '/config.php')) {
+if (file_exists(__DIR__ . '/config.php')) {
     /** Include local configuration overrides */
-    include_once PAYPAL_PI_PATH . '/config.php';
+    include_once __DIR__ . '/config.php';
 }
 
 // Load the site's language file, falling back to English.
-$langpath = PAYPAL_PI_PATH . '/language';
+$langpath = __DIR__ . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!is_file("$langpath/$langfile")) {
     $langfile = 'english.php';
@@ -96,7 +98,7 @@ spl_autoload_register(function ($class)
 
 /** Import plugin-specific functions */
 function USES_paypal_functions()
-{   require_once PAYPAL_PI_PATH . '/paypal_functions.inc.php';  }
+{   require_once __DIR__ . '/paypal_functions.inc.php'; }
 
 function USES_paypal_reports()
 {   require_once PAYPAL_PI_PATH . '/reports.inc.php';  }
@@ -117,9 +119,7 @@ $ppGCart = NULL;
 function PAYPAL_setCart()
 {
     global $ppGCart;
-    if ($ppGCart === NULL) {
-        $ppGCart = new Paypal\Cart();
-    }
+    $ppGCart = Paypal\Cart::getInstance();
     return $ppGCart;
 }
 
@@ -146,14 +146,14 @@ function USES_paypal_class_report($name='')
 */
 function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 {
-    global $_PP_CONF, $ppGCart;
+    global $_PP_CONF;
 
     $display = '';
 
     // Only show if no topic is requested
     if ($_PP_CONF['centerblock'] == 1 && $topic == '') {
         USES_paypal_functions();
-        PAYPAL_setCart();
+        //PAYPAL_setCart();
         $display = \Paypal\siteHeader();
         $T = new Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
@@ -183,7 +183,8 @@ function plugin_upgrade_paypal()
  *
  *  @return array   Associative array of menu items to be added to menu
  */
-function plugin_getmenuitems_paypal() {
+function plugin_getmenuitems_paypal()
+{
     global $_CONF, $_PP_CONF, $LANG_PP;
 
     $menuitems = array();
@@ -413,7 +414,7 @@ function plugin_getadminoption_paypal()
 */
 function plugin_getuseroption_paypal()
 {
-    global $LANG_PP, $_TABLES, $ppGCart, $_USER;
+    global $LANG_PP, $_TABLES, $_USER;
 
     $retval = array();
     if (!COM_isAnonUser() &&
@@ -421,8 +422,8 @@ function plugin_getuseroption_paypal()
         $retval[] = array($LANG_PP['my_orders'],
                 PAYPAL_URL . '/index.php?orderhist=x');
     }
-    PAYPAL_setCart();
-    if ($ppGCart->hasItems()) {
+    //PAYPAL_setCart();
+    if (Paypal\Cart::getInstance()->hasItems()) {
         $retval[] = array($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
     }
@@ -451,12 +452,15 @@ function plugin_chkVersion_paypal()
  *  @TODO   Rather than drop rows, archive them
  *  @param  int $uid    User ID that is being deleted
  */
-function plugin_user_delete_paypal($uid) {
+function plugin_user_delete_paypal($uid)
+{
     global $_TABLES;
 
-    $sql = "DELETE FROM {$_TABLES['paypal.purchases']} WHERE user_id = $uid";
-    DB_query($sql);
+    Paypal\UserInfo::DeleteUser($uid);
+    //$sql = "DELETE FROM {$_TABLES['paypal.purchases']} WHERE user_id = $uid";
+    //DB_query($sql);
 }
+
 
 /**
 *   Support merging local accounts into remote accounts
@@ -687,8 +691,8 @@ function plugin_dopluginsearch_paypal(
 function plugin_getheaderjs_paypal()
 {
     $files = array(
-//        PAYPAL_PI_PATH . '/js/toggleEnabled.js',
-        PAYPAL_PI_PATH . '/js/addcart.js',
+        //__DIR__ . '/js/toggleEnabled.js',
+        __DIR__ . '/js/addcart.js',
     );
     return $files;
 }
@@ -831,6 +835,7 @@ function plugin_autouninstall_paypal ()
         // List all vars by name
         'vars'=> array('paypal_gid'),
     );
+    Paypal\Cache::clear();  // clear everything from cache
     return $out;
 }
 
@@ -848,7 +853,6 @@ function plugin_enablestatechange_paypal($enabled)
     global $_TABLES, $_PLUGINS;
 
     $enabled = $enabled == true ? 1 : 0;
-COM_errorLog("In plugin_enablestatechange_paypal - $enabled");
     // If trying to enable the plugin but lgLib is not available,
     // take no action and return
     if ($enabled && !in_array('lglib', $_PLUGINS)) {
@@ -938,7 +942,8 @@ function phpblock_paypal_cart_contents()
 
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
-    $cart = PAYPAL_setCart();
+    //$cart = PAYPAL_setCart();
+    $cart = Paypal\Cart::getInstance();
 
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return '';
@@ -948,11 +953,12 @@ function phpblock_paypal_cart_contents()
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
-        $link = true;
+        $P = Paypal\Product::getInstance($item['item_id']);
+        $link = Paypal\Product::isPluginItem($item['item_id']) ? false : true;
+
         // See if this is a plugin item, will have a ':' in the item number
         if (strstr($item['item_id'], ':')) {
             $item_info = explode(':', $item['item_id']);
-            if (PAYPAL_is_plugin_item($item_info[0])) $link = false;
         }
         if (strpos($item['item_id'], '|')) {
             list($item_id, $options) = explode('|', $item['item_id']);
@@ -960,7 +966,6 @@ function phpblock_paypal_cart_contents()
             $item_id = $item['item_id'];
             $options = '';
         }
-        $P = new Paypal\Product($item_id);
         $item_price = $item['price'];
         // Store the text for each attribute and custom field in an array,
         // then implode around linebreaks to display them
@@ -976,23 +981,24 @@ function phpblock_paypal_cart_contents()
         }
         $item_total = $item_price * $item['quantity'];
         $text_names = explode('|', $P->custom);
-
         if (!empty($text_names) && isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
             foreach ($item['extras']['custom'] as $id=>$val) {
-                $opt_arr[] = $text_names[$id] . ': ' . $val;
+                if (isset($text_names[$id]) && !empty($val)) {
+                    $opt_arr[] = $text_names[$id] . ': ' . $val;
+                }
             }
         }
         $opt_str = implode('<br />', $opt_arr);
-
         $T->set_var(array(
             'item_id'       => $item_id,
             'options'       => $opt_str,
-            'item_name'     => $item['descrip'],
+            'item_name'     => $P->short_description,
+            'item_dscp'     => $P->descrip,
             'price'         => COM_numberFormat($item['price'], 2),
             'quantity'      => $item['quantity'],
             'item_total'    => COM_numberFormat($item_total, 2),
             'pi_url'        => PAYPAL_URL,
-            'link_item'     => $link ? 'true' : '',
+            'link_item'     => $link,
         ) );
         $T->parse('cRow', 'CartRow', true);
         $total += $item_total;
@@ -1001,9 +1007,7 @@ function phpblock_paypal_cart_contents()
         'grand_total' => COM_numberFormat($total, 2),
     ) );
     $T->parse('output', 'shopping_cart_contents');
-    $block = $T->finish ($T->get_var('output'));
-
-    return $block;
+    return $T->finish ($T->get_var('output'));
 }
 
 
@@ -1459,14 +1463,15 @@ function plugin_canuserrate_paypal($item_id, $uid)
 */
 function plugin_user_logout_paypal($uid)
 {
-    global $_PP_CONF, $ppGCart;
+    global $_PP_CONF;
 
     // Does not apply to anonymouse users or if cart is disabled
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    PAYPAL_setCart();
-    $ppGCart->SaveUserCart($uid);
-    $ppGCart->Clear($uid);
+    //PAYPAL_setCart();
+    $cart = Paypal\Cart::getInstance();
+    $cart->SaveUserCart($uid);
+    $cart->Clear($uid);
 }
 
 
@@ -1482,8 +1487,9 @@ function plugin_user_login_paypal($uid)
 
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    $C = PAYPAL_setCart();
-    $C->Merge();
+    /*$C = PAYPAL_setCart();
+    $C->Merge();*/
+    Paypal\Cart::getInstance()->Merge();
 }
 
 
@@ -1498,8 +1504,10 @@ function plugin_runScheduledTask_paypal()
 
     if ($_PP_CONF['ena_cart'] == 1) {
         // Delete old shopping carts, if the cart is enabled
-        $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
-            last_update < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        $sql = "DELETE FROM {$_TABLES['paypal.cart']}
+            WHERE cart_uid = 1
+            AND last_update < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        //COM_errorLog($sql);
         DB_query($sql);
     }
 
@@ -1517,6 +1525,8 @@ function plugin_runScheduledTask_paypal()
         }
     }
 
+    // Treat disabled and expird products as "deleted" to get them out of
+    // search results, etc.
     $where = " WHERE enabled = 1 AND avail_end < '" .
             PAYPAL_now()->format('Y-m-d', true) . "'";
     $sql = "SELECT id FROM {$_TABLES['paypal.products']} $where";
@@ -1664,7 +1674,7 @@ function plugin_configmanager_select_currency_paypal()
 *   @param  object  &$T     Pointer to template object
 *   @return string          HTML to include in profile page
 */
-function plugin_profilevariablesdisplay_paypal($uid, &$T)
+function Xplugin_profilevariablesdisplay_paypal($uid, &$T)
 {
     global $_TABLES, $_USER, $_PP_CONF;
 
@@ -1681,8 +1691,9 @@ function plugin_profilevariablesdisplay_paypal($uid, &$T)
     ));
     $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
     $U = Paypal\UserInfo::getInstance($uid);
+    $Cur = new Paypal\Currency($_PP_CONF['currency']);
     if ($U->gc_bal > 0) {
-        $LT->set_var('gc_bal', $U->gc_bal);
+        $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
     }
     if (!empty($U->cart)) {
         $cart = true;
@@ -1701,6 +1712,55 @@ function plugin_profilevariablesdisplay_paypal($uid, &$T)
                 $existingFields . $T->finish($LT->get_var('output')));
     }
 }
+
+
+/**
+*   Display variables related to the shop
+*
+*   @param  integer $uid        User ID
+*   @param  string  $panel      Panel being populated
+*   @param  string  $fieldset   Name of fieldset being populated
+*   @return string              HTML for edit form. Never NULL.
+*/
+function plugin_profileedit_paypal($uid, $panel, $fieldset)
+{
+    global $_PP_CONF, $_USER, $_TABLES;
+
+    $retval = '';
+    // Make sure that a valid UID was passed in.
+    if (empty($uid) || (!plugin_ismoderator_paypal() && $uid != $_USER['uid'])) {
+        return $retval;
+    }
+
+    if (($panel == '' || $panel == 'useredit') && $fieldset == '') {
+        $LT = new \Template(__DIR__ . '/templates/');
+        $LT->set_file(array(
+            'block' => 'profileblock.thtml',
+        ));
+        $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
+        $U = Paypal\UserInfo::getInstance($uid);
+        $Cur = new Paypal\Currency($_PP_CONF['currency']);
+        if ($U->gc_bal > 0) {
+            $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
+        }
+        if (!empty($U->cart)) {
+            $cart = true;
+            $LT->set_var('cart', true);
+        } else {
+            $cart = false;
+        }
+        $ord_count = DB_count($_TABLES['paypal.orders'], "uid = $uid");
+        $LT->set_var('orders', $ord_count);
+
+        // Only display the template if there's something to show
+        if ($ord_count > 0 || $cart || $U->gc_bal > 0) {
+            $LT->parse('output', 'block');
+            $retval .= $LT->finish($LT->get_var('output'));
+        }
+    }
+    return $retval;
+}
+
 
 
 /**
@@ -1967,5 +2027,35 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
         return $retval;
     }
 }
+
+
+/**
+*   Get an array variable, first checking whether it's set
+*
+*   @param  array   $A          Array where var should be
+*   @param  string  $varname    Name of array element
+*   @param  string  $type       Type of return value
+*   @return     Array element or NULL, cast to $type
+*/
+ function PP_getVar($A, $varname, $type = 'string')
+ {
+    $val = isset($A[$varname]) ? $A[$varname] : NULL;
+    switch ($type) {
+    case 'int':
+        return (int)$val;
+        break;
+    case 'bool':
+        return (bool)$val;
+        break;
+    case 'float':
+        return (float)$val;
+        break;
+    case 'string':
+    default:
+        return (string)$val;
+        break;
+    }
+}
+
 
 ?>
