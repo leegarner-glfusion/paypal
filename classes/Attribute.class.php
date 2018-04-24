@@ -221,6 +221,7 @@ class Attribute
                 $this->attr_id = DB_insertID();
             }
             $this->ReOrder();
+            //Cache::delete('prod_attr_' . $this->item_id);
             return true;
         } else {
             $this->AddError($err);
@@ -248,9 +249,6 @@ class Attribute
             return false;
 
         DB_delete($_TABLES['paypal.prod_attr'], 'attr_id', $attr_id);
-
-        //$this->ReOrder();
-
         return true;
     }
 
@@ -268,7 +266,6 @@ class Attribute
             $this->attr_value == '') {
             return false;
         }
-
         return true;
     }
 
@@ -329,7 +326,6 @@ class Attribute
         $retval .= $T->parse('output', 'attrform');
         $retval .= COM_endBlock();
         return $retval;
-
     }   // function Edit()
 
 

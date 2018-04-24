@@ -44,11 +44,16 @@ class Currency
         static $currencies = array();
 
         if (!isset($currencies[$code])) {
-            $currencies[$code] = FALSE;
-            $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}
-                    WHERE code = '" . DB_escapeString($code) . "'");
-            if ($res) {
-                $currencies[$code] = DB_fetchArray($res, false);
+            $key = 'currency_' . $code;
+            $currencies[$code] = Cache::get($key);
+            if (!$currencies[$code]) {
+                $currencies[$code] = FALSE;
+                $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}
+                        WHERE code = '" . DB_escapeString($code) . "'");
+                if ($res) {
+                    $currencies[$code] = DB_fetchArray($res, false);
+                }
+                Cache::set($key, $currencies[$code]);
             }
         }
         return $currencies[$code];
