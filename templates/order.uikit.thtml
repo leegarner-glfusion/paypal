@@ -5,7 +5,7 @@
 {!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
-        title="Print" class="uk-icon-print"></a>
+        title="Print" data-uk-tooltip class="uk-icon-print"></a>
   </div>
 {!endif}
 
@@ -99,7 +99,7 @@
         <tr>
           <td>
             {!if is_admin}
-            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}">
+            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" data-uk-tooltip title="{$LANG_PP['orderhist_item']}">
             {!endif}
             {item_descrip}
 {!if is_file}
