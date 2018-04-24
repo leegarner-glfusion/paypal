@@ -27,15 +27,13 @@ define('PAYPAL_FAILURE_UNIQUE', 3);
 define('PAYPAL_FAILURE_EMAIL', 4);
 define('PAYPAL_FAILURE_FUNDS', 5);
 
-require_once 'BaseIPN.class.php';
-
 /**
 *   Class to deal with IPN transactions from Paypal.
 *
 *   @since 0.5.0
 *   @package paypal
 */
-class paypalIPN extends BaseIPN
+class paypal_ipn extends IPN
 {
     /**
     *   Variable to hold unserialized custom data
@@ -53,16 +51,16 @@ class paypalIPN extends BaseIPN
         $this->gw_id = 'paypal';
         parent::__construct($A);
 
-        $this->pp_data['txn_id'] = $A['txn_id'];
-        $this->pp_data['payer_email'] = $A['payer_email'];
-        $this->pp_data['payer_name'] = $A['first_name'] .' '. $A['last_name'];
-        $this->pp_data['pmt_date'] = $A['payment_date'];
-        $this->pp_data['pmt_gross'] = (float)$A['mc_gross'];
-        $this->pp_data['pmt_tax'] = (float)$A['tax'];
+        $this->pp_data['txn_id'] = PP_getVar($A, 'txn_id');
+        $this->pp_data['payer_email'] = PP_getVar($A, 'payer_email');
+        $this->pp_data['payer_name'] = PP_getVar($A, 'first_name') .' '. PP_getVar($A, 'last_name');
+        $this->pp_data['pmt_date'] = PP_getVar($A, 'payment_date');
+        $this->pp_data['pmt_gross'] = PP_getVar($A, 'mc_gross', 'float');
+        $this->pp_data['pmt_tax'] = PP_getVar($A, 'tax', 'float');
         $this->pp_data['gw_desc'] = $this->gw->Description();
         $this->pp_data['gw_name'] = $this->gw->Name();
-        $this->pp_data['pmt_status'] = $A['payment_status'];
-        $this->pp_data['currency'] = $A['mc_currency'];
+        $this->pp_data['pmt_status'] = PP_getVar($A, 'payment_status');
+        $this->pp_data['currency'] = PP_getVar($A, 'mc_currency');
         if (isset($A['invoice']))
             $this->pp_data['invoice'] = $A['invoice'];
         if (isset($A['parent_txn_id']))
@@ -71,13 +69,13 @@ class paypalIPN extends BaseIPN
         // Check a couple of vars to see if a shipping address was supplied
         if (isset($A['address_street']) || isset($A['address_city'])) {
             $this->pp_data['shipto'] = array(
-                'name'      => $A['address_name'],
-                'address1'  => $A['address_street'],
+                'name'      => PP_getVar($A, 'address_name'),
+                'address1'  => PP_getVar($A, 'address_street'),
                 'address2'  => '',
-                'city'      => $A['address_city'],
-                'state'     => $A['address_state'],
-                'country'   => $A['address_country'],
-                'zip'       => $A['address_zip'],
+                'city'      => PP_getVar($A, 'address_city'),
+                'state'     => PP_getVar($A, 'address_state'),
+                'country'   => PP_getVar($A, 'address_country'),
+                'zip'       => PP_getVar($A, 'address_zip'),
             );
         }
 
@@ -102,16 +100,15 @@ class paypalIPN extends BaseIPN
             break;
         }
 
-
-        switch ($A['txn_type']) {
+        switch (PP_getVar($A, 'txn_type')) {
         case 'web_accept':
         case 'send_money':
-            $this->pp_data['pmt_shipping'] = (float)$A['shipping'];
-            $this->pp_data['pmt_handling'] = (float)$A['handling'];
+            $this->pp_data['pmt_shipping'] = PP_getVar($A, 'shipping', 'float');
+            $this->pp_data['pmt_handling'] = PP_getVar($A, 'handling', 'float');
             break;
         case 'cart':
-            $this->pp_data['pmt_shipping'] = (float)$A['mc_shipping'];
-            $this->pp_data['pmt_handling'] = (float)$A['mc_handling'];
+            $this->pp_data['pmt_shipping'] = PP_getVar($A, 'mc_shipping', 'float');
+            $this->pp_data['pmt_handling'] = PP_getVar($A, 'mc_handling', 'float');
             break;
         }
     }
@@ -127,9 +124,11 @@ class paypalIPN extends BaseIPN
     */
     private function Verify()
     {
-        global $_CONF,$_PP_CONF;
+        global $_CONF, $_PP_CONF;
 
-        if (TESTING) return true;
+        if ($this->gw->getConfig('test_mode')) {
+            return true;
+        }
 
         // Default verification to false
         $verified = false;
@@ -240,15 +239,16 @@ class paypalIPN extends BaseIPN
 
                 $payment_gross = $this->pp_data['pmt_gross'] - $fees_paid;
                 $unit_price = $payment_gross / $this->ipn_data['quantity'];
-                $this->AddItem($this->ipn_data['item_number'],
-                        $this->ipn_data['quantity'],
-                        $unit_price,
-                        $this->ipn_data['item_name'],
-                        $this->pp_data['pmt_shipping'],
-                        $this->pp_data['pmt_handling']);
+                $this->AddItem(array(
+                        'item_id' => $this->ipn_data['item_number'],
+                        'quantity' => $this->ipn_data['quantity'],
+                        'price' => $unit_price,
+                        'item_name' => $this->ipn_data['item_name'],
+                        'shipping' => $this->pp_data['pmt_shipping'],
+                        'handling' => $this->pp_data['pmt_handling'],
+                ) );
 
                 $currency = $this->pp_data['currency'];
-
                 PAYPAL_debug("Net Settled: $payment_gross $currency");
                 if ($this->isSufficientFunds()) {
                     $this->handlePurchase();
@@ -265,7 +265,6 @@ class paypalIPN extends BaseIPN
             $fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];
-            USES_paypal_class_Cart();
             if (empty($this->pp_data['custom']['cart_id'])) {
                 $this->handleFailure(NULL, 'Missing Cart ID');
                 return false;
@@ -274,6 +273,10 @@ class paypalIPN extends BaseIPN
             // Actual items purchased and prices will come from the IPN.
             $Cart = new Cart($this->pp_data['custom']['cart_id']);
             $Cart = $Cart->Cart();
+            if (empty($Cart)) {
+                COM_errorLog("Paypal\\paypal_ipn::Process() - Empty Cart for id {$this->pp_data['custom']['cart_id']}");
+                return false;
+            }
             $items = array();
             for ($i = 1; $i <= $this->ipn_data['num_cart_items']; $i++) {
 
@@ -306,17 +309,18 @@ class paypalIPN extends BaseIPN
                 // Add the item to the array for the order creation.
                 // IPN item numbers are indexes into the cart, so get the
                 // actual product ID from the cart
-                $this->AddItem(
+                $args = array(
                         //$this->ipn_data["item_number$i"],
-                        $Cart[$this->ipn_data["item_number$i"]]['item_id'],
-                        $this->ipn_data["quantity$i"],
-                        $unit_price,
-                        $this->ipn_data["item_name$i"],
-                        $item_shipping,
-                        $item_handling,
-                        $item_tax,
-                        $Cart[$this->ipn_data["item_number$i"]]['extras']
+                        'item_id' => $Cart[$this->ipn_data["item_number$i"]]['item_id'],
+                        'quantity' => $this->ipn_data["quantity$i"],
+                        'price' => $unit_price,
+                        'item_name' => $this->ipn_data["item_name$i"],
+                        'shipping' => $item_shipping,
+                        'handling' => $item_handling,
+                        'tax' => $item_tax,
+                        'extras' => $Cart[$this->ipn_data["item_number$i"]]['extras']
                 );
+                $this->AddItem($args);
             }
             $payment_gross = $this->ipn_data['mc_gross'] - $fees_paid;
             PAYPAL_debug("Received $payment_gross gross payment");
@@ -346,10 +350,8 @@ class paypalIPN extends BaseIPN
         }
 
         return true;
-
     }   // function Process
 
-
-}   // class PaypalIPN
+}   // class paypal_ipn
 
 ?>
