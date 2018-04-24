@@ -10,10 +10,10 @@
 *   cart during login.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.5.12
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 *
@@ -41,10 +41,11 @@ class Cart
     private $m_info;
 
     private $_addr_fields = array(
-            'name', 'company', 'address1', 'address2', 
+            'name', 'company', 'address1', 'address2',
             'city', 'state', 'country', 'zip',
     );
 
+    private static $session_var = 'ppGCart';
 
     /**
     *   Constructor.
@@ -52,7 +53,7 @@ class Cart
     *   Does not read from the userinfo table- that's up to the uesr
     *   login and logout functions.
     */
-    public function __construct($cart_id='', $interactive=true) 
+    public function __construct($cart_id='', $interactive=true)
     {
         global $_TABLES, $_PP_CONF, $_USER;
 
@@ -72,7 +73,7 @@ class Cart
                 $cart_id = self::makeCartID();
             }
             // Set the cart ID in the session and the local variable
-            $_SESSION[PP_CART_VAR]['cart_id'] = $cart_id;
+            $_SESSION[self::$session_var]['cart_id'] = $cart_id;
             $this->m_cart_id = $cart_id;
         } else {
             // For non-interactive sessions a cart ID must be provided
@@ -86,11 +87,26 @@ class Cart
 
 
     /**
+    *   Get the cart for the current user
+    *
+    *   @return object  Cart object
+    */
+    public static function getInstance()
+    {
+        static $cart = NULL;
+        if ($cart === NULL) {
+            $cart = new self();
+        }
+        return $cart;
+    }
+
+
+    /**
     *   Get the cart contents as an array of items
     *
     *   @return array   Current cart contents
     */
-    public function Cart() 
+    public function Cart()
     {
         return $this->m_cart;
     }
@@ -119,7 +135,7 @@ class Cart
     {
         global $_TABLES;
 
-        $sql = "SELECT cart_info, cart_contents
+        $sql = "SELECT cart_info, apply_gc, cart_contents
                FROM {$_TABLES['paypal.cart']}
                WHERE cart_id = '$cart_id'";
         //echo $sql;die;
@@ -131,6 +147,7 @@ class Cart
             if (isset($A['cart_info']) && !empty($A['cart_info'])) {
                 $info = @unserialize($A['cart_info']);
             }
+            $info['apply_gc'] = $A['apply_gc'];
             if (isset($A['cart_contents']) && !empty($A['cart_contents'])) {
                 $cart = @unserialize($A['cart_contents']);
             }
@@ -160,20 +177,34 @@ class Cart
 
         if ($_USER['uid'] < 2) return;
 
-        $txt = DB_getItem($_TABLES['paypal.userinfo'], 'cart',
+        $U = UserInfo::getInstance($_USER['uid']);
+
+        /*$txt = DB_getItem($_TABLES['paypal.userinfo'], 'cart',
                     'uid=' . (int)$_USER['uid']);
 
         if (!empty($txt)) {         // No saved cart
             $saved = @unserialize($txt);
             if (!$saved) return;    // Unable to unserialize
         }
-
+        */
+        $saved = $U->cart;
         if (is_array($saved)) {
             // Add saved items to current cart
             foreach ($saved as $id=>$A) {
                 list($item_id, $options) = PAYPAL_explode_opts($A['item_id']);
-                $this->addItem($item_id, $A['name'], $A['descrip'], $A['quantity'], 
-                            $A['price'], $options, $A['extras']);
+                $args = array(
+                    'item_id' => $item_id,
+                    'item_name' => $A['name'],
+                    'descrip' => $A['descrip'],
+                    'quantity' => $A['quantity'],
+                    'price' => $A['price'],
+                    'options' => $options,
+                    'extras' => $A['extras'],
+                );
+                if (isset($A['tax'])) {
+                    $args['tax'] = $A['tax'];
+                }
+                $this->addItem($args);
             }
             $this->Save();
         }
@@ -199,7 +230,7 @@ class Cart
         $info = DB_escapeString($info);
 
         // New way- use the cart table
-        $sql = "INSERT INTO {$_TABLES['paypal.cart']} 
+        $sql = "INSERT INTO {$_TABLES['paypal.cart']}
                 (cart_id, cart_uid, cart_info, cart_contents, last_update)
             VALUES (
                 '" . $this->cartID(true) . "',
@@ -211,8 +242,8 @@ class Cart
             ON DUPLICATE KEY UPDATE
                 cart_contents = '$cart',
                 cart_info = '$info',
-                last_update = '{PAYPAL_now()->toMySql()}'";
-        //echo $sql;die;
+                last_update = '" . PAYPAL_now()->toMySql() . "'";
+        //COM_errorLog($sql);
         DB_query($sql, 1);
         if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);
     }
@@ -240,13 +271,16 @@ class Cart
 
         // See if there's a userinfo record for this user and update or insert
         // as appropriate
-        $sql = "INSERT INTO {$_TABLES['paypal.userinfo']} (uid, cart)
+        $U = UserInfo::getInstance($uid);
+        $U->cart = $this->m_cart;
+        $U->SaveUser();
+        /*$sql = "INSERT INTO {$_TABLES['paypal.userinfo']} (uid, cart)
                     VALUES ($uid, '$cart')
-                ON DUPLICATE KEY UPDATE 
+                ON DUPLICATE KEY UPDATE
                     cart = '$cart'";
         //echo $sql;die;
         DB_query($sql, 1);
-        if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);
+        if (DB_error()) COM_errorLog("Error saving cart for user $uid", 1);*/
         // TODO: Delete cart table contents?
     }
 
@@ -264,14 +298,18 @@ class Cart
     *   @param  array   $extras     Extra cart items (shipping, etc.)
     *   @return integer             Current item quantity
     */
-    public function addItem($item_id, $name, $descrip='', $quantity=1,
-            $price=0, $options=array(), $extras=array())
+    public function addItem($args)
     {
-        $quantity = (float)$quantity;
-        $item_id = trim($item_id);
-        $name = trim($name);
-        $descrip = trim($descrip);
-        $price = (float)$price;
+        global $_PP_CONF;
+
+        if (!isset($args['item_number'])) return false;
+        $item_id = $args['item_number'];    // may contain options
+        $P = Product::getInstance($item_id);
+        if (!isset($args['options'])) $args['options'] = array();
+        $quantity = isset($args['quantity']) ? (float)$args['quantity'] : 1;
+        $price = $P->getPrice($args['options'], $quantity);
+        $extras = isset($args['extras']) ? $args['extras'] : array();
+        $options = isset($args['options']) ? $args['options'] : array();
 
         if (!is_array($this->m_cart))
             $this->m_cart = array();
@@ -281,30 +319,42 @@ class Cart
         if (is_array($options) && !empty($options)) {
             $opts = array();
             foreach($options as $optname=>$option) {
-                list($opt_id, $opt_desc, $opt_price) = explode('|', $option);
-                $opts[] = $opt_id;
+                $opt_tmp = explode('|', $option);
+                $opts[] = $opt_tmp[0];
             }
             $item_id .= '|' . implode(',', $opts);
         } else {
             $options = array();
         }
 
-        // Look for identical items, including options (to catch 
+        if ($P->taxable) {
+            $tax = round($_PP_CONF['tax_rate'] * $price * $quantity, 2);
+        } else {
+            $tax = 0;
+        }
+
+        // Look for identical items, including options (to catch
         // attributes).  If found, just update the quantity.
         $have_id = $this->Contains($item_id, $extras);
         if ($have_id !== false) {
             $this->m_cart[$have_id]['quantity'] += $quantity;
+            $this->m_cart[$have_id]['tax'] = $tax;
             $new_quantity = $this->m_cart[$have_id]['quantity'];
         } else {
-            $this->m_cart[] = array(
+            $tmp = array(
                 'item_id'   => $item_id,
                 'quantity'  => $quantity,
-                'name'      => $name,
-                'descrip'   => $descrip, 
+                'name'      => $P->short_description,
+                'descrip'   => $P->short_description,
                 'price'     => sprintf("%.2f", $price),
                 'options'   => $options,
                 'extras'    => $extras,
+                'tax'       => $tax,
             );
+            if (isset($args['tax'])) {
+                $tmp['tax'] = $args['tax'];
+            }
+            $this->m_cart[] = $tmp;
             $new_quantity = $quantity;
         }
         $this->Save();
@@ -366,10 +416,13 @@ class Cart
         $this->Save();
     }
 
-
     public function getInstructions()
     {
-        return $this->m_info['order_instr'];
+        if (isset($this->m_info['order_instr'])) {
+            return $this->m_info['order_instr'];
+        } else {
+            return '';
+        }
     }
 
 
@@ -398,7 +451,7 @@ class Cart
     */
     public function Clear($del_order = true)
     {
-        global $_TABLES;
+        global $_TABLES, $_USER;
 
         $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
                 cart_id = '" . DB_escapeString($this->cartID()) . "'";
@@ -406,12 +459,12 @@ class Cart
             $sql .= " OR cart_uid = " . (int)$_USER['uid'];
         }
         DB_query($sql);
-        if ($del_order && isset($_SESSION[PP_CART_VAR]['order_id']) &&
-            !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-            Order::Delete($_SESSION[PP_CART_VAR]['order_id']);
+        if ($del_order && isset($_SESSION[self::$session_var]['order_id']) &&
+            !empty($_SESSION[self::$session_var]['order_id'])) {
+            Order::Delete($_SESSION[self::$session_var]['order_id']);
         }
         $this->m_cart = array();
-        unset($_SESSION[PP_CART_VAR]);
+        unset($_SESSION[self::$session_var]);
         return $this->m_cart;
     }
 
@@ -429,7 +482,6 @@ class Cart
     public function View($checkout = false)
     {
         global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
-
         $currency = new Currency();
 
         if (!isset($this->m_cart) ||
@@ -443,14 +495,18 @@ class Cart
             foreach ($_PP_CONF['workflows'] as $key => $value) {
                 $T->set_var('have_' . $value, 'true');
                 foreach ($this->_addr_fields as $fldname) {
-                    $T->set_var($value . '_' . $fldname, 
+                    if (isset($this->m_info[$value][$fldname])) {
+                        $T->set_var($value . '_' . $fldname,
                             $this->m_info[$value][$fldname]);
+                    } else {
+                        $T->set_var($value . '_' . $fldname, '');
+                    }
                 }
             }
             $T->set_var('not_final', 'true');
         }
 
-        $T->set_block('order', 'ItemRow', 'iRow');
+        $T->set_block('cart', 'ItemRow', 'iRow');
 
         // Get the workflows so we show the relevant info.
         if (!isset($_PP_CONF['workflows']) ||
@@ -462,64 +518,67 @@ class Cart
         $counter = 0;
         $subtotal = 0;
         $shipping = 0;
+        $handling = 0;
+        $cart_tax = 0;
         foreach ($this->m_cart as $id=>$item) {
+            $item_price = 0;
             $counter++;
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
 
-            if (is_numeric($item_id)) {
-                // a catalog item, get the "right" price
-                $P = new Product($item_id);
-                $item_price = $P->getPrice($attr_keys, $item['quantity']);
-                if (!empty($attr_keys)) {
-                    foreach ($attr_keys as $attr_key) {
-                        if (!isset($P->options[$attr_key])) continue;   // invalid?
-                        //$attr_price = (float)$P->options[$attr_key]['attr_price'];
-                        $attr_name = $P->options[$attr_key]['attr_name'];
-                        $attr_value = $P->options[$attr_key]['attr_value'];
-                        $attr_desc .= "<br />&nbsp;&nbsp;-- $attr_name: $attr_value";
-                        /*if ($attr_price != 0) {
-                            $item_price += $attr_price;
-                        }*/
+            $P = Product::getInstance($item_id);
+            $item_price = $P->getPrice($attr_keys, $item['quantity']);
+            if (!empty($attr_keys)) {
+                foreach ($attr_keys as $attr_key) {
+                    if (!isset($P->options[$attr_key])) continue;   // invalid?
+                    $attr_name = $P->options[$attr_key]['attr_name'];
+                    $attr_value = $P->options[$attr_key]['attr_value'];
+                    $attr_desc .= "<br />&nbsp;&nbsp;-- $attr_name: $attr_value";
+                }
+            }
+            if (isset($item['extras']) && is_array($item['extras'])) {
+                if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
+                    $sp_flds = $P->getSpecialFields($item['extras']['special']);
+                    foreach ($sp_flds as $txt=>$val) {
+                        $attr_desc .= "<br />&nbsp;&nbsp;-- $txt: $val";
                     }
                 }
-                $text_names = explode('|', $P->custom);
-                if (!empty($text_names) &&
+            }
+            $text_names = explode('|', $P->custom);
+            if (!empty($text_names) &&
+                    isset($item['extras']['custom']) &&
                     is_array($item['extras']['custom'])) {
-                    foreach ($item['extras']['custom'] as $tid=>$val) {
+                foreach ($item['extras']['custom'] as $tid=>$val) {
+                    if (isset($text_names[$tid])) {
                         $attr_desc .= '<br />&nbsp;&nbsp;-- ' .
                             htmlspecialchars($text_names[$tid]) . ': ' .
                             htmlspecialchars($val);
                     }
                 }
-                $item['descrip'] .= $attr_desc;
-
-                // Get shipping amount and weight
-                if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
-                    // fixed shipping amount per item. Update actual cart
-                    $this->m_cart[$id]['shipping'] = $P->shipping_amt * $item['quantity'];
-                    $shipping += $this->m_cart[$id]['shipping']; // for display
-                } elseif ($P->shipping_type == 1 && $P->weight > 0) {
-                    // using gateway profile, save the item's weight in the cart
-                    $this->m_cart[$id]['weight'] = $P->weight * $item['quantity'];
-                }
-                $this->m_cart[$id]['taxable'] = $P->taxable ? 'Y' : 'N';
-                $this->m_cart[$id]['type'] = $P->prod_type;
-            } else {
-                // A plugin item, it's not something we can look up
-                $item_price = (float)$item['price'];
-                if (isset($item['extras']['shipping'])) {
-                    $shipping += (float)$item['extras']['shipping'];
-                    $this->m_cart[$id]['shipping'] = $item['extras']['shipping'];
-                }
             }
+            $item['name'] .= $attr_desc;
+
+            // Get shipping amount and weight
+            if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
+                // fixed shipping amount per item. Update actual cart
+                $this->m_cart[$id]['shipping'] = $P->shipping_amt * $item['quantity'];
+                $shipping += $this->m_cart[$id]['shipping']; // for display
+            } elseif ($P->shipping_type == 1 && $P->weight > 0) {
+                // using gateway profile, save the item's weight in the cart
+                $this->m_cart[$id]['weight'] = $P->weight * $item['quantity'];
+            }
+            $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
+            if ($P->taxable) {
+                $cart_tax += $item_total * $_PP_CONF['tax_rate'];
+            }
             $T->set_var(array(
                 'cart_item_id'  => $id,
                 'pi_url'        => PAYPAL_URL,
                 'cart_id'       => $item['item_id'],
                 'pp_id'         => $counter,
                 'item_id'       => $item_id,
+                'item_name'     => $item['name'],
                 'item_descrip'  => $item['descrip'],
                 'item_price'    => COM_numberFormat($item_price, 2),
                 'item_quantity' => $item['quantity'],
@@ -529,17 +588,16 @@ class Cart
                 'is_uikit'      => $_PP_CONF['_is_uikit'],
             ) );
             $T->parse('iRow', 'ItemRow', true);
-
             $subtotal += $item_total;
         }
 
         $custom_info = array(
-                'uid'       =>$_USER['uid'], 
+                'uid'       =>$_USER['uid'],
                 'transtype' => 'cart_upload',
                 'cart_id'   => $this->cartID(),
         );
-
-        $total = $subtotal + $shipping;
+        $cart_tax = round($cart_tax, 2);
+        $total = $subtotal + $shipping + $handling + $cart_tax;
 
         // A little hack to show only the total if there are no other
         // charges
@@ -551,15 +609,30 @@ class Cart
         } else {
             $tc_link = '';
         }
+
+        // Apparently cannot apply cart discount to shipping and tax, at least
+        // not with PayPal
+        if (!$checkout) {
+            $U = UserInfo::getInstance($_USER['uid']);
+            $gc_bal = min($subtotal, $U->gc_bal);
+        } elseif ($this->m_info['apply_gc'] !== NULL) {
+            $gc_bal = min($this->m_info['apply_gc'], $subtotal);
+        } else {
+            $gc_bal = 0;
+        }
         $T->set_var(array(
-            'paypal_url'        => $_PP_CONF['paypal_url'],
-            'receiver_email'    => $_PP_CONF['receiver_email'][0],
+            //'paypal_url'        => $_PP_CONF['paypal_url'],
+            //'receiver_email'    => $_PP_CONF['receiver_email'][0],
             'custom'    => serialize($custom_info),
             'shipping'  => $shipping > 0 ? $currency->Format($shipping) : '',
-            'subtotal'  => $subtotal > 0 ? $currency->Format($subtotal) : '',
+            'subtotal'  => $subtotal != $total ? $currency->Format($subtotal) : '',
             'total'     => $currency->Format($total),
             'order_instr' => htmlspecialchars($this->getInstructions()),
             'tc_link'  => $tc_link,
+            'gc_bal'    => $gc_bal,
+            'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
+            'net_total' => $currency->Format($total - $gc_bal),
+            'cart_tax'  => $cart_tax > 0 ? $currency->Format($cart_tax) : '',
         ) );
 
         // If this is the final checkout, then show the payment buttons
@@ -620,13 +693,14 @@ class Cart
     {
         foreach ($this->m_cart as $id=>$info) {
             if ($info['item_id'] == $item_id) {
-                if (!empty($extras)) {
-                    if ($info['extras']['custom'] == $extras['custom']) {
+                if (isset($info['extras'])) {
+                    if ($info['extras'] == $extras) {
                         return $id;
+                    } else {
+                        return false;
                     }
-                } else {
-                    return $id;
                 }
+                return $id;
             }
         }
         return false;
@@ -727,7 +801,7 @@ class Cart
     public function getAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
-        return $this->m_info[$type];
+        return isset($this->m_info[$type]) ? $this->m_info[$type] : array();
     }
 
 
@@ -744,15 +818,17 @@ class Cart
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
 
         if (COM_isAnonUser()) {
-            if (!empty($_SESSION[PP_CART_VAR]['cart_id'])) {
-                $cart_id = $_SESSION[PP_CART_VAR]['cart_id'];
+            if (!empty($_SESSION[self::$session_var]['cart_id'])) {
+                $cart_id = $_SESSION[self::$session_var]['cart_id'];
             }
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
                 "cart_uid = $uid ORDER BY last_update DESC limit 1");
-            if (!empty($cart_id)) {
+            if (!empty($cart_id) && !COM_isAnonUser()) {
+                // For logged-in usrs, delete superfluous carts
                 DB_query("DELETE FROM {$_TABLES['paypal.cart']}
-                    WHERE cart_id <> '" . DB_escapeString($cart_id) . "'");
+                    WHERE cart_uid = $uid
+                    AND cart_id <> '" . DB_escapeString($cart_id) . "'");
             }
         }
         return $cart_id;
@@ -764,8 +840,8 @@ class Cart
     */
     public static function initSession()
     {
-        if (!isset($_SESSION['glPPcart'])) {
-            $_SESSION['glPPcart'] = array(
+        if (!isset($_SESSION[self::$session_var])) {
+            $_SESSION[self::$session_var] = array(
                 'cart_id' => '',
                 //'items' => array(),
             );
@@ -781,7 +857,7 @@ class Cart
     */
     public static function setSession($key, $value)
     {
-        $_SESSION['glPPcart'][$key] = $value;
+        $_SESSION[self::$session_var][$key] = $value;
     }
 
 
@@ -793,8 +869,8 @@ class Cart
     */
     public static function getSession($key)
     {
-        if (isset($_SESSION['glPPcart'][$key])) {
-            return $_SESSION['glPPcart'][$key];
+        if (isset($_SESSION[self::$session_var][$key])) {
+            return $_SESSION[self::$session_var][$key];
         } else {
             return NULL;
         }
@@ -808,7 +884,36 @@ class Cart
     */
     public static function clearSession($key)
     {
-        unset($_SESSION['glPPcart'][$key]);
+        unset($_SESSION[self::$session_var][$key]);
+    }
+
+
+    /**
+    *   Get the gift card amount applied to this cart
+    *
+    *   @return float   Gift card amount
+    */
+    public function getGC()
+    {
+        return $this->m_info['apply_gc'];
+    }
+
+
+    /**
+    *   Apply a gift card amount to this cart
+    *
+    *   @param  float   $amt    Amount of credit to apply
+    */
+    public function setGC($amt)
+    {
+        global $_TABLES;
+
+        $amt = (float)$amt;
+        $this->m_info['apply_gc'] = $amt;
+        $sql = "UPDATE {$_TABLES['paypal.cart']}
+                SET apply_gc = $amt
+                WHERE cart_id = '{$this->m_cart_id}'";
+        DB_query($sql);
     }
 
 }   // class Cart
