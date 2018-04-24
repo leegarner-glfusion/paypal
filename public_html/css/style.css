@@ -562,3 +562,7 @@ form.frm_buy_now {
     color: #530E53;
 }
 
+#ppProductForm table {
+    text-align: center;
+    width: 50%;
+}
