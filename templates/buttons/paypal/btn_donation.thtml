@@ -2,9 +2,11 @@
 <form style="display:inline;" class="frm_donation"
     action="{paypal_url}/cgi-bin/webscr" method="post">
   {gateway_vars}
-  <input type="image"
+<!--  <input type="image"
     src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif"
     name="submit"
-    alt="{btn_text}" title="{$LANG_PP['buy_now']}" />
+    alt="{btn_text}" title="{$LANG_PP['buy_now']}" />-->
+  <button type="submit" class="uk-button uk-button-small uk-button-primary">
+    <i class="uk-icon uk-icon-paypal"></i>&nbsp;{$LANG_PP['donate']}</button>
 </form>
 {# end {templatelocation} #}

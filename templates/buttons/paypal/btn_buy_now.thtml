@@ -2,9 +2,12 @@
 <form class="frm_buy_now"
     action="{paypal_url}/cgi-bin/webscr" method="post">
   {gateway_vars}
-  <input type="image"
+<!--  <input type="image"
     src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_SM.gif"
     name="submit"
-    alt="{btn_text}" title="{$LANG_PP['buy_now']}" />
+    alt="{btn_text}" title="{$LANG_PP['buy_now']}" />-->
+  <button type="submit" class="paypalButton blue" border="0" name="submit" alt="{btn_text}">
+    <i class="{iconset}-paypal">&nbsp;</i>{$LANG_PP['buy_now']}
+  </button>
 </form>
 {# end {templatelocation} #}
