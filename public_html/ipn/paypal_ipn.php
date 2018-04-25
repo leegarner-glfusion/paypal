@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal;
 
 /** Import core glFusion functions */
 require_once '../../lib-common.php';
@@ -22,7 +21,7 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 }
 
 // Process IPN request
-$ipn = IPN::getInstance('paypal', $_POST);
+$ipn = Paypal\IPN::getInstance('paypal', $_POST);
 $ipn->Process();
 
 // Finished (this isn't necessary...but heck...why not?)
