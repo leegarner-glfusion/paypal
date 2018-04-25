@@ -41,6 +41,10 @@ class Product
 
     public $currency;
 
+    protected $special_fields = array();
+
+    public $Cat;        // Category object
+
     /**
      *  Constructor.
      *  Reads in the specified class, if $id is set.  If $id is zero,
@@ -56,8 +60,11 @@ class Product
         $this->isNew = true;
         $this->currency = new Currency($_PP_CONF['currency']);
 
-        $id = (int)$id;
-        if ($id < 1) {
+        if (is_array($id)) {
+            $this->setVars($id, true);
+            $this->isNew = false;
+            $this->Cat = Category::getInstance($this->cat_id);
+        } elseif ($id == 0) {
             $this->id = 0;
             $this->name = '';
             $this->cat_id = '';
@@ -87,6 +94,7 @@ class Product
             $this->oversell = $_PP_CONF['def_oversell'];
             $this->qty_discounts = array();
             $this->custom = '';
+            $this->Cat = NULL;
         } else {
             $this->id = $id;
             if (!$this->Read()) {
@@ -94,6 +102,58 @@ class Product
             }
         }
         $this->isAdmin = plugin_ismoderator_paypal() ? 1 : 0;
+    }
+
+
+    /**
+    *   Gets an instance of a product object.
+    *   Figures out the type of product (plugin, catalog, etc.)
+    *   and instantiates an object if necessary.
+    *   $A can be a single item id or an array (DB record) of values.
+    *
+    *   @param  mixed   $A      Single item ID or array of values
+    *   @return object          Product Object
+    */
+    public static function getInstance($A)
+    {
+        global $_TABLES;
+        static $P = array();
+
+        if (is_array($A)) {
+            $id = $A['id'];
+        } else {
+            $id = $A;
+        }
+        if (!array_key_exists($id, $P)) {
+            $item = explode('|', $id);
+            if (self::isPluginItem($item[0])) {
+                $P[$id] = new PluginProduct($item[0]);
+            } else {
+                if (!is_array($A)) {
+                    $cache_key = self::_makeCacheKey($item[0]);
+                    $A = Cache::get($cache_key);
+                    if (!$A) {
+                        // If not found in cache
+                        $sql = "SELECT * FROM {$_TABLES['paypal.products']}
+                                WHERE id = " . (int)$item[0];
+                        $res = DB_query($sql);
+                        $A = DB_fetchArray($res, false);
+                        if (isset($A['id'])) {
+                            Cache::set($cache_key, $A, array('product', $A['id']));
+                        }
+                    }
+                }
+                if (isset($A['prod_type']) && $A['prod_type'] == PP_PROD_COUPON) {
+                    $P[$id] = new Coupon($A);
+                } else {
+                    $P[$id] = new self($A);
+                }
+                if ($P[$id]->hasAccess()) {
+                    $P[$id]->loadAttributes();
+                }
+            }
+        }
+        return $P[$id];
     }
 
 
@@ -221,8 +281,8 @@ class Product
 
         $this->id = $row['id'];
         $this->description = $row['description'];
-        $this->enabled = $row['enabled'];
-        $this->featured = $row['featured'];
+        $this->enabled = isset($row['enabled']) ? $row['enabled'] : 0;
+        $this->featured = isset($row['featured']) ? $row['featured'] : 0;
         $this->name = $row['name'];
         $this->cat_id = $row['cat_id'];
         $this->short_description = $row['short_description'];
@@ -230,18 +290,17 @@ class Product
         $this->sale_price = $row['sale_price'];
         $this->file = $row['file'];
         $this->expiration = $row['expiration'];
-        $this->dt_add = $row['dt_add'];
         $this->keywords = $row['keywords'];
-        $this->prod_type = $row['prod_type'];
+        $this->prod_type = isset($row['prod_type']) ? $row['prod_type'] : 0;
         $this->weight = $row['weight'];
-        $this->taxable = $row['taxable'];
+        $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
         $this->shipping_type = $row['shipping_type'];
         $this->shipping_amt = $row['shipping_amt'];
-        $this->show_random = $row['show_random'];
-        $this->show_popular = $row['show_popular'];
-        $this->track_onhand = $row['track_onhand'];
+        $this->show_random = isset($row['show_random']) ? $row['show_random'] : 0;
+        $this->show_popular = isset($row['show_popular']) ? $row['show_popular'] : 0;
+        $this->track_onhand = isset($row['track_onhand']) ? $row['track_onhand'] : 0;
         $this->onhand = $row['onhand'];
-        $this->oversell = $row['oversell'];
+        $this->oversell = isset($row['oversell']) ? $row['oversell'] : 0;
         $this->custom = $row['custom'];
         $this->sale_beg = $row['sale_beg'];
         $this->sale_end = $row['sale_end'];
@@ -254,7 +313,9 @@ class Product
         if ($fromDB) {
             // unserialization happens in __set()
             $this->qty_discounts = $row['qty_discounts'];
+            $this->dt_add = $row['dt_add'];
         } else {
+            $this->dt_add = PAYPAL_now()->toMySQL();
             $qty_discounts = array();
             for ($i = 0; $i < count($row['disc_qty']); $i++) {
                 $disc_qty = (int)$row['disc_qty'][$i];
@@ -272,10 +333,10 @@ class Product
             $this->categories = array();
         }
 
-        $this->votes = $row['votes'];
-        $this->rating = $row['rating'];
+        $this->votes = isset($row['votes']) ? $row['votes'] : 0;
+        $this->rating = isset($row['rating']) ? $row['rating'] : 0;
         $this->comments_enabled = $row['comments_enabled'];
-        $this->rating_enabled = $row['rating_enabled'];
+        $this->rating_enabled = isset($row['rating_enabled']) ? $row['rating_enabled'] : 0;
         $this->btn_type = $row['buttons'];
         if ($fromDB) {
             $this->views = $row['views'];
@@ -300,28 +361,41 @@ class Product
             return false;
         }
 
-        $result = DB_query("SELECT *
-                    FROM {$_TABLES['paypal.products']}
-                    WHERE id='$id'");
-        if (!$result || DB_numRows($result) != 1) {
-            return false;
-        } else {
-            $row = DB_fetchArray($result, false);
-            // Get the category.  For now, only one is supported
-            /*$row['categories'] = array();
-            $c_res = DB_query(
-                    "SELECT cat_id
-                    FROM {$_TABLES['paypal.prodXcat']}
-                    WHERE prod_id={$row['id']}");
-            while ($A = DB_fetchArray($c_res, false)) {
-                $row['categories'][] = $A['cat_id'];
-            }*/
+        $cache_key = self::_makeCacheKey($id);
+        $row = Cache::get($cache_key);
+        if ($row === NULL) {
+            $result = DB_query("SELECT *
+                        FROM {$_TABLES['paypal.products']}
+                        WHERE id='$id'");
+            if (!$result || DB_numRows($result) != 1) {
+                return false;
+            } else {
+                $row = DB_fetchArray($result, false);
+            }
+        }
+        if (!empty($row)) {
             $this->SetVars($row, true);
             $this->isNew = false;
+            $this->loadAttributes();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-            // Now get the product attributes
+
+    /**
+    *   Load the product attributs into the options array
+    */
+    protected function loadAttributes()
+    {
+        global $_TABLES;
+
+        $cache_key = 'prod_attr_' . $this->id;
+        $this->options = Cache::get($cache_key);
+        if ($this->options === NULL) {
             $sql = "SELECT * FROM {$_TABLES['paypal.prod_attr']}
-                    WHERE item_id = '$id' AND enabled = 1
+                    WHERE item_id = '{$this->id}' AND enabled = 1
                     ORDER BY attr_name, orderby ASC";
             $result = DB_query($sql);
             $this->options = array();
@@ -332,7 +406,7 @@ class Product
                     'attr_price' => $A['attr_price'],
                 );
             }
-            return true;
+            Cache::set($cache_key, $this->options, array('product', $this->id));
         }
     }
 
@@ -394,6 +468,7 @@ class Product
                 dt_add = '" . DB_escapeString(PAYPAL_now()->toMySQL()) . "',";
             $sql3 = '';
         }
+        //$options = DB_escapeString(@serialize($this->options));
         $sql2 = "name='" . DB_escapeString($this->name) . "',
                 cat_id='" . (int)$this->cat_id . "',
                 short_description='" . DB_escapeString($this->short_description) . "',
@@ -418,7 +493,6 @@ class Product
                 track_onhand='{$this->track_onhand}',
                 oversell = '{$this->oversell}',
                 qty_discounts = '{$qty_discounts}',
-                options='$options',
                 custom='" . DB_escapeString($this->custom) . "',
                 sale_price={$this->sale_price},
                 sale_beg='" . DB_escapeString($this->sale_beg) . "',
@@ -426,6 +500,7 @@ class Product
                 avail_beg='" . DB_escapeString($this->avail_beg) . "',
                 avail_end='" . DB_escapeString($this->avail_end) . "',
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
+                //options='$options',
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql);
@@ -438,6 +513,9 @@ class Product
             COM_errorLog("Paypal- SQL error in Product::Save: $sql", 1);
             $status = false;
         }
+
+        Cache::delete($this->id);
+        Cache::delete('prod_attr_' . $this->id);
 
         PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {
@@ -539,7 +617,7 @@ class Product
                 "img_id=$img_id");
         }
 
-        if (file_exists("{$_PP_CONF['image_dir']}/{$filename}"))
+        if (is_file("{$_PP_CONF['image_dir']}/{$filename}"))
                 unlink("{$_PP_CONF['image_dir']}/{$filename}");
 
         DB_delete($_TABLES['paypal.images'], 'img_id', $img_id);
@@ -603,7 +681,6 @@ class Product
     *
     *   @uses   PAYPAL_getDocUrl()
     *   @uses   PAYPAL_errorMessage()
-    *   @uses   PAYPAL_recurseCats()
     *   @param  integer $id     Optional ID, current record used if zero
     *   @return string          HTML for edit form
     */
@@ -670,9 +747,7 @@ class Product
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
-            'cat_select'    => PAYPAL_recurseCats(
-                                __NAMESPACE__ . '\PAYPAL_callbackCatOptionList',
-                                $this->cat_id),
+            'cat_select'    => Category::optionList($this->cat_id),
             'currency'      => $_PP_CONF['currency'],
             'pi_url'        => PAYPAL_URL,
             'doc_url'       => PAYPAL_getDocURL('product_form',
@@ -735,31 +810,16 @@ class Product
             $T->set_var(array(
                 'type_val'  => $value,
                 'type_txt'  => $text,
-                'type_sel'  => $this->prod_type == $value ? 'checked="checked"' : ''
+                'type_sel'  => $this->prod_type == $value ? 'selected="selected"' : '',
             ));
             $T->parse('ProdType', 'ProdTypeRadio', true);
         }
-
-        /*$T->set_block('options', 'OptionRow', 'OptRow');
-        for ($i = 0; $i < 7; $i++) {
-            $T->set_var(array(
-                'var'         => $i,
-                'option_num'  => $i + 1,
-                'on0_name' => $this->properties['options']['on0']['name'],
-                'on0_string' => $this->properties['options']['on0'][$i]['string'],
-                'on0_value' => $this->properties['options']['on0'][$i]['value'],
-                'on1_name' => $this->properties['options']['on1']['name'],
-                'on1_string' => $this->properties['options']['on1'][$i]['string'],
-                'on1_value' => $this->properties['options']['on1'][$i]['value'],
-            ) );
-            $T->parse('OptRow', 'OptionRow', true);
-        }*/
 
         if (!self::isUsed($this->id)) {
             $T->set_var('candelete', 'true');
         }
 
-        // Set up the photo fields.  Use $photocount defined above. 
+        // Set up the photo fields.  Use $photocount defined above.
         // If there are photos, read the $photo result.  Otherwise,
         // or if this is a new ad, just clear the photo area
         $T->set_block('product', 'PhotoRow', 'PRow');
@@ -819,31 +879,9 @@ class Product
             $i++;
         }
 
-        /*$sql = "SELECT cat_id, cat_name
-                FROM {$_TABLES['paypal.categories']}
-                WHERE enabled=1 AND parent_id=0";
-        $res = DB_query($sql);*/
-        /*$str = '';
-        while ($A = DB_fetchArray($res, false)) {
-            $str .= "<div><b>{$A['cat_name']}</b><br/>
-                    <ul>" .
-                    PAYPAL_recurseCats('prodform_catoption', 0, $A['cat_id'],
-                      '', '', '',
-                      0, 0, array('<ol>', '</ol>')) .
-                    "</ul></div>";
-        }
-        $T->set_var('catselect', $str);*/
-
         $retval .= $T->parse('output', 'product');
-
-        /*@setcookie($_CONF['cookie_name'].'fckeditor',
-                SEC_createTokenGeneral('advancededitor'),
-                time() + 1200, $_CONF['cookie_path'],
-                $_CONF['cookiedomain'], $_CONF['cookiesecure']);
-        */
         $retval .= COM_endBlock();
         return $retval;
-
     }   // function showForm()
 
 
@@ -941,14 +979,6 @@ class Product
 
         USES_lib_comments();
 
-        $cacheName = $_PP_CONF['pi_name'] . '__';
-        /*$cacheInstance = $cacheName . CACHE_security_hash() . '__' . $_CONF['theme'];
-
-        $retval = CACHE_check_instance($cacheInstance, 0);
-        if ($retval) {
-            return $retval;
-        }*/
-
         $prod_id = $this->id;
         if ($prod_id < 1 || !$this->enabled ||!$this->isAvailable()) {
             return PAYPAL_errorMessage($LANG_PP['invalid_product_id'], 'info');
@@ -1006,22 +1036,14 @@ class Product
                 if ($prow['filename'] != '' &&
                     file_exists("{$_PP_CONF['image_dir']}/{$prow['filename']}")) {
                     if ($i == 0) {
-                        $T->set_var('main_img',
-                            PAYPAL_ImageUrl($prow['filename'],
-                                $tpl_config['lg_img_width'] - 20,
-                                $tpl_config['lg_img_height'] - 20
-                            )
-                        );
+                        $T->set_var('main_img', PAYPAL_ImageUrl($prow['filename'], 0, 0));
                         $T->set_var('main_imgfile', $prow['filename']);
                     }
                     $T->set_block('product', 'Thumbnail', 'PBlock');
                     $T->set_var(array(
                         'is_uikit' => $_PP_CONF['_is_uikit'],
                         'img_file'      => $prow['filename'],
-                        'disp_img'      => PAYPAL_ImageUrl($prow['filename'],
-                                $tpl_config['lg_img_width'] - 20,
-                                $tpl_config['lg_img_height'] - 20
-                            ),
+                        'disp_img'      => PAYPAL_ImageUrl($prow['filename'], 0, 0),
                         'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
                         'img_url'       => PAYPAL_URL.'/images/products',
                         'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
@@ -1040,62 +1062,64 @@ class Product
         $init_price_adj = NULL;
         $this->_orig_price = $this->price;
         $T->set_block('product', 'AttrSelect', 'attrSel');
-        foreach ($this->options as $id=>$Attr) {
-            /*if ($Attr['attr_value'] === '') {
-                $type = 'text';
-            } else {
+        if (is_array($this->options)) {
+            foreach ($this->options as $id=>$Attr) {
+                /*if ($Attr['attr_value'] === '') {
+                    $type = 'text';
+                } else {
+                    $type = 'select';
+                }*/
                 $type = 'select';
-            }*/
-            $type = 'select';
-            if ($Attr['attr_name'] != $cbrk) {
-                // Adjust the price for cases where all attributes have prices
+                if ($Attr['attr_name'] != $cbrk) {
+                    // Adjust the price for cases where all attributes have prices
+                    if ($init_price_adj !== NULL) {
+                        $this->act_price += $init_price_adj;
+                        $this->_orig_price += $init_price_adj;
+                    }
+                    $init_price_adj = NULL;
+                    if ($cbrk != '') {      // end block if not the first element
+                        $T->set_var(array(
+                            'attr_name' => $cbrk,
+                            'attr_options' => $attributes,
+                            'opt_id' => $id,
+                        ) );
+                        $T->parse('attrSel', 'AttrSelect', true);
+                    }
+                    $cbrk = $Attr['attr_name'];
+                    $attributes = '';
+                }
+
+                if ($type == 'select') {
+                    if ($init_price_adj === NULL) $init_price_adj = $Attr['attr_price'];
+                    if ($Attr['attr_price'] != 0) {
+                        $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
+                    } else {
+                        $attr_str = '';
+                    }
+                    $attributes .= '<option value="' . $id . '|' .
+                        $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
+                        $Attr['attr_value'] . $attr_str .
+                        '</option>' . LB;
+                /*} else {
+                    $attributes .= "<input type=\"hidden\" name=\"on{$i}\"
+                        value=\"{$Attr['attr_name']}\">\n";
+                    $attributes .= $Attr['attr_name'] . ':</td>
+                        <td><input class="uk-contrast uk-form" type"text" name="os' . $i. '" value="" size="32" /></td></tr>';
+                */
+                }
+            }
+            if ($cbrk != '') {      // finish off the last selection
                 if ($init_price_adj !== NULL) {
-                    $this->act_price += $init_price_adj;
+                    $this->_act_price += $init_price_adj;
                     $this->_orig_price += $init_price_adj;
                 }
-                $init_price_adj = NULL;
-                if ($cbrk != '') {      // end block if not the first element
-                    $T->set_var(array(
-                        'attr_name' => $cbrk,
-                        'attr_options' => $attributes,
-                        'opt_id' => $id,
-                    ) );
-                    $T->parse('attrSel', 'AttrSelect', true);
-                }
-                $cbrk = $Attr['attr_name'];
-                $attributes = '';
+                $T->set_var(array(
+                    'attr_name' => $cbrk,
+                    'attr_options' => $attributes,
+                    'opt_id' => $id,
+                ) );
+                $T->parse('attrSel', 'AttrSelect', true);
             }
-           
-            if ($type == 'select') {
-                if ($init_price_adj === NULL) $init_price_adj = $Attr['attr_price'];
-                if ($Attr['attr_price'] != 0) {
-                    $attr_str = sprintf(" ( %+.2f )", $Attr['attr_price']);
-                } else {
-                    $attr_str = '';
-                }
-                $attributes .= '<option value="' . $id . '|' .
-                    $Attr['attr_value'] . '|' . $Attr['attr_price'] . '">' .
-                    $Attr['attr_value'] . $attr_str .
-                    '</option>' . LB;
-            /*} else {
-                $attributes .= "<input type=\"hidden\" name=\"on{$i}\"
-                        value=\"{$Attr['attr_name']}\">\n";
-                $attributes .= $Attr['attr_name'] . ':</td>
-                    <td><input class="uk-contrast uk-form" type"text" name="os' . $i. '" value="" size="32" /></td></tr>';
-            */
-            }
-        }
-        if ($cbrk != '') {      // finish off the last selection
-            if ($init_price_adj !== NULL) {
-                $this->_act_price += $init_price_adj;
-                $this->_orig_price += $init_price_adj;
-            }
-            $T->set_var(array(
-                'attr_name' => $cbrk,
-                'attr_options' => $attributes,
-                'opt_id' => $id,
-            ) );
-            $T->parse('attrSel', 'AttrSelect', true);
         }
 
         $T->set_var(array(
@@ -1118,6 +1142,14 @@ class Product
             'qty_disc'          => $qty_disc_txt,
             'session_id'        => session_id(),
         ) );
+        $T->set_block('product', 'SpecialFields', 'SF');
+        foreach ($this->special_fields as $fld) {
+            $T->set_var(array(
+                'sf_name' => $fld['name'],
+                'sf_text' => $fld['text'],
+            ) );
+            $T->parse('SF', 'SpecialFields', true);
+        }
 
         $buttons = $this->PurchaseLinks();
         $T->set_block('product', 'BtnBlock', 'Btn');
@@ -1229,7 +1261,7 @@ class Product
         return $retval;
     }
 
-       
+
     /**
     *   Gets the purchase links appropriate for the product.
     *   May be Paypal buttons, login-required link, or download button.
@@ -1309,7 +1341,8 @@ class Product
                 'short_description' => htmlspecialchars($this->short_description),
                 'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
-                'form_url'  => $this->hasAttributes() ? '' : 'true',
+                //'form_url'  => $this->hasAttributes() ? '' : 'true',
+                'form_url'  => false,
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
                 'iconset'   => $_PP_CONF['_iconset'],
@@ -1346,6 +1379,64 @@ class Product
 
 
     /**
+    *   Check if this product uses custom per-product text-input fields
+    *
+    *   @return boolean     True if custom fields are configured
+    */
+    public function hasCustomFields()
+    {
+        $cust = $this->custom;
+        return empty($cust) ? false : true;
+    }
+
+
+    /**
+    *   Check if this product type uses special text-input fields
+    *
+    *   @return boolean     True if special fields are configured
+    */
+    public function hasSpecialFields()
+    {
+        return empty($this->special_fields) ? false : true;
+    }
+
+
+    /**
+    *   Add a special field to a product.
+    *   The field will not be added if $fld_name already exists for the
+    *   product.
+    *   The prompt string may be supplied or, if blank, then $fld_name is used
+    *   to find a string in $LANG_PP. Final fallback is to use the field name
+    *   as the prompt.
+    *   Plugins should be sure to set $fld_lang.
+    *
+    *   @param  string  $fld_name   Field Name
+    *   @param  stirng  $fld_lang   Field prompt, language string
+    */
+    public function addSpecialField($fld_name, $fld_lang = '')
+    {
+        global $LANG_PP;
+
+        if (!array_key_exists($fld_name, $this->special_fields)) {
+            // Only add if the field doesn't already exist
+            if (empty($fld_lang)) {
+                // No text supplied, try to get one from the language file.
+                if (array_key_exists($fld_name, $LANG_PP)) {
+                    $fld_lang = $LANG_PP[$fld_name];
+                } else {
+                    // If all else fails, use the field name as the prompt.
+                    $fld_lang = $fld_name;
+                }
+            }
+            $this->special_fields[$fld_name] = array(
+                'name' => $fld_name,
+                'text' => $fld_lang,
+            );
+        }
+    }
+
+
+    /**
     *   Determine if a "Buy Now" button is allowed for this item.
     *   Items with attributes or a quantity discount schedule must be
     *   purchased through the shopping cart to allow for proper price
@@ -1356,8 +1447,10 @@ class Product
     public function canBuyNow()
     {
         $discounts = $this->qty_discounts;
-        if ($this->hasAttributes() ||
-            !empty($discounts)
+        if ($this->hasAttributes()
+            || $this->hasDiscounts()
+            || $this->hasCustomFields()
+            || $this->hasSpecialFields()
         ) {
             return false;
         }
@@ -1367,8 +1460,11 @@ class Product
 
     /**
     *   Get the unit price of this product, considering the specified options.
+    *   Quantity discounts are considered, the return value is the effictive
+    *   price per unit.
     *
     *   @param  array   $options    Array of integer option values
+    *   @param  integer $quantity   Quantity, used to calculate discounts
     *   @return float       Product price, including options
     */
     public function getPrice($options = array(), $quantity = 1)
@@ -1389,19 +1485,38 @@ class Product
         }
         $discount_factor = 1;
         if (is_array($this->qty_discounts)) {
-        foreach ($this->qty_discounts as $qty=>$discount) {
-            $qty = (int)$qty;
-            if ($quantity < $qty) {     // haven't reached this discount level
-                break;
-            } else {
-                $discount = (float)$discount;
-                $discount_factor = (100 - $discount) / 100;
+            foreach ($this->qty_discounts as $qty=>$discount) {
+                $qty = (int)$qty;
+                if ($quantity < $qty) {     // haven't reached this discount level
+                    break;
+                } else {
+                    $discount = (float)$discount;
+                    $discount_factor = (100 - $discount) / 100;
+                }
             }
-        }
         }
         $price *= $discount_factor;
         $price = round($price, $this->currency->Decimals());
         return $price;
+    }
+
+
+    /**
+    *   Get the sales tax for this item based on the configured tax rate.
+    *
+    *   @param  float   $price  Unit price
+    *   @param  integer $qty    Item quantity
+    *   @return float           Sales tax ammount
+    */
+    public function getTax($price, $qty)
+    {
+        global $_PP_CONF;
+
+        if ($this->taxable) {
+            return round($_PP_CONF['tax_rate'] * $price * $qty, 2);
+        } else {
+            return 0;
+        }
     }
 
 
@@ -1429,19 +1544,42 @@ class Product
 
 
     /**
+    *   Get all the attributes for this product that appear in a list
+    *
+    *   @param  array   $options    Array of options
+    *   @return array       Array of a
+    */
+    public function getAttributes($options = array())
+    {
+        global $_TABLES;
+
+        $sql = "SELECT attr_name, attr_value
+                FROM {$_TABLES['paypal.prod_attr']}
+                WHERE attr_id IN ($options)";
+        $optres = DB_query($sql);
+        $opt_str = '';
+        while ($O = DB_fetchArray($optres, false)) {
+            $opt_str .= ', ' . $O['attr_value'];
+            $option_desc[] = $O['attr_name'] . ': ' . $O['attr_value'];
+        }
+    }
+
+
+    /**
     *   Handle the purchase of this item.
     *   1. Update qty on hand if track_onhand is set (min. value 0)
     *
     *   @param  integer $qty        Quantity ordered
-    *   @param  string  $order_id   Optional order ID (not used yet)
+    *   @param  object  $Item       Item record, to get options, etc.
+    *   @param  object  $Order      Optional order (not used yet)
+    *   @param  array   $ipn_data   IPN data (not used in this class)
     *   @return integer     Zero or error value
     */
-    public function handlePurchase($qty, $order_id='')
+    public function handlePurchase(&$Item, $Order=NULL, $ipn_data = array())
     {
         global $_TABLES;
 
         $status = 0;
-        $qty = (int)$qty;
 
         // update the qty on hand, if tracking and not already zero
         if ($this->track_onhand && $this->onhand > 0) {
@@ -1454,10 +1592,13 @@ class Product
                 $status = 1;
             }
         }
-
         return $status;
     }
 
+
+    public function handleRefund($ipn_data = array())
+    {
+    }
 
     public function cancelPurchase($qty, $order_id='')
     {
@@ -1611,6 +1752,77 @@ class Product
             return $str;
     }
 
+
+    /**
+    *   Determine if a given item number belongs to a plugin.
+    *   For now, this simply checks whether the item number is numeric.  If
+    *   it is, it's assumed to be a catalog item.  If it's non-numeric, it's
+    *   assumed to be a plugin-supplied item where the item number is
+    *   formated as "pi_name:item_number:other_opts"
+    *
+    *   @param  mixed   $item_number    Item Number to check
+    *   @return boolean     True if it's a plugin item, false if it's ours
+    */
+    public static function isPluginItem($item_number)
+    {
+        //if (!is_numeric($item_number)) {
+        if (strpos($item_number, ':') > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+    *   Get the text string and value for special fields.
+    *   Used when displaying cart info
+    *
+    *   @param  array   $values     Special field values
+    *   @return array       Array of text=>value
+    */
+    public function getSpecialFields($values = array())
+    {
+        global $LANG_PP;
+
+        $retval = array();
+        if (!is_array($values)) {
+            return $retval;
+        }
+        foreach ($this->special_fields as $fld_name=>$fld) {
+            if (array_key_exists($fld_name, $values) && !empty($values[$fld_name])) {
+                $retval[$fld['text']] = $values[$fld_name];
+            }
+        }
+        return $retval;
+    }
+
+
+    /**
+    *   Helper function to create the cache key.
+    *
+    *   @return string  Cache key
+    */
+    private static function _makeCacheKey($id)
+    {
+        $id = (int)$id;
+        return 'product_' . $id;
+    }
+
+
+    /**
+    *   Determine if the current user has access to view this product.
+    *   Checks the related category for access.
+    *
+    *   @return boolean     True if access and purchase is allowed.
+    */
+    public function hasAccess()
+    {
+        // Make sure the category is set
+        if (!$this->Cat) $this->Cat = Category::getInstance($this->cat_id);
+        return $this->Cat->hasAccess();
+    }
+   
 }   // class Product
 
 ?>
