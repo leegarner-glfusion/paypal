@@ -179,26 +179,18 @@ class Cart
 
         $U = UserInfo::getInstance($_USER['uid']);
 
-        /*$txt = DB_getItem($_TABLES['paypal.userinfo'], 'cart',
-                    'uid=' . (int)$_USER['uid']);
-
-        if (!empty($txt)) {         // No saved cart
-            $saved = @unserialize($txt);
-            if (!$saved) return;    // Unable to unserialize
-        }
-        */
         $saved = $U->cart;
         if (is_array($saved)) {
             // Add saved items to current cart
             foreach ($saved as $id=>$A) {
-                list($item_id, $options) = PAYPAL_explode_opts($A['item_id']);
+                $item = PAYPAL_explode_opts($A['item_id']);
                 $args = array(
-                    'item_id' => $item_id,
+                    'item_number' => $item[0],
                     'item_name' => $A['name'],
                     'descrip' => $A['descrip'],
                     'quantity' => $A['quantity'],
                     'price' => $A['price'],
-                    'options' => $options,
+                    'options' => isset($item[1]) ? $item[1] : '',
                     'extras' => $A['extras'],
                 );
                 if (isset($A['tax'])) {
