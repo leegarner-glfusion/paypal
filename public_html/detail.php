@@ -28,11 +28,6 @@ paypal_access_check();
 // Import plugin-specific functions
 USES_paypal_functions();
 
-// Create a global shopping cart for our use.  This allows the cart to be
-// manipulated in an action and then displayed in a view, without necessarily
-// having to revisit the database or create a new cart.
-PAYPAL_setCart();
-
 COM_setArgNames(array('id'));
 if (isset($_GET['id'])) {
     $id = COM_sanitizeID($_GET['id']);
@@ -55,10 +50,16 @@ if (!empty($msg)) {
 $content = '';
 $breadcrumbs = '';
 if (!empty($id)) {
-    $P = new Paypal\Product($id);
-    if ($P->id == $id) {
+    $P = Paypal\Product::getInstance($id);
+    if ($P->id == $id && $P->hasAccess()) {
         $breadcrumbs = Paypal\Category::Breadcrumbs($P->cat_id);
         $content .= $P->Detail();
+    } else {
+        LGLIB_storeMessage(array(
+            'msg' => $LANG_PP['item_not_found'],
+            'level' => 'error',
+        ) );
+        COM_refresh(PAYPAL_URL);
     }
 }
 if (empty($content)) {
