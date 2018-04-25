@@ -2,9 +2,9 @@
 <form action="{action_url}/index.php" method="post" 
     enctype="multipart/form-data">
 
-  {!if cat_id}
-    <input type="hidden" name="cat_id" value="{cat_id}" />
-  {!endif}
+  <input type="hidden" name="old_parent" value="{old_parent}" />
+  <input type="hidden" name="old_grp" value="{old_grp}" />
+  <input type="hidden" name="cat_id" value="{cat_id}" />
 
   <table>
     <tr>
@@ -18,10 +18,13 @@
     <tr>
       <td>{$LANG_PP['parent_cat']}:</td>
       <td>
-        <select name="parent_id">
-          <option value="0">{$LANG_PP['top_cat']}</option>
-          {parent_sel}
-        </select>
+{!if parent_sel}
+       <select name="parent_id" id="parent_id">
+         {parent_sel}
+       </select>
+{!else}
+      <input type="hidden" name="parent_id" value="0" />{$LANG_PP['dscp_root_cat']}
+{!endif}
       </td>
     </tr>
 

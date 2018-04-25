@@ -31,12 +31,13 @@ function listOrders($admin = false, $uid = '')
     if (!$admin) {
         $uid = $_USER['uid'];
     }
-    $where = '';
 
     USES_lib_admin();
 
     if (!empty($uid)) {
         $where = " WHERE ord.uid = '" . (int)$uid . "'";
+    } else {
+        $where = 'WHERE 1=1';
     }
 
     $isAdmin = $admin == true ? 1 : 0;
@@ -47,9 +48,9 @@ function listOrders($admin = false, $uid = '')
         LEFT JOIN {$_TABLES['users']} AS u
             ON ord.uid = u.uid
         LEFT JOIN {$_TABLES['paypal.purchases']} AS itm
-            ON ord.order_id = itm.order_id
-        $where
-        GROUP BY ord.order_id";
+            ON ord.order_id = itm.order_id";
+        //$where
+        //GROUP BY ord.order_id";
     //echo $sql;die;
 
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
@@ -68,8 +69,9 @@ function listOrders($admin = false, $uid = '')
                 'field' => 'username', 'sort' => true);
     }
 
-    $defsort_arr = array('field' => 'ord.order_date',
-            'direction' => 'DESC');
+    $defsort_arr = array(
+        'field' => 'ord.order_date',
+        'direction' => 'DESC');
 
     if ($admin) {
         $options = array(
@@ -89,19 +91,28 @@ function listOrders($admin = false, $uid = '')
 
     $query_arr = array('table' => 'paypal.orders',
             'sql' => $sql,
-            'query_fields' => array(),
+            'query_fields' => array(
+                    'billto_name', 'billto_company', 'billto_address1',
+                    'billto_address2','billto_city', 'billto_state',
+                    'billto_country', 'billto_zip',
+                    'shipto_name', 'shipto_company', 'shipto_address1',
+                    'shipto_address2','shipto_city', 'shipto_state',
+                    'shipto_country', 'shipto_zip',
+                    'phone', 'buyer_email', 'ord.order_id',
+            ),
             'default_filter' => $where,
+            'group_by' => 'ord.order_id',
         );
 
     $text_arr = array(
-        //'has_extras' => $admin ? true : false,
+        'has_extras' => $admin ? true : false,
         'form_url' => $base_url . '/index.php?orderhist=x',
     );
 
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getPurchaseHistoryField',
+    $display .= ADMIN_list('paypal_orders', __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -308,6 +319,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
                 PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
                 array('data-uk-tooltip' => '{delay:500}',
                     'title' => $LANG_PP['print'],
+                    'target' => '_new',
                 )
         );
         if (!$_PP_CONF['_is_uikit']) {
@@ -342,24 +354,70 @@ function ProductList($cat_id = 0)
         $isAdmin = false;
     }
 
-    $my_groups = implode(',', $_GROUPS);
-
     $cat_name = '';
     $breadcrumbs = '';
     $cat_img_url = '';
     $display = '';
-    if ($cat_id != 0) {
-        $Cat = new Category($cat_id);
-        if ($Cat->isNew || !$Cat->hasAccess()) {
+    $cat_sql = '';
+/*    if ($cat_id != 0) {
+        $Cat = Category::getInstance($cat_id);
+        $breadcrumbs = Category::Breadcrumbs($Cat->cat_id);
+    } else {*/
+        $Cat = Category::getInstance($cat_id);
+
+        // If a cat ID is requested but doesn't exist or the user can't access
+        // it, redirect to the homepage.
+        if ($cat_id > 0 && ($Cat->isNew || !$Cat->hasAccess())) {
             echo COM_refresh(PAYPAL_URL);
             exit;
         }
-
-        $breadcrumbs = Category::Breadcrumbs($cat_id);
+        $RootCat = Category::getRoot();
+        //$cats = Category::getTree($RootCat->cat_id);
+        $links = array();
+        $lines = array();
+        //$ctrl_brk = -1;
+        $breadcrumbs = '';
+    if ($cat_id > 0 && $cat_id != $RootCat->cat_id) {
+        $cats = Category::getTree($cat_id);
+        foreach ($cats as $cat) {
+            // Root category already shown in top header
+            //if ($cat->cat_id == $RootCat->cat_id) continue;
+            // Create the category tree branch
+            /*if ($ctrl_brk == 0 && $cat->parent_id == $RootCat->cat_id) {
+                $lines[] = implode(' :: ', $links);
+                $links = array();
+            }
+            $ctrl_brk = 0;*/
+            if (!$cat->hasAccess()) continue;
+            if ($cat->cat_id == $cat_id) {
+                $cat->cat_name = '<b>' . $cat->cat_name . '</b>';
+            }
+            $links[] = COM_createLink($cat->cat_name,
+                    PAYPAL_URL . '/index.php?category=' .
+                        (int)$cat->cat_id);
+        }
+        if (count($links) > 1) {
+            // Add the final line
+            $lines[] = implode(' :: ', $links);
+            $breadcrumbs = implode('<br />', $lines);
+        }
+    }
         $cat_name = $Cat->cat_name;
         $cat_desc = $Cat->description;
         $cat_img_url = $Cat->ImageUrl();
-    }
+        if ($Cat->parent_id > 0) {
+            // Get the sql to limit by category
+            $tmp = Category::getTree($Cat->cat_id);
+            $cats = array();
+            foreach ($tmp as $cat_id=>$info) {
+                $cats[] = $cat_id;
+            }
+            if (!empty($cats)) {
+                $cat_sql = implode(',', $cats);
+                $cat_sql = " AND c.cat_id IN ($cat_sql)";
+            }
+        }
+    //}
 
     // Display categories
     if (isset($_PP_CONF['cat_columns']) &&
@@ -368,7 +426,7 @@ function ProductList($cat_id = 0)
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
-            WHERE cat.enabled = '1' AND cat.parent_id = '$cat_id'
+            WHERE cat.enabled = '1' AND cat.parent_id = '{$RootCat->cat_id}'
                 AND prod.enabled = '1' " .
             SEC_buildAccessSql('AND', 'cat.grp_access') .
             " GROUP BY cat.cat_id
@@ -377,8 +435,15 @@ function ProductList($cat_id = 0)
         //echo $sql;die;
 
         $res = DB_query($sql);
-        $A = array();
+        $A = array(
+            $RootCat->cat_id => array(
+                'name' => $RootCat->cat_name,
+            ),
+        );
         while ($C = DB_fetchArray($res, false)) {
+            if ($C['cat_id'] == $Cat->cat_id) {
+                $C['cat_name'] = '<b>' . $C['cat_name'] . '</b>';
+            }
             $A[$C['cat_id']] = array(
                 'name' => $C['cat_name'],
                 'count' => $C['cnt'],
@@ -489,7 +554,7 @@ function ProductList($cat_id = 0)
                 )
             AND (
                 p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2
-                )";
+                ) $cat_sql";
 
     $search = '';
     // Add search query, if any
@@ -505,18 +570,6 @@ function ProductList($cat_id = 0)
         $sql .= $srch;
     }
     $pagenav_args = array();
-    // If applicable, limit by category
-    if (!empty($_REQUEST['category'])) {
-        $cat_list = $_REQUEST['category'];
-        $cat_list .=  PAYPAL_recurseCats(__NAMESPACE__ . '\callbackCatCommaList', 0,
-                $_REQUEST['category']);
-        if (!empty($cat_list)) {
-            $sql .= " AND c.cat_id IN ($cat_list)";
-        }
-        $pagenav_args[] = 'category=' . urlencode($_REQUEST['category']);
-    } else {
-        $cat_list = '';
-    }
 
     // If applicable, order by
     $sql .= " ORDER BY $sql_sortby $sql_sortdir";
@@ -530,9 +583,9 @@ function ProductList($cat_id = 0)
     // Display a "not found" message if count == 0
     if ($count == 0) {
         if ($_PP_CONF['_is_uikit']) {
-            return '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
+            $display .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
         } else {
-            return '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
+            $display .= '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
         }
     }
 
@@ -554,7 +607,8 @@ function ProductList($cat_id = 0)
     }
 
     // Re-execute query with the limit clause in place
-    $res = DB_query('SELECT DISTINCT p.id ' . $sql);
+    //$res = DB_query('SELECT DISTINCT p.id ' . $sql);
+    $res = DB_query('SELECT p.* ' . $sql);
 
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
@@ -599,9 +653,6 @@ function ProductList($cat_id = 0)
 
     $display .= $product->parse('', 'start');
 
-    // Create an empty product object
-    $P = new Product();
-
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds('paypal');
     }
@@ -611,7 +662,7 @@ function ProductList($cat_id = 0)
     while ($A = DB_fetchArray($res, false)) {
         $prodrows++;
 
-        $P->Read($A['id']);
+        $P = Product::getInstance($A);
         if ( @in_array($P->id, $ratedIds)) {
             $static = true;
             $voted = 1;
@@ -642,8 +693,7 @@ function ProductList($cat_id = 0)
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'encrypted' => '',
-            'item_url'  => COM_buildURL(PAYPAL_URL .
-                    '/detail.php?id='. $A['id']),
+            'item_url'  => PAYPAL_URL . '/detail.php?id='. $A['id'],
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'track_onhand' => $P->track_onhand ? 'true' : '',
             'qty_onhand' => $P->onhand,

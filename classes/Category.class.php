@@ -21,7 +21,7 @@ class Category
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
-    var $properties;
+    var $properties = array();
 
     /** Indicate whether the current user is an administrator
     *   @var boolean */
@@ -35,14 +35,15 @@ class Category
      *  @var array */
     var $Errors = array();
 
+    private static $tag = 'ppcat_';     // Cache tag
 
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero,
-     *  then a new entry is being created.
-     *
-     *  @param integer $id Optional type ID
-     */
+    *   Constructor.
+    *   Reads in the specified class, if $id is set.  If $id is zero,
+    *   then a new entry is being created.
+    *
+    *   @param integer $id Optional type ID
+    */
     public function __construct($id=0)
     {
         global $_USER, $_VARS;
@@ -50,15 +51,18 @@ class Category
         $this->properties = array();
         $this->isNew = true;
 
-        $this->cat_id = $id;
+        $this->cat_id = 0;
         $this->parent_id = 0;
         $this->cat_name = '';
         $this->description = '';
         $this->grp_access = 2;  // All users have access by default
         $this->image = '';
         $this->enabled = 1;
-
-        if ($this->cat_id > 0) {
+        $this->disp_name = '';
+        if (is_array($id)) {
+            $this->SetVars($id);
+        } elseif ($id > 0) {
+            $this->cat_id = $id;
             if (!$this->Read()) {
                 $this->cat_id = 0;
             }
@@ -87,6 +91,7 @@ class Category
         case 'cat_name':
         case 'description':
         case 'image':
+        case 'disp_name':   // display name in option list
             // String values
             $this->properties[$var] = trim($value);
             break;
@@ -135,7 +140,7 @@ class Category
         $this->enabled = $row['enabled'];
         $this->cat_name = $row['cat_name'];
         $this->grp_access = $row['grp_access'];
-
+        $this->disp_name = isset($row['disp_name']) ? $row['disp_name'] : $row['description'];
         if ($fromDB) {
             $this->image = $row['image'];
         }
@@ -143,11 +148,12 @@ class Category
 
 
     /**
-     *  Read a specific record and populate the local values.
-     *
-     *  @param  integer $id Optional ID.  Current ID is used if zero.
-     *  @return boolean     True if a record was read, False on failure
-     */
+    *   Read a specific record and populate the local values.
+    *   Caches the object for later use.
+    *
+    *   @param  integer $id Optional ID.  Current ID is used if zero.
+    *   @return boolean     True if a record was read, False on failure
+    */
     public function Read($id = 0)
     {
         global $_TABLES;
@@ -168,8 +174,30 @@ class Category
             $row = DB_fetchArray($result, false);
             $this->SetVars($row, true);
             $this->isNew = false;
+            Cache::set(self::_makeCacheKey($id), $this, 'categories');
             return true;
         }
+    }
+
+
+    /**
+    *   Get a category instance.
+    *   Checks cache first and creates a new object if not found.
+    *
+    *   @param  integer $cat_id     Category ID
+    *   @return object              Category object
+    */
+    public static function getInstance($cat_id)
+    {
+        static $cats = array();
+        if (!isset($cats[$cat_id])) {
+            $key = self::_makeCacheKey($cat_id);
+            $cats[$cat_id] = Cache::get($key);
+            if (!$cats[$cat_id]) {
+                $cats[$cat_id] = new self($cat_id);
+            }
+        }
+        return $cats[$cat_id];
     }
 
 
@@ -241,6 +269,14 @@ class Category
                 if ($this->isNew) {
                     $this->cat_id = DB_insertID();
                 }
+                if (isset($_POST['old_parent']) && $_POST['old_parent'] != $this->parent_id) {
+                    self::rebuildTree();
+                }
+                /*if (isset($_POST['old_grp']) && $_POST['old_grp'] > 0 &&
+                        $_POST['old_grp'] != $this->grp_access) {
+                    $this->_propagatePerms($_POST['old_grp']);
+                }*/
+                Cache::clear('categories');
             } else {
                 $this->AddError('Failed to insert or update record');
             }
@@ -255,6 +291,32 @@ class Category
 
 
     /**
+    *   Propagate permissions to sub-categories
+    *
+    */
+    private function _propagatePerms($grp_id)
+    {
+        global $_TABLES;
+
+        if ($grp_id == $this->grp_access) return;   // nothing to do
+
+        $c = self::getTree($this->cat_id);
+        $upd_cats = array();
+        foreach ($c as $cat) {
+            if ($cat->cat_id == $this->cat_id) continue; // already saved
+            $upd_cats[] = $cat->cat_id;
+        }
+        if (!empty($upd_cats)) {
+            $upd_cats = implode(',', $upd_cats);
+            $sql = "UPDATE {$_TABLES['paypal.categories']}
+                    SET grp_access = {$this->grp_access}
+                    WHERE cat_id IN ($upd_cats)";
+            DB_query($sql);
+        }
+    }
+
+
+    /**
      *  Delete the current category record from the database
      */
     public function Delete()
@@ -265,9 +327,9 @@ class Category
             return false;
 
         $this->DeleteImage(false);
-
         DB_delete($_TABLES['paypal.categories'], 'cat_id', $this->cat_id);
-
+        PLG_itemDeleted($this->cat_id, 'paypal_category');
+        Cache::clear('categories');
         $this->cat_id = 0;
         return true;
     }
@@ -339,31 +401,39 @@ class Category
         if ($id > 0) {
             $retval = COM_startBlock($LANG_PP['edit'] . ': ' . $this->cat_name);
             $T->set_var('cat_id', $id);
-            $not = 'NOT';
-            $items = $id;
+            //$not = 'NOT';
+            //$items = $id;
         } else {
             $retval = COM_startBlock($LANG_PP['create_category']);
             $T->set_var('cat_id', '');
-            $not = '';
-            $items = '';
+            //$not = '';
+            //$items = '';
         }
 
+        // If this is the root category, don't display the option list.
+        if ($this->cat_id > 0 && $this->parent_id == 0) {
+            $T->set_var('parent_sel', false);
+        } else {
+            $T->set_var('parent_sel', self::optionList($this->parent_id, $this->cat_id));
+        }
         $T->set_var(array(
             'action_url'    => PAYPAL_ADMIN_URL,
             'pi_url'        => PAYPAL_URL,
             'cat_name'      => $this->cat_name,
             'description'   => $this->description,
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
-            'parent_sel'    => PAYPAL_recurseCats(
+            'old_parent'    => $this->parent_id,
+            'old_grp'       => $this->grp_access,
+            /*'parent_sel'    => PAYPAL_recurseCats(
                                     __NAMESPACE__ . '\callbackCatOptionList',
                                     $this->parent_id, 0, '',
-                                    $not, $items),
+                                    $not, $items),*/
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
             'doc_url'       => PAYPAL_getDocURL('category_form'),
         ) );
 
         if ($this->image != '') {
-            $T->set_var('img_url', PAYPAL_PI_URL . '/images/categories/' .
+            $T->set_var('img_url', PAYPAL_URL . '/images/categories/' .
                 $this->image);
         }
 
@@ -389,9 +459,6 @@ class Category
         if ($this->image != '') {
             $T->set_var('img_url',
                     PAYPAL_URL . '/images/categories/' . $this->image);
-            $T->set_var('del_img_url',
-                    PAYPAL_ADMIN_URL . '/index.php?action=delete_img&amp;img_id=' .
-                        $prow['img_id']. '&amp;id=' . $this->id);
         }
 
         $retval .= $T->parse('output', 'category');
@@ -476,10 +543,15 @@ class Category
         }
 
         // Check if any categories are under this one.
-        if (DB_count($_TABLES['paypal.categories'],
-                        'parent_id', $cat_id) > 0) {
+        if (DB_count($_TABLES['paypal.categories'], 'parent_id', $cat_id) > 0) {
             return true;
         }
+
+        $C = self::getRoot();
+        if ($C->cat_id == $cat_id) {
+            return true;
+        }
+
         return false;
     }
 
@@ -584,19 +656,155 @@ class Category
                 continue;
             }
             $A[] = COM_createLink($row['cat_name'],
-                    COM_buildUrl(PAYPAL_URL . '/index.php?category=' .
-                        (int)$row['cat_id']));
+                    PAYPAL_URL . '/index.php?category=' .
+                        (int)$row['cat_id']);
             if ($parent == 0) {
                 break;
             }
         }
 
         // Always add link to shop home
-        $A[] = COM_createLink($LANG_PP['home'],
-                COM_buildURL(PAYPAL_URL . '/index.php'));
+        //$A[] = COM_createLink($LANG_PP['home'],
+        //        COM_buildURL(PAYPAL_URL . '/index.php'));
         $B = array_reverse($A);
         $location = implode(' :: ', $B);
         return $location;
+    }
+
+
+    /**
+    *   Helper function to create the cache key.
+    *
+    *   @return string  Cache key
+    */
+    private static function _makeCacheKey($id)
+    {
+        return self::$tag . $id;
+    }
+
+
+    /**
+    *   Read all the categories into a static array.
+    *
+    *   @param  integer $root   Root category ID
+    *   @return array           Array of category objects
+    */
+    public static function getTree($root=0, $prefix='&nbsp;')
+    {
+        global $_TABLES;
+
+        $between = '';
+        $root = (int)$root;
+        $cache_key = self::_makeCacheKey('cat_tree_' . (string)$root);
+        $All = Cache::get($cache_key);
+        if (!$All) {        // not found in cache, build the tree
+            if ($root > 0) {
+                $result = DB_query("SELECT lft, rgt FROM {$_TABLES['paypal.categories']}
+                            WHERE cat_id = $root");
+                $row = DB_fetchArray($result, false);
+                $between = ' AND parent.lft BETWEEN ' . (int)$row['lft'] .
+                        ' AND ' . (int)$row['rgt'];
+            }
+            $prefix = DB_escapeString($prefix);
+            $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
+                FROM {$_TABLES['paypal.categories']} AS node,
+                    {$_TABLES['paypal.categories']} AS parent
+                WHERE node.lft BETWEEN parent.lft AND parent.rgt
+                $between
+                GROUP BY node.cat_name
+                ORDER BY node.lft";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $All[$A['cat_id']] = new self($A);
+            }
+            Cache::set($cache_key, $All, 'categories');
+        }
+        return $All;
+    }
+
+
+    /**
+    *   Get the options for a selection list.
+    *   Used in the product form and to select a parent category.
+    *   $exclude indicates a category to disable, to prevent selecting a
+    *   category as its own parent.
+    *
+    *   @uses   self::getTree()
+    *   @param  integer $sel        Selected category ID
+    *   @param  integer $exclude    Category to disable in the list
+    *   @return string          Option elements for Select
+    */
+    public static function optionList($sel = 0, $exclude = 0)
+    {
+        $Cats = self::getTree();
+        $opts = '';
+        foreach ($Cats as $Cat) {
+            $disabled = $Cat->cat_id == $exclude ? 'disabled="disabled"' : '';
+            $selected = $Cat->cat_id == $sel ? 'selected="selected"' : '';
+            $opts .= '<option value="' . $Cat->cat_id . '" ' . $disabled .
+                    ' ' . $selected . '>' . $Cat->disp_name . '</option>' . LB;
+        }
+        return $opts;
+    }
+
+
+    /**
+    *   Get the root category.
+    *   Depending on how Paypal was installed or updated this might not be #1.
+    *
+    *   @return mixed   Category object
+    */
+    public static function getRoot()
+    {
+        global $_TABLES;
+
+        $parent = (int)DB_getItem($_TABLES['paypal.categories'], 'cat_id',
+                'parent_id = 0');
+        return self::getInstance($parent);
+    }
+
+    
+    /**
+    *   Rebuild the MPT tree starting at a given parent and "left" value
+    *
+    *   @param  integer $parent     Starting category ID
+    *   @param  integer $left       Left value of the given category
+    *   @return integer         New Right value (only when called recursively)
+    */
+    public static function rebuildTree($parent = 0, $left = 1)
+    {
+        global $_TABLES;
+
+        // If parent is undefined, get the root category ID
+        if ($parent == 0) {
+            $parent = self::getRoot();
+            $parent = $parent->cat_id;
+        }
+
+        // the right value of this node is the left value + 1
+        $right = $left + 1;
+
+        // get all children of this node
+        $sql = "SELECT cat_id FROM {$_TABLES['paypal.categories']}
+                WHERE parent_id ='$parent'";
+        $result = DB_query($sql);
+        while ($row = DB_fetchArray($result, false)) {
+            // recursive execution of this function for each
+            // child of this node
+            // $right is the current right value, which is
+            // incremented by the rebuild_tree function
+            $right = self::rebuildTree($row['cat_id'], $right);
+        }
+
+        // we've got the left value, and now that we've processed
+        // the children of this node we also know the right value
+        $sql1 = "UPDATE {$_TABLES['paypal.categories']}
+                SET lft = '$left', rgt = '$right'
+                WHERE cat_id = '$parent'";
+        DB_query($sql1);
+
+        // return the right value of this node + 1
+        return $right + 1;
     }
 
 }   // class Category

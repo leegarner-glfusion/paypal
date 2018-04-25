@@ -672,7 +672,8 @@ abstract class Gateway
 
             } else {
                 PAYPAL_debug("Paypal item " . $item_number);
-                $P = new Product($item_number);
+                //$P = new Product($item_number);
+                $P = Product::getInstance($item_number);
                 $A = array('name' => $P->name,
                     'short_description' => $P->short_description,
                     'expiration' => $P->expiration,
@@ -988,22 +989,6 @@ abstract class Gateway
     *   @return array               Name=>Value array of data for display
     */
     abstract public function ipnlogVars($data);
-        /*  Example function from the PayPal IPN processor.
-            This takes the field values from the PayPal IPN message
-            and sets them into our array.  The four array fields shown
-            should be populated by the gateway's function.
-        if (!is_array($data)) {
-            return array();
-        }
-
-        $retval = array(
-            'pmt_gross'     => $data['mc_gross'] . ' ' . $data['mc_currency'],
-            'verified'      => $data['payer_status'],
-            'pmt_status'    => $data['payment_status'],
-            'buyer_email'   => $data['payer_email'],
-        );
-        return $retval;
-        */
 
 
     /**
@@ -1050,6 +1035,12 @@ abstract class Gateway
     }
 
 
+    /**
+    *   Get all gateways into a static array.
+    *
+    *   @param  boolean $enabled    True to get only enabled gateways
+    *   @return array       Array of gateways, enabled or all
+    */
     public static function getAll($enabled = true)
     {
         global $_TABLES, $_PP_CONF;
@@ -1074,6 +1065,20 @@ abstract class Gateway
             }
         }
         return $gateways[$key];
+    }
+
+
+    /**
+    *   Get a config item.
+    *   Provides a safe way to reference a configuration item without first
+    *   checking whether it's set.
+    *
+    *   @param  string  $item   Config item name
+    *   @return mixed       Value of item, or NULL if not set
+    */
+    public function getConfig($item)
+    {
+        return isset($this->config[$item]) ? $this->config[$item] : NULL;
     }
 
 }   // class PaymentGw
