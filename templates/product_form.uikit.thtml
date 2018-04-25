@@ -10,7 +10,7 @@
     enctype="multipart/form-data" onsubmit='set_postcontent();'>
   <input type="hidden" name="id" value="{product_id}" />
   <fieldset>
-    <legend>{$LANG_PP['product_info']} {doc_url}</legend>
+    <legend>{$LANG_PP['product_info']}</legend>
 
     <div class="uk-form-row">
       <label class="uk-form-label" for="name">{$LANG_PP['product']}:
