@@ -62,6 +62,23 @@ class Order
 
 
     /**
+    *   Get an object instance for an order.
+    *
+    *   @param  string  $id     Order ID
+    *   @return object          Order object
+    */
+    public static function getInstance($id)
+    {
+        global $_TABLES;
+        static $orders = array();
+        if (!array_key_exists($id, $orders)) {
+            $orders[$id] = new self($id);
+        }
+        return $orders[$id];
+    }
+
+
+    /**
     *   Magic setter function
     *   Set a property value
     *
@@ -133,11 +150,11 @@ class Order
                 WHERE order_id = '{$this->order_id}'";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $this->items[$A['id']] = $A;
+            $this->items[$A['id']] = new OrderItem($A);
             $X = DB_fetchArray(DB_query("SELECT *
                     FROM {$_TABLES['paypal.products']}
-                    WHERE id='".DB_escapeString($A['id'])."'"), false);
-            $this->items[$A['id']]['data'] = $X;
+                    WHERE id='".DB_escapeString($A['product_id'])."'"), false);
+            //$this->items[$A['id']]['data'] = $X;
         }
         return true;
     }
@@ -228,14 +245,14 @@ class Order
         }
 
         if (!empty($A)) {
-            $this->billto_name     = $A['name'];
-            $this->billto_company  = $A['company'];
-            $this->billto_address1 = $A['address1'];
-            $this->billto_address2 = $A['address2'];
-            $this->billto_city     = $A['city'];
-            $this->billto_state    = $A['state'];
-            $this->billto_country  = $A['country'];
-            $this->billto_zip      = $A['zip'];
+            $this->billto_name     = PP_getVar($A, 'name');
+            $this->billto_company  = PP_getVar($A, 'company');
+            $this->billto_address1 = PP_getVar($A, 'address1');
+            $this->billto_address2 = PP_getVar($A, 'address2');
+            $this->billto_city     = PP_getVar($A, 'city');
+            $this->billto_state    = PP_getVar($A, 'state');
+            $this->billto_country  = PP_getVar($A, 'country');
+            $this->billto_zip      = PP_getVar($A, 'zip');
         }
     }
 
@@ -259,14 +276,14 @@ class Order
         }
 
         if (!empty($A)) {
-            $this->shipto_name     = $A['name'];
-            $this->shipto_company  = $A['company'];
-            $this->shipto_address1 = $A['address1'];
-            $this->shipto_address2 = $A['address2'];
-            $this->shipto_city     = $A['city'];
-            $this->shipto_state    = $A['state'];
-            $this->shipto_country  = $A['country'];
-            $this->shipto_zip      = $A['zip'];
+            $this->shipto_name     = PP_getVar($A, 'name');
+            $this->shipto_company  = PP_getVar($A, 'company');
+            $this->shipto_address1 = PP_getVar($A, 'address1');
+            $this->shipto_address2 = PP_getVar($A, 'address2');
+            $this->shipto_city     = PP_getVar($A, 'city');
+            $this->shipto_state    = PP_getVar($A, 'state');
+            $this->shipto_country  = PP_getVar($A, 'country');
+            $this->shipto_zip      = PP_getVar($A, 'zip');
         }
     }
 
@@ -280,16 +297,16 @@ class Order
     {
         if (!is_array($A)) return false;
 
-        $this->uid      = (int)$A['uid'];
-        $this->status   = $A['status'];
-        $this->pmt_method = $A['pmt_method'];
-        $this->pmt_txn_id = $A['pmt_txn_id'];
-        $this->order_date = $A['order_date'];
-        $this->order_id = $A['order_id'];
-        $this->shipping = $A['shipping'];
-        $this->handling = $A['handling'];
-        $this->tax = $A['tax'];
-        $this->instructions = $A['instructions'];
+        $this->uid      = PP_getVar($A, 'uid', 'int');
+        $this->status   = PP_getVar($A, 'status');
+        $this->pmt_method = PP_getVar($A, 'pmt_method');
+        $this->pmt_txn_id = PP_getVar($A, 'pmt_txn_id');
+        $this->order_date = PP_getVar($A, 'order_date');
+        $this->order_id = PP_getVar($A, 'order_id');
+        $this->shipping = PP_getVar($A, 'shipping', 'float');
+        $this->handling = PP_getVar($A, 'handling', 'float');
+        $this->tax = PP_getVar($A, 'tax', 'float');
+        $this->instructions = PP_getVar($A, 'instructions');
 
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
@@ -342,8 +359,6 @@ class Order
 
     public function CreateFromCart($cart)
     {
-        global $_USER;
-
         foreach (array('billto', 'shipto') as $t) {
             $A = $cart->getAddress($t);
             $this->{$t . '_name'}   = $A['name'];
@@ -355,7 +370,6 @@ class Order
             $this->{$t . '_country'}  = $A['country'];
             $this->{$t.'_zip'}      = $A['zip'];
         }
-
         $this->status = '';
         $this->pmt_method = '';
         $this->pmt_txn_id = '';
@@ -454,35 +468,38 @@ class Order
         foreach ($_PP_CONF['workflows'] as $key => $value) {
             $T->set_var('have_' . $value, 'true');
         }
+
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
-            $P = new Product($item['product_id']);
+            //$P = Product::getInstance($item['product_id']);
             $item_options = '';
-            $opt = json_decode($item['options_text'], true);
-            if ($opt) {
+            //$opt = json_decode($item['options_text'], true);
+            $opt = $item->options_text;
+            if ($opt && is_array($opt)) {
                 foreach ($opt as $opt_str) {
                     $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
                 }
             }
-            $item_total = $item['price'] * $item['quantity'];
+            //$item_total = $item['price'] * $item['quantity'];
+            $item_total = $item->price * $item->quantity;
             $subtotal += $item_total;
             $T->set_var(array(
                 //'pi_url'        => PAYPAL_URL,
                 //'cart_id'       => $id,
                 //'pp_id'         => $id + 1,
                 //'item_id'       => $item['item_number'],
-                'item_id'       => htmlspecialchars($item['product_id']),
-                'item_descrip'  => htmlspecialchars($item['description']),
-                'item_price'    => COM_numberFormat($item['price'], 2),
-                'item_quantity' => (int)$item['quantity'],
+                'item_id'       => htmlspecialchars($item->product_id),
+                'item_descrip'  => htmlspecialchars($item->description),
+                'item_price'    => COM_numberFormat($item->price, 2),
+                'item_quantity' => (int)$item->quantity,
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_options'  => $item_options,
                 'is_admin' => $isAdmin ? 'true' : '',
-                'is_file' => $P->file != '' ? 'true' : '',
+                'is_file' => $item->getProduct()->file != '' ? 'true' : '',
             ) );
             $T->parse('iRow', 'ItemRow', true);
-            if ($item['data']['prod_type'] == PP_PROD_PHYSICAL) {
+            if ($item->getProduct()->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;
             }
         }
@@ -679,44 +696,44 @@ class Order
         $dl_links = '';         // Start with empty download links
 
         foreach ($this->items as $id=>$item) {
-            if (!PAYPAL_is_plugin_item($item['product_id'])) {
-                $P = new Product($item['product_id']);
-                if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
-                    $have_physical = 1;
+            //$P = Product::getInstance($item->product_id);
+            //if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+            if ($item->getProduct()->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+                $have_physical = 1;
 
-                // Add the file to the filename array, if any. Download
-                // links are only included if the order status is 'paid'
-                $file = $P->file;
-                if (!empty($file) && $this->status == 'paid') {
-                    $files[] = $file;
-                    $dl_url = PAYPAL_URL . '/download.php?';
-                    // There should always be a token, but fall back to the
-                    // product ID if there isn't
-                    if (!empty($item['token'])) {
-                        $dl_url .= 'token=' . urlencode($item['token']);
-                    } else {
-                        $dl_url .= 'id=' . $item['item_number'];
-                    }
-                    $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
+            // Add the file to the filename array, if any. Download
+            // links are only included if the order status is 'paid'
+            $file = $item->getProduct()->file;
+            if (!empty($file) && $this->status == 'paid') {
+                $files[] = $file;
+                $dl_url = PAYPAL_URL . '/download.php?';
+                // There should always be a token, but fall back to the
+                // product ID if there isn't
+                if (!empty($item->token)) {
+                    $dl_url .= 'token=' . urlencode($item->token);
+                } else {
+                    $dl_url .= 'id=' . $item->item_number;
                 }
+                $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
             }
 
-            $ext = (float)$item['quantity'] * (float)$item['price'];
+            $ext = (float)$item->quantity * (float)$item->price;
             $item_total += $ext;
-            $item_descr = isset($item['description']) ? $item['description'] : $item['descrip'];
+            $item_descr = $item->getShortDscp();
 
             //$message->set_block('message', 'ItemList', 'List');
-            $opts = json_decode($item['options_text'], true);
             $options_text = '';
+            /*$opts = $item->getOptions();
+            $opts = isset($item['options_text']) ? @json_decode($item['options_text'], true) : array();
             if ($opts) {
                 foreach ($opts as $opt_text) {
                     $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
                 }
-            }
+            }*/
             $message->set_block('msg_body', 'ItemList', 'List');
             $message->set_var(array(
-                'qty'   => $item['quantity'],
-                'price' => sprintf($num_format, $item['price']),
+                'qty'   => $item->quantity,
+                'price' => sprintf($num_format, $item->price),
                 'ext'   => sprintf($num_format, $ext),
                 'name'  => $item_descr,
                 'options_text' => $options_text,
