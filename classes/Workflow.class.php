@@ -212,7 +212,7 @@ class Workflow
     *   @param  string  $currview   Current view
     *   @return string              Next view in line
     */
-    public function getNextView($currview = '')
+    public static function getNextView($currview = '')
     {
         global $_PP_CONF;
 
