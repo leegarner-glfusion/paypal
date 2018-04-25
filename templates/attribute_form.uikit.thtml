@@ -1,10 +1,7 @@
 {# begin {templatelocation} #}
 
 <form class="uk-form uk-form-horizontal" action="{action_url}/index.php" method="post">
-  {!if attr_id}
-    <input type="hidden" name="attr_id" value="{attr_id}" />
-  {!endif}
-
+  <input type="hidden" name="attr_id" value="{attr_id}" />
   <fieldset>
 
   <div class="uk-form-row">

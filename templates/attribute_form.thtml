@@ -1,9 +1,7 @@
 {# begin {templatelocation} #}
 
 <form class="paypalProductForm" action="{action_url}/index.php" method="POST">
-  {!if attr_id}
-    <input type="hidden" name="attr_id" value="{attr_id}" />
-  {!endif}
+  <input type="hidden" name="attr_id" value="{attr_id}" />
 
   <fieldset>
 
