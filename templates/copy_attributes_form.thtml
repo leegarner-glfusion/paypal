@@ -13,7 +13,8 @@
 {$LANG_PP['target_cat']}: <select name="dest_cat">
 <option value="0">-- Make Selection --</option>
 {cat_select}
-</select>
+</select>&nbsp;&nbsp;
+<input type="checkbox" name="del_existing_attr" value="1" />{$LANG_PP['del_existing']}
 </p>
 <p><button 
 {!if uikit}
