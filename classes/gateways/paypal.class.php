@@ -170,7 +170,7 @@ class paypal extends Gateway
     */
     public function CheckoutButton($cart)
     {
-        global $_PP_CONF, $_USER, $_TABLES;
+        global $_PP_CONF, $_USER, $_TABLES, $LANG_PP;
 
         if (!$this->_Supports('checkout')) {
             return '';
@@ -214,12 +214,17 @@ class paypal extends Gateway
         $total_amount = 0;
         $shipping = 0;
         $weight = 0;
+        $handling = 0;
+        $fields['tax_cart'] = 0;
 
         foreach ($cartItems as $cart_item_id=>$item) {
-            //$opt_str = '';
-            list($db_item_id, $options) = explode('|', $item['item_id']);
-            if (is_numeric($db_item_id)) {
-                $P = new Product($db_item_id);
+            $opt_str = '';
+            $item_parts = explode('|', $item['item_id']);
+            $db_item_id = $item_parts[0];
+            $options = isset($item_parts[1]) ? $item_parts[1] : '';
+            //if (is_numeric($db_item_id)) {
+                //$P = new Product($db_item_id);
+                $P = Product::getInstance($db_item_id);
                 $db_item_id = DB_escapeString($db_item_id);
                 $oc = 0;
                 if (is_array($item['options'])) {
@@ -238,18 +243,19 @@ class paypal extends Gateway
                     $opts = array();
                 }
                 $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
-                if ($P->taxable == 0) {
+                $fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
+                /*if ($P->taxable == 0) {
                     $fields['tax_' . $i] = '0.00';
-                }
-            } else {
+                }*/
+            /*} else {
                 // Plugin item
                 $fields['amount_' . $i] = $item['price'];
-            }
+            }*/
             //$fields['item_number_' . $i] = htmlspecialchars($item['item_id']);
             $fields['item_number_' . $i] = (int)$cart_item_id;
             $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
             $total_amount += $item['price'];
-            if (is_array($item['extras']['custom'])) {
+            if (isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
                 foreach ($item['extras']['custom'] as $id=>$val) {
                     $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
                     $fields['os'.$oc.'_'.$i] = $val;
@@ -265,12 +271,17 @@ class paypal extends Gateway
             if (isset($item['weight']) && $item['weight'] > 0) {
                 $weight += $item['weight'];
             }
-            if (isset($item['tax'])) {
+            /*if (isset($item['tax'])) {
                 $fields['tax_' . $i] = $item['tax'];
             } elseif (isset($item['options']['tax'])) {
                 $fields['tax_' . $i] = $item['options']['tax'];
-            }
+            }*/
             $i++;
+        }
+
+        $gc = $cart->getGC();
+        if ($gc > 0) {
+            $fields['discount_amount_cart'] = (float)($gc);
         }
 
         if ($shipping > 0) $total_amount += $shipping;
@@ -488,7 +499,7 @@ class paypal extends Gateway
             $vars['custom'] = $this->PrepareCustom();
             $vars['return'] = PAYPAL_URL . '/index.php?thanks=paypal';
             $vars['cancel_return'] = PAYPAL_URL;
-            $vars['amount'] = $P->sale_price;
+            $vars['amount'] = $P->_act_price;
             $vars['undefined_quantity'] = '1';
             $vars['notify_url'] = $this->ipn_url;
 
@@ -519,9 +530,13 @@ class paypal extends Gateway
             $U = self::UserInfo();
             $shipto = $U->getDefaultAddress('shipto');
             if (!empty($shipto)) {
-                list($fname, $lname)  = explode(' ', $shipto['name']);
-                $vars['first_name'] = $fname;
-                if ($lname) $vars['last_name'] = $lname;
+                if (strpos($shipto['name'], ' ')) {
+                    list($fname, $lname) = explode(' ', $shipto['name']);
+                    $vars['first_name'] = $fname;
+                    if ($lname) $vars['last_name'] = $lname;
+                } else {
+                    $vars['first_name'] = $shipto['name'];
+                }
                 $vars['address1'] = $shipto['address1'];
                 if (!empty($shipto['address2']))
                     $vars['address2'] = $shipto['address2'];
@@ -594,7 +609,7 @@ class paypal extends Gateway
         $T->set_file('btn', 'btn_' . $type . '.thtml');
         $btn_text = isset($LANG_PP['buttons'][$type]) ? 
                 $LANG_PP['buttons'][$type] : $LANG_PP['buy_now'];
-        $amount = (float)$attribs['amount'];
+        $amount = isset($attribs['amount']) ? (float)$attribs['amount'] : 0;
         $this->setReceiver($amount);
         $this->AddCustom('transtype', $type);
         if (isset($attribs['custom']) && is_array($attribs['custom'])) {
@@ -693,6 +708,7 @@ class paypal extends Gateway
                 'cmd'       => '_s-xclick',
             );
         }*/
+        $gateway_vars = '';
         foreach ($vars as $name=>$value) {
             $gateway_vars .= '<input type="hidden" name="' . $name . 
                         '" value="' . $value . '" />' . "\n";
