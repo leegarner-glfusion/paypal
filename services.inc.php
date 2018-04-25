@@ -4,9 +4,9 @@
 *   This is used to supply PayPal functions to other plugins.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.5.12
 *   @since      version 0.5.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
@@ -44,8 +44,9 @@ if (!defined ('GVERSION')) {
 */
 function service_genButton_paypal($args, &$output, &$svc_msg)
 {
-    global $_CONF, $_PP_CONF, $ppGCart;
+    global $_CONF, $_PP_CONF;
 
+    $ppGCart = Paypal\Cart::getInstance();
     $btn_type = isset($args['btn_type']) ? $args['btn_type'] : '';
     $output = array();
 
@@ -67,7 +68,6 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
         if (isset($args['unique'])) {
             // If items may only be added to the cart once, check that
             // this one isn't already there
-            PAYPAL_setCart();
             if ($ppGCart->Contains($args['item_number']) !== false) {
                 $btn_cls = 'grey';
                 $btn_disabled = 'disabled="disabled"';
@@ -176,28 +176,31 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
 */
 function service_addCartItem_paypal($args, &$output, &$svc_msg)
 {
-    global $ppGCart;
-
-    PAYPAL_setCart();
-
-    $qty = isset($args['quantity']) ? (float)$args['quantity'] : 1;
-    if (!isset($args['item_number']) || empty($args['item_number'])) {
+    if (!is_array($args) || !isset($args['item_number']) || empty($args['item_number'])) {
         return PLG_RET_ERROR;
     }
 
-    $item_name = isset($args['item_name']) ? $args['item_name'] : '';
-    $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
-    $descrip = isset($args['short_description']) ? $args['short_description'] : '';
-    $options = isset($args['options']) ? $args['options'] : array();
-    $extras = isset($args['extras']) ? $args['extras'] : array();
+    $ppGCart = Paypal\Cart::getInstance();
+
+    $cart_args = array(
+        'item_number' => $args['item_number'],
+        'quantity' => isset($args['quantity']) ? (float)$args['quantity'] : 1,
+        'item_name' => isset($args['item_name']) ? $args['item_name'] : '',
+        'amount' => isset($args['amount']) ? (float)$args['amount'] : 0,
+        'short_description' => isset($args['short_description']) ? $args['short_description'] : '',
+        'options' => isset($args['options']) ? $args['options'] : array(),
+        'extras' => isset($args['extras']) ? $args['extras'] : array(),
+    );
+    if (isset($args['tax'])) {
+        $cart_args['tax'] = $args['tax'];
+    }
 
     // Option to add or update an item only if it is not currently in the cart.
     if (isset($args['unique']) && $args['unique']) {
         if ($ppGCart->Contains($args['item_number']) !== false) return PLG_RET_OK;
     }
 
-    $ppGCart->addItem($args['item_number'], $item_name,
-                $descrip, $qty, $amount, $options, $extras);
+    $ppGCart->addItem($cart_args);
     return PLG_RET_OK;
 }
 
