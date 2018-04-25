@@ -33,14 +33,12 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-PAYPAL_setCart();
+//PAYPAL_setCart();
+$ppGCart = Paypal\Cart::getInstance();
 
-// First try to get the SEO-friendly arguments.  A single "action" and "id"
-// will probably be the most common anyway.  If that fails, go through all
-// the possibilies for actions that might come from submit buttons, etc.
-COM_setArgNames(array('action', 'id'));
-$action = COM_getArgument('action');
+$action = '';
 $actionval = '';
+$view = '';
 
 if (!empty($action)) {
     $id = COM_sanitizeID(COM_getArgument('id'));
@@ -55,8 +53,9 @@ if (!empty($action)) {
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
+        'cart',
     );
-    $action = 'view';
+    $action = 'productlist';    // default view
     foreach($expected as $provided) {
         if (isset($_POST[$provided])) {
             $action = $provided;
@@ -92,6 +91,9 @@ case 'checkout':
     }
     if (isset($_POST['order_instr'])) {
         $ppGCart->setInstructions($_POST['order_instr']);
+    }
+    if (isset($_POST['apply_gc'])) {
+        $ppGCart->setGC($_POST['apply_gc']);
     }
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
@@ -151,10 +153,15 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
             $ppGCart->Contains($_POST['item_number']) !== false) {
         break;
     }
-    $qty = isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1;
-    $ppGCart->addItem($_POST['item_number'], $_POST['item_name'],
-                $_POST['item_descr'], $qty,
-                $_POST['amount'], $_POST['options'], $_POST['extras']);
+    $ppGCart->addItem(array(
+        'item_number' => isset($_POST['item_number']) ? $_POST['item_number'] : '',
+        'item_name' => isset($_POST['item_name']) ? $_POST['item_name'] : '',
+        'description' => isset($$_POST['item_descr']) ? $_POST['item_descr'] : '',
+        'quantity' => isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1,
+        'price' => isset($_POST['amount']) ? $_POST['amount'] : 0,
+        'options' => isset($_POST['options']) ? $_POST['options'] : array(),
+        'extras' => isset($_POST['extras']) ? $_POST['extras'] : array(),
+    ) );
     if (isset($_POST['_ret_url'])) {
         COM_refresh($_POST['_ret_url']);
         exit;
@@ -223,7 +230,7 @@ case 'redeem':
     }
     $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
     $uid = $_USER['uid'];
-    Paypal\Coupon::Redeem($code);
+    Paypal\Coupon::Apply($code, $uid);
     break;
     
 case 'action':      // catch all the "?action=" urls
@@ -307,10 +314,13 @@ case 'history':
 
 case 'billto':
 case 'shipto':
-    if (COM_isAnonUser()) COM_404();
-    $U = new Paypal\UserInfo();
-    $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
-    $content .= $U->AddressForm($view, $A);
+    if (COM_isAnonUser()) {
+        $content .= SEC_loginRequiredForm();
+    } else {
+        $U = new Paypal\UserInfo();
+        $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
+        $content .= $U->AddressForm($view, $A);
+    }
     break;
 
 case 'order':
@@ -338,11 +348,13 @@ case 'vieworder':
     //$_SESSION[PP_CART_VAR]['prevpage'] = $view;
     Paypal\Cart::setSession('prevpage', $view);
     $content .= $ppGCart->View(true);
-    $page_title = $LANG_PP['view_order'];
+    $page_title = $LANG_PP['vieworder'];
     break;
 
 case 'detail':
     // deprecated, should be displayed via detail.php
+    COM_errorLog("Called detail from index.php, deprecated");
+    COM_404();
     $P = new Paypal\Product($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
@@ -378,11 +390,8 @@ case 'checkoutcart':
 
 case 'productlist':
 default:
-    if (isset($_REQUEST['category'])) {
-        $content .= Paypal\ProductList($_REQUEST['category']);
-    } else {
-        $content .= Paypal\ProductList();
-    }
+    $cat_id = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
+    $content .= Paypal\ProductList($cat_id);
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['main_title'];
     break;
@@ -395,7 +404,10 @@ case 'none':
 $display = Paypal\siteHeader();
 $T = new Template(PAYPAL_PI_PATH . '/templates');
 $T->set_file('title', 'paypal_title.thtml');
-//$T->set_var('title', $page_title);
+$T->set_var(array(
+    'title' => isset($page_title) ? $page_title : '',
+    'is_admin' => plugin_ismoderator_paypal(),
+) );
 $display .= $T->parse('', 'title');
 if (!empty($msg)) {
     //msg block
