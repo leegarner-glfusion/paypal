@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.12
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -103,7 +103,7 @@ function PAYPAL_do_upgrade()
         // Add buttons to the product records or they won't be shown.
         // Old paypal version always has buy_now and add_cart buttons.
         $buttons = serialize(array('buy_now' => '', 'add_cart' => ''));
-        DB_query("UPDATE {$_TABLES['paypal.products']} 
+        DB_query("UPDATE {$_TABLES['paypal.products']}
                 SET buttons='$buttons',
                 dt_add = UNIX_TIMESTAMP()");
 
@@ -132,7 +132,7 @@ function PAYPAL_do_upgrade()
             $c->add('blk_popular_limit', $_PP_DEFAULTS['blk_popular_limit'],
                     'text', 0, 30, 2, 60, true, $_PP_CONF['pi_name']);
 
-            $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true, 
+            $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true,
                 $_PP_CONF['pi_name']);
             $c->add('debug', $_PP_DEFAULTS['debug'],
                 'select', 0, 50, 2, 10, true, $_PP_CONF['pi_name']);
@@ -269,7 +269,7 @@ function PAYPAL_do_upgrade()
         $c->del('pp_cert_id', 'paypal');
 
         // Add new plugin config items
-        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true, 
+        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('get_street', $_PP_DEFAULTS['get_street'],
                 'select', 0, 60, 14, 10, true, $_PP_CONF['pi_name']);
@@ -331,19 +331,19 @@ function PAYPAL_do_upgrade()
                         if (isset($data['tax'])) {
                             $tax = (float)$data['tax'];
                             $price -= $tax;
-                        } else {    
+                        } else {
                             $tax = 0;
                         }
                         if (isset($data['shipping'])) {
                             $shipping = (float)$data['shipping'];
                             $price -= $shipping;
-                        } else {    
+                        } else {
                             $shipping = 0;
                         }
                         if (isset($data['handling'])) {
                             $handling = (float)$data['handling'];
                             $price -= $handling;
-                        } else {    
+                        } else {
                             $handling = 0;
                         }
                     }
@@ -423,7 +423,7 @@ function PAYPAL_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.5.7')) {
         $current_ver = '0.5.7';
-        $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id', 
+        $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id',
             "grp_name='{$_PP_CONF['pi_name']} Admin'");
         if ($gid < 1)
             $gid = 1;        // default to Root if paypal group not found
@@ -518,7 +518,7 @@ function PAYPAL_do_upgrade()
                 $_PP_CONF['pi_name']);
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
- 
+
     if (!COM_checkVersion($current_ver, '0.5.11')) {
         $current_ver = '0.5.11';
         // Make sure a "uid" key doesn't exist in this table.
@@ -532,7 +532,23 @@ function PAYPAL_do_upgrade()
     if (!COM_checkVersion($current_ver, '0.5.12')) {
         $current_ver = '0.5.12';
         $c->del('download_path', $_PP_CONF['pi_name']);
+
+        // Previously, categories were not required. With the MPTT method,
+        // there must be at least one.
+        $cats = DB_count($_TABLES['paypal.categories']);
+        if ($cats == 0) {
+            $sql = "INSERT INTO {$_TABLES['paypal.categories']}
+                    (cat_id, cat_name, description)
+                VALUES
+                    (1, 'Home', 'Root Category', 1, 2)";
+            DB_query($sql);
+            $sql = "UPDATE {$_TABLES['paypal.products']}
+                    SET cat_id = 1 WHERE cat_id = 0";
+            DB_query($sql);
+        }
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        // Rebuild the tree after the lft/rgt category fields are added.
+        Paypal\Category::rebuildTree();
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
