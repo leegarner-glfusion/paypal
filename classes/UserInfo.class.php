@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -27,12 +27,16 @@ class UserInfo
     *   @var array */
     var $addresses = array();
 
+    private $isNew = true;
+    private $properties = array();
     private $formaction = NULL;
     private $extravars = array();
 
+    private static $users = array();
+
     /**
     *   Constructor.
-    *   Reads in the specified user, if $id is set.  If $id is zero, 
+    *   Reads in the specified user, if $id is set.  If $id is zero,
     *   then the current user is used.
     *
     *   @param  integer     $uid    Optional user ID
@@ -51,6 +55,47 @@ class UserInfo
 
 
     /**
+    *   Set a property's value
+    *
+    *   @param  string  $key    Name of property to set
+    *   @param  mixed   $value  Value to set
+    */
+    public function __set($key, $value)
+    {
+        switch ($key) {
+        case 'cart':
+            // Check if the cart is being passed as an array or is already
+            // serialized
+            if (is_string($value)) {
+                $value = @unserialize($value);
+                if (!$value) $value = array();
+            }
+            $this->properties[$key] = $value;
+            break;
+        case 'gc_bal':
+            $this->properties[$key] = (float)$value;
+            break;
+        }
+    }
+
+
+    /**
+    *   Get a property's value
+    *
+    *   @param  string  $key    Name of property to retrieve
+    *   @return mixed       Value of property, NULL if not set
+    */
+    public function __get($key)
+    {
+        if (isset($this->properties[$key])) {
+            return $this->properties[$key];
+        } else {
+            return NULL;
+        }
+    }
+
+
+    /**
     *   Read one user from the database
     *
     *   @param  integer $uid Optional User ID.  Current user if zero.
@@ -65,11 +110,26 @@ class UserInfo
             return;
         }
 
-        $result = DB_query("SELECT * FROM {$_TABLES['paypal.address']} 
+        $res = DB_query("SELECT * FROM {$_TABLES['paypal.address']}
                             WHERE uid=$uid");
-        while ($A = DB_fetchArray($result, false)) {
+        while ($A = DB_fetchArray($res, false)) {
             $this->addresses[] = $A;
             //$this->SetAddresses($A);
+        }
+        $res = DB_query("SELECT * FROM {$_TABLES['paypal.userinfo']}
+                            WHERE uid = $uid");
+        if (DB_numRows($res) == 1) {
+            $A = DB_fetchArray($res, false);
+            $this->gc_bal = (float)$A['gc_bal'];
+            $cart = @unserialize($A['cart']);
+            if (!$cart) $cart = array();
+            $this->cart = $cart;
+            $this->isNew = false;
+        } else {
+            $this->gc_bal = 0;
+            $this->cart = array();
+            $this->isNew = true;
+            $this->SaveUser();
         }
     }
 
@@ -132,7 +192,7 @@ class UserInfo
             $type .= '_';
         }
 
-        $id = isset($A['addr_id']) && !empty($A['addr_id']) ? 
+        $id = isset($A['addr_id']) && !empty($A['addr_id']) ?
             (int)$A['addr_id'] : 0;
 
         $msg = self::isValidAddress($A, $type);
@@ -170,21 +230,69 @@ class UserInfo
                     SET {$type}def = 0
                     WHERE id <> $id AND {$type}def = 1");
         }
-
+        Cache::delete('ppuser_' . $this->uid);
         return array($id, '');
     }
 
 
     /**
-    *   Delete the current user info record from the database
+    *   Save the usr information
+    *
+    *   @return boolean     True on success, False on failure
     */
-    public function Delete($id)
+    public function SaveUser()
     {
         global $_TABLES;
 
-        $id = (int)$id;
+        if ($this->isNew) {
+            $sql1 = "INSERT INTO {$_TABLES['paypal.userinfo']} SET
+                    uid = {$this->uid},";
+            $sql3 = '';
+        } else {
+            $sql1 = "UPDATE {$_TABLES['paypal.userinfo']} SET ";
+            $sql3 = " WHERE uid = {$this->uid}";
+        }
+        $cart = DB_escapeString(@serialize($this->cart));
+
+        $sql2 = "gc_bal = {$this->gc_bal},
+                cart = '$cart'";
+        $sql = $sql1 . $sql2 . $sql3;
+        DB_query($sql);
+        Cache::delete('ppuser_' . $this->uid);
+        return DB_error() ? false : true;
+    }
+
+
+    /**
+    *   Delete all information for a user.
+    *   Called from plugin_user_deleted_paypal() when a user account is
+    *   removed.
+    *
+    *   @param  integer $uid    User ID
+    */
+    public static function deleteUser($uid)
+    {
+        global $_TABLES;
+
+        $uid = (int)$uid;
+        DB_delete($_TABLES['paypal.userinfo'], 'uid', $uid);
+        DB_delete($_TABLES['paypal.address'], 'uid', $uid);
+        Cache::delete('ppuser_' . $uid);
+    }
+
+
+    /**
+    *   Delete an address by id.
+    *   Called when the user deletes one of their billing or shipping addresses.
+    */
+    public static function deleteAddress($id)
+    {
+        global $_TABLES;
+
         if ($id < 1) return false;
-        DB_delete($_TABLES['paypal.address'], 'id', $this->id);
+        $id = (int)$id;
+        DB_delete($_TABLES['paypal.address'], 'id', $id);
+        Cache::delete('ppuser_' . $this->uid);
     }
 
 
@@ -195,7 +303,7 @@ class UserInfo
     *   @param  string  $type   Type of address (billing or shipping)
     *   @return string      Invalid items, or empty string for success
     */
-    public function isValidAddress($A)
+    public static function isValidAddress($A)
     {
         global $LANG_PP, $_PP_CONF;
 
@@ -355,8 +463,33 @@ class UserInfo
     */
     public function addFormVar($name, $value)
     {
-        $this->extravars[] = '<input type="hidden" name="' . $name . 
+        $this->extravars[] = '<input type="hidden" name="' . $name .
                 '" value="' . $value . '" />';
+    }
+
+
+    /**
+    *   Get the instance of a UserInfo object for the specified user.
+    *
+    *   @param  integer $uid    User ID
+    *   @return object          UserInfo object for the user
+    */
+    public static function getInstance($uid = 0)
+    {
+        global $_USER;
+
+        if ($uid == 0) $uid = $_USER['uid'];
+        $uid = (int)$uid;
+        $key = 'ppuser_' . $uid;
+        // If not already set, read the user info from the database
+        if (!isset(self::$users[$uid])) {
+            self::$users[$uid] = Cache::get($key);
+            if (!self::$users[$uid]) {
+                self::$users[$uid] = new self($uid);
+                Cache::set($key, self::$users[$uid]);
+            }
+        }
+        return self::$users[$uid];
     }
 
 }   // class UserInfo
