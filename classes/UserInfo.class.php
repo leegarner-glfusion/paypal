@@ -492,6 +492,19 @@ class UserInfo
         return self::$users[$uid];
     }
 
+
+    /**
+    *   Get an array of field names used by this class.
+    *   May be used when constructing forms and SQL statements.
+    *
+    *   @return array   Array of field names
+    */
+    public static function Fields()
+    {
+        return array('name', 'company', 'address1', 'address2',
+            'city', 'state', 'country', 'zip');
+    }
+
 }   // class UserInfo
 
 ?>
