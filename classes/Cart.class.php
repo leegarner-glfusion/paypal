@@ -36,8 +36,6 @@ class Cart
         @var string */
     private $m_cart_id;
 
-    //private $m_billto;
-    //private $m_shipto;
     private $m_info;
 
     private $_addr_fields = array(
@@ -70,11 +68,13 @@ class Cart
             }
             // If a cart ID still not found, create a new one
             if (empty($cart_id)) {
-                $cart_id = self::makeCartID();
+                $cart_id = self::_makeCartID();
             }
-            // Set the cart ID in the session and the local variable
-            $_SESSION[self::$session_var]['cart_id'] = $cart_id;
+            // Set the cart ID in the cookie and the local variable
             $this->m_cart_id = $cart_id;
+            if (COM_isAnonUser()) {
+                self::setAnonCartID($this->m_cart_id);
+            }
         } else {
             // For non-interactive sessions a cart ID must be provided
             $this->m_cart_id = $cart_id;
@@ -91,11 +91,25 @@ class Cart
     *
     *   @return object  Cart object
     */
-    public static function getInstance()
+    public static function getInstance($uid = 0, $cart_id = '')
     {
-        static $cart = NULL;
-        if ($cart === NULL) {
-            $cart = new self();
+        global $_USER;
+        static $carts = array();
+
+        if ($uid == 0) $uid = $_USER['uid'];
+        $uid = (int)$uid;
+        if ($uid > 1) {
+            if (!array_key_exists($uid, $carts)) {
+                $carts[$uid] = new self();
+            }
+            $cart = $carts[$uid];
+        } else {
+            // Get a cart for another user. Used to get the anonymous
+            // cart by ID to merge when logging in. Can't cache this.
+            if ($cart_id == '') {
+                $cart_id = self::_makeCartID();
+            }
+            $cart = new self($cart_id);
         }
         return $cart;
     }
@@ -114,9 +128,8 @@ class Cart
 
     /**
     *   Set the cart contents.
-    *   If a cart array is provided, then it is used.  Otherwise, the current
-    *   user's cart is read from the database.  Either way, any current contents
-    *   of $m_cart are overwritten.
+    *
+    *   @uses   self::Read()
     */
     public function Load()
     {
@@ -125,13 +138,19 @@ class Cart
             return;
         }
 
-        $data = $this->Read($cart_id);
+        $data = self::Read($cart_id);
         $this->m_info = $data['info'];
         $this->m_cart = $data['cart'];
     }
 
 
-    public function Read($cart_id)
+    /**
+    *   Static function to read cart info from the database.
+    *
+    *   @param  string  $cart_id    Cart ID
+    *   @return array       Array of cart contents and other info
+    */
+    public static function Read($cart_id)
     {
         global $_TABLES;
 
@@ -164,25 +183,20 @@ class Cart
 
 
     /**
-    *   Merge the save cart from the database into the current cart.
-    *   Normally used when a user logs in to add their saved cart items
-    *   to any that might have been added while browsing anonymously.
+    *   Merge the saved cart for Anonymous into the current user's cart.
     *   Saves the updated cart to the database
     *
     *   @return array       Current cart contents
     */
-    public function Merge()
+    public function Merge($cart_id)
     {
         global $_TABLES, $_USER;
 
         if ($_USER['uid'] < 2) return;
 
-        $U = UserInfo::getInstance($_USER['uid']);
-
-        $saved = $U->cart;
-        if (is_array($saved)) {
-            // Add saved items to current cart
-            foreach ($saved as $id=>$A) {
+        $AnonCart = self::getInstance(1, $cart_id);
+        if (!empty($AnonCart->m_cart)) {
+            foreach ($AnonCart->m_cart as $A) {
                 $item = PAYPAL_explode_opts($A['item_id']);
                 $args = array(
                     'item_number' => $item[0],
@@ -200,6 +214,7 @@ class Cart
             }
             $this->Save();
         }
+        self::delAnonCart($cart_id);    // Delete to avoid re-merging
         return $this->m_cart;
     }
 
@@ -243,8 +258,9 @@ class Cart
 
     /**
     *   Save the current cart items to the userinfo table for logged-in users
+    *   @deprecated
     */
-    public function SaveUserCart()
+    public function X_SaveUserCart()
     {
         global $_TABLES, $_USER;
 
@@ -320,7 +336,8 @@ class Cart
         }
 
         if ($P->taxable) {
-            $tax = round($_PP_CONF['tax_rate'] * $price * $quantity, 2);
+            $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
+            $tax = round($tax_rate * $price * $quantity, 2);
         } else {
             $tax = 0;
         }
@@ -456,7 +473,7 @@ class Cart
             Order::Delete($_SESSION[self::$session_var]['order_id']);
         }
         $this->m_cart = array();
-        unset($_SESSION[self::$session_var]);
+        self::delAnonCart();
         return $this->m_cart;
     }
 
@@ -562,7 +579,7 @@ class Cart
             $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
             if ($P->taxable) {
-                $cart_tax += $item_total * $_PP_CONF['tax_rate'];
+                $cart_tax += $item_total * PP_getVar($_PP_CONF, 'tax_rate', 'float');
             }
             $T->set_var(array(
                 'cart_item_id'  => $id,
@@ -584,7 +601,7 @@ class Cart
         }
 
         $custom_info = array(
-                'uid'       =>$_USER['uid'],
+                'uid'       => $_USER['uid'],
                 'transtype' => 'cart_upload',
                 'cart_id'   => $this->cartID(),
         );
@@ -719,7 +736,7 @@ class Cart
     *
     *   @return string  Cart ID
     */
-    public function makeCartID()
+    private static function _makeCartID()
     {
         global $_CONF;
 
@@ -802,7 +819,7 @@ class Cart
     *   Gets the latest cart, and cleans up extra carts that may accumulate
     *   due to expired sessions
     */
-    public function getCart($uid = 0)
+    public static function getCart($uid = 0)
     {
         global $_USER, $_TABLES;
 
@@ -810,9 +827,7 @@ class Cart
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
 
         if (COM_isAnonUser()) {
-            if (!empty($_SESSION[self::$session_var]['cart_id'])) {
-                $cart_id = $_SESSION[self::$session_var]['cart_id'];
-            }
+            $cart_id = self::getAnonCartID();
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
                 "cart_uid = $uid ORDER BY last_update DESC limit 1");
@@ -906,6 +921,83 @@ class Cart
                 SET apply_gc = $amt
                 WHERE cart_id = '{$this->m_cart_id}'";
         DB_query($sql);
+    }
+
+
+    /**
+    *   Delete any cart(s) for a user.
+    *
+    *   @param  integer $uid    User ID
+    */
+    public static function deleteUser($uid)
+    {
+        global $_TABLES;
+
+        DB_delete($_TABLES['paypal.cart'], 'cart_uid', $uid);
+    }
+
+
+    /**
+    *   Delete a specific cart.
+    *   Called after an order is created from the cart items.
+    *
+    *   @param  string  $cart_id    Cart ID
+    */
+    public function delete()
+    {
+        global $_TABLES;
+
+        DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->m_cart_id);
+        PAYPAL_debug("Cart {$this->m_cart_id} deleted");
+    }
+
+
+    /**
+    *   Set the anonymous user's cart ID.
+    *   Used so the anonymous cart can be located and merged when a user
+    *   logs in.
+    *
+    *   @param  string  $cart_id    Cart ID
+    */
+    public static function setAnonCartID($cart_id)
+    {
+        setcookie(self::$session_var, $cart_id);
+    }
+
+
+    /**
+    *   Delete the anonymous user's cart.
+    */
+    public static function delAnonCart()
+    {
+        global $_TABLES;
+
+        $cart_id = self::getAnonCartID();
+        if ($cart_id) {
+            // Remove the cookie
+            unset($_COOKIE[self::$session_var]);
+            setcookie(self::$session_var, '', time()-3600);
+            // And delete the cart record
+            DB_delete($_TABLES['paypal.cart'],
+                array('cart_id', 'cart_uid'),
+                array($cart_id, 1)
+            );
+        }
+    }
+
+
+    /**
+    *   Get the anonymous user's cart ID from the cookie
+    *
+    *   @return mixed   Cart ID, or Null if not set
+    */
+    public static function getAnonCartID()
+    {
+        if (isset($_COOKIE[self::$session_var]) && !empty($_COOKIE[self::$session_var])) {
+            return $_COOKIE[self::$session_var];
+        } else {
+            return NULL;
+        }
     }
 
 }   // class Cart
