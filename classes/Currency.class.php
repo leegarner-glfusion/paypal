@@ -24,8 +24,11 @@ class Currency
     *
     *   @param  string  $defCur Currency code to set as default
     */
-    public function __construct($defCur='USD')
+    public function __construct($defCur=NULL)
     {
+        global $_PP_CONF;
+
+        if ($defCur === NULL) $defCur = $_PP_CONF['currency'];
         $this->setDefault($defCur);
     }
 
