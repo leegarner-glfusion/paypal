@@ -594,36 +594,28 @@ class IPN
             //list($item_number,$options) =
             //if (is_numeric($item_number)) {
             $P = Product::getInstance($item['item_id']);
-            //if (is_numeric($item['item_number'])) {
-                // For Paypal catalog options, check for options and append
-                // to the description.  Update quantity on hand if tracking
-                // is enabled.  These actions don't apply to items from
-                // other plugins.
-                //$P = new Product($item['item_id']);
-                //$P = Product::getInstance($item['item_id']);
-                $item['short_description'] = $P->short_description;
-                if (!empty($options)) {
-                    // options is expected as CSV
-                    $sql = "SELECT attr_name, attr_value
-                            FROM {$_TABLES['paypal.prod_attr']}
-                            WHERE attr_id IN ($options)";
-                    $optres = DB_query($sql);
-                    $opt_str = '';
-                    while ($O = DB_fetchArray($optres, false)) {
-                        $opt_str .= ', ' . $O['attr_value'];
-                        $option_desc[] = $O['attr_name'] . ': ' . $O['attr_value'];
-                    }
+            $item['short_description'] = $P->short_description;
+            if (!empty($options)) {
+                // options is expected as CSV
+                $sql = "SELECT attr_name, attr_value
+                        FROM {$_TABLES['paypal.prod_attr']}
+                        WHERE attr_id IN ($options)";
+                $optres = DB_query($sql);
+                $opt_str = '';
+                while ($O = DB_fetchArray($optres, false)) {
+                    $opt_str .= ', ' . $O['attr_value'];
+                    $option_desc[] = $O['attr_name'] . ': ' . $O['attr_value'];
                 }
+            }
 
-                // Get the product record and custom strings
-                if (isset($item['extras']['custom']) &&
-                        is_array($item['extras']['custom']) &&
-                        !empty($item['extras']['custom'])) {
-                    foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
-                        $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
-                    }
+            // Get the product record and custom strings
+            if (isset($item['extras']['custom']) &&
+                    is_array($item['extras']['custom']) &&
+                    !empty($item['extras']['custom'])) {
+                foreach ($item['extras']['custom'] as $cust_id=>$cust_val) {
+                    $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
                 }
-//            }
+            }
 //var_dump($item);die;
             $args = array(
                 'order_id' => $order_id,
@@ -651,7 +643,7 @@ class IPN
         // If this was a user's cart, then clear that also
         if ($cart) {
             $cart->delete();
-        }
+        } else {
             PAYPAL_debug('no cart to delete');
         }
         return 0;
