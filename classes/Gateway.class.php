@@ -370,7 +370,7 @@ abstract class Gateway
     /**
     *   Reorder all gateways
     */
-    function ReOrder()
+    public static function ReOrder()
     {
         global $_TABLES;
 
