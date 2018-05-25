@@ -2,6 +2,11 @@
 
 ## Ver 0.5.12
 Released TBD
+- Use cookie instead of session to store cart IDs since session changes at login
+- Add privacy_export function
+- Additional refactoring to support multiple product types
+- Support for selling gift cards
+- Implement glFusion 1.8.0 caching
 - Implement class autoloader, refactor gateway classes
 - Change post to get for redirect from Paypal
 - Removed unused comment counter field

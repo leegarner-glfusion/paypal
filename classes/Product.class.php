@@ -1513,7 +1513,8 @@ class Product
         global $_PP_CONF;
 
         if ($this->taxable) {
-            return round($_PP_CONF['tax_rate'] * $price * $qty, 2);
+            $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
+            return round($tax_rate * $price * $qty, 2);
         } else {
             return 0;
         }
@@ -1584,7 +1585,7 @@ class Product
         // update the qty on hand, if tracking and not already zero
         if ($this->track_onhand && $this->onhand > 0) {
             $sql = "UPDATE {$_TABLES['paypal.products']} SET
-                    onhand = GREATEST(0, onhand - $qty)
+                    onhand = GREATEST(0, onhand - {$Item->quantity})
                     WHERE id = '{$this->id}'";
             DB_query($sql, 1);
             if (DB_error()) {
@@ -1755,10 +1756,8 @@ class Product
 
     /**
     *   Determine if a given item number belongs to a plugin.
-    *   For now, this simply checks whether the item number is numeric.  If
-    *   it is, it's assumed to be a catalog item.  If it's non-numeric, it's
-    *   assumed to be a plugin-supplied item where the item number is
-    *   formated as "pi_name:item_number:other_opts"
+    *   Looks for a colon in the item number, which will indicate a plugin
+    *   item number formated as "pi_name:item_number:other_opts"
     *
     *   @param  mixed   $item_number    Item Number to check
     *   @return boolean     True if it's a plugin item, false if it's ours

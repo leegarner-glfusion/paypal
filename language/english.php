@@ -44,6 +44,7 @@ $LANG_PP = array (
 'quantity'          => 'Quantity',
 'item_total'        => 'Item Total',
 'total'             => 'Total',
+'net_total'         => 'Net Total',
 'cart_empty'        => 'Your cart is empty.',
 'purchase_history'  => 'Purchase History',
 'ipnlog'            => 'IPN Log',
@@ -119,8 +120,11 @@ $LANG_PP = array (
     ),
 'prod_type'         => 'Product Type',
 'prod_types'        => array(
-        1 => 'Physical', 2 => 'Downloadable', 4 => 'Other Virtual',
+        1 => 'Physical',
+        2 => 'Downloadable',
+        4 => 'Other Virtual',
         3 => 'Physical + Download',
+//        8 => 'Gift Card',
     ),
 'edit'              => 'Edit',
 'create_category'   => 'Create a New Category',
@@ -269,7 +273,8 @@ $LANG_PP = array (
 'qty_disc_text' => 'Discounts calculated at checkout',
 'order_instr' => 'Special Order Instructions',
 'copy_attributes' => 'Copy all attributes from one product to another product or category.<br />' .
-    'Existing attributes will not be changed',
+    'Existing attributes will not be changed unless the &quot;Delete Existing&quot; box is checked',
+'del_existing' => 'Delete Existing?',
 'copy_from' => 'Copy From',
 'target_prod' => 'Target Product',
 'target_cat' => 'Target Category',
@@ -281,7 +286,7 @@ $LANG_PP = array (
 'terms_and_cond' => 'Terms and Conditions',
 'item_history' => 'Item Purchase History',
 'reset' => 'Reset',
-'datepicker' => 'Date Selector',
+'datepicker' => 'Click for Date Selector',
 'workflows' => 'Order Workflows',
 'statuses' => 'Order Statuses',
 'reports' => 'Reports',
@@ -298,10 +303,32 @@ $LANG_PP = array (
 'print' => 'Print',
 'resetbuttons' => 'Clear Encrypted Button Cache',
 'orderhist_item' => 'View the order history for this item',
+'notify_email' => 'Notification Email',
+'recipient_email' => 'Recipient Email',
+'sender_name' => 'Sender\'s Name',
+'apply_gc' => 'Apply Gift Card Balance',
+'item_not_found' => 'Item not found',
+'dscp_root_cat' => 'This is the root category and cannot be deleted.',
+'no_del_item' => 'Product %s has purchase records, can&apos;t delete.',
+'no_del_cat' => 'Category %s has related products or sub-categories, can&apos;t delete.',
+'forgotten_user' => 'User Forgotten',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
 }
+
+$LANG_PP_EMAIL = array(
+'coupon_1' => 'You have received a gift card. Click on the link below to redeem it.',
+'coupon_id' => 'Gift Card',
+'coupon_subject' => 'You have a gift card!',
+);
+
+$LANG_PP_HELP = array(
+'notify_email' => 'Enter an optional email address to receive the notification of this order. Your own email address will be used if this is empty.',
+'hlp_cat_delete' => 'Only unused categories may be deleted',
+);
+
+$LANG_MYACCOUNT['pe_paypal'] = 'Shopping';
 
 /** Message indicating plugin version is up to date */
 $PLG_paypal_MESSAGE03 = 'Error retrieving current version number';

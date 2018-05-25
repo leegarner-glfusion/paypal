@@ -61,6 +61,7 @@ class paypal_ipn extends IPN
         $this->pp_data['gw_name'] = $this->gw->Name();
         $this->pp_data['pmt_status'] = PP_getVar($A, 'payment_status');
         $this->pp_data['currency'] = PP_getVar($A, 'mc_currency');
+        $this->pp_data['discount'] = PP_getVar($A, 'discount', 'float');
         if (isset($A['invoice']))
             $this->pp_data['invoice'] = $A['invoice'];
         if (isset($A['parent_txn_id']))
