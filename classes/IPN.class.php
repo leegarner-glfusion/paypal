@@ -130,8 +130,6 @@ class IPN
     *   @param  float   $handling   Optional per-item handling amount
     *   @param  float   $tax        Optional per-item sales tax amount
     */
-    //protected function AddItem($item_id, $qty, $price, $item_name='',
-    //        $shipping=0, $handling=0, $tax=0, $extras='')
     protected function AddItem($args)
     {
         if (!isset($args['item_id']) || !isset($args['quantity']) || !isset($args['price'])) {
@@ -231,66 +229,37 @@ class IPN
         $total = (float)0;
         $payment_gross = (float)$this->pp_data['pmt_gross'];
 
+        // Get the discount amount, if any, and verify the user's balance
+        $discount = (float)$this->pp_data['discount'];
+        if ($discount > 0) {
+            $uid = (int)$this->pp_data['custom']['uid'];
+            if (!Coupon::verifyBalance($uid, $discount)) {
+                $discount = 0;
+            }
+        }
+
         foreach ($this->items as $id => $item) {
             $P = Product::getInstance($item['item_number']);
-
-            // If the item number is numeric, assume it's an
-            // inventory item.  Otherwise, it should be a plugin-supplied
-            // item with the item number like pi_name:item_number:options
-            //if (PAYPAL_is_plugin_item($item['item_number'])) {
-            //    PAYPAL_debug('Plugin Item: ' . $item['item_number']);
-
-                // Split the item number into component parts.  It could
-                // be just a single string, depending on the plugin's needs.
-                // pi_info[0] will be the plugin name, pi_info[1] is most
-                // likely a product ID which will be decoded by the plugin
-                // handler.
-             /*   if (strstr($item['item_number'], ':')) {
-                    // received "plugin_name:sku..."
-                    $pi_info = explode(':', $item['item_number']);
-                } else {
-                    // received just "plugin_name" as complete item number
-                    $pi_info = array($item['item_number']);
-                }*/
-                // Try to call the plugin's function to get product info.
-                //$status = LGLIB_invokeService($pi_info[0], 'productinfo',
-                //    $pi_info, $A, $svc_msg);
-                //if ($status == PLG_RET_OK) {
-                /*    $price = isset($A['price']) ? $A['price'] : 0;
-                    // we don't get the product name with the IPN, add it here
-                    $this->items[$id]['name'] = $A['name'];
-                } else {
-                    // probably an invalid product ID
-                    $price = 0;
-                }
-
-            } else {*/
-                // It's one of our items, so grab relevant product data
-                // from product table to insert into purchase table.
-                //$P = new Product($item['item_number']);
-                //$P = Product::getInstance($item['item_number']);
-                if (!empty($item['options'])) {
-                    $opts = explode(',', $item['options']);
-                } else {
-                    $opts = array();
-                }
-                $price = $P->getPrice($opts, $item['quantity']);
+            if (!empty($item['options'])) {
+                $opts = explode(',', $item['options']);
+            } else {
+                $opts = array();
             }
+            $price = $P->getPrice($opts, $item['quantity']);
 
             // calculate the total purchase price
             $total += ($price * $item['quantity']);
-        //}
+        }
 
         // Compare total price to gross payment.  The ".0001" is to help
-        // kill any floating-point errors
-        if ($total <= $payment_gross + .0001) {
+        // kill any floating-point errors. Include any discount.
+        if ($total <= $payment_gross + $discount + .0001) {
             PAYPAL_debug("$payment_gross received is ok, require $total");
             return true;
         } else {
             PAYPAL_debug("$payment_gross received is less than price of $total");
             return false;
         }
-
     }   // isSufficientFunds()
 
 
@@ -470,84 +439,19 @@ class IPN
 
             $this->items[$id]['prod_type'] = $P->prod_type;
 
-
-/*            if (PAYPAL_is_plugin_item($item['item_number'])) {
-                PAYPAL_debug("handlePurchase for Plugin item " .
-                        $item['item_number']);
-                // Initialize item info array to be used later
-                $A = array();
-                // Split the item number into component parts.  It could
-                // be just a single string, depending on the plugin's needs.
-                if (strstr($item['item_number'], ':')) {
-                    $pi_info = explode(':', $item['item_number']);
-                } else {
-                    $pi_info = array($item['item_number']);
-                }
-                PAYPAL_debug('Paypal\\IPN::handlePurchase() pi_info: ' . print_r($pi_info,true));
-                $status = LGLIB_invokeService($pi_info[0], 'productinfo',
-                        $pi_info, $A, $svc_msg);
-
-                if ($status != PLG_RET_OK) {
-                    $A = array();
-                }
-                if (!empty($A)) {
-                    $this->items[$id]['name'] = $A['name'];
-                    $this->items[$id]['short_description'] = $A['short_description'];
-                }
-                PAYPAL_debug("Paypal\\IPN::handlePurchase() Got name " . $this->items[$id]['name']);
-                $vars = array(
-                        'item' => $item,
-                        'ipn_data' => $this->pp_data,
-//                        'order' => $this->Order,
-                );
-                if ($this->pp_data['status'] == 'paid') {
-                    $status = LGLIB_invokeService($pi_info[0], 'handlePurchase',
-                            $vars, $A, $svc_msg);
-                    if ($status != PLG_RET_OK) {
-                        $A = array();
-                    }
-                }
-                $A['prod_type'] = PP_PROD_PLUGIN;
-
-                // Mark what type of product this is
-                $prod_types |= PP_PROD_VIRTUAL;
-
-            } else {*/
-                PAYPAL_debug("Paypal item " . $item['item_number']);
-                //$P = new Product($item['item_number']);
-                //$P = Product::getInstance($item['item_number']);
-/*                $A = array(
-                    'name' => $P->name,
-                    'short_description' => $P->short_description,
-                    'expiration' => $P->expiration,
-                    'prod_type' => $P->prod_type,
-                    'file' => $P->file,
-                    'price' => $item['price'],
-                );*/
-                if (!empty($item['options'])) {
-                    $opts = explode(',', $item['options']);
-                    $opt_str = $P->getOptionDesc($opts);
-                    if (!empty($opt_str)) {
+            PAYPAL_debug("Paypal item " . $item['item_number']);
+            if (!empty($item['options'])) {
+                $opts = explode(',', $item['options']);
+                $opt_str = $P->getOptionDesc($opts);
+                if (!empty($opt_str)) {
             // TODO:            $A['short_description'] .= " ($opt_str)";
-                    }
-                    //$this->items[$id]['item_number'] .= '|' . $item['options'];
                 }
-
-                // Mark what type of product this is
-                $prod_types |= $P->prod_type;
-
-                //$P->handlePurchase($item['quantity']);
-            //}
-
-            // An invalid item number, or nothing returned for a plugin
-/*            if (empty($A)) {
-                $this->Error("Item {$item['item_number']} not found - txn " .
-                        $this->pp_data['txn_id']);
-                continue;
             }
-*/
+
+            // Mark what type of product this is
+            $prod_types |= $P->prod_type;
+
             // If it's a downloadable item, then get the full path to the file.
- //           if (!empty($A['file'])) {
             if ($P->file != '') {
                 //$this->items[$id]['file'] = $_PP_CONF['download_path'] . $A['file'];
                 $this->items[$id]['file'] = $_PP_CONF['download_path'] . $P->file;
@@ -557,13 +461,9 @@ class IPN
             } else {
                 $token = '';
             }
-            //$this->items[$id]['prod_type'] = $A['prod_type'];
             if (is_numeric($P->expiration) && $P->expiration > 0) {
                 $this->items[$id]['expiration'] = $P->expiration;
             }
-            /*if (is_numeric($A['expiration']) && $A['expiration'] > 0) {
-                $this->items[$id]['expiration'] = $A['expiration'];
-            }*/
 
             // If a custom name was supplied by the gateway's IPN processor,
             // then use that.  Otherwise, plug in the name from inventory or
@@ -583,10 +483,6 @@ class IPN
         $status = $this->CreateOrder();
         if ($status == 0) {
             foreach ($this->Order->items as $item) {
-                //if (!PAYPAL_is_plugin_item($item['product_id'])) {
-                //    $P = Product::getInstance($item['product_id']);
-                //    $P->handlePurchase($item, $this->Order);
-                //}
                 $item->getProduct()->handlePurchase($item, $this->Order, $this->pp_data);
             }
             $this->Order->Notify();
@@ -634,8 +530,10 @@ class IPN
 
         if (isset($this->pp_data['custom']['cart_id'])) {
             $cart = new Cart($this->pp_data['custom']['cart_id']);
-            if (!$_PP_CONF['sys_test_ipn'] && !$cart->hasItems()) {
-                return 1; // shouldn't normally be empty except during testing
+            if (!$cart->hasItems()) {
+                if (!$_PP_CONF['sys_test_ipn']) {
+                    return 1; // shouldn't normally be empty except during testing
+                }
             }
         } else {
             $cart = NULL;
@@ -744,47 +642,16 @@ class IPN
                 'extras' => $item['extras'],
             );
             $OrderItem = new OrderItem($args);
-//var_dump($OrderItem);die;
             $OrderItem->Save();
-
-/*
-            $sql = "INSERT INTO {$_TABLES['paypal.purchases']} SET
-                    order_id = '{$db_order_id}',
-                    product_id = '{$item['item_number']}',
-                    description = '" . DB_escapeString($item['short_description']) . "',
-                    quantity = '{$item['quantity']}',
-                    user_id = '{$this->pp_data['custom']['uid']}',
-                    txn_type = '{$this->pp_data['custom']['transtype']}',
-                    txn_id = '{$this->pp_data['txn_id']}',
-                    purchase_date = '{$this->sql_date}',
-                    status = 'paid',
-                    token = '" . md5(time()) . "',
-                    price = " . (float)$item['price'] . ",
-                    options = '$options',
-                    options_text = '" . DB_escapeString(json_encode($option_desc)) . "',
-                    extras = '" . DB_escapeString(json_encode($item['extras'])) . "'";
-
-            // add an expiration date if appropriate
-            if (isset($item['expiration']) && $item['expiration'] > 0) {
-                $sql .= ", expiration = DATE_ADD('{$this->sql_date}', INTERVAL {$item['expiration']} DAY)";
-            }
-            PAYPAL_debug($sql);
-            DB_query($sql);*/
-
         }   // foreach item
 
         // Reload the order to get the items
         $this->Order->Load();
 
         // If this was a user's cart, then clear that also
-        if (isset($this->pp_data['custom']['cart_id']) &&
-                    !empty($this->pp_data['custom']['cart_id'])) {
-            if (!$_PP_CONF['sys_test_ipn']) {
-                DB_delete($_TABLES['paypal.cart'], 'cart_id',
-                                $this->pp_data['custom']['cart_id']);
-                PAYPAL_debug('Cart ' . $this->pp_data['custom']['cart_id'] . ' deleted');
-            }
-        } else {
+        if ($cart) {
+            $cart->delete();
+        }
             PAYPAL_debug('no cart to delete');
         }
         return 0;
