@@ -33,7 +33,6 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-//PAYPAL_setCart();
 $ppGCart = Paypal\Cart::getInstance();
 
 $action = '';
@@ -176,11 +175,6 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
 
 case 'delcartitem':
     $ppGCart->Remove($_GET['id']);
-    /*if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
-        !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-        //Paypal\Order::delCartItem($_GET['id'], $_SESSION[PP_CART_VAR]['order_id']);
-        $ppGCart->Remove($_GET['id']);
-    }*/
     $view = 'cart';
     break;
 
@@ -345,7 +339,6 @@ case 'printorder':
 
 case 'vieworder':
     if (COM_isAnonUser()) COM_404();
-    //$_SESSION[PP_CART_VAR]['prevpage'] = $view;
     Paypal\Cart::setSession('prevpage', $view);
     $content .= $ppGCart->View(true);
     $page_title = $LANG_PP['vieworder'];
@@ -375,15 +368,6 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    // Need to create an order or save the cart, so IPN class
-    // can access the data. For now, use the cart.
-    /*
-    if (empty($_SESSION[PP_CART_VAR]['invoice'])) {
-        $Ord = new Paypal\Order();
-        $Ord->CreateFromCart($ppGCart);
-    } else {
-        $Ord = new Order($_SESSION[PP_CART_VAR]['invoice']);
-    }*/
     $ppGCart->Save();   // make sure it's saved to the DB
     $content .= $ppGCart->View(true);
     break;
