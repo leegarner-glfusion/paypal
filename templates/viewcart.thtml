@@ -21,7 +21,7 @@
         {!if item_link}
         <a href="{pi_url}/detail.php?id={item_id}">
         {!endif}
-        {item_descrip}
+        {item_name}
         {!if item_link}
         </a>
         {!endif}
@@ -51,14 +51,50 @@
       <input type="hidden" name="amount_{pp_id}" value="{item_price}">
     </tr>
     <!-- END ItemRow -->
+{!if subtotal}
     <tr>
-      <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
+      <td colspan="2" class="alignright"><b>{$LANG_PP['item_total']}</b></td>
       <td colspan="2" class="alignright"><b>{subtotal}</b></td>
     </tr>
+{!endif}
+{!if cart_tax}
+    <tr>
+      <td colspan="2" class="alignright">{$LANG_PP['tax']}</td>
+      <td colspan="2" class="alignright">{cart_tax}</td>
+    </tr>
+{!endif}
+{!if shipping}
+    <tr>
+      <td colspan="2" class="alignright">{$LANG_PP['shipping']}</td>
+      <td colspan="2" class="alignright">{shipping}</td>
+    </tr>
+{!endif}
+{!if handling}
+    <tr>
+      <td colspan="2" class="alignright">{$LANG_PP['hangling']}</td>
+      <td colspan="2" class="alignright">{handling}</td>
+    </tr>
+{!endif}
+    <tr>
+      <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
+      <td colspan="2" class="alignright"><b>{total}</b></td>
+    </tr>
+{!if gc_bal}
+    <tr>
+      <td colspan="2" class="alignright"><b>{$LANG_PP['apply_gc']}</b></td>
+      <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{gc_bal_disp}" /></td>
+    </tr>
+{!endif}
   </table>
     <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
       <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
     </div>
+{!if 0}
+    <div id="notify_email" style="margin-top:10px;margin-bottom:10px;">{$LANG_PP['notify_email']}:
+      <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['notify_email']}"></i>
+      <br /><input type="text" name="notify_email" size="40" malength="255" />
+    </div>
+{!endif}
   <input type="hidden" name="custom" value='{custom}' />
 {!if is_uikit}
   <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">

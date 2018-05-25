@@ -102,7 +102,7 @@
             {!if is_admin}
             <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}">
             {!endif}
-            {item_descrip}
+            {item_name}
 {!if is_file}
             &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="gl_mootip" title="{$LANG_PP['download']}">{$LANG_PP['download']}</a>
 {!endif}
@@ -125,10 +125,10 @@
           <td class="alignright">{subtotal}</td>
         </tr>
         {!endif}
-        {!if tax}
+        {!if cart_tax}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['tax']}</td>
-          <td class="alignright">{tax}</td>
+          <td class="alignright">{cart_tax}</td>
         </tr>
         {!endif}
         {!if shipping}
@@ -147,6 +147,16 @@
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
         </tr>
+{!if gc_bal}
+        <tr>
+          <td colspan="2" class="alignright"><b>{$LANG_PP['apply_gc']}</b></td>
+          <td colspan="2" class="alignright">-&nbsp;{gc_bal_disp}</td>
+        </tr>
+        <tr>
+          <td colspan="3" class="alignright"><b>{$LANG_PP['net_total']}</b></td>
+          <td class="alignright"><b>{net_total}</b></td>
+        </tr>
+{!endif}
       </table>
     </div>
   </div>

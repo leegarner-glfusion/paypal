@@ -56,8 +56,17 @@
       <td colspan="2" class="alignright"><b>{subtotal}</b></td>
     </tr>
   </table>
+{!if gc_bal}
+    <div>
+      {$LANG_PP['apply_gc']}:
+      <input type="text" name="apply_gc" value="{gc_bal}" />
+    </div>
+{!endif}
     <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
       <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
+    </div>
+    <div id="notify_email">Notification Email:
+      <input type="text" name="notify_email" size="40" malength="255" />
     </div>
   <input type="hidden" name="custom" value='{custom}' />
   <button type="submit" class="uk-button uk-button-primary" name="updatecart" 
