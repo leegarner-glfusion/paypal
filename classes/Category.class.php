@@ -3,9 +3,9 @@
 *   Class to manage product categories
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.8
+*   @version    0.5.12
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -59,6 +59,8 @@ class Category
         $this->image = '';
         $this->enabled = 1;
         $this->disp_name = '';
+        $this->lft = 0;
+        $this->rgt = 0;
         if (is_array($id)) {
             $this->SetVars($id);
         } elseif ($id > 0) {
@@ -84,6 +86,8 @@ class Category
         case 'cat_id':
         case 'parent_id':
         case 'grp_access':
+        case 'lft':
+        case 'rgt':
             // Integer values
             $this->properties[$var] = (int)$value;
             break;
@@ -141,6 +145,8 @@ class Category
         $this->cat_name = $row['cat_name'];
         $this->grp_access = $row['grp_access'];
         $this->disp_name = isset($row['disp_name']) ? $row['disp_name'] : $row['description'];
+        $this->lft = isset($row['lft']) ? $row['lft'] : 0;
+        $this->rgt = isset($row['rgt']) ? $row['rgt'] : 0;
         if ($fromDB) {
             $this->image = $row['image'];
         }
@@ -655,9 +661,9 @@ class Category
             if (!SEC_inGroup($row['grp_access'])) {
                 continue;
             }
-            $A[] = COM_createLink($row['cat_name'],
+            $A[] = '<li>' . COM_createLink($row['cat_name'],
                     PAYPAL_URL . '/index.php?category=' .
-                        (int)$row['cat_id']);
+                        (int)$row['cat_id']) . '<li>';
             if ($parent == 0) {
                 break;
             }
@@ -667,7 +673,7 @@ class Category
         //$A[] = COM_createLink($LANG_PP['home'],
         //        COM_buildURL(PAYPAL_URL . '/index.php'));
         $B = array_reverse($A);
-        $location = implode(' :: ', $B);
+        //$location = implode(' :: ', $B);
         return $location;
     }
 
@@ -695,7 +701,8 @@ class Category
 
         $between = '';
         $root = (int)$root;
-        $cache_key = self::_makeCacheKey('cat_tree_' . (string)$root);
+        $p = $prefix == '&nbsp;' ? 'x_' : $prefix . '_';
+        $cache_key = self::_makeCacheKey('cat_tree_' . $p . (string)$root);
         $All = Cache::get($cache_key);
         if (!$All) {        // not found in cache, build the tree
             if ($root > 0) {
@@ -724,6 +731,46 @@ class Category
 
 
     /**
+    *   Get the full path to a category, optionally including sub-categories
+    *
+    *   @param  integer $cat_id     Category ID
+    *   @param  boolean $incl_sub   True to include sub-categories
+    *   @return array       Array of category objects
+    */
+    public static function getPath($cat_id, $incl_sub = true)
+    {
+        $key = 'cat_path_' . $cat_id . '_' . (int)$incl_sub;
+        $path = Cache::get($key);
+        if (!$path) {
+            $cats = self::getTree();    // need the full tree to find parents
+            $path = array();
+
+            // if node doesn't exist, return. Don't bother setting cache
+            if (!isset($cats[$cat_id])) return $path;
+
+            $Cat = $cats[$cat_id];      // save info for the current node
+            foreach ($cats as $id=>$C) {
+                if ($C->lft < $Cat->lft && $C->rgt > $Cat->rgt) {
+                    $path[$C->cat_id] = $C;
+                }
+            }
+
+            // Now append the node, or the subtree
+            if ($incl_sub) {
+                $subtree = self::getTree($cat_id);
+                foreach ($subtree as $id=>$C) {
+                    $path[$C->cat_id] = $C;
+                }
+            } else {
+                $path[$Cat->cat_id] = $Cat;
+            }
+            Cache::set($key, $path);
+        }
+        return $path;
+    }
+
+
+    /**
     *   Get the options for a selection list.
     *   Used in the product form and to select a parent category.
     *   $exclude indicates a category to disable, to prevent selecting a
@@ -736,7 +783,7 @@ class Category
     */
     public static function optionList($sel = 0, $exclude = 0)
     {
-        $Cats = self::getTree();
+        $Cats = self::getTree(0, '-');
         $opts = '';
         foreach ($Cats as $Cat) {
             $disabled = $Cat->cat_id == $exclude ? 'disabled="disabled"' : '';
@@ -763,7 +810,7 @@ class Category
         return self::getInstance($parent);
     }
 
-    
+
     /**
     *   Rebuild the MPT tree starting at a given parent and "left" value
     *
