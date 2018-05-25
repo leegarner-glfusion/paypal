@@ -235,7 +235,6 @@ class Order
         if (isset($A['useaddress'])) {
             // If set, the user has selected an existing address.  Read
             // that value and use it's values.
-            //$_SESSION[PP_CART_VAR]['billing'] = $A['useaddress'];
             Cart::setSession('billing', $A['useaddress']);
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
@@ -266,7 +265,6 @@ class Order
     {
         if (isset($A['useaddress'])) {
             // If set, read and use an existing address
-            //$_SESSION[PP_CART_VAR]['shipping'] = $A['useaddress'];
             Cart::setSession('shipping', $A['useaddress']);
             $A = UserInfo::getAddress($A['useaddress']);
             $prefix = '';
@@ -316,12 +314,10 @@ class Order
         if (isset($A['order_id']) && !empty($A['order_id'])) {
             $this->order_id = $A['order_id'];
             $this->isNew = false;
-            //$_SESSION[PP_CART_VAR]['order_id'] = $A['order_id'];
             Cart::setSession('order_id', $A['order_id']);
         } else {
             $this->order_id = '';
             $this->isNew = true;
-            //$_SESSION[PP_CART_VAR]['order_id'] = '';
             Cart::clearSession('order_id');
         }
     }
@@ -337,15 +333,9 @@ class Order
         global $_TABLES;
 
         if ($order_id == '') {
-            /*if (isset($_SESSION[PP_CART_VAR]['order_id']) &&
-                !empty($_SESSION[PP_CART_VAR]['order_id'])) {
-                $order_id = $_SESSION[PP_CART_VAR]['order_id'];
-            } else {
-                return;
-            }*/
             $order_id = Cart::getSession('order_id');
-            if (!$order_id) return;
         }
+        if (!$order_id) return;
 
         $order_id = DB_escapeString($order_id);
         $status = (int)DB_getItem($_TABLES['paypal.orders'],
@@ -389,7 +379,6 @@ class Order
             if ($this->billto_name == '') {
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
-            //$_SESSION[PP_CART_VAR]['order_id'] = $this->order_id;
             Cart::setSession('order_id', $this->order_id);
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
