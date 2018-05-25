@@ -1,5 +1,9 @@
 {# begin {templatelocation} #}
+{!if breadcrumbs}
+<ul class="uk-breadcrumb uk-margin-remove">
 {breadcrumbs}
+</ul>
+{!endif}
 {!if cat_desc}
 <p>
 {!if cat_img_url}
