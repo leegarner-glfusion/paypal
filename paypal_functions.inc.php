@@ -348,81 +348,72 @@ function ProductList($cat_id = 0)
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
             $_IMAGE_TYPE, $_GROUPS, $LANG13;
 
-    if (plugin_ismoderator_paypal()) {
-        $isAdmin = true;
-    } else {
-        $isAdmin = false;
-    }
-
+    $isAdmin = plugin_ismoderator_paypal() ? true : false;
     $cat_name = '';
     $breadcrumbs = '';
     $cat_img_url = '';
     $display = '';
     $cat_sql = '';
-/*    if ($cat_id != 0) {
-        $Cat = Category::getInstance($cat_id);
-        $breadcrumbs = Category::Breadcrumbs($Cat->cat_id);
-    } else {*/
-        $Cat = Category::getInstance($cat_id);
+    $Cat = Category::getInstance($cat_id);
 
-        // If a cat ID is requested but doesn't exist or the user can't access
-        // it, redirect to the homepage.
-        if ($cat_id > 0 && ($Cat->isNew || !$Cat->hasAccess())) {
-            echo COM_refresh(PAYPAL_URL);
-            exit;
-        }
-        $RootCat = Category::getRoot();
-        //$cats = Category::getTree($RootCat->cat_id);
-        $links = array();
-        $lines = array();
-        //$ctrl_brk = -1;
-        $breadcrumbs = '';
+    // If a cat ID is requested but doesn't exist or the user can't access
+    // it, redirect to the homepage.
+    if ($cat_id > 0 && ($Cat->isNew || !$Cat->hasAccess())) {
+        echo COM_refresh(PAYPAL_URL);
+        exit;
+    }
+    $RootCat = Category::getRoot();
     if ($cat_id > 0 && $cat_id != $RootCat->cat_id) {
-        $cats = Category::getTree($cat_id);
+        $cats = Category::getPath($cat_id);
         foreach ($cats as $cat) {
             // Root category already shown in top header
-            //if ($cat->cat_id == $RootCat->cat_id) continue;
-            // Create the category tree branch
-            /*if ($ctrl_brk == 0 && $cat->parent_id == $RootCat->cat_id) {
-                $lines[] = implode(' :: ', $links);
-                $links = array();
-            }
-            $ctrl_brk = 0;*/
+            if ($cat->cat_id == $RootCat->cat_id) continue;
             if (!$cat->hasAccess()) continue;
             if ($cat->cat_id == $cat_id) {
-                $cat->cat_name = '<b>' . $cat->cat_name . '</b>';
-            }
-            $links[] = COM_createLink($cat->cat_name,
+                $breadcrumbs .= "<li class=\"uk-active\"><span>{$cat->cat_name}</span></li>" . LB;
+            } else {
+                $breadcrumbs .= "<li>" . COM_createLink($cat->cat_name,
                     PAYPAL_URL . '/index.php?category=' .
-                        (int)$cat->cat_id);
-        }
-        if (count($links) > 1) {
-            // Add the final line
-            $lines[] = implode(' :: ', $links);
-            $breadcrumbs = implode('<br />', $lines);
+                        (int)$cat->cat_id) . '</li>' . LB;
+            }
         }
     }
-        $cat_name = $Cat->cat_name;
-        $cat_desc = $Cat->description;
-        $cat_img_url = $Cat->ImageUrl();
-        if ($Cat->parent_id > 0) {
-            // Get the sql to limit by category
-            $tmp = Category::getTree($Cat->cat_id);
-            $cats = array();
-            foreach ($tmp as $cat_id=>$info) {
-                $cats[] = $cat_id;
-            }
-            if (!empty($cats)) {
-                $cat_sql = implode(',', $cats);
-                $cat_sql = " AND c.cat_id IN ($cat_sql)";
-            }
-        }
-    //}
 
-    // Display categories
+    $cat_name = $Cat->cat_name;
+    $cat_desc = $Cat->description;
+    $cat_img_url = $Cat->ImageUrl();
+    if ($Cat->parent_id > 0) {
+        // Get the sql to limit by category
+        $tmp = Category::getTree($Cat->cat_id);
+        $cats = array();
+        foreach ($tmp as $cat_id=>$info) {
+            $cats[] = $cat_id;
+        }
+        if (!empty($cats)) {
+            $cat_sql = implode(',', $cats);
+            $cat_sql = " AND c.cat_id IN ($cat_sql)";
+        }
+    }
+
+    // Display top-level categories
+    $tmp = Category::getTree();
+    $A = array(
+        $RootCat->cat_id => array(
+            'name' => $RootCat->cat_name,
+        ),
+    );
+    foreach ($tmp as $cat_id=>$C) {
+        if ($C->parent_id == $RootCat->cat_id && $C->hasAccess()) {
+            $A[$C->cat_id] = array(
+                'name' => $C->cat_name,
+                'count' => $C->cnt,
+            );
+        }
+    }
+
     if (isset($_PP_CONF['cat_columns']) &&
             $_PP_CONF['cat_columns'] > 0) {
-        $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt
+/*        $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.products']} prod
                 ON prod.cat_id = cat.cat_id
@@ -449,7 +440,7 @@ function ProductList($cat_id = 0)
                 'count' => $C['cnt'],
             );
         }
-
+*/
         // Now get categories from plugins
         foreach ($_PLUGINS as $pi_name) {
             $pi_cats = PLG_callFunctionForOnePlugin('plugin_paypal_getcategories_' . $pi_name);
@@ -505,7 +496,7 @@ function ProductList($cat_id = 0)
         $sql_sortby = 'price';
         $sql_sortdir = 'ASC';
         break;
-    case 'price_h2l':
+    case 'price_h2l':   // price, high to low
         $sql_sortby = 'price';
         $sql_sortdir = 'DESC';
         break;
@@ -521,13 +512,6 @@ function ProductList($cat_id = 0)
         $sql_sortby = 'short_description';
         $sql_sortdir = 'ASC';
         break;
-    /*case 'price':
-    case 'dt_add':
-        $sql_sortby = $sortby;
-        break;
-    case 'rating':
-        $sql_sortby = 'rating';
-        break;*/
     default:
         $sortby = $_PP_CONF['order'];
         $sql_sortby = $sortby;
@@ -643,13 +627,7 @@ function ProductList($cat_id = 0)
     }
 
     $product->set_var('sortby_options', $sortby_options);
-    /*if ($sortdir == 'DESC') {
-        $product->set_var('sortdir_desc_sel', ' selected="selected"');
-    } else {
-        $product->set_var('sortdir_asc_sel', ' selected="selected"');
-    }*/
     $product->set_var('sortby', $sortby);
-    //$product->set_var('sortdir', $sortdir);
 
     $display .= $product->parse('', 'start');
 
@@ -820,9 +798,7 @@ function ProductList($cat_id = 0)
     }
 
     $display .= $product->parse('', 'end');
-
     return $display;
-
 }
 
 
@@ -1124,8 +1100,9 @@ function PAYPAL_errMsg($msg, $title = '')
 *   @param string   $not        'NOT' to exclude $items, '' to include
 *   @param string   $items      Optional comma-separated list of items to include or exclude
 *   @return string              HTML option list, without <select> tags
+*   @deprecated
 */
-function PAYPAL_recurseCats(
+function X_PAYPAL_recurseCats(
         $function, $sel=0, $parent_id=0, $char='', $not='', $items='',
         $level=0, $maxlevel=0, $prepost = array())
 {
@@ -1181,8 +1158,9 @@ function PAYPAL_recurseCats(
 *   @param  integer $parent_id  Parent ID from which we've started searching
 *   @param  string  $txt    Different text to use for category name.
 *   @return string          Option list element for a category
+*   @deprecated
 */
-function callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
+function X_callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
 {
     return ',' . $A['cat_id'];
 }
