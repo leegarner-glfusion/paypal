@@ -36,7 +36,6 @@ define('PAYPAL_URL', "{$_CONF['site_url']}/{$_PP_CONF['pi_name']}");
 /** Define URL to plugin admin interface */
 define('PAYPAL_ADMIN_URL',
         "{$_CONF['site_admin_url']}/plugins/{$_PP_CONF['pi_name']}");
-define('PP_CART_VAR', 'ppGCart');
 
 // Define product types
 define('PP_PROD_PHYSICAL',  1);
@@ -445,20 +444,23 @@ function plugin_chkVersion_paypal()
 
 
 /**
- *  Performs operations when a user (or admin) deletes an account
- *
- *  Remove purchases from the paypal purchases table.
- *
- *  @TODO   Rather than drop rows, archive them
- *  @param  int $uid    User ID that is being deleted
- */
+*   Performs operations when a user (or admin) deletes an account
+*   - Anonymize user data in orders
+*   - Delete user address info
+*
+*   @param  int $uid    User ID that is being deleted
+*/
 function plugin_user_delete_paypal($uid)
 {
     global $_TABLES;
 
-    Paypal\UserInfo::DeleteUser($uid);
-    //$sql = "DELETE FROM {$_TABLES['paypal.purchases']} WHERE user_id = $uid";
-    //DB_query($sql);
+    $uid = (int)$uid;
+    $sql = "UPDATE {$_TABLES['paypal.orders']}
+            SET uid = 1
+            WHERE uid = '$uid'";
+
+    Paypal\UserInfo::deleteUser($uid);
+    Paypal\Cart::deleteUser($uid);
 }
 
 
@@ -1218,7 +1220,7 @@ function phpblock_paypal_recent($cat='')
 *   @deprecated 0.5.0
 *   @return string      Our configured currency code.
 */
-function PAYPAL_getCurrency()
+function X_PAYPAL_getCurrency()
 {
     global $_PP_CONF;
     return $_PP_CONF['currency'];
@@ -1461,7 +1463,7 @@ function plugin_canuserrate_paypal($item_id, $uid)
 *   @since  version 0.5.0
 *   @param  integer $uid    User ID (not really used
 */
-function plugin_user_logout_paypal($uid)
+function X_plugin_user_logout_paypal($uid)
 {
     global $_PP_CONF;
 
@@ -1487,9 +1489,10 @@ function plugin_user_login_paypal($uid)
 
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    /*$C = PAYPAL_setCart();
-    $C->Merge();*/
-    Paypal\Cart::getInstance()->Merge();
+    $anon_cart = Paypal\Cart::getAnonCartID();  // get the anonymous cart ID
+    if (empty($anon_cart)) return;             // save a step if there's no anon cart
+    $user_cart = Paypal\Cart::getInstance();    // get the logged-in user's cart
+    $user_cart->Merge($anon_cart);
 }
 
 
@@ -1691,7 +1694,7 @@ function Xplugin_profilevariablesdisplay_paypal($uid, &$T)
     ));
     $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
     $U = Paypal\UserInfo::getInstance($uid);
-    $Cur = new Paypal\Currency($_PP_CONF['currency']);
+    $Cur = new Paypal\Currency();
     if ($U->gc_bal > 0) {
         $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
     }
@@ -1732,14 +1735,16 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         return $retval;
     }
 
-    if (($panel == '' || $panel == 'useredit') && $fieldset == '') {
+    if ( ($panel == 'useredit') || ($panel == '' && $fieldset == '') ) {
+COM_errorLog("HERE");
+    //if (($panel == '' || $panel == 'useredit') && $fieldset == '') {
         $LT = new \Template(__DIR__ . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
         $U = Paypal\UserInfo::getInstance($uid);
-        $Cur = new Paypal\Currency($_PP_CONF['currency']);
+        $Cur = new Paypal\Currency();
         if ($U->gc_bal > 0) {
             $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
         }
@@ -2030,6 +2035,38 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
 
 
 /**
+*   Export user data when requested.
+*
+*   @param  integer $uid        User ID
+*   @param  string  $email      User Email Address (not used)
+*   @param  string  $username   User Name (not used)
+*   @param  string  $ip         IP address (not used)
+*   @return string              XML-formatted data
+*/
+function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
+{
+    $U = Paypal\UserInfo::getInstance($uid);
+
+    $retval = "<paypal>\n";
+
+    foreach ($U->addresses as $addr) {
+        foreach (Paypal\UserInfo::Fields() as $fld) {
+            if ($addr[$fld] != '') {
+                $d = addSlashes(htmlentities($addr[$fld]));
+                $retval .= '<'.$fld.'>'.$d.'</'.$fld.">\n";
+            }
+        }
+    }
+    $retval .= "</paypal>\n";
+
+    if ( function_exists('tidy_repair_string')) {
+        $retval = tidy_repair_string($retval, array('input-xml' => 1));
+    }
+    return $retval;
+}
+
+
+/**
 *   Get an array variable, first checking whether it's set
 *
 *   @param  array   $A          Array where var should be
@@ -2056,6 +2093,5 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
         break;
     }
 }
-
 
 ?>
