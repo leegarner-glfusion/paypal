@@ -265,6 +265,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
   `options_text` text,
+  `extras` text,
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
@@ -386,6 +387,7 @@ $_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
   `cart_order_id` varchar(20) DEFAULT NULL,
   `cart_info` text,
   `cart_contents` text,
+  `apply_gc` float(8,2),
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`cart_id`)
 ) ENGINE=MyISAM";
@@ -798,6 +800,10 @@ $PP_UPGRADE['0.5.12'] = array(
         ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0',
         ADD KEY `cat_lft` (`lft`),
         ADD KEY `cat_rgt` (`rgt`)",
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
+        ADD extras text",
+    "ALTER TABLE {$_TABLES['paypal.cart']}
+        ADD apply_gc float(8,2) AFTER cart_contents",
 );
 
 ?>
