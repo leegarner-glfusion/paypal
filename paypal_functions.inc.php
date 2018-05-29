@@ -49,9 +49,9 @@ function listOrders($admin = false, $uid = '')
             ON ord.uid = u.uid
         LEFT JOIN {$_TABLES['paypal.purchases']} AS itm
             ON ord.order_id = itm.order_id";
-        //$where
-        //GROUP BY ord.order_id";
-    //echo $sql;die;
+    if (!$admin) {
+        $sql .= " $where GROUP BY ord.order_id";
+    }
 
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
