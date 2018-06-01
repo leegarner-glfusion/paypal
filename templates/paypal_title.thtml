@@ -5,5 +5,9 @@
 {!if title}
 <h2>{title}</h2>
 {!endif}
+{!if breadcrumbs}
+{breadcrumbs}
+{!endif}
 {todo}
+<div style="margin-top: 10px;clear:both;"></div>
 {# end {templatelocation} #}

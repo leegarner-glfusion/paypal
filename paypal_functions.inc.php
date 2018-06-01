@@ -735,30 +735,43 @@ function ProductList($cat_id = 0)
             foreach ($plugin_data as $A) {
                 // Reset button values
                 $buttons = '';
-                $A['prod_type'] = PP_PROD_PLUGIN;
+                if (!isset($A['buttons'])) $A['buttons'] = array();
+
+                // If the plugin has a getDetailPage service function, use it
+                // to wrap the item's detail page in the catalog page.
+                // Otherwise just use a link to the product's url.
+                if (isset($A['have_detail_svc'])) {
+                    $item_url = PAYPAL_URL . '/index.php?pidetail=' . $A['id'];
+                } elseif (isset($A['url'])) {
+                    $item_url = $A['url'];
+                } else {
+                    $item_url = '';
+                }
+                $item_name = isset($A['name']) ? $A['name'] : $A['id'];
+                $item_dscp = isset($A['short_description']) ? $A['short_description'] : $item_name;
+                $img = isset($A['image']) && !empty($A['image']) ? PAYPAL_ImageUrl($A['image']) : '';
+                $price = isset($A['price']) ? (float)$A['price'] : 0;
                 $product->set_var(array(
-                    'id'        => $A['id'],
-                    'name'      => $A['name'],
-                    'short_description' => $A['short_description'],
-                    'display'   => '; display: none',
-                    'small_pic' => '',
+                    'id'        => $A['id'],        // required
+                    'name'      => $item_name,
+                    'short_description' => $item_dscp,
                     'encrypted' => '',
-                    'item_url'  => $A['url'],
+                    'item_url'  => $item_url,
                     'track_onhand' => '',   // not available for plugins
-                    'small_pic' => !empty($A['image']) ? PAYPAL_ImageUrl($A['image']) : '',
+                    'small_pic' => $img,
                     'on_sale'   => '',
                 ) );
-                if ($A['price'] > 0) {
-                    $product->set_var('price', $Cur->Format($A['price']));
+                if ($price > 0) {
+                    $product->set_var('price', $Cur->Format($price));
                 } else {
                     $product->clear_var('price');
                 }
 
-                if ( $A['price'] > 0 &&
+                if ( $price > 0 &&
                         $_USER['uid'] == 1 &&
                         !$_PP_CONF['anon_buy'] ) {
                     $buttons .= $product->set_var('', 'login_req') . '&nbsp;';
-                } elseif ( $A['prod_type'] > PP_PROD_PHYSICAL &&
+                } elseif ( (!isset($A['prod_type']) || $A['prod_type'] > PP_PROD_PHYSICAL) &&
                             $A['price'] == 0 ) {
                     // Free items or items purchases and not expired, download.
                     $buttons .= $product->set_var('', 'download') . '&nbsp;';

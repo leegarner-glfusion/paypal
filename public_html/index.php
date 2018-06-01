@@ -46,13 +46,13 @@ if (!empty($action)) {
         // Actions
         'updatecart', 'checkout', 'searchcat',
         'savebillto', 'saveshipto',
-        'updatecart', 'emptycart',
+        'updatecart', 'emptycart', 'delcartitem',
         'addcartitem', 'addcartitem_x', 'checkoutcart',
         'processorder', 'thanks', 'action',
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
-        'cart',
+        'cart', 'pidetail'
     );
     $action = 'productlist';    // default view
     foreach($expected as $provided) {
@@ -342,6 +342,22 @@ case 'vieworder':
     Paypal\Cart::setSession('prevpage', $view);
     $content .= $ppGCart->View(true);
     $page_title = $LANG_PP['vieworder'];
+    break;
+
+case 'pidetail':
+    // Show detail for a plugin item wrapped in the catalog layout
+    $item = explode(':', $actionval);
+    $status = LGLIB_invokeService($item[0], 'getDetailPage',
+                array('item_id' => $actionval), $output, $svc_msg);
+    if ($status != PLG_RET_OK) {
+        $output = $LANG_PP['item_not_found'];
+    }
+    $T = new \Template(PAYPAL_PI_PATH . '/templates');
+    $T->set_file('header', 'paypal_title.thtml');
+    $T->set_var('breadcrumbs', COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL));
+    $T->parse('output', 'header');
+    $content .= $T->finish($T->get_var('output'));
+    $content .= $output;
     break;
 
 case 'detail':
