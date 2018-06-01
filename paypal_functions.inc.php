@@ -735,7 +735,7 @@ function ProductList($cat_id = 0)
             foreach ($plugin_data as $A) {
                 // Reset button values
                 $buttons = '';
-
+                $A['prod_type'] = PP_PROD_PLUGIN;
                 $product->set_var(array(
                     'id'        => $A['id'],
                     'name'      => $A['name'],
