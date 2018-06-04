@@ -249,6 +249,12 @@ class IPN
 
             // calculate the total purchase price
             $total += ($price * $item['quantity']);
+            $total += $P->getTax($price, $item['quantity']);
+        }
+        foreach (array('mc_shipping', 'handling_amount') as $key) {
+            if (isset($this->pp_data[$key])) {
+                $total += (float)$this->pp_data[$key];
+            }
         }
 
         // Compare total price to gross payment.  The ".0001" is to help
@@ -257,7 +263,7 @@ class IPN
             PAYPAL_debug("$payment_gross received is ok, require $total");
             return true;
         } else {
-            PAYPAL_debug("$payment_gross received is less than price of $total");
+            PAYPAL_debug("$payment_gross received is less than required $total");
             return false;
         }
     }   // isSufficientFunds()
