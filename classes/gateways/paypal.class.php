@@ -522,9 +522,7 @@ class paypal extends Gateway
                 break;
             }
 
-            if ($P->taxable == 0) {
-                $vars['tax'] = '0';
-            }
+            $vars['tax'] = sprintf("%0.2f", $P->getTax($P->price));
 
             // Buy-now product button, set default billing/shipping addresses
             $U = self::UserInfo();
