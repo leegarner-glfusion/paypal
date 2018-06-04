@@ -89,22 +89,13 @@ class PluginProduct extends Product
     *
     *   @param  integer $qty        Quantity ordered
     *   @param  object  $Item       Item record, to get options, etc.
-    *   @param  object  $Order      Optional order (not used yet)
+    *   @param  object  $Order      Optional order object (not used yet)
     *   @param  array   $ipn_data   IPN data
     *   @return integer     Zero or error value
     */
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
-        // Initialize item info array to be used later
-        //$A = array();
-
         PAYPAL_debug('Paypal\\PluginProduct::handlePurchase() pi_info: ' . $this->pi_name);
-//        $item_info = array(
-//            'item_number' => $this->pi_name
-//return;
-        //$pi_info = array();
-        // Set the variables. A couple of layouts have been supported by
-        // plugins so the item info is set two ways.
         $vars = array(
             'item'  => array(
                 'item_id' => $Item->product_id,
@@ -112,22 +103,21 @@ class PluginProduct extends Product
                 'name' => $Item->item_name,
                 'price' => $Item->price,
             ),
-            'item_id'   => $Item->product_id,
-            'quantity'  => $Item->quantity,
-            'name' => $Item->item_name,
-            'price' => $Item->price,
             'ipn_data'  => $ipn_data,
-//          'order' => $this->Order,
+            'order' => $Order,      // Pass the order object, may be used in the future
         );
         if ($ipn_data['status'] == 'paid') {
             $status = LGLIB_invokeService($this->pi_name, 'handlePurchase', $vars, $output, $svc_msg);
-            /*if ($status != PLG_RET_OK) {
-                $A = array();
-            }*/
         }
     }
 
 
+    /**
+    *   Handle a refund for this product
+    *
+    *   @param  array   $pp_data    Paypal IPN data
+    *   @return integer         Status from plugin's handleRefund function
+    */
     public function handleRefund($pp_data = array())
     {
         if (empty($pp_data)) return false;
@@ -148,10 +138,11 @@ class PluginProduct extends Product
 
     /**
     *   Get the unit price of this product, considering the specified options.
-    *   Plugins don't currently support option prices or discounts
+    *   Plugins don't currently support option prices or discounts so the
+    *   price is just the set price.
     *
-    *   @param  array   $options    Array of integer option values
-    *   @param  integer $quantity   Quantity, used to calculate discounts
+    *   @param  array   $options    Array of integer option values (unused)
+    *   @param  integer $quantity   Quantity, used to calculate discounts (unused)
     *   @return float       Product price, including options
     */
     public function getPrice($options = array(), $quantity = 1)
