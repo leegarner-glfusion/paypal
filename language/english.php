@@ -312,6 +312,7 @@ $LANG_PP = array (
 'no_del_item' => 'Product %s has purchase records, can&apos;t delete.',
 'no_del_cat' => 'Category %s has related products or sub-categories, can&apos;t delete.',
 'forgotten_user' => 'User Forgotten',
+'tax_on_x_items' => '%.2f%% Tax on %s item(s)',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
