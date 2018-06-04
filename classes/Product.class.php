@@ -127,8 +127,10 @@ class Product
         if (!array_key_exists($id, $P)) {
             $item = explode('|', $id);
             if (self::isPluginItem($item[0])) {
+                // Product provided by another plugin
                 $P[$id] = new PluginProduct($item[0]);
             } else {
+                // Product internal to this plugin
                 if (!is_array($A)) {
                     $cache_key = self::_makeCacheKey($item[0]);
                     $A = Cache::get($cache_key);
@@ -514,8 +516,8 @@ class Product
             $status = false;
         }
 
-        Cache::delete($this->id);
         Cache::delete('prod_attr_' . $this->id);
+        Cache::clear('product');
 
         PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {
@@ -1446,7 +1448,6 @@ class Product
     */
     public function canBuyNow()
     {
-        $discounts = $this->qty_discounts;
         if ($this->hasAttributes()
             || $this->hasDiscounts()
             || $this->hasCustomFields()
@@ -1508,7 +1509,7 @@ class Product
     *   @param  integer $qty    Item quantity
     *   @return float           Sales tax ammount
     */
-    public function getTax($price, $qty)
+    public function getTax($price, $qty = 1)
     {
         global $_PP_CONF;
 
@@ -1764,7 +1765,6 @@ class Product
     */
     public static function isPluginItem($item_number)
     {
-        //if (!is_numeric($item_number)) {
         if (strpos($item_number, ':') > 0) {
             return true;
         } else {
