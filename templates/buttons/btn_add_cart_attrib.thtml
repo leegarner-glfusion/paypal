@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 {!if form_url}
-<form id="add_cart" style="display:inline;" action="{pi_url}/index.php" method="post">
+<form id="add_cart_{item_number}" style="display:inline;" action="{pi_url}/index.php" method="post">
 {!endif}
   <input type="hidden" name="item_name" value="{item_name}" />
   <input type="hidden" name="item_number" value="{item_number}" />
@@ -16,7 +16,7 @@
     <div class="uk-form-controls">
       <input type="text" name="quantity" size="3" maxlength="5" value="1" />
       &nbsp;&nbsp;<button type="submit" class="paypalButton orange" border="0"
-        onclick='ppAddToCart("add_cart");return false;'>
+        onclick='ppAddToCart("add_cart_{item_number}");return false;'>
         <i class="{iconset}-shopping-cart">&nbsp;</i>{$LANG_PP['add_to_cart']}
       </button>
     </div>
