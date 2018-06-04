@@ -678,7 +678,7 @@ function ProductList($cat_id = 0)
             'has_discounts' => $P->hasDiscounts() ? 'true' : '',
             'price'     => $P->getPrice() > 0 ? $P->currency->Format($P->price) : '',
             'sale_price' => $P->currency->Format($P->sale_price),
-            'on_sale'   => $P->isOnSale() ? 'true' : '',
+            'on_sale'   => $P->isOnSale(),
             'small_pic' => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
             'tpl_ver'   => $_PP_CONF['list_tpl_ver'],
         ) );
@@ -699,7 +699,7 @@ function ProductList($cat_id = 0)
                     "user_id = {$_USER['uid']} AND product_id ='{$A['id']}'");
         */
         $product->set_block('product', 'BtnBlock', 'Btn');
-        if (!$P->hasAttributes()) {
+        if (!$P->hasAttributes() && !$P->hasCustomFields() && !$P->hasSpecialFields()) {
             // Buttons only show in the list if there are no options to select
             $buttons = $P->PurchaseLinks();
             foreach ($buttons as $name=>$html) {
