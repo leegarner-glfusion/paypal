@@ -1736,7 +1736,6 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
     }
 
     if ( ($panel == 'useredit') || ($panel == '' && $fieldset == '') ) {
-COM_errorLog("HERE");
     //if (($panel == '' || $panel == 'useredit') && $fieldset == '') {
         $LT = new \Template(__DIR__ . '/templates/');
         $LT->set_file(array(
