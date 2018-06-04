@@ -1511,11 +1511,8 @@ class Product
     */
     public function getTax($price, $qty = 1)
     {
-        global $_PP_CONF;
-
         if ($this->taxable) {
-            $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
-            return round($tax_rate * $price * $qty, 2);
+            return round(PP_getTaxRate() * $price * $qty, 2);
         } else {
             return 0;
         }
