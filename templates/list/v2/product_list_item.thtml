@@ -16,8 +16,8 @@
         {!endif}
        <div class="paypalPrice list normal v2">
         {!if on_sale}
-          <span class="paypalPrice list was v2">{price}</span>
-          <span class="paypalPrice list sale v2" id="price" name="price">{sale_price}</span>
+          <span class="paypalPrice list was v2">{orig_price}</span><br />
+          <span class="paypalPrice list sale v2" id="price" name="price">{price}</span>
         {!else}
           {price}
         {!endif}

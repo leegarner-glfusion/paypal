@@ -35,7 +35,12 @@
 {!if Xtrack_onhand}
         ({qty_onhand} {$LANG_PP['available']})&nbsp;&nbsp;
 {!endif}
+{!if on_sale}
+      <span class="paypalPrice was">{orig_price}</span>
+      <span class="paypalPrice sale">{price}</span>
+{!else}
         {price}</span>
+{!endif}
     </div>
 {!endif}
     <!-- BEGIN BtnBlock -->

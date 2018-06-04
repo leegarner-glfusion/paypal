@@ -1134,7 +1134,7 @@ class Product
             'description'       => $l_desc,
             'cur_decimals'      => $this->currency->Decimals(),
             'init_price'        => $this->currency->FormatValue($this->_act_price),
-            'price'             => $this->currency->FormatValue($this->price),
+            'price'             => $this->currency->FormatValue($this->getPrice()),
             'orig_price'        => $this->currency->Format($this->_orig_price),
             'on_sale'           => $onsale ? 'true' : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
