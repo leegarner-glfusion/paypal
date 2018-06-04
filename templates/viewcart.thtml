@@ -43,9 +43,14 @@
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">
-        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><i
+        <a href="{pi_url}/index.php?delcartitem=x&id={cart_item_id}"><i
             class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
       </td>
+{!if taxable}
+      <td class="aligncenter">
+        <span class="tooltip" title="{$LANG_PP['taxable']}">{tax_icon}</i>
+      </td>
+{!endif}
       <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
       <input type="hidden" name="item_number_{pp_id}" value="{item_id}">
       <input type="hidden" name="amount_{pp_id}" value="{item_price}">
@@ -59,8 +64,9 @@
 {!endif}
 {!if cart_tax}
     <tr>
-      <td colspan="2" class="alignright">{$LANG_PP['tax']}</td>
+      <td colspan="2" class="alignright">{tax_on_items}</td>
       <td colspan="2" class="alignright">{cart_tax}</td>
+      <td></td>
     </tr>
 {!endif}
 {!if shipping}

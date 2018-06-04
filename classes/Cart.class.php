@@ -152,7 +152,7 @@ class Cart
     */
     public static function Read($cart_id)
     {
-        global $_TABLES;
+        global $_TABLES, $_PP_CONF;
 
         $sql = "SELECT cart_info, apply_gc, cart_contents
                FROM {$_TABLES['paypal.cart']}
@@ -166,7 +166,7 @@ class Cart
             if (isset($A['cart_info']) && !empty($A['cart_info'])) {
                 $info = @unserialize($A['cart_info']);
             }
-            $info['apply_gc'] = $A['apply_gc'];
+            $info['apply_gc'] = $_PP_CONF['gc_enabled'] ? $A['apply_gc'] : 0;
             if (isset($A['cart_contents']) && !empty($A['cart_contents'])) {
                 $cart = @unserialize($A['cart_contents']);
             }
@@ -235,7 +235,6 @@ class Cart
         $info = @serialize($this->m_info);
         if (!$info) $info = '';
         $info = DB_escapeString($info);
-
         // New way- use the cart table
         $sql = "INSERT INTO {$_TABLES['paypal.cart']}
                 (cart_id, cart_uid, cart_info, cart_contents, last_update)
@@ -501,7 +500,7 @@ class Cart
         $T->set_file('cart', $checkout ? 'order.thtml' : 'viewcart.thtml');
 
         if ($checkout) {
-            foreach ($_PP_CONF['workflows'] as $key => $value) {
+            foreach (Workflow::getAll() as $key => $value) {
                 $T->set_var('have_' . $value, 'true');
                 foreach ($this->_addr_fields as $fldname) {
                     if (isset($this->m_info[$value][$fldname])) {
@@ -515,13 +514,6 @@ class Cart
             $T->set_var('not_final', 'true');
         }
 
-        $T->set_block('cart', 'ItemRow', 'iRow');
-
-        // Get the workflows so we show the relevant info.
-        if (!isset($_PP_CONF['workflows']) ||
-            !is_array($_PP_CONF['workflows'])) {
-            Workflow::Load();
-        }
 
         $T->set_block('cart', 'ItemRow', 'iRow');
         $counter = 0;
@@ -529,6 +521,7 @@ class Cart
         $shipping = 0;
         $handling = 0;
         $cart_tax = 0;
+        $tax_items = 0;
         foreach ($this->m_cart as $id=>$item) {
             $item_price = 0;
             $counter++;
@@ -579,7 +572,8 @@ class Cart
             $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
             if ($P->taxable) {
-                $cart_tax += $item_total * PP_getVar($_PP_CONF, 'tax_rate', 'float');
+                $cart_tax += $P->getTax($item_price, $item['quantity']);
+                $tax_items++;       // count the taxable items for display
             }
             $T->set_var(array(
                 'cart_item_id'  => $id,
@@ -595,6 +589,8 @@ class Cart
                 'item_link'     => is_numeric($item_id) ? 'true' : '',
                 'iconset'       => $_PP_CONF['_iconset'],
                 'is_uikit'      => $_PP_CONF['_is_uikit'],
+                'taxable'       => $P->taxable,
+                'tax_icon'      => $LANG_PP['tax'][0],
             ) );
             $T->parse('iRow', 'ItemRow', true);
             $subtotal += $item_total;
@@ -606,6 +602,7 @@ class Cart
                 'cart_id'   => $this->cartID(),
         );
         $cart_tax = round($cart_tax, 2);
+        $this->m_info['cart_tax'] = $cart_tax;
         $total = $subtotal + $shipping + $handling + $cart_tax;
 
         // A little hack to show only the total if there are no other
@@ -621,13 +618,14 @@ class Cart
 
         // Apparently cannot apply cart discount to shipping and tax, at least
         // not with PayPal
+        $gc_bal = 0;
+        if ($_PP_CONF['gc_enabled']) {
         if (!$checkout) {
             $U = UserInfo::getInstance($_USER['uid']);
             $gc_bal = min($subtotal, $U->gc_bal);
         } elseif ($this->m_info['apply_gc'] !== NULL) {
             $gc_bal = min($this->m_info['apply_gc'], $subtotal);
-        } else {
-            $gc_bal = 0;
+        }
         }
         $T->set_var(array(
             //'paypal_url'        => $_PP_CONF['paypal_url'],
@@ -642,10 +640,12 @@ class Cart
             'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
             'net_total' => $currency->Format($total - $gc_bal),
             'cart_tax'  => $cart_tax > 0 ? $currency->Format($cart_tax) : '',
+            'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
 
         // If this is the final checkout, then show the payment buttons
         if ($checkout) {
+            $this->Save();      // Update for tax
             $T->set_var(array(
                 'gateway_vars'  => $this->getCheckoutButtons(),
                 'checkout'      => 'true',

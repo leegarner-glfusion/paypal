@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -15,7 +15,7 @@ namespace Paypal;
 
 /**
 *   Class for workflow items
-*   Workflows are defined in the database and can be re-ordered and 
+*   Workflows are defined in the database and can be re-ordered and
 *   individually enabled or disabled.  The workflows determine which screens
 *   are displayed during checkout and in what order they appear.
 *   @package paypal
@@ -43,15 +43,41 @@ class Workflow
     {
         global $_TABLES, $_PP_CONF;
 
-        $_PP_CONF['workflows'] = array();
-        $sql = "SELECT wf_name
-                FROM {$_TABLES[self::$table]}
-                WHERE enabled = 1
-                ORDER BY orderby ASC";
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $_PP_CONF['workflows'][] = $A['wf_name'];
+        if (!isset($_PP_CONF['workflows'])) {
+            $_PP_CONF['workflows'] = array();
+            $sql = "SELECT wf_name
+                    FROM {$_TABLES[self::$table]}
+                    WHERE enabled = 1
+                    ORDER BY orderby ASC";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $_PP_CONF['workflows'][] = $A['wf_name'];
+            }
         }
+    }
+
+
+    public static function getAll()
+    {
+        global $_TABLES;
+        static $workflows = NULL;
+
+        if ($workflows === NULL) {
+            $cache_key = 'workflows_enabled';
+            $workflows = Cache::get($cache_key);
+            if (!$workflows) {
+                $sql = "SELECT wf_name
+                        FROM {$_TABLES[self::$table]}
+                        WHERE enabled = 1
+                        ORDER BY orderby ASC";
+                $res = DB_query($sql);
+                while ($A = DB_fetchArray($res, false)) {
+                    $workflows[] = $A['wf_name'];
+                }
+                Cache::set($cache_key, $workflows, 'workflows');
+            }
+        }
+        return $workflows;
     }
 
 
@@ -65,7 +91,7 @@ class Workflow
     {
         global $_PP_CONF;
 
-        if (!isset($_PP_CONF['workflows']) || 
+        if (!isset($_PP_CONF['workflows']) ||
             !is_array($_PP_CONF['workflows'])) {
             self::Load();
         }
@@ -128,6 +154,7 @@ class Workflow
         //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
+            Cache::clear('workflows');
             return $newvalue;
         } else {
             COM_errorLog("Workflow::Toggle() SQL error: $sql", 1);
@@ -143,7 +170,7 @@ class Workflow
     {
         global $_TABLES;
 
-        $sql = "SELECT id, orderby 
+        $sql = "SELECT id, orderby
                 FROM {$_TABLES[self::$table]}
                 ORDER BY orderby ASC;";
         //echo $sql;die;
@@ -151,11 +178,12 @@ class Workflow
 
         $order = 10;
         $stepNumber = 10;
+        $changed = false;
         while ($A = DB_fetchArray($result, false)) {
-
             if ($A['orderby'] != $order) {  // only update incorrect ones
+                $changed = true;
                 $sql = "UPDATE {$_TABLES[self::$table]}
-                    SET orderby = '$order' 
+                    SET orderby = '$order'
                     WHERE id = '{$A['id']}'";
                 DB_query($sql, 1);
                 if (DB_error()) {
@@ -164,7 +192,7 @@ class Workflow
             }
             $order += $stepNumber;
         }
-
+        if ($changed) Cache::clear('workflows');
     }
 
 
@@ -182,17 +210,17 @@ class Workflow
         $id = DB_escapeString($id);
 
         switch ($where) {
-        case 'up': 
+        case 'up':
             $oper = '-';
             break;
-        case 'down': 
+        case 'down':
             $oper = '+';
             break;
         default:
             return;
         }
         $sql = "UPDATE {$_TABLES[self::$table]}
-                SET orderby = orderby $oper 11 
+                SET orderby = orderby $oper 11
                 WHERE id = '$id'";
         //echo $sql;die;
         DB_query($sql, 1);
@@ -217,36 +245,27 @@ class Workflow
         global $_PP_CONF;
 
         /** Load the views, if not done already */
-        self::Init();
+        //self::Init();
+        $workflows = self::getAll();
 
         // If the current view is empty, or isn't part of our array,
         // then set the current key to -1 so we end up returning value 0.
         if ($currview == '') {
             $curr_key = -1;
         } else {
-            $curr_key = array_search($currview, $_PP_CONF['workflows']);
+            //$curr_key = array_search($currview, $_PP_CONF['workflows']);
+            $curr_key = array_search($currview, $workflows);
             if ($curr_key === false) $curr_key = -1;
         }
 
         if ($curr_key > -1) {
-            Cart::setSession('prevpage', $_PP_CONF['workflows'][$curr_key]);
-            //$_SESSION[PP_CART_VAR]['prevpage'] = 
-            //        $_PP_CONF['workflows'][$curr_key];
+            Cart::setSession('prevpage', $workflows[$curr_key]);
         }
-        if (isset($_PP_CONF['workflows'][$curr_key + 1])) {
-            $view = $_PP_CONF['workflows'][$curr_key + 1];
+        if (isset($workflows[$curr_key + 1])) {
+            $view = $workflows[$curr_key + 1];
         } else {
             $view = 'vieworder';
         }
-
-        /*if (isset($_SESSION[PP_CART_VAR]['prevpage']) &&
-            !empty($_SESSION[PP_CART_VAR]['prevpage'])) {
-            $view = $_SESSION[PP_CART_VAR]['prevpage'];
-            $_SESSION[PP_CART_VAR]['prevpage'] = '';
-        } else {
-            $view = $currview;
-        }*/
-
         return $view;
     }
 
