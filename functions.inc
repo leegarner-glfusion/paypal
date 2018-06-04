@@ -2073,8 +2073,8 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 *   @param  string  $type       Type of return value
 *   @return     Array element or NULL, cast to $type
 */
- function PP_getVar($A, $varname, $type = 'string')
- {
+function PP_getVar($A, $varname, $type = 'string')
+{
     $val = isset($A[$varname]) ? $A[$varname] : NULL;
     switch ($type) {
     case 'int':
@@ -2091,6 +2091,20 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
         return (string)$val;
         break;
     }
+}
+
+
+/**
+*   Get the sales tax rate to charge.
+*   Currently just returns the globally-configured rate
+*
+*   @return float   Tax Rate
+*/
+function PP_getTaxRate()
+{
+    global $_PP_CONF;
+
+    return PP_getVar($_PP_CONF, 'tax_rate', 'float');
 }
 
 ?>
