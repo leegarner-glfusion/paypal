@@ -499,7 +499,7 @@ class paypal extends Gateway
             $vars['custom'] = $this->PrepareCustom();
             $vars['return'] = PAYPAL_URL . '/index.php?thanks=paypal';
             $vars['cancel_return'] = PAYPAL_URL;
-            $vars['amount'] = $P->_act_price;
+            $vars['amount'] = $P->getPrice();
             $vars['undefined_quantity'] = '1';
             $vars['notify_url'] = $this->ipn_url;
 
@@ -522,7 +522,7 @@ class paypal extends Gateway
                 break;
             }
 
-            $vars['tax'] = sprintf("%0.2f", $P->getTax($P->price));
+            $vars['tax_rate'] = sprintf("%0.4f", PP_getTaxRate() * 100);
 
             // Buy-now product button, set default billing/shipping addresses
             $U = self::UserInfo();
