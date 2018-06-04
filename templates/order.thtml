@@ -116,6 +116,11 @@
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
           <td class="alignright">{item_total}</td>
+{!if taxable}
+          <td class="aligncenter">
+            <span class="tooltip" title="{$LANG_PP['taxable']}">{tax_icon}</span>
+          </td>
+{!endif}
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
@@ -127,7 +132,7 @@
         {!endif}
         {!if cart_tax}
         <tr>
-          <td colspan="3" class="alignright">{$LANG_PP['tax']}</td>
+          <td colspan="3" class="alignright">{tax_on_items}</td>
           <td class="alignright">{cart_tax}</td>
         </tr>
         {!endif}
