@@ -144,7 +144,7 @@ class paypal_ipn extends IPN
         }
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->gw->getActionUrl() .
+        curl_setopt($ch, CURLOPT_URL, $this->gw->getPostBackUrl() .
                 '/cgi-bin/webscr');
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_FAILONERROR, 1);
@@ -263,27 +263,44 @@ class paypal_ipn extends IPN
 
         case 'cart':
             // shopping cart
-            $fees_paid = $this->pp_data['pmt_tax'] +
+            // Create a cart and read the info from the cart table.
+            $Cart = new Cart($this->pp_data['custom']['cart_id']);
+            $this->pp_data['pmt_tax'] = (float)$Cart->getInfo('cart_tax');
+            $this->pp_data['pmt_shipping'] = (float)$Cart->getInfo('cart_shipping');
+            $this->pp_data['pmt_handling'] = (float)$Cart->getInfo('cart_handling');
+            /*$fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
-                        $this->pp_data['pmt_handling'];
+                        $this->pp_data['pmt_handling'];*/
+            $fees_paid = 0;
             if (empty($this->pp_data['custom']['cart_id'])) {
                 $this->handleFailure(NULL, 'Missing Cart ID');
                 return false;
             }
-            // Create a cart and read the info from the cart table.
-            // Actual items purchased and prices will come from the IPN.
-            $Cart = new Cart($this->pp_data['custom']['cart_id']);
             $Cart = $Cart->Cart();
             if (empty($Cart)) {
                 COM_errorLog("Paypal\\paypal_ipn::Process() - Empty Cart for id {$this->pp_data['custom']['cart_id']}");
                 return false;
             }
-            $items = array();
-            for ($i = 1; $i <= $this->ipn_data['num_cart_items']; $i++) {
+
+            //$num_items = count($Cart);
+            //for ($i = 1; $i <= $num_items; $i++) {
+            foreach ($Cart as $item) {
+                $args = array(
+                        //$this->ipn_data["item_number$i"],
+                        'item_id' => $item['item_id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                        'item_name' => $item['name'],
+                        'shipping' => PP_getVar($item, 'shipping', 'float'),
+                        'handling' => PP_getVar($item, 'handling', 'float'),
+                        'tax' => PP_getVar($item, 'tax', 'float'),
+                        'extras' => $item['extras']
+                );
+                $this->AddItem($args);
 
                 // PayPal returns the total price as mc_gross_X, so divide
                 // by the quantity to get back to a unit price.
-                if (!isset($this->ipn_data["quantity$i"]) ||
+/*                if (!isset($this->ipn_data["quantity$i"]) ||
                     (float)$this->ipn_data["quantity$i"] == 0) {
                     $this->ipn_data["quantity$i"] = 1;
                 }
@@ -322,7 +339,13 @@ class paypal_ipn extends IPN
                         'extras' => $Cart[$this->ipn_data["item_number$i"]]['extras']
                 );
                 $this->AddItem($args);
+*/
             }
+/*            $this->pp_data['pmt_tax'] = $
+        $this->Order->shipping = $this->pp_data['pmt_shipping'];
+        $this->Order->handling = $this->pp_data['pmt_handling'];
+*/
+
             $payment_gross = $this->ipn_data['mc_gross'] - $fees_paid;
             PAYPAL_debug("Received $payment_gross gross payment");
             //$currency = $this->ipn_data['mc_currency'];

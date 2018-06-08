@@ -7,10 +7,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2011 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.3
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -84,6 +84,9 @@ case 'updatecart':
     break;
 
 case 'checkout':
+    if (isset($_POST['gateway'])) {
+        $ppGCart->setGateway($_POST['gateway']);
+    }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
         $ppGCart->UpdateAllQty($_POST['quantity']);
@@ -94,6 +97,7 @@ case 'checkout':
     if (isset($_POST['apply_gc'])) {
         $ppGCart->setGC($_POST['apply_gc']);
     }
+    $ppGCart->Save();
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
         //$view = Workflow::getNextView();
@@ -253,7 +257,7 @@ case 'view':            // "?view=" url passed in
 case 'processorder':
     // Process the order, similar to what an IPN would normally do.
     // This is for internal, manual processes like C.O.D. or Prepayment orders
-    $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : '';
+    $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : 'check';
     $gw = Paypal\Gateway::getInstance($gw_name);
     if ($gw !== NULL) {
         $output = $gw->handlePurchase($_POST);

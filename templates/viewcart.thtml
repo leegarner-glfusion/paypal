@@ -85,40 +85,41 @@
       <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
       <td colspan="2" class="alignright"><b>{total}</b></td>
     </tr>
-{!if gc_bal}
+{!if gc_bal_disp}
     <tr>
-      <td colspan="2" class="alignright"><b>{$LANG_PP['apply_gc']}</b></td>
-      <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{gc_bal_disp}" /></td>
+      <td colspan="2" class="alignright">{$LANG_PP['apply_gc']}</td>
+      <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{apply_gc}" /></td>
+      <td>{$LANG_PP['balance']}: {gc_bal_disp}</td>
     </tr>
 {!endif}
   </table>
-    <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
-      <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
-    </div>
-{!if 0}
-    <div id="notify_email" style="margin-top:10px;margin-bottom:10px;">{$LANG_PP['notify_email']}:
-      <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['notify_email']}"></i>
-      <br /><input type="text" name="notify_email" size="40" malength="255" />
-    </div>
-{!endif}
+  <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
+    <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
+  </div>
   <input type="hidden" name="custom" value='{custom}' />
 {!if is_uikit}
   <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">
     <i class="{iconset}-refresh"></i>&nbsp;{$LANG_PP['update_cart']}</button>
   <button style="float:none;" type="submit" class="uk-button uk-button-danger" name="emptycart">
     <i class="{iconset}-trash-o"></i>&nbsp;{$LANG_PP['empty_cart']}</button>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
-    <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
 {!else}
   <input type="submit" class="paypalButton blue" name="updatecart" 
         value="{$LANG_PP['update_cart']}" />
   <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <input id="submit" type="submit" class="paypalButton green" name="checkout" 
+{!endif}
+<div style="width:50%; clear:both;margin-top:15px;">
+<div style="float:left;">{gateway_radios}</div>
+<div style="float:right;">
+{!if is_uikit}
+  <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
+    <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
+{!else}
+  <input id="submit" type="submit" class="paypalButton green" name="checkout"
         value="{$LANG_PP['checkout']} >>" />
 {!endif}
+</div>
+</div>
 </form>
 {!if tc_link}
 <div class="ppTOCLink">

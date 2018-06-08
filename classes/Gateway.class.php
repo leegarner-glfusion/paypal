@@ -4,9 +4,9 @@
 *   Provides the base class for actual payment gateway classes to use.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.1
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -100,6 +100,7 @@ abstract class Gateway
     */
     protected $postback_url = NULL;
 
+    protected $button_url = '';
 
     private static $gateways = array();
 
@@ -177,7 +178,7 @@ abstract class Gateway
     *   @param  string  $key    Name of property to return
     *   @return mixed   property value if defined, otherwise returns NULL
     */
-    function __get($key)
+    public function __get($key)
     {
         switch ($key) {
         case 'buy_now':
@@ -288,6 +289,7 @@ abstract class Gateway
         if (DB_error())
             return false;
         else {
+            Cache::clear('gateways');
             self::Reorder();
             return true;
         }
@@ -302,7 +304,7 @@ abstract class Gateway
     *   @param  integer $id         ID number of element to modify
     *   @return integer             New value, or old value upon failure
     */
-    private function _toggle($oldvalue, $varname, $id)
+    private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
@@ -317,11 +319,13 @@ abstract class Gateway
                 SET $varname=$newvalue
                 WHERE id='$id'";
         //echo $sql;die;
-        DB_query($sql);
-        if (DB_error())
+        COM_errorLog($sql);
+        if (DB_error()) {
             return $oldvalue;
-        else
+        } else {
+            Cache::clear('gateways');
             return $newvalue;
+        }
     }
 
 
@@ -333,7 +337,7 @@ abstract class Gateway
     *   @param  integer $id         ID number of element to modify
     *   @return integer             New value, or old value upon failure
     */
-    function toggleEnabled($oldvalue, $id)
+    public static function toggleEnabled($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'enabled', $id);
     }
@@ -347,7 +351,7 @@ abstract class Gateway
     *   @param  integer $id          ID number of element to modify
     *   @return integer              New value, or old value upon failure
     */
-    function toggleBuyNow($oldvalue, $id)
+    public static function toggleBuyNow($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'buy_now', $id);
     }
@@ -361,7 +365,7 @@ abstract class Gateway
     *   @param  integer $id          ID number of element to modify
     *   @return integer              New value, or old value upon failure
     */
-    function toggleDonation($oldvalue, $id)
+    public static function toggleDonation($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'donation', $id);
     }
@@ -390,6 +394,7 @@ abstract class Gateway
             }
             $order += $stepNumber;
         }
+        Cache::clear('gateways');
     }
 
 
@@ -473,6 +478,7 @@ abstract class Gateway
                 '" . DB_escapeString($config) . "',
                 '" . DB_escapeString($services) . "')";
             DB_query($sql);
+            Cache::clear('gateways');
             return DB_error() ? false : true;
         }
         return false;
@@ -489,6 +495,7 @@ abstract class Gateway
 
         $this->ClearButtonCache();
         DB_delete($_TABLES['paypal.gateways'], 'id', $this->gw_name);
+        Cache::clear('gateways');
     }
 
 
@@ -576,7 +583,9 @@ abstract class Gateway
         if (!is_file(PAYPAL_PI_PATH . '/language/' . $langfile)) {
             $langfile = $this->gw_name . '_english.php';
         }
+        global $LANG_PP_gateway;
         include_once PAYPAL_PI_PATH . '/language/' . $langfile;
+        return $LANG_PP_gateway;
     }
 
 
@@ -837,15 +846,26 @@ abstract class Gateway
 
 
     /**
-    *   Create the purchase button shown on a cart checkout.
-    *   This should be overridden by the child class, the default here
-    *   is to return nothing
+    *   Get the checkout button
     *
-    *   @return string      HTML for purchase button
+    *   @param  object  $cart   Shoppping cart
+    *   @return string      HTML for checkout button
     */
-    public function CheckoutButton($cart)
+    public function checkoutButton($cart)
     {
-        return '';
+        global $_PP_CONF;
+
+        if (!$this->_Supports('checkout')) return '';
+
+        $gateway_vars = $this->gatewayVars($cart);
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
+        $T->set_file(array('btn' => 'btn_checkout.thtml'));
+        $T->set_var(array(
+            'action'    => $this->getActionUrl(),
+            'gateway_vars' => $gateway_vars,
+            'is_uikit'  => $_PP_CONF['_is_uikit'],
+        ) );
+        return $T->parse('', 'btn');
     }
 
 
@@ -878,7 +898,7 @@ abstract class Gateway
 
     /**
     *   Get the form action URL.
-    *   This function should probably be declared by the child class.
+    *   This function may be overridden by the child class.
     *   The default is to simply return the configured URL
     *
     *   This is public so that if it is not declared by the child class,
@@ -892,6 +912,11 @@ abstract class Gateway
     }
 
 
+    /**
+    *   Get the postback URL for transaction verification.
+    *
+    *   @return strin       URL for postbacks
+    */
     public function getPostBackUrl()
     {
         return $this->postback_url;
@@ -976,7 +1001,9 @@ abstract class Gateway
     *   @param  string  $key    Name of property to set
     *   @param  mixed   $value  Value to set for property
     */
-    abstract function __set($key, $value);
+    public function __set($key, $value)
+    {
+    }
 
 
     /**
@@ -988,7 +1015,10 @@ abstract class Gateway
     *   @param  array   $data       Array of original IPN data
     *   @return array               Name=>Value array of data for display
     */
-    abstract public function ipnlogVars($data);
+    public function ipnlogVars($data)
+    {
+        return array();
+    }
 
 
     /**
@@ -1005,7 +1035,47 @@ abstract class Gateway
     *   @abstract
     *   @return string      HTML for the configuration form.
     */
-    abstract public function Configure();
+    public function Configure()
+    {
+        global $_CONF, $LANG_PP, $_PP_CONF;
+
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
+        if ($_PP_CONF['_is_uikit']) {
+            $T->set_file('tpl', 'gateway_edit.uikit.thtml');
+        } else {
+            $T->set_file('tpl', 'gateway_edit.thtml');
+        }
+        $svc_boxes = $this->getServiceCheckboxes();
+
+        $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name,
+                $_CONF['language']);
+        $T->set_var(array(
+            'gw_description' => self::Description(),
+            'gw_id'         => $this->gw_name,
+            'orderby'       => $this->orderby,
+            'enabled_chk'   => $this->enabled == 1 ? ' checked="checked"' : '',
+            'pi_admin_url'  => PAYPAL_ADMIN_URL,
+            'doc_url'       => $doc_url,
+            'svc_checkboxes' => $svc_boxes,
+        ) );
+
+        // Load the language for this gateway and get all the config fields
+        $LANG = $this->LoadLanguage();
+        $fields = $this->getConfigFields($LANG);
+        $T->set_block('tpl', 'ItemRow', 'IRow');
+        foreach ($fields as $name=>$field) {
+            $T->set_var(array(
+                'param_name'    => $LANG[$name],
+                'field_name'    => $name,
+                'param_field'   => $field['param_field'],
+                'other_label'   => isset($field['other_label']) ? $field['other_label'] : '',
+            ) );
+            $T->parse('IRow', 'ItemRow', true);
+        }
+        $T->parse('output', 'tpl');
+        $form = $T->finish($T->get_var('output'));
+        return $form;
+    }
 
 
     /**
@@ -1022,14 +1092,19 @@ abstract class Gateway
         static $gateways = array();
 
         if (!isset(self::$gateways[$gw_name])) {
-            $filename = __DIR__ . '/gateways/' . $gw_name . '.class.php';
-            if (file_exists($filename)) {
-                include_once $filename;
-                $gw = __NAMESPACE__ . '\\' . $gw_name;
-                $gateways[$gw_name] = new $gw($A);
-            } else {
-                $gateways[$gw_name] = NULL;
-            }
+//            $cache_key = 'gateway_' . $gw_name;
+//            $gateways[$gw_name] = Cache::get($cache_key);
+//            if (!$gateways[$gw_name]) {
+                $filename = __DIR__ . '/gateways/' . $gw_name . '.class.php';
+                if (file_exists($filename)) {
+                    include_once $filename;
+                    $gw = __NAMESPACE__ . '\\' . $gw_name;
+                    $gateways[$gw_name] = new $gw($A);
+                } else {
+                    $gateways[$gw_name] = new dummy($A);
+                }
+//                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
+//            }
         }
         return $gateways[$gw_name];
     }
@@ -1050,19 +1125,23 @@ abstract class Gateway
 
         if (!isset($gateways[$key])) {
             $gateways[$key] = array();
-
-            // Load the gateways
-            $sql = "SELECT id, enabled, services
-                FROM {$_TABLES['paypal.gateways']}";
-            // If not loading all gateways, get just then enabled ones
-            if ($enabled) $sql .= ' WHERE enabled=1';
-            $sql .= ' ORDER BY orderby';
-            $res = DB_query($sql);
-            while ($A = DB_fetchArray($res, false)) {
-                // For each available gateway, load its class file and add it
-                // to the static array
-                $gateways[$key][] = self::getInstance($A['id'], $A);
-            }
+//            $cache_key = 'gateways_' . $key;
+//            $gateways[$key] = Cache::get($cache_key);
+//            if (!$gateways[$key]) {
+                // Load the gateways
+                $sql = "SELECT id, enabled, services
+                    FROM {$_TABLES['paypal.gateways']}";
+                // If not loading all gateways, get just then enabled ones
+                if ($enabled) $sql .= ' WHERE enabled=1';
+                $sql .= ' ORDER BY orderby';
+                $res = DB_query($sql);
+                while ($A = DB_fetchArray($res, false)) {
+                    // For each available gateway, load its class file and add it
+                    // to the static array
+                    $gateways[$key][] = self::getInstance($A['id'], $A);
+                }
+//                Cache::set($cache_key, $gateways[$key], 'gateways');
+//            }
         }
         return $gateways[$key];
     }
@@ -1081,6 +1160,37 @@ abstract class Gateway
         return isset($this->config[$item]) ? $this->config[$item] : NULL;
     }
 
-}   // class PaymentGw
+
+    /**
+    *   Get the radio button for this gateway to show on the checkout form
+    *
+    *   @param  boolean $selected   True if the button should be selected
+    *   @return string      HTML for radio button
+    */
+    public function checkoutRadio($selected = false)
+    {
+        $sel = $selected ? 'checked="checked" ' : '';
+        $radio = '<input required type="radio" name="gateway" value="' . $this->gw_name . '" ' . $sel . '/>&nbsp;';
+        // Get the image for the gateway, or default to the description
+        if ($this->button_url != '') {
+            $radio .= $this->button_url;
+        } else {
+            $radio .= $this->gw_desc;
+        }
+        return $radio;
+    }
+
+
+    public function gatewayVars($cart)
+    {
+        return '';
+    }
+
+}   // class Gateway
+
+
+class dummy extends Gateway
+{
+}
 
 ?>

@@ -43,8 +43,11 @@
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">
-        <a href="{pi_url}/index.php?action=delcartitem&id={cart_item_id}"><i
+        <a href="{pi_url}/index.php?delcartitem=x&id={cart_item_id}"><i
             class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
+      </td>
+      <td class="aligncenter">
+        <i class="{iconset}-info-circle tooltip" title="Taxable"></i>
       </td>
       <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
       <input type="hidden" name="item_number_{pp_id}" value="{item_id}">

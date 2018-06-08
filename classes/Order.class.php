@@ -95,6 +95,7 @@ class Order
         case 'tax':
         case 'shipping':
         case 'handling':
+        case 'by_gc':
             $this->properties[$name] = (float)$value;
             break;
 
@@ -233,7 +234,7 @@ class Order
     public function setBilling($A)
     {
         if (isset($A['useaddress'])) {
-            // If set, the user has selected an existing address.  Read
+            // If set, the user has selected an existing address. Read
             // that value and use it's values.
             Cart::setSession('billing', $A['useaddress']);
             $A = UserInfo::getAddress($A['useaddress']);
@@ -305,6 +306,7 @@ class Order
         $this->handling = PP_getVar($A, 'handling', 'float');
         $this->tax = PP_getVar($A, 'tax', 'float');
         $this->instructions = PP_getVar($A, 'instructions');
+        $this->by_gc = PP_getVar($A, 'by_gc', 'float');
 
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
@@ -396,6 +398,7 @@ class Order
                 "status = '{$this->status}'",
                 "pmt_txn_id = '" . DB_escapeString($this->pmt_txn_id) . "'",
                 "pmt_method = '" . DB_escapeString($this->pmt_method) . "'",
+                "by_gc = '{$this->by_gc}'",
                 "phone = '" . DB_escapeString($this->phone) . "'",
                 "tax = '{$this->tax}'",
                 "shipping = '{$this->shipping}'",
@@ -434,12 +437,9 @@ class Order
         if (!$this->canView()) return '';
 
         $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        if ($tpl == 'print') {
-            $tpltype = '.print';
-        } else {
-            $tpltype = $_SYSTEM['framework'] == 'uikit' ? '.uikit' : '';
-        }
-        $T->set_file('order', "order$tpltype.thtml");
+        $tplname = 'order';
+        if (!empty($tpl)) $tplname .= '.' . $tpl;
+        $T->set_file('order', "$tplname.thtml");
 
         $isAdmin = plugin_ismoderator_paypal() ? true : false;
 
@@ -499,7 +499,7 @@ class Order
             'pi_url'    => PAYPAL_URL,
             'is_admin' => $isAdmin ? 'true' : '',
             'pi_admin_url' => PAYPAL_ADMIN_URL,
-            'total'     => sprintf('%6.2f', $total),
+            'total'     => COM_numberFormat($total, 2),
             'not_final' => $final ? '' : 'true',
             'order_date' => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
@@ -514,6 +514,9 @@ class Order
             'shop_name' => $_PP_CONF['shop_name'],
             'shop_addr' => $_PP_CONF['shop_addr'],
             'shop_phone' => $_PP_CONF['shop_phone'],
+            'apply_gc'     => COM_numberFormat($this->by_gc, 2),
+            'net_total' => $total - $this->by_gc,
+            'iconset'   => $_PP_CONF['_iconset'],
         ) );
 
         if ($isAdmin) {
@@ -599,11 +602,12 @@ class Order
         DB_query($sql);
         if (DB_error()) return false;
         if ($log) {
-            self::Log("Status changed from $oldstatus to $newstatus",
-                    $order_id, $log_user);
+            $this->Log("Status changed from $oldstatus to $newstatus",
+                    $log_user);
         }
 
-        if ($_PP_CONF['orderstatus'][$newstatus]['notify_buyer'] == 1) {
+        if (isset($_PP_CONF['orderstatus'][$newstatus]['notify_buyer']) &&
+                $_PP_CONF['orderstatus'][$newstatus]['notify_buyer'] == 1) {
             $this->Notify($newstatus);
         }
         return true;
@@ -618,21 +622,15 @@ class Order
     *   associated with the log entry.
     *
     *   @param  string  $msg        Log message
-    *   @param  string  $order_id   Optional order ID, or use current object
     *   @param  string  $log_user   Optional log username
     *   @return boolean             True on success, False on DB error
     */
-    function Log($msg, $order_id = '', $log_user = '')
+    public function Log($msg, $log_user = '')
     {
         global $_TABLES, $_USER;
 
         // If the order ID is omitted, get information from the current
         // object.
-        if ($order_id == '' && is_object($this)) {
-            $order_id = $this->order_id;
-            $log_user = $this->log_user;
-        }
-        if (empty($order_id)) return false;
         if (empty($log_user)) {
             $log_user = COM_getDisplayName($_USER['uid']) .
                 ' (' . $_USER['uid'] . ')';
@@ -640,7 +638,7 @@ class Order
 
         $sql = "INSERT INTO {$_TABLES['paypal.order_log']} SET
             username = '" . DB_escapeString($log_user) . "',
-            order_id = '" . DB_escapeString($order_id) . "',
+            order_id = '" . DB_escapeString($this->order_id) . "',
             message = '" . DB_escapeString($msg) . "',
             ts = UTC_TIMESTAMP()";
         DB_query($sql);
@@ -668,8 +666,8 @@ class Order
         PAYPAL_debug("Sending email to " . $this->uid);
 
         // setup templates
-        $message = new \Template(PAYPAL_PI_PATH . '/templates');
-        $message->set_file(array(
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
+        $T ->set_file(array(
             'subject' => 'purchase_email_subject.txt',
             'msg_admin' => 'purchase_email_admin.txt',
             'msg_user' => 'purchase_email_user.txt',
@@ -710,7 +708,7 @@ class Order
             $item_total += $ext;
             $item_descr = $item->getShortDscp();
 
-            //$message->set_block('message', 'ItemList', 'List');
+            //$T->set_block('message', 'ItemList', 'List');
             $options_text = '';
             /*$opts = $item->getOptions();
             $opts = isset($item['options_text']) ? @json_decode($item['options_text'], true) : array();
@@ -719,15 +717,15 @@ class Order
                     $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
                 }
             }*/
-            $message->set_block('msg_body', 'ItemList', 'List');
-            $message->set_var(array(
+            $T->set_block('msg_body', 'ItemList', 'List');
+            $T->set_var(array(
                 'qty'   => $item->quantity,
                 'price' => sprintf($num_format, $item->price),
                 'ext'   => sprintf($num_format, $ext),
                 'name'  => $item_descr,
                 'options_text' => $options_text,
             ) );
-            $message->parse('List', 'ItemList', true);
+            $T->parse('List', 'ItemList', true);
         }
 
         // Determine if files will be attached to this message based on
@@ -753,12 +751,15 @@ class Order
             $this->billto_name = $user_name;
         }
 
-        $message->set_var(array(
+        $T->set_var(array(
             'payment_gross'     => sprintf($num_format, $total_amount),
             'payment_items'     => sprintf($num_format, $item_total),
             'tax'               => sprintf($num_format, $this->tax),
+            'tax_num'           => $this->tax,
             'shipping'          => sprintf($num_format, $this->shipping),
+            'shipping_num'      => $this->shipping,
             'handling'          => sprintf($num_format, $this->handling),
+            'handling_num'      => $this->handling,
             'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
             'payer_name'        => $this->billto_name,
@@ -776,13 +777,26 @@ class Order
             'status'            => $this->status,
             'order_instr'   => $this->instructions,
         ) );
+        if ($this->by_gc > 0) {
+            $T->set_var(array(
+                'by_gc'     => sprintf($num_format, $this->by_gc),
+                'net_total' => sprintf($num_format, $total_amount - $this->by_gc),
+            ) );
+        }
+        $gc_bal = Coupon::getUserBalance($this->uid);
+        if ($gc_bal > 0) {
+            $T->set_var(array(
+                'gc_bal_fmt' => sprintf($num_format, $gc_bal),
+                'gc_bal_num' => $gc_bal,
+            ) );
+        }
 
         // parse templates for subject/text
-        $subject = trim($message->parse('output', 'subject'));
-        $message->set_var('purchase_details',
-                        $message->parse('detail', 'msg_body'));
-        $user_text  = $message->parse('user_out', 'msg_user');
-        $admin_text = $message->parse('admin_out', 'msg_admin');
+        $subject = trim($T->parse('output', 'subject'));
+        $T->set_var('purchase_details',
+                        $T->parse('detail', 'msg_body'));
+        $user_text  = $T->parse('user_out', 'msg_user');
+        $admin_text = $T->parse('admin_out', 'msg_admin');
 
         if ($this->buyer_email != '') {
             // if specified to mail attachment, do so, otherwise skip

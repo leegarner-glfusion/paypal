@@ -566,3 +566,9 @@ form.frm_buy_now {
     text-align: center;
     width: 50%;
 }
+
+div.ppGatewayRadios {
+    margin-top:10px;
+    text-align:left;
+    font-size: 125%;
+}

@@ -3,9 +3,9 @@
 *   Gateway implementation for PayPal.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.7
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -33,7 +33,7 @@ class paypal extends Gateway
     *   Constructor.
     *   Set gateway-specific items and call the parent constructor.
     */
-    function __construct()
+    public function __construct()
     {
         global $_PP_CONF, $_USER;
 
@@ -46,6 +46,7 @@ class paypal extends Gateway
         // These are used by the parent constructor, set them first.
         $this->gw_name = 'paypal';
         $this->gw_desc = 'PayPal Web Payments Standard';
+        $this->button_url = '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal Logo">';
 
         // Set default values for the config items, just to be sure that
         // something is set here.
@@ -105,7 +106,7 @@ class paypal extends Gateway
     *
     *   @return string      Gateway's home page
     */
-    function getMainUrl()
+    public function getMainUrl()
     {   return 'https://www.paypal.com';    }
 
 
@@ -116,7 +117,7 @@ class paypal extends Gateway
     *   @param  string  $key    Name of property to set
     *   @param  mixed   $value  New value for property
     */
-    function __set($key, $value)
+    public function __set($key, $value)
     {
         switch ($key) {
         case 'business':
@@ -168,7 +169,7 @@ class paypal extends Gateway
     *   @uses   getActionUrl()
     *   @return string      HTML for purchase button
     */
-    public function CheckoutButton($cart)
+    public function gatewayVars($cart)
     {
         global $_PP_CONF, $_USER, $_TABLES, $LANG_PP;
 
@@ -176,7 +177,6 @@ class paypal extends Gateway
             return '';
         }
 
-        $cartItems = $cart->Cart();
         $cartID = $cart->CartID();
 
         $custom_arr = array(
@@ -184,6 +184,7 @@ class paypal extends Gateway
             'transtype' => 'cart_upload',
             'cart_id' => $cartID,
         );
+        $custom_arr = array_merge($custom_arr, $cart->custom_info);
 
         $fields = array(
             'cmd'       => '_cart',
@@ -217,13 +218,18 @@ class paypal extends Gateway
         $handling = 0;
         $fields['tax_cart'] = 0;
 
-        foreach ($cartItems as $cart_item_id=>$item) {
-            $opt_str = '';
-            $item_parts = explode('|', $item['item_id']);
-            $db_item_id = $item_parts[0];
-            $options = isset($item_parts[1]) ? $item_parts[1] : '';
-            //if (is_numeric($db_item_id)) {
-                //$P = new Product($db_item_id);
+        if (isset($custom_arr['by_gc'])) {      // If using a gift card....
+            $total_amount = $cart->getInfo('final_total');
+            $fields['item_number_1'] = $LANG_PP['cart'];
+            $fields['item_name_1'] = $LANG_PP['all_items'];
+            $fields['amount_1'] = $total_amount;
+        } else {
+            $cartItems = $cart->Cart();
+            foreach ($cartItems as $cart_item_id=>$item) {
+                $opt_str = '';
+                $item_parts = explode('|', $item['item_id']);
+                $db_item_id = $item_parts[0];
+                $options = isset($item_parts[1]) ? $item_parts[1] : '';
                 $P = Product::getInstance($db_item_id);
                 $db_item_id = DB_escapeString($db_item_id);
                 $oc = 0;
@@ -238,57 +244,39 @@ class paypal extends Gateway
                             $oc++;
                         }
                     }
-                    //$item['descrip'] .= $opt_str;
                 } else {
                     $opts = array();
                 }
                 $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
                 $fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
-                /*if ($P->taxable == 0) {
-                    $fields['tax_' . $i] = '0.00';
-                }*/
-            /*} else {
-                // Plugin item
-                $fields['amount_' . $i] = $item['price'];
-            }*/
-            //$fields['item_number_' . $i] = htmlspecialchars($item['item_id']);
-            $fields['item_number_' . $i] = (int)$cart_item_id;
-            $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
-            $total_amount += $item['price'];
-            if (isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
-                foreach ($item['extras']['custom'] as $id=>$val) {
-                    $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
-                    $fields['os'.$oc.'_'.$i] = $val;
-                    $oc++;
+                $fields['item_number_' . $i] = (int)$cart_item_id;
+                $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
+                $total_amount += $item['price'];
+                if (isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
+                    foreach ($item['extras']['custom'] as $id=>$val) {
+                        $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
+                        $fields['os'.$oc.'_'.$i] = $val;
+                        $oc++;
+                    }
                 }
-            }
-            $fields['quantity_' . $i] = $item['quantity'];
+                $fields['quantity_' . $i] = $item['quantity'];
 
-            if (isset($item['shipping'])) {
-                $fields['shipping_' . $i] = $item['shipping'];
-                $shipping += $item['shipping'];
+                if (isset($item['shipping'])) {
+                    $fields['shipping_' . $i] = $item['shipping'];
+                    $shipping += $item['shipping'];
+                }
+                if (isset($item['weight']) && $item['weight'] > 0) {
+                    $weight += $item['weight'];
+                }
+                $i++;
             }
-            if (isset($item['weight']) && $item['weight'] > 0) {
-                $weight += $item['weight'];
-            }
-            /*if (isset($item['tax'])) {
-                $fields['tax_' . $i] = $item['tax'];
-            } elseif (isset($item['options']['tax'])) {
-                $fields['tax_' . $i] = $item['options']['tax'];
-            }*/
-            $i++;
-        }
 
-        $gc = $cart->getGC();
-        if ($gc > 0) {
-            $fields['discount_amount_cart'] = (float)($gc);
-        }
-
-        if ($shipping > 0) $total_amount += $shipping;
-        if ($weight > 0) {
-            $fields['weight_cart'] = $weight;
-            $fields['weight_unit'] = $_PP_CONF['weight_unit'] == 'kgs' ?
+            if ($shipping > 0) $total_amount += $shipping;
+            if ($weight > 0) {
+                $fields['weight_cart'] = $weight;
+                $fields['weight_unit'] = $_PP_CONF['weight_unit'] == 'kgs' ?
                             'kgs' : 'lbs';
+            }
         }
 
         // Set the business e-mail address based on the total puchase amount
@@ -319,13 +307,29 @@ class paypal extends Gateway
         }
 
         $gateway_vars = implode("\n", $gatewayVars);
+        return $gateway_vars;
+    }
+
+
+    /**
+    *   Get the checkout button
+    *
+    *   @param  object  $cart   Shoppping cart
+    *   @return string      HTML for checkout button
+    */
+    public function XcheckoutButton($cart)
+    {
+        global $_PP_CONF;
+
+        $gateway_vars = $this->gatewayVars($cart);
+
         $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                     $this->gw_name);
         $T->set_file(array('btn' => 'btn_checkout.thtml'));
         $T->set_var('paypal_url', $this->getActionUrl());
         $T->set_var('gateway_vars', $gateway_vars);
-        $retval = $T->parse('', 'btn');
-        return $retval;
+        $T->set_var('is_uikit', $_PP_CONF['_is_uikit']);
+        return $T->parse('', 'btn');
     }
 
 
@@ -791,39 +795,13 @@ class paypal extends Gateway
 
 
     /**
-    *   Present the configuration form for this gateway.
+    *   Get all the configuration fields specifiec to this gateway
     *
-    *   @uses   Gateway::getServiceCheckboxes
-    *   @return string      HTML for the configuration form.
+    *   @return array   Array of fields (name=>field_info)
     */
-    public function Configure()
+    protected function getConfigFields()
     {
-        global $_CONF, $LANG_PP_paypal, $_PP_CONF;
-
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
-        if ($_PP_CONF['_is_uikit']) {
-            $T->set_file('tpl', 'gateway_edit.uikit.thtml');
-        } else {
-            $T->set_file('tpl', 'gateway_edit.thtml');
-        }
-
-        $svc_boxes = $this->getServiceCheckboxes();
-
-        $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name,
-                $_CONF['language']);
-        $T->set_var(array(
-            'gw_description' => self::Description(),
-            'gw_id'         => $this->gw_name,
-            'orderby'       => $this->orderby,
-            'enabled_chk'   => $this->enabled == 1 ? ' checked="checked"' : '',
-            'pi_admin_url'  => PAYPAL_ADMIN_URL,
-            'doc_url'       => $doc_url,
-            'svc_checkboxes' => $svc_boxes,
-        ) );
-
-        $this->LoadLanguage();
-
-        $T->set_block('tpl', 'ItemRow', 'IRow');
+        $fields = array();
         foreach($this->config as $name=>$value) {
             $other_label = '';
             switch ($name) {
@@ -839,20 +817,13 @@ class paypal extends Gateway
                     $value . '" size="60" />';
                 break;
             }
-            $T->set_var(array(
-                'param_name'    => $LANG_PP_paypal[$name],
-                'field_name'    => $name,
+            $fields[$name] = array(
                 'param_field'   => $field,
                 'other_label'   => $other_label,
-                'doc_url'       => $doc_url,
-            ) );
-            $T->parse('IRow', 'ItemRow', true);
+                'doc_url'       => '',
+            );
         }
-
-        $T->parse('output', 'tpl');
-        $form = $T->finish($T->get_var('output'));
-
-        return $form;
+        return $fields;
     }
 
 

@@ -226,15 +226,17 @@ class IPN
         USES_paypal_functions();
 
         // for each item purchased, check its price and accumulate total
+        // Add in any gift card applied.
         $total = (float)0;
         $payment_gross = (float)$this->pp_data['pmt_gross'];
-
-        // Get the discount amount, if any, and verify the user's balance
-        $discount = (float)$this->pp_data['discount'];
-        if ($discount > 0) {
+        $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
+        if ($by_gc > 0) {
             $uid = (int)$this->pp_data['custom']['uid'];
-            if (!Coupon::verifyBalance($uid, $discount)) {
-                $discount = 0;
+            if (Coupon::verifyBalance($by_gc, $uid)) {
+                $payment_gross += $by_gc;
+            } else {
+                $gc_bal = Coupon::getUserBalance($uid);
+                COM_errorLog("Insufficient Gift Card Balance, need $by_gc, have $gc_bal");
             }
         }
 
@@ -259,7 +261,7 @@ class IPN
 
         // Compare total price to gross payment.  The ".0001" is to help
         // kill any floating-point errors. Include any discount.
-        if ($total <= $payment_gross + $discount + .0001) {
+        if ($total <= $payment_gross + .0001) {
             PAYPAL_debug("$payment_gross received is ok, require $total");
             return true;
         } else {
@@ -277,7 +279,7 @@ class IPN
     *   @deprecated
     *   @see Order::Notify()
     */
-    protected function sendNotification()
+    protected function X_sendNotification()
     {
         global $_CONF, $_PP_CONF;
 
@@ -347,6 +349,11 @@ class IPN
             }
             $gw_msg = sprintf($LANG_PP['pmt_made_via'],
                     $this->pp_data['gw_name'], $this->pp_data['pmt_date']);
+
+            $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
+            if ($by_gc > 0) {
+                $message->set_var('payment_gc', sprintf($LANG_PP['paid_amt_gw'], $by_gc, 'Gift Cart'));
+            }
 
             $message->set_var(array(
                 'payment_gross'     => sprintf('%6.2f',
@@ -430,7 +437,7 @@ class IPN
     */
     protected function handlePurchase()
     {
-        global $_TABLES, $_CONF, $_PP_CONF;
+        global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
 
         $prod_types = 0;
 
@@ -490,6 +497,13 @@ class IPN
         if ($status == 0) {
             foreach ($this->Order->items as $item) {
                 $item->getProduct()->handlePurchase($item, $this->Order, $this->pp_data);
+            }
+            $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $this->pp_data['pmt_gross'], $this->pp_data['gw_name']));
+            $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
+            $this->Order->by_gc = $by_gc;
+            if ($by_gc > 0) {
+                $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $by_gc, 'Gift Card'));
+                Coupon::Redeem($by_gc, $this->Order->uid, $this->Order);
             }
             $this->Order->Notify();
         } else {

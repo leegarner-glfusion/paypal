@@ -99,16 +99,16 @@
         <!-- BEGIN ItemRow -->
         <tr>
           <td>
-            {!if is_admin}
-            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}">
-            {!endif}
-            {item_name}
-{!if is_file}
-            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="gl_mootip" title="{$LANG_PP['download']}">{$LANG_PP['download']}</a>
+{!if is_admin}
+            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" class="tooltip" title="{$LANG_PP['orderhist_item']}">
 {!endif}
-            {!if is_admin}
+              {item_descrip}
+{!if is_file}
+            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
+{!endif}
+{!if is_admin}
             </a>
-            {!endif}
+{!endif}
             {!if item_options}
             <br />{item_options}
             {!endif}
@@ -152,10 +152,10 @@
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
         </tr>
-{!if gc_bal}
+{!if apply_gc}
         <tr>
-          <td colspan="2" class="alignright"><b>{$LANG_PP['apply_gc']}</b></td>
-          <td colspan="2" class="alignright">-&nbsp;{gc_bal_disp}</td>
+          <td colspan="3" class="alignright">{$LANG_PP['apply_gc']}</td>
+          <td class="alignright">-&nbsp;{apply_gc}</td>
         </tr>
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['net_total']}</b></td>
@@ -202,8 +202,8 @@
     </tr>
     <!-- BEGIN LogMessages -->
     <tr>
-      <td class="nowrap" title="{log_ts_tip}">{log_ts}</td>
-      <td>{log_username}</td>
+      <td style="white-space:nowrap" title="{log_ts_tip}">{log_ts}</td>
+      <td style="white-space:nowrap" >{log_username}</td>
       <td>{log_msg}</td>
     </tr>
     <!-- END LogMessages -->

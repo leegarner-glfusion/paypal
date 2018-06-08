@@ -18,17 +18,31 @@
 <tr>
   <td colspan="3" align="right">{$LANG_PP['item_total']}:</td><td align="right">{payment_items}</td>
 </tr>
+{!if tax_num}
 <tr>
   <td colspan="3" align="right">{$LANG_PP['tax']}</td><td align="right">{tax}</td>
 </tr>
+{!endif}
+{!if shipping_num}
 <tr>
   <td colspan="3" align="right">{$LANG_PP['shipping']}</td><td align="right">{shipping}</td>
 </tr>
+{!endif}
+{!if handling_num}
 <tr>
   <td colspan="3" align="right">{$LANG_PP['handling']}</td><td align="right">{handling}</td>
 </tr>
+{!endif}
 <tr>
   <td colspan="3" align="right">{$LANG_PP['total']}:</td><td align="right">{payment_gross}</td>
 </tr>
+{!if by_gc}
+<tr>
+  <td colspan="3" align="right">{$LANG_PP['paid_by_gc']}:</td><td align="right">-&nbsp;{by_gc}</td>
+</tr>
+<tr>
+  <td colspan="3" align="right">{$LANG_PP['pmt_total']}:</td><td align="right">{net_total}</td>
+</tr>
+{!endif}
 </table>
-
+<p />

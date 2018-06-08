@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2017 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -58,11 +58,6 @@ SESS_setVar($_PP_CONF['pi_name'], array(
     'origpath' => $_PP_CONF['image_dir'],
 ));
 
-if (file_exists(__DIR__ . '/config.php')) {
-    /** Include local configuration overrides */
-    include_once __DIR__ . '/config.php';
-}
-
 // Load the site's language file, falling back to English.
 $langpath = __DIR__ . '/language';
 $langfile = "{$_CONF['language']}.php";
@@ -75,6 +70,11 @@ require_once "$langpath/$langfile";
 if (is_file("$langpath/custom/$langfile")) {
     /** Include the custom language file, if any */
     include_once "$langpath/custom/$langfile";
+}
+
+if (file_exists(__DIR__ . '/config.php')) {
+    /** Include local configuration overrides */
+    include_once __DIR__ . '/config.php';
 }
 
 //  Set user ID = 1 for anonymous users.
@@ -1695,8 +1695,9 @@ function Xplugin_profilevariablesdisplay_paypal($uid, &$T)
     $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
     $U = Paypal\UserInfo::getInstance($uid);
     $Cur = new Paypal\Currency();
-    if ($U->gc_bal > 0) {
-        $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
+    $gc_bal = Paypal\Coupon::getUserBalance($uid);
+    if ($gc_bal > 0) {
+        $LT->set_var('gc_bal', $Cur->Format($gc_bal));
     }
     if (!empty($U->cart)) {
         $cart = true;
@@ -1708,7 +1709,7 @@ function Xplugin_profilevariablesdisplay_paypal($uid, &$T)
     $LT->set_var('orders', $ord_count);
 
     // Only display the template if there's something to show
-    if ($ord_count > 0 || $cart || $U->gc_bal > 0) {
+    if ($ord_count > 0 || $cart || $gc_bal > 0) {
         $LT->parse('output', 'block');
         $existingFields = $T->get_var('plugin_fields');
         $T->set_var('plugin_fields',
@@ -1743,9 +1744,10 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         ));
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
         $U = Paypal\UserInfo::getInstance($uid);
+        $gc_bal = Paypal\Coupon::getUserBalance($uid);
         $Cur = new Paypal\Currency();
-        if ($U->gc_bal > 0) {
-            $LT->set_var('gc_bal', $Cur->Format($U->gc_bal));
+        if ($gc_bal > 0) {
+            $LT->set_var('gc_bal', $Cur->Format($gc_bal));
         }
         if (!empty($U->cart)) {
             $cart = true;
@@ -1757,7 +1759,7 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         $LT->set_var('orders', $ord_count);
 
         // Only display the template if there's something to show
-        if ($ord_count > 0 || $cart || $U->gc_bal > 0) {
+        if ($ord_count > 0 || $cart || $gc_bal > 0) {
             $LT->parse('output', 'block');
             $retval .= $LT->finish($LT->get_var('output'));
         }

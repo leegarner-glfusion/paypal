@@ -11,6 +11,7 @@ Released TBD
 - Change post to get for redirect from Paypal
 - Removed unused comment counter field
 - Remove configured file download path, use data/paypal/files always.
+- Implement gift card sales and redemption.
 
 ## Ver 0.5.11
 Released 2017-07-23

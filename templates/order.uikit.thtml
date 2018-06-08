@@ -5,7 +5,7 @@
 {!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
-        title="Print" data-uk-tooltip class="uk-icon-print"></a>
+        title="Print" class="uk-icon-print tooltip"></a>
   </div>
 {!endif}
 
@@ -98,19 +98,19 @@
         <!-- BEGIN ItemRow -->
         <tr>
           <td>
-            {!if is_admin}
-            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" data-uk-tooltip title="{$LANG_PP['orderhist_item']}">
-            {!endif}
-            {item_descrip}
-{!if is_file}
-            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="uk-icon-download" title="{$LANG_PP['download']}" data-uk-tooltip></a>
+{!if is_admin}
+            <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" class="tooltip" title="{$LANG_PP['orderhist_item']}">
 {!endif}
-            {!if is_admin}
+              {item_descrip}
+{!if is_file}
+            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
+{!endif}
+{!if is_admin}
             </a>
-            {!endif}
-          {!if item_options}
+{!endif}
+{!if item_options}
           <br />{item_options}
-          {!endif}
+{!endif}
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
@@ -118,34 +118,44 @@
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
-        {!if subtotal}
+{!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
           <td class="alignright">{subtotal}</td>
         </tr>
-        {!endif}
-        {!if tax}
+{!endif}
+{!if tax}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['tax']}</td>
           <td class="alignright">{tax}</td>
         </tr>
-        {!endif}
-        {!if shipping}
+{!endif}
+{!if shipping}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['shipping']}</td>
           <td class="alignright">{shipping}</td>
         </tr>
-        {!endif}
-        {!if handling}
+{!endif}
+{!if handling}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['handling']}</td>
           <td class="alignright">{handling}</td>
         </tr>
-        {!endif}
+{!endif}
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
         </tr>
+{!if by_gc}
+        <tr>
+          <td colspan="3" class="alignright">{$LANG_PP['paid_by_gc']}</td>
+          <td class="alignright">{by_gc}</td>
+        </tr>
+        <tr>
+          <td colspan="3" class="alignright"><b>{$LANG_PP['net_total']}</b></td>
+          <td class="alignright"><b>{net_total}</b></td>
+        </tr>
+{!endif}
       </table>
     </div>
   </div>

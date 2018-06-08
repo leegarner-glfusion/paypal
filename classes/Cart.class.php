@@ -12,7 +12,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.12
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -44,6 +44,10 @@ class Cart
     );
 
     private static $session_var = 'ppGCart';
+
+    /** Holder for custom information
+    *   @var array */
+    public $custom_info = array();
 
     /**
     *   Constructor.
@@ -214,7 +218,7 @@ class Cart
             }
             $this->Save();
         }
-        self::delAnonCart($cart_id);    // Delete to avoid re-merging
+        self::delAnonCart();    // Delete to avoid re-merging
         return $this->m_cart;
     }
 
@@ -433,6 +437,19 @@ class Cart
         }
     }
 
+    public function getInfo($item = '')
+    {
+        if ($item != '') {
+            if (isset($this->m_info[$item])) {
+                return $this->m_info[$item];
+            } else {
+                return NULL;
+            }
+        } else {
+            return $this->m_info;
+        }
+    }
+
 
     /**
     *   Remove an item from the cart.
@@ -513,7 +530,6 @@ class Cart
             }
             $T->set_var('not_final', 'true');
         }
-
 
         $T->set_block('cart', 'ItemRow', 'iRow');
         $counter = 0;
@@ -616,17 +632,26 @@ class Cart
             $tc_link = '';
         }
 
-        // Apparently cannot apply cart discount to shipping and tax, at least
-        // not with PayPal
         $gc_bal = 0;
+        $apply_gc = 0;
         if ($_PP_CONF['gc_enabled']) {
-        if (!$checkout) {
-            $U = UserInfo::getInstance($_USER['uid']);
-            $gc_bal = min($subtotal, $U->gc_bal);
-        } elseif ($this->m_info['apply_gc'] !== NULL) {
-            $gc_bal = min($this->m_info['apply_gc'], $subtotal);
+            $gc_bal = Coupon::getUserBalance();
+            if (!$checkout) {
+                if (isset($this->m_info['apply_gc'])) {
+                    $apply_gc = $this->m_info['apply_gc'];
+                }
+                $apply_gc = min($total, $apply_gc);
+            } elseif ($this->m_info['apply_gc'] !== NULL) {
+                $apply_gc = min($this->m_info['apply_gc'], $total);
+            }
         }
-        }
+
+        $this->custom_info['by_gc'] = $apply_gc;
+        $this->custom_info['final_total'] = $total - $apply_gc;
+        $this->m_info['apply_gc'] = $apply_gc;
+        $this->m_info['final_total'] = $total - $apply_gc;
+        $this->m_info['shipping'] = $shipping;
+        $this->m_info['cart_tax'] = $cart_tax;
         $T->set_var(array(
             //'paypal_url'        => $_PP_CONF['paypal_url'],
             //'receiver_email'    => $_PP_CONF['receiver_email'][0],
@@ -636,9 +661,9 @@ class Cart
             'total'     => $currency->Format($total),
             'order_instr' => htmlspecialchars($this->getInstructions()),
             'tc_link'  => $tc_link,
-            'gc_bal'    => $gc_bal,
+            'apply_gc'  => COM_numberFormat($apply_gc, 2),
             'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
-            'net_total' => $currency->Format($total - $gc_bal),
+            'net_total' => $currency->Format(max($total - $apply_gc, 0)),
             'cart_tax'  => $cart_tax > 0 ? $currency->Format($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
@@ -647,15 +672,64 @@ class Cart
         if ($checkout) {
             $this->Save();      // Update for tax
             $T->set_var(array(
-                'gateway_vars'  => $this->getCheckoutButtons(),
+                'gateway_vars'  => $this->checkoutButton($this->m_info['gateway']),
                 'checkout'      => 'true',
             ) );
+        } else {
+            $T->set_var('gateway_radios', $this->getCheckoutRadios());
         }
 
         $T->parse('output', 'cart');
         $form = $T->finish($T->get_var('output'));
-
         return $form;
+    }
+
+
+    /**
+    *   Create a button that takes the buyer to the final order screen
+    *
+    *   @param  string  $gw_name    Selected Payment Gateway
+    *   @return string      HTML for final checkout button
+    */
+    public function checkoutButton($gw_name)
+    {
+        global $_PP_CONF, $_USER;
+
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
+        $T->set_file('checkout', 'btn_checkout.thtml');
+        $T->set_var(array(
+            'is_uikit' => $_PP_CONF['_is_uikit'],
+        ) );
+        // Special handling if there is a zero total due to discounts
+        // or gift cards
+        if ($this->custom_info['final_total'] < .001) {
+            $this->custom_info['uid'] = $_USER['uid'];
+            $gateway_vars = array(
+                '<input type="hidden" name="processorder" value="by_gc" />',
+                '<input type="hidden" name="cart_id" value="' . $this->CartID() . '" />',
+                '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
+            );
+            $T->set_var(array(
+                'action' => PAYPAL_URL . '/ipn/null_ipn.php',
+                'gateway_vars' => implode("\n", $gateway_vars),
+            ) );
+            $T->parse('checkout_btn', 'checkout');
+            return $T->finish($T->get_var('checkout_btn'));
+        }
+
+        $gw = Gateway::getInstance($gw_name);
+        if ($gw->Supports('checkout')) {
+            $T->set_var(array(
+                'is_uikit' => $_PP_CONF['_is_uikit'],
+                'gateway_vars' => $gw->gatewayVars($this),
+                'action' => $gw->getActionUrl(),
+            ) );
+            $T->parse('checkout_btn', 'checkout');
+            return $gw->checkoutButton($this);
+            return $T->finish($T->get_var('checkout_btn'));
+        } else {
+            return 'Gateway does not support checkout';
+        }
     }
 
 
@@ -683,8 +757,48 @@ class Cart
             $L->parse('login_btn', 'login');
             $gateway_vars = $L->finish($L->get_var('login_btn'));
         }
-
         return $gateway_vars;
+    }
+
+
+    /**
+    *   Get the payment gateway checkout buttons.
+    *   If there is only one possible gateway, pre-select it. If more than one
+    *   then leave all unselected, unless m_info['gateway'] has already been
+    *   set for this order.
+    *
+    *   @uses   PaymentGw::CheckoutButton()
+    *   @return string      HTML for checkout buttons
+    */
+    public function getCheckoutRadios()
+    {
+        global $_PP_CONF;
+
+        $retval = '';
+        $T = new \Template(PAYPAL_PI_PATH . '/templates');
+        $T->set_file('radios', 'gw_checkout_select.thtml');
+        $T->set_block('radio', 'Radios', 'row');
+        if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
+            $gateways = Gateway::getAll();
+            if (isset($this->m_info['gateway'])) {
+                // Select the previously selected gateway
+                $gw_sel = $this->m_info['gateway'];
+                $sel = false;
+            } else {
+                // Select the first if there's one, otherwise select none.
+                $gw_sel = '';
+                $sel = count($gateways) == 1 ? true : false;
+            }
+            foreach ($gateways as $gw) {
+                if ($gw->Supports('checkout')) {
+                    $T->set_var('radio', $gw->checkoutRadio($sel || $gw_sel == $gw->Name()));
+                    $T->parse('row', 'Radios', true);
+                    $sel = false;
+                }
+            }
+        }
+        $T->parse('output', 'radios');
+        return $T->finish($T->get_var('output'));
     }
 
 
@@ -925,6 +1039,19 @@ class Cart
 
 
     /**
+    *   Set the chosen payment gateway into the cart information.
+    *   Uses so the gateway will be pre-selected if the buyer returns to the
+    *   cart update page.
+    *
+    *   @param  string  $gw_name    Gateway name
+    */
+    public function setGateway($gw_name)
+    {
+        $this->m_info['gateway'] = $gw_name;
+    }
+
+
+    /**
     *   Delete any cart(s) for a user.
     *
     *   @param  integer $uid    User ID
@@ -932,8 +1059,8 @@ class Cart
     public static function deleteUser($uid)
     {
         global $_TABLES;
-
         DB_delete($_TABLES['paypal.cart'], 'cart_uid', $uid);
+        PAYPAL_debug("All carts for user {$uid} deleted");
     }
 
 
@@ -945,8 +1072,8 @@ class Cart
     */
     public function delete()
     {
+return;
         global $_TABLES;
-
         DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->m_cart_id);
         PAYPAL_debug("Cart {$this->m_cart_id} deleted");
     }
@@ -967,6 +1094,8 @@ class Cart
 
     /**
     *   Delete the anonymous user's cart.
+    *   This is done after merging the cart during login to prevent it from
+    *   being left behind and possibly re-merged during a subsequent login
     */
     public static function delAnonCart()
     {

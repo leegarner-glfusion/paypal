@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net>
-*   @copyright  Copyright (c) 2009-2011 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -50,7 +50,7 @@ $expected = array(
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
-    'wfadmin', 'order', 'itemhist', 'reports',
+    'wfadmin', 'order', 'itemhist', 'reports', 'coupons',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -291,6 +291,10 @@ case 'orderhist':
     }
     $uid = isset($_REQUEST['uid']) ? $_REQUEST['uid'] : 0;
     $content .= Paypal\listOrders(true, $uid);
+    break;
+
+case 'coupons':
+    $content .= PAYPAL_couponlist();
     break;
 
 case 'itemhist':
@@ -697,6 +701,8 @@ function PAYPAL_adminMenu($view='')
                     'text' => $LANG_PP['other_func']);
     $menu_arr[] = array('url'  => PAYPAL_URL . '/index.php',
                     'text' => $LANG_PP['storefront']);
+    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
+                    'text' => $LANG_PP['coupons']);
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
 //                    'text' => $LANG_PP['reports']);
 
@@ -1463,6 +1469,66 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
 *   @param  mixed   $item_id    Numeric or string item ID
 *   @return string      Display HTML
 */
+function PAYPAL_couponlist()
+{
+    global $_TABLES, $LANG_PP;
+
+    $filt_sql = '';
+    if (isset($_GET['filter']) && isset($_GET['value'])) {
+        switch ($_GET['filter']) {
+        case 'buyer':
+        case 'redeemer':
+            $filt_sql = "WHERE `{$_GET['filter']}` = '" . DB_escapeString($_GET['value']) . "'";
+            break;
+        }
+    }
+    $sql = "SELECT * FROM {$_TABLES['paypal.coupons']} $filt_sql";
+
+    $header_arr = array(
+        array('text' => $LANG_PP['code'],
+                'field' => 'code', 'sort' => true),
+        array('text' => $LANG_PP['purch_date'],
+                'field' => 'purchased', 'sort' => true),
+        array('text' => $LANG_PP['amount'],
+                'field' => 'amount', 'sort' => false),
+        array('text' => $LANG_PP['balance'],
+                'field' => 'balance', 'sort' => false),
+        array('text' => $LANG_PP['buyer'],
+                'field' => 'buyer', 'sort' => true),
+        array('text' => $LANG_PP['redeemer'],
+                'field' => 'redeemer', 'sort' => true),
+    );
+
+    $defsort_arr = array('field' => 'purchased',
+            'direction' => 'DESC');
+
+    $query_arr = array('table' => 'paypal.coupons',
+        'sql' => $sql,
+        'query_fields' => array(),
+        'default_filter' => '',
+    );
+
+    $text_arr = array();
+    if (!isset($_REQUEST['query_limit']))
+        $_GET['query_limit'] = 20;
+
+    $display = COM_startBlock('', '',
+                    COM_getBlockTemplate('_admin_block', 'header'));
+    $display .= $LANG_PP['couponlist'];
+    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_coupons',
+            $header_arr, $text_arr, $query_arr, $defsort_arr,
+            '', '', '', '');
+    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+    return $display;
+}
+
+
+/**
+*   Display the purchase history for a single item.
+*
+*   @param  mixed   $item_id    Numeric or string item ID
+*   @return string      Display HTML
+*/
 function PAYPAL_itemhist($item_id = '')
 {
     global $_TABLES, $LANG_PP;
@@ -1558,5 +1624,47 @@ function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
 
     return $retval;
 }
+
+
+/**
+*   Get an individual field for the coupon listing
+*
+*   @param  string  $fieldname  Name of field (from the array, not the db)
+*   @param  mixed   $fieldvalue Value of the field
+*   @param  array   $A          Array of all fields from the database
+*   @param  array   $icon_arr   System icon array (not used)
+*   @param  object  $EntryList  This entry list object
+*   @return string              HTML for field display in the table
+*/
+function getAdminField_coupons($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CONF, $_PP_CONF, $LANG_PP;
+
+    $retval = '';
+    static $username = array();
+
+    switch($fieldname) {
+    case 'buyer':
+    case 'redeemer':
+        if (!isset($username[$fieldvalue])) {
+            $username[$fieldvalue] = COM_getDisplayName($fieldvalue);
+        }
+        $retval = COM_createLink($username[$fieldvalue],
+            PAYPAL_ADMIN_URL . "/index.php?coupons=x&filter=$fieldname&value=$fieldvalue",
+            array(
+                'title' => 'Click to filter by ' . $fieldname,
+                'class' => 'tooltip',
+            )
+        );
+        break;
+
+    default:
+        $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
+        break;
+    }
+
+    return $retval;
+}
+
 
 ?>

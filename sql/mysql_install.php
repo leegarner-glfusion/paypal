@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.12
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -437,12 +437,28 @@ $_SQL['paypal.currency'] = $PP_UPGRADE['0.5.4'][0];
 $_SQL['paypal.coupons'] = "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
   `code` varchar(128) NOT NULL,
   `amount` float(8,2) unsigned NOT NULL DEFAULT '0.00',
+  `balance` float(8,2) DEFAULT NULL,
   `buyer` int(11) unsigned NOT NULL DEFAULT '0',
   `redeemer` int(11) unsigned NOT NULL DEFAULT '0',
-  `purchased` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `purchased` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `redeemed` datetime DEFAULT NULL,
-  PRIMARY KEY (`code`)
+  `expires` date DEFAULT '9999-12-31',
+  PRIMARY KEY (`code`),
+  KEY `owner` (`redeemer`,`balance`,`expires`)
 ) ENGINE=MyIsam";
+
+$_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupons']} (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(128) NOT NULL,
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `order_id` varchar(50) DEFAULT NULL,
+  `amount` float(8,2) DEFAULT NULL,
+  `msg` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  KEY `code` (`code`,`ts`)
+) ENGINE=MyIsam";
+
 
 // Sample data to load up the Paypal gateway configuration
 $_PP_SAMPLEDATA = array(
@@ -793,7 +809,7 @@ $PP_UPGRADE['0.5.11'] = array(
         CHANGE `billto_zip` `billto_zip` varchar(40) DEFAULT NULL,
         CHANGE `shipto_zip` `shipto_zip` varchar(40) DEFAULT NULL",
 );
-$PP_UPGRADE['0.5.12'] = array(
+$PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.products']} DROP comments",
     "ALTER TABLE {$_TABLES['paypal.categories']}
         ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0',
@@ -804,6 +820,29 @@ $PP_UPGRADE['0.5.12'] = array(
         ADD extras text",
     "ALTER TABLE {$_TABLES['paypal.cart']}
         ADD apply_gc float(8,2) AFTER cart_contents",
+    "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
+      `code` varchar(128) NOT NULL,
+      `amount` float(8,2) unsigned NOT NULL DEFAULT '0.00',
+      `balance` float(8,2) DEFAULT NULL,
+      `buyer` int(11) unsigned NOT NULL DEFAULT '0',
+      `redeemer` int(11) unsigned NOT NULL DEFAULT '0',
+      `purchased` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      `redeemed` datetime DEFAULT NULL,
+      `expires` date DEFAULT '9999-12-31',
+      PRIMARY KEY (`code`),
+      KEY `owner` (`redeemer`,`balance`,`expires`)
+    ) ENGINE=MyIsam",
+    "CREATE TABLE {$_TABLES['paypal.coupons']} (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `code` varchar(128) NOT NULL,
+      `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `order_id` varchar(50) DEFAULT NULL,
+      `amount` float(8,2) DEFAULT NULL,
+      `msg` varchar(255) DEFAULT NULL,
+      PRIMARY KEY (`id`),
+      KEY `order_id` (`order_id`),
+      KEY `code` (`code`,`ts`)
+    ) ENGINE=MyIsam",
 );
 
 ?>

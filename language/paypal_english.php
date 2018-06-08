@@ -11,8 +11,7 @@
 *   @filesource
 */
 
-global $LANG_PP_paypal;
-$LANG_PP_paypal = array(
+$LANG_PP_gateway = array(
 'bus_prod_email' => 'Production Business E-Mail',
 'bus_test_email' => 'Sandbox Business E-Mail',
 'micro_prod_email' => 'Production Micro-Payment E-Mail',

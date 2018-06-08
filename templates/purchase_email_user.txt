@@ -27,6 +27,11 @@ another email message confirming your payment.
 {!if gw_msg}
 <p>{gw_msg}</p>
 {!endif}
+{!if gc_bal_num}
+<p>
+You have a remaining gift card balance of {gc_bal_fmt}.
+</p>
+{!endif}
 <p>
 Thanks,<br />
 {site_name}<br />

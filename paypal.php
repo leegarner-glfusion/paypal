@@ -25,8 +25,8 @@ global $_PP_CONF;
 
 $_PP_CONF['pi_name']            = 'paypal';
 $_PP_CONF['pi_display_name']    = 'PayPal';
-$_PP_CONF['pi_version']         = '0.5.12';
-$_PP_CONF['gl_version']         = '1.6.0';
+$_PP_CONF['pi_version']         = '0.6.0';
+$_PP_CONF['gl_version']         = '1.7.0';
 $_PP_CONF['pi_url']             = 'http://www.glfusion.org';
 
 $_PP_table_prefix = $_DB_table_prefix . 'pp_';
@@ -49,6 +49,8 @@ $_TABLES['paypal.workflows']    = $_PP_table_prefix . 'workflows';
 $_TABLES['paypal.orderstatus']  = $_PP_table_prefix . 'order_status';
 $_TABLES['paypal.order_log']    = $_PP_table_prefix . 'order_log';
 $_TABLES['paypal.currency']     = $_PP_table_prefix . 'currency';
+$_TABLES['paypal.coupons']      = $_PP_table_prefix . 'coupons';
+$_TABLES['paypal.coupon_log']   = $_PP_table_prefix . 'coupon_log';
 
 // Other relatively static values;
 $_PP_CONF['image_dir']  = $_CONF['path_html'] . $_PP_CONF['pi_name'] .
