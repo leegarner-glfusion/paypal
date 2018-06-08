@@ -31,7 +31,7 @@ case 'updatestatus':
         $newstatus = $_POST['newstatus'];
         $order_id = $_POST['order_id'];
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        $ord = new Paypal\Order($_POST['order_id']);
+        $ord = Paypal\Order::getInstance($_POST['order_id']);
         if ($ord->isNew) break;     // non-existant order
         if ($ord->UpdateStatus($newstatus)) {
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
