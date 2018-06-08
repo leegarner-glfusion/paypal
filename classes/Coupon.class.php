@@ -3,9 +3,9 @@
 *   Class to handle coupon operations
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -31,7 +31,7 @@ class Coupon extends Product
         $this->addSpecialField('sender_name');
     }
 
-               
+
     /**
     *   Generate a single coupon code based on options given.
     *   Mask, if used, is "XXXX-XXXX" where "X" indicates a character and any
@@ -149,7 +149,7 @@ class Coupon extends Product
     *   @param  integer $uid        User ID, default = current user
     *   @return mixed       Coupon code, or false on error
     */
-    public static function Purchase($amount = 0, $uid = 0)
+    public static function Purchase($amount = 0, $uid = 0, $exp = NULL)
     {
         global $_TABLES, $_USER;
 
@@ -159,6 +159,7 @@ class Coupon extends Product
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
+        if ($exp == NULL) $exp = '9999-12-31';
         $options = array(
         //    'length'    => 12,    // not used if mask is specified
             'letters'   => true,
@@ -174,8 +175,9 @@ class Coupon extends Product
             $code = self::generate($options);
         }
         $code = DB_escapeString($code);
+        $exp = DB_escapeString($exp);
         DB_save($_TABLES['paypal.coupons'],
-            'code,buyer,amount', "'$code',$uid,$amount");
+            'code,buyer,amount,balance,expires', "'$code',$uid,$amount,$amount,'$exp'");
         return $code;
     }
 
@@ -202,7 +204,7 @@ class Coupon extends Product
                 WHERE code = '$code'");
         if (DB_numRows($res) == 0) {
             return "Not Found";
-        } else {   
+        } else {
             $A = DB_fetchArray($res, false);
             if (!is_null($A['redeemed'])) {
                 return "Already Redeemed by {$A['redeemer']} on {$A['redeemed']}";
@@ -210,13 +212,11 @@ class Coupon extends Product
         }
         $amount = (float)$A['amount'];
         if ($amount > 0) {
-            $U = new UserInfo($uid);
-            $U->gc_bal = $U->gc_bal + $amount;
-            $U->SaveUser();
             DB_query("UPDATE {$_TABLES['paypal.coupons']} SET
                     redeemer = $uid,
                     redeemed = '" . PAYPAL_now()->toMySQL(true) . "'
                     WHERE code = '$code'");
+            Cache::delete('coupons_' . $uid);
         }
         return 'OK';
     }
@@ -230,22 +230,38 @@ class Coupon extends Product
     *   @param  float   $amount     Amount to redeem (order value)
     *   @return float               Remaining order value, if any
     */
-    public static function Redeem($amount, $uid = 0)
+    public static function Redeem($amount, $uid = 0, $Order = NULL)
     {
         global $_TABLES, $_USER;
 
         if ($uid == 0) $uid = $_USER['uid'];
-        $U = UserInfo::getInstance($uid);
-        $remain = $amount - $U->gc_bal;
-        if ($remain >= 0) {
-            // Entire coupon balance applied, may be some order value left
-            $U->gc_bal = 0;
-        } else {
-            // Coupon balance exceeds order value
-            $U->gc_bal = $U->gc_bal - $amount;
-            $remain = 0;
+        $coupons = self::getUserCoupons($uid);
+        $remain = (float)$amount;
+        foreach ($coupons as $coupon) {
+            $bal = (float)$coupon['balance'];
+            if ($bal > $remain) {
+                $bal -= $remain;
+                $remain = 0;
+            } else {
+                $remain -= $bal;
+                $bal = 0;
+            }
+            $code = DB_escapeString($coupon['code']);
+            $order_id = '';
+            if ($Order !== NULL) {
+                $order_id = DB_escapeString($Order->order_id);
+            }
+            $sql = "UPDATE {$_TABLES['paypal.coupons']}
+                    SET balance = $bal
+                    WHERE code = '$code';";
+            $sql .= "INSERT INTO {$_TABLES['paypal.coupon_log']}
+                    (code, order_id, amount, msg)
+                    VALUES
+                    ('{$code}', '{$order_id}', '$amount', 'Applied to order');";
+            DB_query($sql);
+            if ($remain == 0) break;
         }
-        $U->SaveUser();
+        Cache::delete('coupons_' . $uid);
         return $remain;     // Return unapplied balance
     }
 
@@ -303,13 +319,86 @@ class Coupon extends Product
     }
 
 
-    public static function verifyBalance($uid, $amount)
+    /**
+    *   Get all the current Gift Card records for a user
+    *   If $all is true then all records are returned, if false then only
+    *   those that are not redeemed and not expired are returned.
+    *
+    *   @param  integer $uid    User ID, default = curent user
+    *   @param  boolean $all    True to get all, False to get currently usable
+    *   @return array           Array of gift card records
+    */
+    public static function getUserCoupons($uid = 0, $all = false)
+    {
+        global $_TABLES, $_USER;
+        static $coupons = array();
+
+        if ($uid == 0) $uid = $_USER['uid'];
+        $uid = (int)$uid;
+
+        if (!isset($coupons[$uid])) {
+            $cache_key = 'coupons_' . $uid;
+            $coupons[$uid] = Cache::get($cache_key);
+            $today = date('Y-m-d');
+            if (!$coupons[$uid]) {
+                $coupons[$uid] = array();
+                $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
+                        WHERE redeemer = '$uid'";
+                if (!$all) {
+                    $sql .= " AND expires >= '$today'
+                            AND balance > 0";
+                }
+                $sql .= " ORDER BY redeemed ASC";
+                $res = DB_query($sql);
+                while ($A = DB_fetchArray($res, false)) {
+                    $coupons[$uid][] = $A;
+                }
+                Cache::set($cache_key, $coupons[$uid], 'coupons');
+            }
+        }
+        return $coupons[$uid];
+    }
+
+
+    /**
+    *   Get the current unused Gift Card balance for a user
+    *
+    *   @param  integer $uid    User ID, default = current user
+    *   @return float           User's gift card balance
+    */
+    public static function getUserBalance($uid = 0)
+    {
+        global $_USER;
+        static $bals = array();
+
+        if ($uid == 0) $uid = $_USER['uid'];
+        if (!isset($bals[$uid])) {
+            $bals[$uid] = (float)0;
+            $coupons = self::getUserCoupons($uid);
+            foreach ($coupons as $coupon) {
+                $bals[$uid] += $coupon['balance'];
+            }
+        }
+        return (float)$bals[$uid];
+    }
+
+
+    /**
+    *   Verifies that the given user has sufficient Gift Card balances
+    *   to cover an amount.
+    *
+    *   @uses   self::getUserBalance()
+    *   @param  float   $amount     Amount to check
+    *   @param  integer $uid        User ID, default = current user
+    *   @return boolean             True if the GC balance is sufficient.
+    */
+    public static function verifyBalance($amount, $uid = 0)
     {
         $amount = (float)$amount;
-        $U = UserInfo::getInstance($uid);
-        return $amount <= $U->gc_bal ? true : false;
+        $balance = self::getUserBalance($uid);
+        return $amount <= $balance ? true : false;
     }
- 
+
 }
 
 ?>
