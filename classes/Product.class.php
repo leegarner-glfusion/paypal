@@ -1344,7 +1344,7 @@ class Product
                 'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
                 //'form_url'  => $this->hasAttributes() ? '' : 'true',
-                'form_url'  => true,
+                'form_url'  => false,
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
                 'iconset'   => $_PP_CONF['_iconset'],

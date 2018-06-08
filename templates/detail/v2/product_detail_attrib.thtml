@@ -139,7 +139,7 @@ target="_blank" rel="slimbox[product]">
 {!endif}
 
 <div class="paypalDetailAttrib v2 uk-width-1-4">
-  <form class="uk-form" method="post" id="add_cart" action="javascript:void()">
+  <form class="uk-form" method="post" id="add_cart_{id}" action="javascript:void()">
 {!if 0}
 action="{site_url}/paypal/index.php" method="post">
 {!endif}

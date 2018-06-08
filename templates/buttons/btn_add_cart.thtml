@@ -1,5 +1,7 @@
 {# begin {templatelocation} #}
+{!if form_url}
 <form id="{frm_id}" action="{pi_url}/index.php" method="post">
+{!endif}
 <!--<form id="{frm_id}" style="display:inline;" action="{pi_url}/index.php" method="post">-->
   <input type="hidden" name="item_name" value="{item_name}" />
   <input type="hidden" name="item_number" value="{item_number}" />
@@ -25,5 +27,7 @@
   {!endif}
   <button id="{frm_id}_add_cart_btn" type="button" class="paypalButton {btn_cls}" border="0" {btn_disabled}
     onclick='ppAddToCart("{frm_id}");return false;' value="{$LANG_PP['add_to_cart']}">{$LANG_PP['add_to_cart']}</button>
+{!if form_url}
 </form>
+{!endif}
 {# end {templatelocation} #}
