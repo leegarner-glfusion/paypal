@@ -1,0 +1,7 @@
+{# begin {templatelocation} #}
+<!-- BEGIN Radios -->
+<div class="ppGatewayRadios">
+{radio}
+</div>
+<!-- END Radios -->
+{# end {templatelocation} #}
