@@ -461,23 +461,16 @@ class Order
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
         foreach ($this->items as $key => $item) {
-            //$P = Product::getInstance($item['product_id']);
             $item_options = '';
-            //$opt = json_decode($item['options_text'], true);
             $opt = $item->options_text;
             if ($opt && is_array($opt)) {
                 foreach ($opt as $opt_str) {
                     $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
                 }
             }
-            //$item_total = $item['price'] * $item['quantity'];
             $item_total = $item->price * $item->quantity;
             $subtotal += $item_total;
             $T->set_var(array(
-                //'pi_url'        => PAYPAL_URL,
-                //'cart_id'       => $id,
-                //'pp_id'         => $id + 1,
-                //'item_id'       => $item['item_number'],
                 'item_id'       => htmlspecialchars($item->product_id),
                 'item_descrip'  => htmlspecialchars($item->description),
                 'item_price'    => COM_numberFormat($item->price, 2),
@@ -708,15 +701,13 @@ class Order
             $item_total += $ext;
             $item_descr = $item->getShortDscp();
 
-            //$T->set_block('message', 'ItemList', 'List');
             $options_text = '';
-            /*$opts = $item->getOptions();
-            $opts = isset($item['options_text']) ? @json_decode($item['options_text'], true) : array();
-            if ($opts) {
+            $opts = $item->options_text;
+            if (is_array($opts)) {
                 foreach ($opts as $opt_text) {
                     $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
                 }
-            }*/
+            }
             $T->set_block('msg_body', 'ItemList', 'List');
             $T->set_var(array(
                 'qty'   => $item->quantity,
