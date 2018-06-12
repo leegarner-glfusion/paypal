@@ -3,9 +3,9 @@
 *   Class to handle user account info for the Classifieds plugin
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -72,9 +72,6 @@ class UserInfo
             }
             $this->properties[$key] = $value;
             break;
-        case 'gc_bal':
-            $this->properties[$key] = (float)$value;
-            break;
         }
     }
 
@@ -120,13 +117,11 @@ class UserInfo
                             WHERE uid = $uid");
         if (DB_numRows($res) == 1) {
             $A = DB_fetchArray($res, false);
-            $this->gc_bal = (float)$A['gc_bal'];
             $cart = @unserialize($A['cart']);
             if (!$cart) $cart = array();
             $this->cart = $cart;
             $this->isNew = false;
         } else {
-            $this->gc_bal = 0;
             $this->cart = array();
             $this->isNew = true;
             $this->SaveUser();
@@ -254,8 +249,7 @@ class UserInfo
         }
         $cart = DB_escapeString(@serialize($this->cart));
 
-        $sql2 = "gc_bal = {$this->gc_bal},
-                cart = '$cart'";
+        $sql2 = " cart = '$cart'";
         $sql = $sql1 . $sql2 . $sql3;
         DB_query($sql);
         Cache::delete('ppuser_' . $this->uid);
