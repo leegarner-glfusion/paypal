@@ -777,7 +777,7 @@ class Cart
         $retval = '';
         $T = new \Template(PAYPAL_PI_PATH . '/templates');
         $T->set_file('radios', 'gw_checkout_select.thtml');
-        $T->set_block('radio', 'Radios', 'row');
+        $T->set_block('radios', 'Radios', 'row');
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
             if (isset($this->m_info['gateway'])) {
