@@ -54,16 +54,11 @@ if (!empty($id)) {
     if ($P->id == $id && $P->hasAccess()) {
         $breadcrumbs = Paypal\Category::Breadcrumbs($P->cat_id);
         $content .= $P->Detail();
-    } else {
-        LGLIB_storeMessage(array(
-            'msg' => $LANG_PP['item_not_found'],
-            'level' => 'error',
-        ) );
-        COM_refresh(PAYPAL_URL);
     }
 }
 if (empty($content)) {
-    $content .= PAYPAL_errorMessage($LANG_PP['invalid_product_id']);
+    COM_setMsg($LANG_PP['item_not_found']);
+    COM_refresh(PAYPAL_URL);
 }
 if (empty($breadcrumbs)) {
     $breadcrumbs = COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL);
