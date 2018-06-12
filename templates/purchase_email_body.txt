@@ -4,15 +4,15 @@
 </tr>
 
 <!-- BEGIN ItemList -->
-<tr>
-  <td>{qty}</td>
+<tr style="margin-bottom:5px;">
+  <td style="vertical-align:top">{qty}</td>
   <td style="width:275px;">{name}
   {!if options_text}
     <br />{options_text}
   {!endif}
   </td>
-  <td style="width:80px; text-align:right;">{price}</td>
-  <td style="width:80px; text-align:right;">{ext}</td>
+  <td style="vertical=align:top;width:80px; text-align:right;">{price}</td>
+  <td vertical=align:top;style="width:80px; text-align:right;">{ext}</td>
 </tr>
 <!-- END ItemList -->
 <tr>
