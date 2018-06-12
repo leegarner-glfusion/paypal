@@ -447,7 +447,7 @@ $_SQL['paypal.coupons'] = "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
   KEY `owner` (`redeemer`,`balance`,`expires`)
 ) ENGINE=MyIsam";
 
-$_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupons']} (
+$_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(128) NOT NULL,
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -818,6 +818,8 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD KEY `cat_rgt` (`rgt`)",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD extras text",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        ADD by_gc decimal(8,2) unsigned AFTER handling",
     "ALTER TABLE {$_TABLES['paypal.cart']}
         ADD apply_gc float(8,2) AFTER cart_contents",
     "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
@@ -832,7 +834,7 @@ $PP_UPGRADE['0.6.0'] = array(
       PRIMARY KEY (`code`),
       KEY `owner` (`redeemer`,`balance`,`expires`)
     ) ENGINE=MyIsam",
-    "CREATE TABLE {$_TABLES['paypal.coupons']} (
+    "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
       `code` varchar(128) NOT NULL,
       `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
