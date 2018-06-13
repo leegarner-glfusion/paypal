@@ -200,9 +200,9 @@ class paypal extends Gateway
 
         $address = $cart->getAddress('shipto');
         if (!empty($address)) {
-            list($fname, $lname) = explode(' ', $address['name']);
-            $fields['first_name'] = htmlspecialchars($fname);
-            $fields['last_name'] = htmlspecialchars($lname);
+            $np = explode(' ', $address['name']);
+            $fields['first_name'] = isset($np[0]) ? htmlspecialchars($np[0]) : '';
+            $fields['last_name'] = isset($np[1]) ? htmlspecialchars($np[1]) : '';
             $fields['address1'] = htmlspecialchars($address['address1']);
             $fields['address2'] = htmlspecialchars($address['address2']);
             $fields['city'] = htmlspecialchars($address['city']);
