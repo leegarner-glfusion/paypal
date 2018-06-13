@@ -33,7 +33,8 @@ case 'updatestatus':
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
         $ord = Paypal\Order::getInstance($_POST['order_id']);
         if ($ord->isNew) break;     // non-existant order
-        if ($ord->UpdateStatus($newstatus)) {
+        if ($ord->updateStatus($newstatus)) {
+            // Get the log message that was just added
             $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
                 WHERE order_id = '" . DB_escapeString($order_id) . "'
                 ORDER BY ts DESC

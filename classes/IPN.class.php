@@ -511,7 +511,7 @@ class IPN
         }
 
         // Update the order status to Paid
-        //Order::UpdateStatus($this->gw->getPaidStatus($prod_types),
+        //Order::updateStatus($this->gw->getPaidStatus($prod_types),
         //            $order_id, false);
 
     }  // function handlePurchase
@@ -540,7 +540,7 @@ class IPN
             $this->Order = Order::getInstance($order_id);
             if ($this->Order->order_id != '') {
                 $this->Order->log_user = $this->gw->Description();
-                $this->Order->UpdateStatus($this->pp_data['status']);
+                $this->Order->updateStatus($this->pp_data['status']);
             }
             return 2;
         }
@@ -732,7 +732,7 @@ class IPN
                 //}
             }
             // Update the order status to Refunded
-            $Order->UpdateStatus($LANG_PP['orderstatus']['refunded']);
+            $Order->updateStatus($LANG_PP['orderstatus']['refunded']);
         }
 
     }  // function handleRefund

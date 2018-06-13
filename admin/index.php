@@ -284,7 +284,7 @@ case 'orderhist':
                 continue;
             }
             $ord = new Paypal\Order($order_id);
-            $ord->UpdateStatus($_POST['newstatus'][$order_id]);
+            $ord->updateStatus($_POST['newstatus'][$order_id]);
             $i++;
         }
         $msg[] = sprintf($LANG_PP['updated_x_orders'], $i);

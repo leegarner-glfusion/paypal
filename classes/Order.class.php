@@ -512,7 +512,7 @@ class Order
             'iconset'   => $_PP_CONF['_iconset'],
         ) );
 
-        if ($isAdmin) {
+        //if ($isAdmin) {
             $T->set_var(array(
                 'purch_name' => COM_getDisplayName($this->uid),
                 'purch_uid' => $this->uid,
@@ -520,11 +520,9 @@ class Order
                 'status' => $this->status,
             ) );
 
-            $sql = "SELECT * FROM {$_TABLES['paypal.order_log']} WHERE order_id = '" .
-                    DB_escapeString($this->order_id) . "'";
-            $res = DB_query($sql);
+            $log = $this->getLog();
             $T->set_block('order', 'LogMessages', 'Log');
-            while ($L = DB_fetchArray($res, false)) {
+            foreach ($log as $L) {
                 $dt->setTimestamp(strtotime($L['ts']));
                 $T->set_var(array(
                     'log_username'  => $L['username'],
@@ -534,7 +532,7 @@ class Order
                 ) );
                 $T->parse('Log', 'LogMessages', true);
             }
-        }
+        //}
 
         $status = $this->status;
         if ($this->pmt_method != '') {
@@ -570,7 +568,7 @@ class Order
     *   @param  boolean $log            True to log the change, False to not
     *   @return boolean                 True on success or no change
     */
-    public function UpdateStatus($newstatus, $log = true)
+    public function updateStatus($newstatus, $log = true)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -628,13 +626,15 @@ class Order
             $log_user = COM_getDisplayName($_USER['uid']) .
                 ' (' . $_USER['uid'] . ')';
         }
-
+        $order_id = DB_escapeString($this->order_id);
         $sql = "INSERT INTO {$_TABLES['paypal.order_log']} SET
             username = '" . DB_escapeString($log_user) . "',
-            order_id = '" . DB_escapeString($this->order_id) . "',
+            order_id = '$order_id',
             message = '" . DB_escapeString($msg) . "',
             ts = UTC_TIMESTAMP()";
         DB_query($sql);
+        $cache_key = 'orderlog_' . $order_id;
+        Cache::delete($cache_key);
         return true;
     }
 
@@ -767,6 +767,7 @@ class Order
             'gw_msg'        => $gw_msg,
             'status'            => $this->status,
             'order_instr'   => $this->instructions,
+            'order_id'      => $this->order_id,
         ) );
         if ($this->by_gc > 0) {
             $T->set_var(array(
@@ -857,6 +858,26 @@ class Order
         } else {
             return false;
         }
+    }
+
+
+    public function getLog()
+    {
+        global $_TABLES, $_CONF;
+
+        $order_id = DB_escapeString($this->order_id);
+        $cache_key = 'orderlog_' . $order_id;
+        $log = Cache::get($cache_key);
+        if ($log === NULL) {
+            $log = array();
+            $sql = "SELECT * FROM {$_TABLES['paypal.order_log']} WHERE order_id = '$order_id'";
+            $res = DB_query($sql);
+            while ($L = DB_fetchArray($res, false)) {
+                $log[] = $L;
+            }
+            Cache::set($cache_key, $log, 'order_log');
+        }
+        return $log;
     }
 
 }
