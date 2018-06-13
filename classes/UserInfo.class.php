@@ -103,7 +103,7 @@ class UserInfo
 
         $uid = (int)$uid;
         if ($uid == 0) $uid = $this->uid;
-        if ($uid == 0) {
+        if ($uid < 2) {     // Anon information is not saved
             return;
         }
 
