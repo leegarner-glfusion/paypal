@@ -425,7 +425,7 @@ exit;
 */
 function PAYPAL_adminlist_Product($cat_id=0)
 {
-    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $LANG_PP_HELP;
 
     $display = '';
     $sql = "SELECT
@@ -461,7 +461,9 @@ function PAYPAL_adminlist_Product($cat_id=0)
                 'field' => 'price', 'sort' => true, 'align' => 'right'),
         array('text' => $LANG_PP['prod_type'],
                 'field' => 'prod_type', 'sort' => true),
-        array('text' => $LANG_ADMIN['delete'],
+        array('text' => $LANG_ADMIN['delete'] .
+                    '&nbsp;<i class="uk-icon uk-icon-question-circle tooltip" title="' .
+                    $LANG_PP_HELP['hlp_prod_delete'] . '"></i>',
                 'field' => 'delete', 'sort' => false,
                 'align' => 'center'),
     );
@@ -875,7 +877,7 @@ function PAYPAL_adminlist_Category()
         array('text' => $LANG_PP['visible_to'],
                 'field' => 'grp_access', 'sort' => false),
         array('text' => $LANG_ADMIN['delete'] .
-                    '&nbsp;<i class="uk-icon uk-icon-question-circle" data-uk-tooltip title="' .
+                    '&nbsp;<i class="uk-icon uk-icon-question-circle tooltip" title="' .
                     $LANG_PP_HELP['hlp_cat_delete'] . '"></i>',
                 'field' => 'delete', 'sort' => false,
                 'align' => 'center'),
@@ -1305,9 +1307,9 @@ function PAYPAL_adminlist_Workflow()
 
     $header_arr = array(
         array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => true),
+                'field' => 'orderby', 'sort' => false),
         array('text' => $LANG_PP['name'],
-                'field' => 'wf_name', 'sort' => true),
+                'field' => 'wf_name', 'sort' => false),
         array('text' => $LANG_PP['enabled'],
                 'field' => 'enabled', 'sort' => false,
                 'align' => 'center'),
@@ -1357,9 +1359,9 @@ function PAYPAL_adminlist_OrderStatus()
 
     $header_arr = array(
         array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => true),
+                'field' => 'orderby', 'sort' => false),
         array('text' => $LANG_PP['name'],
-                'field' => 'name', 'sort' => true),
+                'field' => 'name', 'sort' => false),
         array('text' => $LANG_PP['enabled'],
                 'field' => 'enabled', 'sort' => false,
                 'align' => 'center'),
