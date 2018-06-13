@@ -193,25 +193,29 @@
       {gateway_vars}
     </div>
   {!else}
-    {!if is_admin}
+{!if is_admin}
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: <a href="{site_url}/users.php?mode=profile&uid={purch_uid}">{purch_name} ({purch_uid})</a></p>
   <p>{$LANG_PP['status']}: {stat_update}</p>
+{!endif}
   <p>
     <table id="paypalOrderLog">
     <tr>
       <th>{$LANG_PP['timestamp']}</th>
+{!if is_admin}
       <th>{$LANG_PP['username']}</th>
+{!endif}
       <th>{$LANG_PP['message']}</th>
     </tr>
     <!-- BEGIN LogMessages -->
-    <tr>
-      <td style="white-space:nowrap" title="{log_ts_tip}">{log_ts}</td>
-      <td style="white-space:nowrap" >{log_username}</td>
-      <td>{log_msg}</td>
+    <tr style="line-height: 1.5rem;">
+      <td style="vertical-align:top;white-space:nowrap" title="{log_ts_tip}">{log_ts}</td>
+{!if is_admin}
+      <td style="vertical-align:top;white-space:nowrap" >{log_username}</td>
+{!endif}
+      <td style="vertical-align:top;">{log_msg}</td>
     </tr>
     <!-- END LogMessages -->
     </table>
-    {!endif}
   {!endif}
   {!if pmt_method}
     <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
