@@ -1528,14 +1528,14 @@ function plugin_runScheduledTask_paypal()
         }
     }
 
-    // Treat disabled and expird products as "deleted" to get them out of
+    // Treat disabled and expired products as "deleted" to get them out of
     // search results, etc.
     $where = " WHERE enabled = 1 AND avail_end < '" .
             PAYPAL_now()->format('Y-m-d', true) . "'";
-    $sql = "SELECT id FROM {$_TABLES['paypal.products']} $where";
+    $sql = "SELECT id, type FROM {$_TABLES['paypal.products']} $where";
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
-        PLG_itemDeleted($A['item_id'], $A['type']);
+        PLG_itemDeleted($A['id'], $A['type']);
         DB_query("UPDATE {$_TABLES['paypal.products']}
                 SET enabled = 0 $where");
     }
