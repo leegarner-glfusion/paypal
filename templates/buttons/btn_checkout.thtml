@@ -2,7 +2,9 @@
 <form style="display:inline;" class="frm_checkout"
     action="{action}" method="post">
   {gateway_vars}
-{!if is_uikit}
+{!if button_url}
+  <button type="submit">{button_url}</button>
+{!elseif is_uikit}
   <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['checkout']}</button>
 {!else}
   <button type="submit" class="lgButton green" name="submit">{$LANG_PP['checkout']}</button>
