@@ -176,8 +176,8 @@ function removeAddress(id)
       type="text" id="city" name="city" size="60" value="{city}" />
 {!if req_city}
       <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
-    </div>
 {!endif}
+    </div>
   </div>
 {!else}
   <input type="hidden" id="city" name="city" value="" />
