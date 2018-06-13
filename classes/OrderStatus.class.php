@@ -3,9 +3,9 @@
 *   Class to manage order processing statuses.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -118,7 +118,7 @@ class OrderStatus extends Workflow
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    public function Toggle($id, $field, $oldvalue)
+    public static function Toggle($id, $field, $oldvalue)
     {
         global $_TABLES;
 
@@ -142,6 +142,75 @@ class OrderStatus extends Workflow
             COM_errorLog("OrderStatus::Toggle() SQL error: $sql", 1);
             return $oldvalue;
         }
+    }
+
+
+    /**
+    *   Move a workflow up or down the admin list.
+    *
+    *   @param  string  $id     Workflow database ID
+    *   @param  string  $where  Direction to move (up or down)
+    */
+    public static function moveRow($id, $where)
+    {
+        global $_TABLES;
+
+        $retval = '';
+        $id = DB_escapeString($id);
+
+        switch ($where) {
+        case 'up':
+            $oper = '-';
+            break;
+        case 'down':
+            $oper = '+';
+            break;
+        default:
+            return;
+        }
+        $sql = "UPDATE {$_TABLES[self::$table]}
+                SET orderby = orderby $oper 11
+                WHERE id = '$id'";
+        //echo $sql;die;
+        DB_query($sql, 1);
+        if (!DB_error()) {
+            self::ReOrder();
+        } else {
+            COM_errorLog("Workflow::moveRow() SQL error: $sql", 1);
+        }
+    }
+
+
+    /**
+    *   Reorder all workflow items.
+    */
+    public static function ReOrder()
+    {
+        global $_TABLES;
+
+        $sql = "SELECT id, orderby
+                FROM {$_TABLES[self::$table]}
+                ORDER BY orderby ASC;";
+        //echo $sql;die;
+        $result = DB_query($sql);
+
+        $order = 10;
+        $stepNumber = 10;
+        $changed = false;
+        while ($A = DB_fetchArray($result, false)) {
+            if ($A['orderby'] != $order) {  // only update incorrect ones
+                $changed = true;
+                $sql = "UPDATE {$_TABLES[self::$table]}
+                    SET orderby = '$order'
+                    WHERE id = '{$A['id']}'";
+                DB_query($sql, 1);
+                if (DB_error()) {
+                    COM_errorLog("Workflow::ReOrder() SQL error: $sql", 1);
+                }
+            }
+            $order += $stepNumber;
+        }
+        if ($changed) Cache::clear('orderstatuses');
     }
 
 }   // class OrderStatus

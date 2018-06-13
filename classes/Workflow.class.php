@@ -3,9 +3,9 @@
 *   Class to manage workflow.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -105,7 +105,7 @@ class Workflow
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    protected function _toggle($oldvalue, $varname, $id)
+    protected static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
@@ -135,7 +135,7 @@ class Workflow
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    public function Toggle($id, $field, $oldvalue)
+    public static function Toggle($id, $field, $oldvalue)
     {
         global $_TABLES;
 
@@ -166,7 +166,7 @@ class Workflow
     /**
     *   Reorder all workflow items.
     */
-    public function ReOrder()
+    public static function ReOrder()
     {
         global $_TABLES;
 
