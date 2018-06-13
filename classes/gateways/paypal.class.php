@@ -218,7 +218,10 @@ class paypal extends Gateway
         $handling = 0;
         $fields['tax_cart'] = 0;
 
-        if (isset($custom_arr['by_gc'])) {      // If using a gift card....
+        // If using a gift card, the gc amount could exceed the item total
+        // which won't work with Paypal. Just create one cart item to
+        // represent the entire cart including tax, shipping, etc.
+        if (PP_getVar($custom_arr, 'by_gc', 'float') > 0) {
             $total_amount = $cart->getInfo('final_total');
             $fields['item_number_1'] = $LANG_PP['cart'];
             $fields['item_name_1'] = $LANG_PP['all_items'];
@@ -317,19 +320,9 @@ class paypal extends Gateway
     *   @param  object  $cart   Shoppping cart
     *   @return string      HTML for checkout button
     */
-    public function XcheckoutButton($cart)
+    public function XgetCheckoutButton()
     {
-        global $_PP_CONF;
-
-        $gateway_vars = $this->gatewayVars($cart);
-
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
-                    $this->gw_name);
-        $T->set_file(array('btn' => 'btn_checkout.thtml'));
-        $T->set_var('paypal_url', $this->getActionUrl());
-        $T->set_var('gateway_vars', $gateway_vars);
-        $T->set_var('is_uikit', $_PP_CONF['_is_uikit']);
-        return $T->parse('', 'btn');
+        return '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png" alt="Check out with PayPal" />';
     }
 
 
@@ -927,6 +920,13 @@ class paypal extends Gateway
             'buyer_email'   => $data['payer_email'],
         );
         return $retval;
+    }
+
+
+    public function getLogo()
+    {
+        return '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal Logo">';
+        return $this->button_url;
     }
 
 }   // class paypal

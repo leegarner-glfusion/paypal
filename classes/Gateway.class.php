@@ -864,8 +864,15 @@ abstract class Gateway
             'action'    => $this->getActionUrl(),
             'gateway_vars' => $gateway_vars,
             'is_uikit'  => $_PP_CONF['_is_uikit'],
+            'button_url' => $this->getCheckoutButton(),
         ) );
         return $T->parse('', 'btn');
+    }
+
+
+    public function getLogo()
+    {
+        return $this->gw_desc;
     }
 
 
@@ -1091,7 +1098,8 @@ abstract class Gateway
         global $_TABLES, $_PP_CONF;
         static $gateways = array();
 
-        if (!isset(self::$gateways[$gw_name])) {
+        //if (!isset(self::$gateways[$gw_name])) {
+        if (!isset($gateways[$gw_name])) {
 //            $cache_key = 'gateway_' . $gw_name;
 //            $gateways[$gw_name] = Cache::get($cache_key);
 //            if (!$gateways[$gw_name]) {
@@ -1100,8 +1108,8 @@ abstract class Gateway
                     include_once $filename;
                     $gw = __NAMESPACE__ . '\\' . $gw_name;
                     $gateways[$gw_name] = new $gw($A);
-                } else {
-                    $gateways[$gw_name] = new dummy($A);
+                //} else {
+                //    $gateways[$gw_name] = new dummy($A);
                 }
 //                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
 //            }
@@ -1170,13 +1178,8 @@ abstract class Gateway
     public function checkoutRadio($selected = false)
     {
         $sel = $selected ? 'checked="checked" ' : '';
-        $radio = '<input required type="radio" name="gateway" value="' . $this->gw_name . '" ' . $sel . '/>&nbsp;';
-        // Get the image for the gateway, or default to the description
-        if ($this->button_url != '') {
-            $radio .= $this->button_url;
-        } else {
-            $radio .= $this->gw_desc;
-        }
+        $radio = '<input required type="radio" name="gateway" value="' .
+                $this->gw_name . '" ' . $sel . '/>&nbsp;' . $this->getLogo();
         return $radio;
     }
 
@@ -1184,6 +1187,12 @@ abstract class Gateway
     public function gatewayVars($cart)
     {
         return '';
+    }
+
+
+    public function getCheckoutButton()
+    {
+        return NULL;
     }
 
 }   // class Gateway
