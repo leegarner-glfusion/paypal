@@ -11,8 +11,8 @@
     <br />{options_text}
   {!endif}
   </td>
-  <td style="vertical=align:top;width:80px; text-align:right;">{price}</td>
-  <td vertical=align:top;style="width:80px; text-align:right;">{ext}</td>
+  <td style="vertical-align:top;width:80px;text-align:right;">{price}</td>
+  <td style="vertical-align:top;width:80px;text-align:right;">{ext}</td>
 </tr>
 <!-- END ItemList -->
 <tr>
