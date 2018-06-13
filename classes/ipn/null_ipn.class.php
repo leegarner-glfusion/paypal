@@ -43,7 +43,7 @@ class null_ipn extends IPN
 
         $cart_id = PP_getVar($A, 'cart_id');
         if (!empty($cart_id)) {
-            $this->Cart = Cart::getInstance($cart_id);
+            $this->Cart = Cart::getInstance(0, $cart_id);
         }
         $this->pp_data['txn_id'] = $cart_id;
         $billto = $this->Cart->getAddress('billto');
