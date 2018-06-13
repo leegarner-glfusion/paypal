@@ -20,7 +20,7 @@ if (!plugin_ismoderator_paypal()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the paypal admin ajax function.");
     exit;
 }
-switch ($_REQUEST['action']) {
+switch ($_POST['action']) {
 case 'updatestatus':
     if (!empty($_POST['order_id']) &&
         !empty($_POST['newstatus'])) {
@@ -77,7 +77,7 @@ case 'toggle':
     case 'category':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Category::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Paypal\Category::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -88,7 +88,7 @@ case 'toggle':
     case 'attribute':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Attribute::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Paypal\Attribute::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -100,15 +100,15 @@ case 'toggle':
     case 'gateway':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Gateway::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Paypal\Gateway::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
         case 'buy_now':
-            $newval = Paypal\Gateway::toggleBuyNow($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Paypal\Gateway::toggleBuyNow($_POST['oldval'], $_POST['id']);
             break;
 
         case 'donation':
-            $newval = Paypal\Gateway::toggleDonation($_REQUEST['oldval'], $_REQUEST['id']);
+            $newval = Paypal\Gateway::toggleDonation($_POST['oldval'], $_POST['id']);
             break;
 
         default:
@@ -120,7 +120,7 @@ case 'toggle':
         $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
-            $newval = Paypal\Workflow::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
+            $newval = Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
             break;
 
         default:
@@ -133,7 +133,7 @@ case 'toggle':
         switch ($field) {
         case 'enabled':
         case 'notify_buyer':
-            $newval = Paypal\OrderStatus::Toggle($_REQUEST['id'], $field, $_REQUEST['oldval']);
+            $newval = Paypal\OrderStatus::Toggle($_POST['id'], $field, $_POST['oldval']);
             break;
 
         default:
@@ -155,7 +155,7 @@ case 'toggle':
                 $LANG_PP['msg_updated'] : $LANG_PP['msg_unchanged'],
     );
 
-    header('Content-Type: text/xml');
+    header('Content-Type: applicsation/json');
     header("Cache-Control: no-cache, must-revalidate");
     //A date in the past
     header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
