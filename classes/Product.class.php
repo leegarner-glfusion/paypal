@@ -983,7 +983,7 @@ class Product
 
         $prod_id = $this->id;
         if ($prod_id < 1 || !$this->enabled ||!$this->isAvailable()) {
-            return PAYPAL_errorMessage($LANG_PP['invalid_product_id'], 'info');
+            return '';
         }
 
         $retval = COM_startBlock();
