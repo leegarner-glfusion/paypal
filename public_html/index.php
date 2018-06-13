@@ -131,9 +131,8 @@ case 'saveshipto':
         $view = $addr_type;
         break;
     }
-
     $U = new Paypal\UserInfo();
-    if ($U->uid > 1) {
+    if ($U->uid > 1) {      // only save addresses for logged-in users
         $addr_id = $U->SaveAddress($_POST, $addr_type);
         if ($addr_id[0] < 0) {
             if (!empty($addr_id[1]))
@@ -312,40 +311,48 @@ case 'history':
 
 case 'billto':
 case 'shipto':
-    if (COM_isAnonUser()) {
+    /*if (COM_isAnonUser()) {
         $content .= SEC_loginRequiredForm();
-    } else {
+    } else {*/
         $U = new Paypal\UserInfo();
         $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
         $content .= $U->AddressForm($view, $A);
-    }
+//   }
     break;
 
 case 'order':
-    if (COM_isAnonUser()) COM_404();
-    $order = new Paypal\Order($actionval);
-    if ($order->canView()) {
-        $content .= $order->View(true);
-    } else {
-        $content .= $LANG_PP['access_denied_msg'];
-    }
-    break;
-
-case 'printorder':
-    $order = new Paypal\Order($actionval);
-    if ($order->canView()) {
-        echo $order->View(true, 'print');
-        exit;
+    if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
+        $order = new Paypal\Order($actionval);
+        if ($order->canView()) {
+            $content .= $order->View(true);
+        } else {
+            $content .= $LANG_PP['access_denied_msg'];
+        }
     } else {
         COM_404();
     }
     break;
 
+case 'printorder':
+    if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
+        $order = new Paypal\Order($actionval);
+        if ($order->canView()) {
+            echo $order->View(true, 'print');
+            exit;
+        }
+    }
+    // else
+    COM_404();
+    break;
+
 case 'vieworder':
-    if (COM_isAnonUser()) COM_404();
-    Paypal\Cart::setSession('prevpage', $view);
-    $content .= $ppGCart->View(true);
-    $page_title = $LANG_PP['vieworder'];
+    if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
+        Paypal\Cart::setSession('prevpage', $view);
+        $content .= $ppGCart->View(true);
+        $page_title = $LANG_PP['vieworder'];
+    } else {
+        COM_404();
+    }
     break;
 
 case 'pidetail':
