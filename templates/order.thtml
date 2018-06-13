@@ -166,11 +166,14 @@
     </div>
   </div>
 
+{!if order_instr}
   <div id="orderInstructions"><span class="orderInstructionsTitle">{$LANG_PP['order_instr']}:</span><br />
     {order_instr}
   </div>
+{!endif}
   <div style="clear:both;">
   {!if checkout}
+    <div id="orderPmtMethod">{pmt_logo}</div>
     <div>
 {!if is_uikit}
       <button class="uk-button uk-button-primary" type="submit" name="viewcart"

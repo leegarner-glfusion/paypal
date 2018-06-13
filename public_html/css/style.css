@@ -572,3 +572,8 @@ div.ppGatewayRadios {
     text-align:left;
     font-size: 125%;
 }
+
+div #orderPmtMethod {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
