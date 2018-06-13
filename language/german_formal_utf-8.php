@@ -316,6 +316,20 @@ if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
 }
 
+$LANG_PP_EMAIL = array(
+'coupon_1' => 'You have received a gift card. Click on the link below to redeem it.',
+'coupon_id' => 'Gift Card',
+'coupon_subject' => 'You have a gift card!',
+);
+
+$LANG_PP_HELP = array(
+'notify_email' => 'Enter an optional email address to receive the notification of this order. Your own email address will be used if this is empty.',
+'hlp_cat_delete' => 'Only unused categories may be deleted',
+'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
+);
+
+$LANG_MYACCOUNT['pe_paypal'] = 'Shopping';
+
 /** Message indicating plugin version is up to date */
 $PLG_paypal_MESSAGE03 = 'Fehler beim Abrufen der aktuellen Versionsnummer';
 $PLG_paypal_MESSAGE04 = 'Fehler beim Durchführen des Plugin-Aktualisierung';
