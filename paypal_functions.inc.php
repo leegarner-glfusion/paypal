@@ -201,7 +201,8 @@ function history($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getPurchaseHistoryField',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_history',
+            __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -632,7 +633,7 @@ function ProductList($cat_id = 0)
     $display .= $product->parse('', 'start');
 
     if ($_PP_CONF['ena_ratings'] == 1) {
-        $PP_ratedIds = RATING_getRatedIds('paypal');
+        $PP_ratedIds = RATING_getRatedIds($_PP_CONF['pi_name']);
     }
 
     // Display each product
@@ -652,7 +653,7 @@ function ProductList($cat_id = 0)
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
             // can't rate from list page, messes with product links
             $static = true;
-            $rating_box = RATING_ratingBar('paypal', $A['id'],
+            $rating_box = RATING_ratingBar($_PP_CONF['pi_name'], $A['id'],
                     $P->votes, $P->rating,
                     $voted, 5, $static, 'sm');
             $product->set_var('rating_bar', $rating_box);

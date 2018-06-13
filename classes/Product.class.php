@@ -708,16 +708,17 @@ class Product
         }
 
         // Set up the wysiwyg editor, if available
+        $tpl_var = $_PP_CONF['pi_name'] . '_entry';
         switch (PLG_getEditorType()) {
         case 'ckeditor':
             $T->set_var('show_htmleditor', true);
-            PLG_requestEditor('paypal','paypal_entry','ckeditor_paypal.thtml');
-            PLG_templateSetVars('paypal_entry', $T);
+            PLG_requestEditor($_PP_CONF['pi_name'], $tpl_var, 'ckeditor_paypal.thtml');
+            PLG_templateSetVars($tpl_var, $T);
             break;
         case 'tinymce' :
             $T->set_var('show_htmleditor',true);
-            PLG_requestEditor('paypal','paypal_entry','tinymce_paypal.thtml');
-            PLG_templateSetVars('paypal_entry', $T);
+            PLG_requestEditor($_PP_CONF['pi_name'], $tpl_var, 'tinymce_paypal.thtml');
+            PLG_templateSetVars($tpl_var, $T);
             break;
         default :
             // don't support others right now
@@ -1176,12 +1177,12 @@ class Product
                 $mode = $this->comments_enabled;
             }
             $T->set_var('usercomments',
-                CMT_userComments($prod_id, $this->short_description, 'paypal',
+                CMT_userComments($prod_id, $this->short_description, $_PP_CONF['pi_name'],
                     '', '', 0, 1, false, false, $mode));
         }
 
         if ($this->rating_enabled == 1) {
-            $PP_ratedIds = RATING_getRatedIds('paypal');
+            $PP_ratedIds = RATING_getRatedIds($_PP_CONF['pi_name']);
             if (in_array($prod_id, $PP_ratedIds)) {
                 $static = true;
                 $voted = 1;
@@ -1192,7 +1193,7 @@ class Product
                 $static = 1;
                 $voted = 0;
             }
-            $rating_box = RATING_ratingBar('paypal', $prod_id,
+            $rating_box = RATING_ratingBar($_PP_CONF['pi_name'], $prod_id,
                     $this->votes, $this->rating,
                     $voted, 5, $static, 'sm');
             $T->set_var('rating_bar', $rating_box);

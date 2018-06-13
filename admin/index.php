@@ -18,7 +18,7 @@
 require_once('../../../lib-common.php');
 
 // If plugin is installed but not enabled, display an error and exit gracefully
-if (!in_array('paypal', $_PLUGINS)) {
+if (!isset($_PP_CONF) || !in_array($_PP_CONF['pi_name'], $_PLUGINS)) {
     COM_404();
 }
 
@@ -504,7 +504,8 @@ function PAYPAL_adminlist_Product($cat_id=0)
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Product',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_productlist',
+            __NAMESPACE__ . '\getAdminField_Product',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', '', '');
 
@@ -777,7 +778,8 @@ function PAYPAL_adminlist_IPNLog()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_IPNLog',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_ipnlog',
+            __NAMESPACE__ . '\getAdminField_IPNLog',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -902,7 +904,8 @@ function PAYPAL_adminlist_Category()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Category',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_catlist',
+            __NAMESPACE__ . '\getAdminField_Category',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1064,7 +1067,8 @@ function PAYPAL_adminlist_Attributes()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Attribute',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_attrlist',
+            __NAMESPACE__ . '\getAdminField_Attribute',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', $options, '');
 
@@ -1198,7 +1202,8 @@ function PAYPAL_adminList_Gateway()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Gateway',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_gwlist',
+            __NAMESPACE__ . '\getAdminField_Gateway',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1336,7 +1341,8 @@ function PAYPAL_adminlist_Workflow()
         $_GET['query_limit'] = 20;
 
     $display .= "<h2>{$LANG_PP['workflows']}</h2>\n";
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Workflow',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_workflowlist',
+            __NAMESPACE__ . '\getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1394,7 +1400,8 @@ function PAYPAL_adminlist_OrderStatus()
 
     $display .= "<h2>{$LANG_PP['statuses']}</h2>\n";
     $display .= $LANG_PP['admin_hdr_wfstatus'] . "\n";
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_Workflow',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_statuslist',
+            __NAMESPACE__ . '\getAdminField_Workflow',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1517,7 +1524,8 @@ function PAYPAL_couponlist()
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= $LANG_PP['couponlist'];
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_coupons',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_couponlist',
+            __NAMESPACE__ . '\getAdminField_coupons',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -1580,7 +1588,8 @@ function PAYPAL_itemhist($item_id = '')
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= $LANG_PP['item_history'] . ': ' . $item_desc;
-    $display .= ADMIN_list('paypal', __NAMESPACE__ . '\getAdminField_itemhist',
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_itemhist',
+            __NAMESPACE__ . '\getAdminField_itemhist',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));

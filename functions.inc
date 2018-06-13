@@ -226,7 +226,7 @@ function plugin_commentsupport_paypal()
 */
 function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 {
-    global $LANG03;
+    global $LANG03, $_PP_CONF;
 
     // Without comment support, we shouldn't get here unless something
     // nefarious is going on, but just in case...
@@ -239,12 +239,12 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
     $postmode = COM_applyFilter ($postmode);
 
     // Actually save the comment
-    $ret = CMT_saveComment($title, $comment, $id, $pid, 'paypal', $postmode);
+    $ret = CMT_saveComment($title, $comment, $id, $pid, $_PP_CONF['pi_name'], $postmode);
 
     if ($ret > 0) {     // failure
         return COM_siteHeader()
             . CMT_commentform ($title, $comment, $id, $pid,
-                    'paypal', $LANG03[14], $postmode)
+                    $_PP_CONF['pi_name'], $LANG03[14], $postmode)
             . COM_siteFooter();
     } else {        // success - update the comment counter for this item
         return COM_refresh(COM_buildUrl(PAYPAL_URL . "/detail.php?id=$id"));
@@ -266,7 +266,7 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 */
 function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, $view)
 {
-    global $_USER, $LANG_ACCESS;
+    global $_USER, $LANG_ACCESS, $_PP_CONF;
 
     $retval = '';
 
@@ -283,7 +283,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
 
     if ($allowed == 1) {
         $delete_option = plugin_ismoderator_paypal();
-        $retval .= CMT_userComments($id, $title, 'paypal', $order, $format,
+        $retval .= CMT_userComments($id, $title, $_PP_CONF['pi_name'], $order, $format,
                                      $cid, $page, $view, $delete_option,
                                      $P->comments_enabled, $_USER['uid']);
     } else {
@@ -306,13 +306,13 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
 */
 function plugin_deletecomment_paypal($cid, $id)
 {
-    global $_CONF,$_FM_TABLES, $_TABLES;
+    global $_CONF, $_TABLES, $_PP_CONF;
 
     if (plugin_ismoderator_paypal()) {
-        if (CMT_deleteComment($cid, $id, 'paypal') == 0) {
+        if (CMT_deleteComment($cid, $id, $_PP_CONF['pi_name']) == 0) {
             $count = DB_count($_TABLES['comments'],
                         array('sid', 'type'),
-                        array($id, 'paypal'));
+                        array($id, $_PP_CONF['pi_name']));
             $count--;
             if ($count < 0) $count = 0;
             DB_query("UPDATE {$_TABLES['paypal.products']}
@@ -502,14 +502,16 @@ function plugin_user_move_paypal($origUID, $destUID)
 *   @param  array   $autotag    Autotag details
 *   @return string              Updated $content
 */
-function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
-    global $_CONF, $_TABLES;
+function plugin_autotags_paypal ($op, $content = '', $autotag = '')
+{
+    global $_CONF, $_TABLES, $_PP_CONF;
 
+    $pi_name = $_PP_CONF['pi_name'];
     if ($op == 'tagname' ) {
-        return array('paypal','paypal_cat');
+        return array($pi_name, $pi_name . '_cat');
     } else if ($op == 'parse') {
         switch ($autotag['tag']) {
-        case 'paypal':
+        case $pi_name:
             $id = COM_applyFilter($autotag['parm1'], true);
             $url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
 
@@ -525,7 +527,7 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
             $content = str_replace ($autotag['tagstr'], $link, $content);
             break;
 
-        case 'paypal_cat':
+        case $pi_name . '_cat':
             $id = COM_applyFilter($autotag['parm1'], true);
             $url = COM_buildUrl(PAYPAL_URL.'/index.php?category='.$id);
             if (empty($autotag['parm2'])) {
@@ -554,10 +556,10 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '') {
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
-    global $_PLUGINS;
+    global $_PLUGINS, $_PP_CONF;
 
     // If this plugin or a required plugin isn't available, abort gracefully
-    if (!in_array('paypal', $_PLUGINS) ||
+    if (!in_array($_PP_CONF['pi_name'], $_PLUGINS) ||
         !in_array('lglib', $_PLUGINS) ||
         !SEC_hasRights($rights, 'OR')) {
         COM_404();
@@ -852,14 +854,14 @@ function plugin_autouninstall_paypal ()
 */
 function plugin_enablestatechange_paypal($enabled)
 {
-    global $_TABLES, $_PLUGINS;
+    global $_TABLES, $_PLUGINS, $_PP_CONF;
 
     $enabled = $enabled == true ? 1 : 0;
     // If trying to enable the plugin but lgLib is not available,
     // take no action and return
     if ($enabled && !in_array('lglib', $_PLUGINS)) {
         // Re-disable the plugin
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'paypal');
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', $_PP_CONF['pi_name']);
         $enabled = 0;
     }
 
@@ -877,21 +879,21 @@ function plugin_enablestatechange_paypal($enabled)
 
 
 /**
-*   Receives notification of anothe plugin's deletion
+*   Receives notification of another plugin's deletion
 *
 *   @param  mixed   $id     Item ID
 *   @param  string  $type   Plugin Name
 */
 function plugin_itemdeleted_paypal($id, $type)
 {
-    global $_TABLES;
+    global $_TABLES, $_PP_CONF;
 
     // If the lgLib plugin is disabled or removed, disable thie plugin
     if ($type == 'lglib' && $id == '*') {
         plugin_enablestatechange_paypal(false);
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'paypal');
-        unset($_POST['enabledplugins']['paypal']);
-        unset($_POST['pluginarray']['paypal']);
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', $_PP_CONF['pi_name']);
+        unset($_POST['enabledplugins'][$_PP_CONF['pi_name']]);
+        unset($_POST['pluginarray'][$_PP_CONF['pi_name']]);
     }
 }
 

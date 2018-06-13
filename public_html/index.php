@@ -20,7 +20,7 @@
 require_once '../lib-common.php';
 
 // If plugin is installed but not enabled, display an error and exit gracefully
-if (!in_array('paypal', $_PLUGINS)) {
+if (!isset($_PP_CONF) || !in_array($_PP_CONF['pi_name'], $_PLUGINS)) {
     COM_404();
 }
 
@@ -321,6 +321,7 @@ case 'shipto':
     break;
 
 case 'order':
+    // View a completed order record
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new Paypal\Order($actionval);
         if ($order->canView()) {

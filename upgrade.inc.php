@@ -30,13 +30,14 @@ function PAYPAL_do_upgrade()
 {
     global $_TABLES, $_CONF, $_PP_CONF, $_PP_DEFAULTS, $PP_UPGRADE, $_PLUGIN_INFO;
 
-    if (isset($_PLUGIN_INFO[$_PP_CONF['pi_name']])) {
-        if (is_array($_PLUGIN_INFO[$_PP_CONF['pi_name']])) {
+    $pi_name = $_PP_CONF['pi_name'];
+    if (isset($_PLUGIN_INFO[$pi_name])) {
+        if (is_array($_PLUGIN_INFO[$pi_name])) {
             // glFusion >= 1.6.6
-            $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']]['pi_version'];
+            $current_ver = $_PLUGIN_INFO[$pi_name]['pi_version'];
         } else {
             // legacy
-            $current_ver = $_PLUGIN_INFO[$_PP_CONF['pi_name']];
+            $current_ver = $_PLUGIN_INFO[$pi_name];
         }
     } else {
         return false;
@@ -109,7 +110,7 @@ function PAYPAL_do_upgrade()
 
         // Finally, rename any existing config.php file since we now use
         // the online configuration.
-        $pi_path = $_CONF['path'] . '/plugins/' . $_PP_CONF['pi_name'];
+        $pi_path = $_CONF['path'] . '/plugins/' . $pi_name;
         if (is_file($pi_path . '/config.php')) {
             COM_errorLog("Renaming old config.php file to $pi_path/config.old.php", 1);
             if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
@@ -124,18 +125,17 @@ function PAYPAL_do_upgrade()
         $current_ver = '0.4.1';
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
 
-        if ($c->group_exists($_PP_CONF['pi_name'])) {
+        if ($c->group_exists($pi_name)) {
              $c->add('blk_random_limit', $_PP_DEFAULTS['blk_random_limit'],
-                    'text', 0, 30, 2, 40, true, $_PP_CONF['pi_name']);
+                    'text', 0, 30, 2, 40, true, $pi_name);
             $c->add('blk_featured_limit', $_PP_DEFAULTS['blk_featured_limit'],
-                    'text', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
+                    'text', 0, 30, 2, 50, true, $pi_name);
             $c->add('blk_popular_limit', $_PP_DEFAULTS['blk_popular_limit'],
-                    'text', 0, 30, 2, 60, true, $_PP_CONF['pi_name']);
+                    'text', 0, 30, 2, 60, true, $pi_name);
 
-            $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true,
-                $_PP_CONF['pi_name']);
+            $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true, $pi_name);
             $c->add('debug', $_PP_DEFAULTS['debug'],
-                'select', 0, 50, 2, 10, true, $_PP_CONF['pi_name']);
+                'select', 0, 50, 2, 10, true, $pi_name);
         }
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
@@ -155,9 +155,9 @@ function PAYPAL_do_upgrade()
         $current_ver = '0.4.3';
         if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
 
-        if ($c->group_exists($_PP_CONF['pi_name'])) {
+        if ($c->group_exists($pi_name)) {
             $c->add('def_expiration', $_PP_DEFAULTS['def_expiration'],
-                'text', 0, 30, 0, 40, true, $_PP_CONF['pi_name']);
+                'text', 0, 30, 0, 40, true, $pi_name);
         }
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
@@ -169,12 +169,12 @@ function PAYPAL_do_upgrade()
         if ($_PP_CONF['leftblocks'] == 1) $displayblocks += 1;
         if ($_PP_CONF['rightblocks'] == 1) $displayblocks += 2;
 
-        $c->del('leftblocks','paypal');
-        $c->del('rightblocks','paypal');
+        $c->del('leftblocks', $pi_name);
+        $c->del('rightblocks', $pi_name);
         $c->add('displayblocks', $displayblocks,
-                'select', 0, 0, 13, 210, true, $_PP_CONF['pi_name']);
+                'select', 0, 0, 13, 210, true, $pi_name);
         $c->add('debug_ipn', $_PP_DEFAULTS['debug_ipn'],
-                'select', 0, 50, 2, 20, true, $_PP_CONF['pi_name']);
+                'select', 0, 50, 2, 20, true, $pi_name);
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
@@ -183,7 +183,7 @@ function PAYPAL_do_upgrade()
         $current_ver = '0.4.5';
         // Add notification email override
         $c->add('admin_email_addr', $_PP_DEFAULTS['admin_email_addr'],
-                'text', 0, 0, 0, 40, true, $_PP_CONF['pi_name']);
+                'text', 0, 0, 0, 40, true, $pi_name);
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
@@ -202,7 +202,7 @@ function PAYPAL_do_upgrade()
                 $button = '';
             }
             DB_query("INSERT INTO {$_TABLES['paypal.buttons']} VALUES
-                ('$id', 'paypal', '$button')", 1);
+                ('$id', $pi_name, '$button')", 1);
         }
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
@@ -257,39 +257,38 @@ function PAYPAL_do_upgrade()
                 ('amazon', 20, 0, 'Amazon SimplePay', '', '$db_services')";
         //echo $sql;die;
         // ... and remove Paypal-specific configs from the main config system
-        $c->del('receiver_email', 'paypal');
-        $c->del('testing', 'paypal');
-        $c->del('paypal_url', 'paypal');
-        $c->del('prod_url', 'paypal');
-        $c->del('use_css_menus', 'paypal');     // Just not used any more
-        $c->del('encrypt_buttons', 'paypal');
-        $c->del('prv_key', 'paypal');
-        $c->del('pub_key', 'paypal');
-        $c->del('pp_cert', 'paypal');
-        $c->del('pp_cert_id', 'paypal');
+        $c->del('receiver_email', $pi_name);
+        $c->del('testing', $pi_name);
+        $c->del('paypal_url', $pi_name);
+        $c->del('prod_url', $pi_name);
+        $c->del('use_css_menus', $pi_name);     // Just not used any more
+        $c->del('encrypt_buttons', $pi_name);
+        $c->del('prv_key', $pi_name);
+        $c->del('pub_key', $pi_name);
+        $c->del('pp_cert', $pi_name);
+        $c->del('pp_cert_id', $pi_name);
 
         // Add new plugin config items
-        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true,
-                $_PP_CONF['pi_name']);
+        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true, $pi_name);
         $c->add('get_street', $_PP_DEFAULTS['get_street'],
-                'select', 0, 60, 14, 10, true, $_PP_CONF['pi_name']);
+                'select', 0, 60, 14, 10, true, $pi_name);
         $c->add('get_city', $_PP_DEFAULTS['get_city'],
-                'select', 0, 60, 14, 20, true, $_PP_CONF['pi_name']);
+                'select', 0, 60, 14, 20, true, $pi_name);
         $c->add('get_state', $_PP_DEFAULTS['get_state'],
-                'select', 0, 60, 14, 30, true, $_PP_CONF['pi_name']);
+                'select', 0, 60, 14, 30, true, $pi_name);
         $c->add('get_country', $_PP_DEFAULTS['get_country'],
-                'select', 0, 60, 14, 40, true, $_PP_CONF['pi_name']);
+                'select', 0, 60, 14, 40, true, $pi_name;
         $c->add('get_postal', $_PP_DEFAULTS['get_postal'],
-                'select', 0, 60, 14, 50, true, $_PP_CONF['pi_name']);
+                'select', 0, 60, 14, 50, true, $pi_name);
         $c->add('weight_unit', $_PP_DEFAULTS['weight_unit'],
-                'select', 0, 0, 15, 230, true, $_PP_CONF['pi_name']);
+                'select', 0, 0, 15, 230, true, $pi_name);
         $c->add('ena_cart', $PP_DEFAULTS['ena_cart'],
-                'select', 0, 0, 2, 220, true, $_PP_CONF['pi_name']);
+                'select', 0, 0, 2, 220, true, $pi_name);
 
         DB_query("UPDATE {$_TABLES['conf_values']}
                 SET sort_order=80
                 WHERE name='tmpdir'
-                AND group_name='paypal'");
+                AND group_name='$pi_name'");
         DB_query($sql, 1);
         if (DB_error()) {
             COM_errorLog("Error Executing SQL: $sql", 1);
@@ -383,7 +382,7 @@ function PAYPAL_do_upgrade()
         if ($error)
             return $error;
         $c->add('centerblock', $_PP_DEFAULTS['centerblock'],
-                'select', 0, 0, 2, 215, true, $_PP_CONF['pi_name']);
+                'select', 0, 0, 2, 215, true, $pi_name);
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
@@ -415,26 +414,26 @@ function PAYPAL_do_upgrade()
 
         // Add new product defaults for onhand tracking
         $c->add('def_track_onhand', $_PP_DEFAULTS['def_track_onhand'],
-                'select', 0, 30, 2, 50, true, $_PP_CONF['pi_name']);
+                'select', 0, 30, 2, 50, true, $pi_name);
         $c->add('def_oversell', $_PP_DEFAULTS['def_oversell'],
-                'select', 0, 30, 16, 60, true, $_PP_CONF['pi_name']);
+                'select', 0, 30, 16, 60, true, $pi_name);
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.5.7')) {
         $current_ver = '0.5.7';
         $gid = (int)DB_getItem($_TABLES['groups'], 'grp_id',
-            "grp_name='{$_PP_CONF['pi_name']} Admin'");
+            "grp_name='{$pi_name} Admin'");
         if ($gid < 1)
             $gid = 1;        // default to Root if paypal group not found
         DB_query("INSERT INTO {$_TABLES['vars']}
                 SET name='paypal_gid', value=$gid");
         $c->add('product_tpl_ver', $_PP_DEFAULTS['product_tpl_ver'],
-                'select', 0, 30, 2, 70, true, $_PP_CONF['pi_name']);
+                'select', 0, 30, 2, 70, true, $pi_name);
         $c->add('list_tpl_ver', $_PP_DEFAULTS['list_tpl_ver'],
-                'select', 0, 30, 0, 80, true, $_PP_CONF['pi_name']);
+                'select', 0, 30, 0, 80, true, $pi_name);
         $c->add('cache_max_age', $_PP_DEFAULTS['cache_max_age'],
-                'text', 0, 40, 2, 40, true, $_PP_CONF['pi_name']);
+                'text', 0, 40, 2, 40, true, $pi_name);
 
         // Create cache directory
         if (!is_dir($_PP_DEFAULTS['tmpdir'] . 'cache')) {
@@ -449,7 +448,7 @@ function PAYPAL_do_upgrade()
         $current_ver = '0.5.8';
         // Add terms and conditions link
         $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
-                'text', 0, 40, 2, 50, true, $_PP_CONF['pi_name']);
+                'text', 0, 40, 2, 50, true, $pi_name);
         // Upgrade sql changes from owner/group/member/anon perms to group id
         // First update the group_id based on the perms.
         $sql = "SELECT cat_id,group_id,perm_group,perm_members,perm_anon
@@ -476,11 +475,11 @@ function PAYPAL_do_upgrade()
         $current_ver = '0.5.9';
         // Add shop phone and email conf values, fix subgroup ID for shop info
         $c->add('shop_phone', '',
-                'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
+                'text', 10, 100, 0, 30, true, $pi_name);
         $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
-                'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
+                'text', 10, 100, 0, 40, true, $pi_name);
         // Create default path for downloads (even if not used)
-        @mkdir($_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files', true);
+        @mkdir($_CONF['path'] . 'data/' . $pi_name . '/files', true);
         // Remove stray .htaccess file that interferes with plugin removal
         @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
@@ -510,12 +509,11 @@ function PAYPAL_do_upgrade()
             }
         }
         // Delete config option and working-directory fieldset
-        $c->del('tmpdir', $_PP_CONF['pi_name']);
-        $c->del('fs_encbtn', $_PP_CONF['pi_name']);
+        $c->del('tmpdir', $pi_name);
+        $c->del('fs_encbtn', $pi_name);
         // Add option to show plugins on product page. Default to "1" during
         // upgrade for backward compatibility
-        $c->add('show_plugins', 1, 'select', 0, 0, 2, 165, true,
-                $_PP_CONF['pi_name']);
+        $c->add('show_plugins', 1, 'select', 0, 0, 2, 165, true, $pi_name);
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
@@ -531,7 +529,7 @@ function PAYPAL_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.5.12')) {
         $current_ver = '0.5.12';
-        $c->del('download_path', $_PP_CONF['pi_name']);
+        $c->del('download_path', $pi_name);
 
         // Previously, categories were not required. With the MPTT method,
         // there must be at least one.
@@ -556,7 +554,7 @@ function PAYPAL_do_upgrade()
         if (!PAYPAL_do_set_version($installed_ver)) return false;
     }
 
-    CTL_clearCache($_PP_CONF['pi_name']);
+    CTL_clearCache($pi_name);
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
     return true;
 }

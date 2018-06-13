@@ -554,7 +554,7 @@ $PP_UPGRADE['0.4.1'] = array(
             fieldset=50,
             sort_order=20
         WHERE
-            name='debug_ipn' AND group_name='paypal'",
+            name='debug_ipn' AND group_name='" . $_PP_CONF['pi_name'] . "'",
 );
 
 $PP_UPGRADE['0.4.2'] = array(
