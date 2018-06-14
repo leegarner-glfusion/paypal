@@ -455,10 +455,10 @@ function ProductList($cat_id = 0)
         $i = 1;
         $catrows = count($A);
         if ($catrows > 0) {
-            $CT = new \Template(PAYPAL_PI_PATH . '/templates');
-            $CT->set_file(array('table'    => 'category_table.thtml',
-                        'row'      => 'category_row.thtml',
-                        'category' => 'category.thtml',
+            $CT = PP_getTemplate(array(
+                    'table'    => 'category_table',
+                    'row'      => 'category_row',
+                    'category' => 'category',
             ) );
             //$CT->set_var('breadcrumbs', $breadcrumbs);
             if ($cat_img_url != '') {
@@ -597,17 +597,16 @@ function ProductList($cat_id = 0)
 
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
-    $product = new \Template(PAYPAL_PI_PATH . '/templates');
-    $product->set_file(array(
-        'start'   => 'product_list_start.thtml',
-        'end'     => 'product_list_end.thtml',
-        'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item.thtml',
-        //    'product' => 'product_list.thtml',
-        //'buy'     => 'buttons/btn_buy_now.thtml',
-        //'cart'    => 'buttons/btn_add_cart.thtml',
-        'download'  => 'buttons/btn_download.thtml',
-        'login_req' => 'buttons/btn_login_req.thtml',
-        'btn_details' => 'buttons/btn_details.thtml',
+    $product = PP_getTemplate(array(
+        'start'   => 'product_list_start',
+        'end'     => 'product_list_end',
+        'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item',
+        //    'product' => 'product_list',
+        //'buy'     => 'buttons/btn_buy_now',
+        //'cart'    => 'buttons/btn_add_cart',
+        'download'  => 'buttons/btn_download',
+        'login_req' => 'buttons/btn_login_req',
+        'btn_details' => 'buttons/btn_details',
     ) );
     $product->set_var(array(
         'pi_url'        => PAYPAL_URL,
@@ -843,8 +842,7 @@ function ipnlogSingle($id, $txn_id)
         $vals = $gw->ipnlogVars($ipn);
 
         // Create ipnlog template
-        $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
-        $T->set_file(array('ipnlog' => 'ipnlog_detail.thtml'));
+        $T = PP_getTemplate('ipnlog_detail', 'ipnlog');
 
         // Display the specified ipnlog row
         $T->set_var(array(
@@ -909,10 +907,10 @@ function X_PAYPAL_ipnlogList()
     $res = DB_query($sql);
 
     // Create ipnlog template
-    $ipnlog = new \Template($_CONF['path'] . 'plugins/paypal/templates');
-    $ipnlog->set_file(array('ipnlog' => 'ipnlog_item.thtml',
-                            'start'  => 'ipnlog_start.thtml',
-                            'end'    => 'ipnlog_end.thtml') );
+    $ipnlog = PP_getTemplate(array('ipnlog' => 'ipnlog_item.thtml',
+            'start'  => 'ipnlog_start',
+            'end'    => 'ipnlog_end',
+    ) );
     $ipnlog->set_var('site_url', $_CONF['site_url']);
 
     // Display the begging of the ipnlog list

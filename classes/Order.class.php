@@ -436,12 +436,12 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
         $tplname = 'order';
         if (!empty($tpl)) $tplname .= '.' . $tpl;
-        $T->set_file('order', "$tplname.thtml");
+        $T = PP_getTemplate($tplname, 'order');
 
         $isAdmin = plugin_ismoderator_paypal() ? true : false;
+        $currency = new Currency();
 
         foreach ($this->_addr_fields as $fldname) {
             $T->set_var($fldname, $this->$fldname);
@@ -460,8 +460,11 @@ class Order
 
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $subtotal = 0;
+        $tax_items = 0;
+        $cart_tax = 0;
         foreach ($this->items as $key => $item) {
             $item_options = '';
+            $P = $item->getProduct();
             $opt = $item->options_text;
             if ($opt && is_array($opt)) {
                 foreach ($opt as $opt_str) {
@@ -470,6 +473,10 @@ class Order
             }
             $item_total = $item->price * $item->quantity;
             $subtotal += $item_total;
+            if ($P->taxable) {
+                $cart_tax += $P->getTax($item_total);
+                $tax_items++;       // count the taxable items for display
+            }
             $T->set_var(array(
                 'item_id'       => htmlspecialchars($item->product_id),
                 'item_descrip'  => htmlspecialchars($item->description),
@@ -478,38 +485,43 @@ class Order
                 'item_total'    => COM_numberFormat($item_total, 2),
                 'item_options'  => $item_options,
                 'is_admin' => $isAdmin ? 'true' : '',
-                'is_file' => $item->getProduct()->file != '' ? 'true' : '',
+                'is_file' => $P->file != '' ? 'true' : '',
+                'taxable'       => $P->taxable,
+                'tax_icon'      => $LANG_PP['tax'][0],
             ) );
             $T->parse('iRow', 'ItemRow', true);
-            if ($item->getProduct()->prod_type == PP_PROD_PHYSICAL) {
+            if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;
             }
         }
+        $cart_tax = round($cart_tax, 2);
 
         $dt = new \Date($this->order_date, $_CONF['timezone']);
         $total = $subtotal + $this->shipping + $this->handling + $this->tax;
         $T->set_var(array(
-            'pi_url'    => PAYPAL_URL,
-            'is_admin' => $isAdmin ? 'true' : '',
-            'pi_admin_url' => PAYPAL_ADMIN_URL,
-            'total'     => COM_numberFormat($total, 2),
-            'not_final' => $final ? '' : 'true',
-            'order_date' => $dt->format($_PP_CONF['datetime_fmt'], true),
+            'pi_url'        => PAYPAL_URL,
+            'is_admin'      => $isAdmin ? 'true' : '',
+            'pi_admin_url'  => PAYPAL_ADMIN_URL,
+            'total'         => $currency->Format($total),
+            'not_final'     => $final ? '' : 'true',
+            'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
-            'shipping' => COM_numberFormat($this->shipping, 2),
-            'handling' => COM_numberFormat($this->handling, 2),
-            'tax' => COM_numberFormat($this->tax, 2),
-            'subtotal' => COM_numberFormat($subtotal, 2),
-            'have_billto' => 'true',
-            'have_shipto' => 'true',
-            'order_instr' => htmlspecialchars($this->instructions),
-            'shop_name' => $_PP_CONF['shop_name'],
-            'shop_addr' => $_PP_CONF['shop_addr'],
-            'shop_phone' => $_PP_CONF['shop_phone'],
-            'apply_gc'     => COM_numberFormat($this->by_gc, 2),
-            'net_total' => $total - $this->by_gc,
-            'iconset'   => $_PP_CONF['_iconset'],
+            'shipping'      => $this->shipping > 0 ? $currency->FormatValue($this->shipping) : 0,
+            'handling'      => $this->handling > 0 ? $currency->FormatValue($this->handling) : 0,
+            'tax'           => $this->tax > 0 ? $currency->FormatValue($this->tax) : 0,
+            'subtotal'      => $currency->Format($subtotal),
+            'have_billto'   => 'true',
+            'have_shipto'   => 'true',
+            'order_instr'   => htmlspecialchars($this->instructions),
+            'shop_name'     => $_PP_CONF['shop_name'],
+            'shop_addr'     => $_PP_CONF['shop_addr'],
+            'shop_phone'    => $_PP_CONF['shop_phone'],
+            'apply_gc'      => $this->by_gc > 0 ? $currency->FormatValue($this->by_gc) : 0,
+            'net_total'     => $total - $this->by_gc,
+            'iconset'       => $_PP_CONF['_iconset'],
+            'cart_tax'      => $cart_tax > 0 ? COM_numberFormat($cart_tax, 2) : 0,
+            'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
 
         //if ($isAdmin) {
@@ -659,8 +671,7 @@ class Order
         PAYPAL_debug("Sending email to " . $this->uid);
 
         // setup templates
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        $T ->set_file(array(
+        $T = PP_getTemplate(array(
             'subject' => 'purchase_email_subject.txt',
             'msg_admin' => 'purchase_email_admin.txt',
             'msg_user' => 'purchase_email_user.txt',

@@ -709,8 +709,7 @@ function PAYPAL_adminMenu($view='')
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
 //                    'text' => $LANG_PP['reports']);
 
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
-    $T->set_file('title', 'paypal_title.thtml');
+    $T = PP_getTemplate('paypal_title', 'title');
     $T->set_var(array(
         'title' => $LANG_PP['admin_title'] . ' (Ver. ' . $_PP_CONF['pi_version'] . ')',
         'is_admin' => true,
@@ -1073,8 +1072,7 @@ function PAYPAL_adminlist_Attributes()
             $filter, '', $options, '');
 
     // Create the "copy attributes" form at the bottom
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
-    $T->set_file('copy_attr_form', 'copy_attributes_form.thtml');
+    $T = PP_getTemplate('copy_attributes_form', 'copy_attr_form');
     $T->set_var(array(
         'src_product'       => $product_selection,
         'product_select'    => COM_optionList($_TABLES['paypal.products'], 'id, name'),
@@ -1157,11 +1155,7 @@ function PAYPAL_adminList_Gateway()
             $LANG32;
 
     $sql = "SELECT * FROM {$_TABLES['paypal.gateways']}";
-    $res = DB_query($sql);
-    $installed = array();
-    while ($A = DB_fetchArray($res, false)) {
-        $installed[$A['id']] = 1;
-    }
+    $to_install = Paypal\Gateway::getUninstalled();
 
     $header_arr = array(
         array('text' => $LANG_ADMIN['edit'],
@@ -1207,21 +1201,13 @@ function PAYPAL_adminList_Gateway()
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
-    $results = glob(PAYPAL_PI_PATH . '/classes/gateways/*.class.php');
-    $ins_gw = '';
-    if (is_array($results)) {
-        foreach ($results as $fullpath) {
-            $parts = explode('/', $fullpath);
-            list($class,$x1,$x2) = explode('.', $parts[count($parts)-1]);
-            if (!array_key_exists($class, $installed)) {
-                $ins_gw .= $class . '&nbsp;&nbsp;<a href="' .
-                    PAYPAL_ADMIN_URL . '/index.php?gwinstall=x&gwname=' .
-                    urlencode($class) . '">' . $LANG32[22] . '</a><br />' . LB;
-            }
+    if (!empty($to_install)) {
+        $display .= $LANG_PP['gw_notinstalled'] . ':<br />';
+        foreach ($to_install as $name=>$info) {
+            $display .= $name . '&nbsp;&nbsp;<a href="' .
+                    PAYPAL_ADMIN_URL. '/index.php?gwinstall=x&gwname=' .
+                    urlencode($name) . '">' . $LANG32[22] . '</a><br />' . LB;
         }
-    }
-    if (!empty($ins_gw)) {
-        $display .= $LANG_PP['gw_notinstalled'] . '<br />' . LB . $ins_gw;
     }
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;

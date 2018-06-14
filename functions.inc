@@ -24,7 +24,7 @@ require_once $_CONF['path_system'] . 'classes/config.class.php';
 $pp_config = config::get_instance();
 $_PP_CONF= $pp_config->get_config('paypal');
 
-/** Include paypal config file  */
+/** Include plugin config file  */
 require_once __DIR__ . '/paypal.php';
 
 $_PP_CONF['datetime_fmt'] = 'Y-m-d H:i:s T';
@@ -100,7 +100,7 @@ function USES_paypal_functions()
 {   require_once __DIR__ . '/paypal_functions.inc.php'; }
 
 function USES_paypal_reports()
-{   require_once PAYPAL_PI_PATH . '/reports.inc.php';  }
+{   require_once __DIR__ . '/reports.inc.php';  }
 
 // Mark whether this is a uikit theme. Save to global conf var
 // so it's available where needed.
@@ -125,7 +125,7 @@ function PAYPAL_setCart()
 
 function USES_paypal_class_report($name='')
 {
-    $classfile = PAYPAL_PI_PATH . '/classes/reports/' . $name . '.class.php';
+    $classfile = __DIR__ . '/classes/reports/' . $name . '.class.php';
     if (is_file($classfile)) {
         require_once $classfile;
         return true;
@@ -154,7 +154,7 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
         USES_paypal_functions();
         //PAYPAL_setCart();
         $display = \Paypal\siteHeader();
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new Template(__DIR__ . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
         $T->set_var('title', $LANG_PP['main_title']);
         $display .= $T->parse('', 'title');
@@ -172,7 +172,7 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 */
 function plugin_upgrade_paypal()
 {
-    require_once PAYPAL_PI_PATH . '/upgrade.inc.php';
+    require_once __DIR__ . '/upgrade.inc.php';
     return PAYPAL_do_upgrade();
 }
 
@@ -193,8 +193,6 @@ function plugin_getmenuitems_paypal()
             '/\{(.*)\}/i',
             '<i class="' . PP_getIcon('${1}', '') . '"></i>',
             $LANG_PP['mnu_paypal']);
-
-        //$menuitems[$LANG_PP['mnu_paypal']] = PAYPAL_URL . '/index.php';
         $menuitems[$a] = PAYPAL_URL . '/index.php';
     }
     return $menuitems;
@@ -601,7 +599,7 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
         if ($_PP_CONF['ena_cart'] == 1) {
             $tpl_add_cart = 'btn_add_cart.thtml';
             if ($item_type == 0) $item_type = PP_PROD_VIRTUAL;
-            $T = new Template(PAYPAL_PI_PATH . '/templates');
+            $T = new Template(__DIR__ . '/templates');
             $T->set_file('cart', 'buttons/btn_add_cart.thtml');
             $T->set_var(array(
                 'item_name'     => $vars['item_name'],
@@ -767,7 +765,7 @@ function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 */
 function PAYPAL_getDocURL($file='', $doclang='english')
 {
-    $doc_path = PAYPAL_PI_PATH . "/docs/$doclang/";
+    $doc_path = __DIR__ . "/docs/$doclang/";
     $doc_url = '';
 
     if (version_compare(GVERSION, '1.6.0', '<')) {
@@ -917,7 +915,7 @@ function plugin_getcommenturlid_paypal()
 */
 function phpblock_paypal_cart()
 {
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
     $contents = phpblock_paypal_cart_contents();
     $vis = empty($contents) ? 'none' : 'block';
@@ -952,7 +950,7 @@ function phpblock_paypal_cart_contents()
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return '';
 
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
@@ -1024,7 +1022,7 @@ function phpblock_paypal_search()
 {
     global $_TABLES;
 
-    $T = new Template(PAYPAL_PI_PATH . '/templates/');
+    $T = new Template(__DIR__ . '/templates/');
     $T->set_file('search', 'blk_search.thtml');
 
     $category_options = COM_optionList($_TABLES['paypal.categories'],
@@ -1116,7 +1114,7 @@ function phpblock_paypal_categories()
     if (!$result || DB_numRows($result) == 0)
         return '';
 
-    $T = new Template(PAYPAL_PI_PATH . '/templates');
+    $T = new Template(__DIR__ . '/templates');
     $T->set_file(array('blk_category' => 'blk_categories.thtml'));
 
     while ($A = DB_fetchArray($result, false)) {
@@ -1351,7 +1349,7 @@ function PAYPAL_phpblock_product($sql)
     }
     if ($res && DB_numRows($res) > 0) {
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates');
+        $T = new Template(__DIR__ . '/templates');
         $T->set_file(array(
             'blk_random' => 'blk_random.thtml',
             'btn_details' => 'buttons/btn_details.thtml',
@@ -1629,7 +1627,7 @@ function PAYPAL_debug($msg, $type = 'debug')
 function plugin_configmanager_select_product_tpl_ver_paypal()
 {
     $A = array();
-    $dirs = glob(PAYPAL_PI_PATH . '/templates/detail/*', GLOB_ONLYDIR);
+    $dirs = glob(__DIR__ . '/templates/detail/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $tmp = explode('/', $dir);
         $opt = end($tmp);
@@ -1647,7 +1645,7 @@ function plugin_configmanager_select_product_tpl_ver_paypal()
 function plugin_configmanager_select_list_tpl_ver_paypal()
 {
     $A = array();
-    $dirs = glob(PAYPAL_PI_PATH . '/templates/list/*', GLOB_ONLYDIR);
+    $dirs = glob(__DIR__ . '/templates/list/*', GLOB_ONLYDIR);
     foreach ($dirs as $dir) {
         $tmp = explode('/', $dir);
         $opt = end($tmp);
@@ -1869,7 +1867,7 @@ function PP_getIcon($name, $style='info')
     return $_PP_CONF['_iconset'] . '-' . $name . $style;
 }
 
-require_once PAYPAL_PI_PATH . '/services.inc.php';
+require_once __DIR__ . '/services.inc.php';
 
 /**
 *   Provides the getItemInfo function for products
@@ -2109,6 +2107,48 @@ function PP_getTaxRate()
     global $_PP_CONF;
 
     return PP_getVar($_PP_CONF, 'tax_rate', 'float');
+}
+
+
+/**
+*   Helper function to get a template object.
+*
+*   @param  string  $name   Base name of template file, e.g. "editor"
+*   @param  string  $id     ID of template, e.g. "editform"
+*   @param  string  $path   Optional path if not "templates/"
+*   @return string      Full filename, e.g. "editor.uikit.thtml"
+*/
+function PP_getTemplate($name, $id='', $path='')
+{
+    global $_PP_CONF;
+
+    $templates = array();
+
+    // Put parameters into an array if not already.
+    if (!is_array($name) && !empty($id)) {
+        $templates = array($id => $name);
+    } elseif (is_array($name)) {
+        $templates = $name;
+    }
+
+    // Add additional path info if needed
+    if (!empty($path) && $path[0] == '/') $path = substr($path, 1);
+    if (substr($path, 0, 9) != 'templates') {
+        $path = 'templates/' . $path;
+    }
+
+    // May use "switch" later, for now there are only two options
+    $tpltype = $_PP_CONF['_is_uikit'] ? '.uikit' : '';
+    foreach ($templates as $t_id =>$t_name) {
+        if (file_exists(__DIR__ . "/$path/$t_name$tpltype.thtml")) {
+            $templates[$t_id] = "$t_name$tpltype.thtml";
+        } else {
+            $templates[$t_id] = "$t_name.thtml";
+        }
+    }
+    $T = new Template(__DIR__ . '/' . $path);
+    $T->set_file($templates);
+    return $T;
 }
 
 ?>

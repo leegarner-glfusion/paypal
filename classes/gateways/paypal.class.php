@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -81,7 +81,7 @@ class paypal extends Gateway
             $this->gw_url = $this->config['prod_url'];
             $this->postback_url = 'https://ipnpb.paypal.com';
         }
- 
+
         // If the configured currency is not one of the supported ones,
         // this gateway cannot be used, so disable it.
         if (!in_array($this->currency_code, $supported_currency)) {
@@ -295,7 +295,7 @@ class paypal extends Gateway
         if ($this->config['encrypt']) {
             $enc_btn = self::_encButton($fields);
             if (!empty($enc_btn)) {
-                $gatewayVars[] = 
+                $gatewayVars[] =
                 '<input type="hidden" name="cmd" value="_s-xclick" />';
                 $gatewayVars[] = '<input type="hidden" name="encrypted" '.
                 'value="' . $enc_btn . '" />';
@@ -352,7 +352,7 @@ class paypal extends Gateway
 
         // Now check that the files exist and can be read
         foreach (array('prv_key', 'pub_key', 'pp_cert') as $idx=>$name) {
-            if (!is_file($this->config[$name]) || 
+            if (!is_file($this->config[$name]) ||
                 !is_readable($this->config[$name])) {
                 return '';
             }
@@ -556,7 +556,7 @@ class paypal extends Gateway
                 // Create unencrypted buttons if not configured to encrypt,
                 // or if encryption fails.
                 foreach ($vars as $name=>$value) {
-                    $gateway_vars .= '<input type="hidden" name="' . $name . 
+                    $gateway_vars .= '<input type="hidden" name="' . $name .
                         '" value="' . $value . '" />' . "\n";
                 }
             } else {
@@ -566,16 +566,10 @@ class paypal extends Gateway
 
         // Set the text for the button, falling back to our Buy Now
         // phrase if not available
-        $btn_text = isset($LANG_PP['buttons'][$btn_type]) ? 
+        $btn_text = isset($LANG_PP['buttons'][$btn_type]) ?
                 $LANG_PP['buttons'][$btn_type] : $LANG_PP['buy_now'];
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
-                    $this->gw_name);
-        $T->set_file('btn', 'btn_' . $btn_info['tpl'] . '.thtml');
-        //$T = new \Template(PAYPAL_PI_PATH . '/templates/');
-        //$T->set_file('btn', 'buttons/' . $this->gw_name . 
-        //        '/btn_' . $btn_info['tpl'] . '.thtml');
-
+        $T = PP_getTemplate('btn_' . $btn_info['tpl'], 'btn', 'buttons/' . $this->gw_name);
         $T->set_var('paypal_url', $this->getActionUrl());
         $T->set_var('btn_text', $btn_text);
         $T->set_var('gateway_vars', $gateway_vars);
@@ -599,10 +593,8 @@ class paypal extends Gateway
     {
         global $_PP_CONF, $LANG_PP;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
-                    $this->gw_name);
-        $T->set_file('btn', 'btn_' . $type . '.thtml');
-        $btn_text = isset($LANG_PP['buttons'][$type]) ? 
+        $T = PP_getTemplate('btn_' . $type, 'btn', 'buttons/' . $this->gw_name);
+        $btn_text = isset($LANG_PP['buttons'][$type]) ?
                 $LANG_PP['buttons'][$type] : $LANG_PP['buy_now'];
         $amount = isset($attribs['amount']) ? (float)$attribs['amount'] : 0;
         $this->setReceiver($amount);
@@ -705,7 +697,7 @@ class paypal extends Gateway
         }*/
         $gateway_vars = '';
         foreach ($vars as $name=>$value) {
-            $gateway_vars .= '<input type="hidden" name="' . $name . 
+            $gateway_vars .= '<input type="hidden" name="' . $name .
                         '" value="' . $value . '" />' . "\n";
         }
         $T->set_var('paypal_url', $this->getActionUrl());
@@ -800,7 +792,7 @@ class paypal extends Gateway
             switch ($name) {
             case 'test_mode':
             case 'encrypt':
-                $field = '<input type="checkbox" name="' . $name . 
+                $field = '<input type="checkbox" name="' . $name .
                     '" value="1" ';
                 if ($value == 1) $field .= 'checked="checked" ';
                 $field .= '/>';
@@ -930,5 +922,5 @@ class paypal extends Gateway
     }
 
 }   // class paypal
- 
+
 ?>

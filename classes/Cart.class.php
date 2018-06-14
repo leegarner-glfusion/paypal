@@ -513,9 +513,8 @@ class Cart
                 empty($this->m_cart)) {
             return $LANG_PP['cart_empty'];
         }
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('cart', $checkout ? 'order.thtml' : 'viewcart.thtml');
-
+        $tpl = $checkout ? 'order' : 'viewcart';
+        $T = PP_getTemplate($tpl, 'cart');
         if ($checkout) {
             foreach (Workflow::getAll() as $key => $value) {
                 $T->set_var('have_' . $value, 'true');
@@ -656,15 +655,15 @@ class Cart
             //'paypal_url'        => $_PP_CONF['paypal_url'],
             //'receiver_email'    => $_PP_CONF['receiver_email'][0],
             'custom'    => serialize($custom_info),
-            'shipping'  => $shipping > 0 ? $currency->Format($shipping) : '',
+            'shipping'  => $shipping > 0 ? $currency->FormatValue($shipping) : '',
             'subtotal'  => $subtotal != $total ? $currency->Format($subtotal) : '',
             'total'     => $currency->Format($total),
             'order_instr' => htmlspecialchars($this->getInstructions()),
             'tc_link'  => $tc_link,
-            'apply_gc'  => COM_numberFormat($apply_gc, 2),
+            'apply_gc'  => $apply_gc ? $currency->FormatValue($apply_gc) : 0,
             'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
             'net_total' => $currency->Format(max($total - $apply_gc, 0)),
-            'cart_tax'  => $cart_tax > 0 ? $currency->Format($cart_tax) : '',
+            'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
 
@@ -695,8 +694,7 @@ class Cart
     {
         global $_PP_CONF, $_USER;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
-        $T->set_file('checkout', 'btn_checkout.thtml');
+        $T = PP_getTemplate('btn_checkout', 'checkout', 'buttons');
         $T->set_var(array(
             'is_uikit' => $_PP_CONF['_is_uikit'],
         ) );
@@ -752,8 +750,7 @@ class Cart
                 }
             }
         } else {
-            $L = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
-            $L->set_file('login', 'btn_login_req.thtml');
+            $L = PP_getTemplate('btn_login_req', 'login');
             $L->parse('login_btn', 'login');
             $gateway_vars = $L->finish($L->get_var('login_btn'));
         }
@@ -775,8 +772,7 @@ class Cart
         global $_PP_CONF;
 
         $retval = '';
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('radios', 'gw_checkout_select.thtml');
+        $T = PP_getTemplate('gw_checkout_select', 'radios');
         $T->set_block('radios', 'Radios', 'row');
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
@@ -798,7 +794,8 @@ class Cart
             }
         }
         $T->parse('output', 'radios');
-        return $T->finish($T->get_var('output'));
+        $retval = $T->finish($T->get_var('output'));
+        return $retval;
     }
 
 

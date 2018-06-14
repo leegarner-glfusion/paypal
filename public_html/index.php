@@ -200,8 +200,7 @@ case 'thanks':
         if ($gw !== NULL) {
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
-                $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
-                $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
+                $T = PP_getTemplate('thanks_for_order', 'msg');
                 $T->set_var(array(
                     'site_name'     => $_CONF['site_name'],
                     'payment_date'  => $tVars['payment_date'],
@@ -233,8 +232,7 @@ case 'redeem':
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
-        $T = new Template($_CONF['path'] . 'plugins/paypal/templates');
-        $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
+        $T = PP_getTemplate('thanks_for_order', 'msg');
         $T->set_var(array(
             'site_name'     => $_CONF['site_name'],
             'payment_date'  => $_POST['payment_date'],
@@ -364,8 +362,7 @@ case 'pidetail':
     if ($status != PLG_RET_OK) {
         $output = $LANG_PP['item_not_found'];
     }
-    $T = new \Template(PAYPAL_PI_PATH . '/templates');
-    $T->set_file('header', 'paypal_title.thtml');
+    $T = PP_getTemplate('paypal_title', 'header');
     $T->set_var('breadcrumbs', COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL));
     $T->parse('output', 'header');
     $content .= $T->finish($T->get_var('output'));
@@ -414,8 +411,7 @@ case 'none':
 }
 
 $display = Paypal\siteHeader();
-$T = new Template(PAYPAL_PI_PATH . '/templates');
-$T->set_file('title', 'paypal_title.thtml');
+$T = PP_getTemplate('paypal_title', 'title');
 $T->set_var(array(
     'title' => isset($page_title) ? $page_title : '',
     'is_admin' => plugin_ismoderator_paypal(),

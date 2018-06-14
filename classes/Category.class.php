@@ -393,12 +393,7 @@ class Category
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        if ($_SYSTEM['framework'] == 'uikit') {
-            $T->set_file('category', 'category_form.uikit.thtml');
-        } else {
-            $T->set_file('category', 'category_form.thtml');
-        }
+        $T = PP_getTemplate('category_form', 'category');
         $id = $this->cat_id;
 
         // If we have a nonzero category ID, then we edit the existing record.
