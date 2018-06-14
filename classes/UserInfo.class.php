@@ -344,12 +344,7 @@ class UserInfo
         if ($type != 'billto') $type = 'shipto';
         if (empty($this->formaction)) $this->formaction = 'save' . $type;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        if ($_PP_CONF['_is_uikit']) {
-            $T->set_file('address', 'address.uikit.thtml');
-        } else {
-            $T->set_file('address', 'address.thtml');
-        }
+        $T = PP_getTemplate('address', 'address');
 
         // Set the address to select by default.  Start by using the one
         // already stored in the cart, if any.

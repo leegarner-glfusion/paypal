@@ -73,8 +73,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 $btn_disabled = 'disabled="disabled"';
             }
         }
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('cart', 'buttons/btn_add_cart.thtml');
+        $T = PP_getTemplate('btn_add_cart', 'cart', 'buttons');
         $T->set_var(array(
                 'item_name'     => $args['item_name'],
                 'item_number'   => $args['item_number'],

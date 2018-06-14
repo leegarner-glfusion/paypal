@@ -301,8 +301,7 @@ class Coupon extends Product
         if ($recip_email != '') {
             PAYPAL_debug("Sending email to " . $recip_email);
 
-            $T = new \Template(PAYPAL_PI_PATH . '/templates');
-            $T->set_file('message', 'coupon_email_message.thtml');
+            $T = PP_getTemplate('coupon_email_message', 'message');
             $T->set_var(array(
                 'gc_code'   => $gc_code,
             ) );

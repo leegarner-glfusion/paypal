@@ -36,8 +36,7 @@ if (isset($_GET['id'])) {
 }
 
 $display = Paypal\siteHeader();
-$T = new Template(PAYPAL_PI_PATH . '/templates');
-$T->set_file('title', 'paypal_title.thtml');
+$T = PP_getTemplate('paypal_title', 'title');
 $T->set_var('title', $LANG_PP['main_title']);
 $display .= $T->parse('', 'title');
 if (!empty($msg)) {

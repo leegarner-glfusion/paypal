@@ -699,13 +699,7 @@ class Product
             }
         }
         $id = $this->id;
-
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        if ($_SYSTEM['framework'] == 'uikit') {
-            $T->set_file('product', 'product_form.uikit.thtml');
-        } else {
-            $T->set_file('product', 'product_form.thtml');
-        }
+        $T = PP_getTemplate('product_form', 'product');
 
         // Set up the wysiwyg editor, if available
         $tpl_var = $_PP_CONF['pi_name'] . '_entry';
@@ -990,10 +984,8 @@ class Product
         $retval = COM_startBlock();
 
         // Set the template dir based on the configured template version
-        $tpl_dir = PAYPAL_PI_PATH . '/templates/detail/' .
-                $_PP_CONF['product_tpl_ver'];
-        $T = new \Template($tpl_dir);
-        $T->set_file('product', 'product_detail_attrib.thtml');
+        $T = PP_getTemplate('product_detail_attrib', 'product',
+                'detail/' . $_PP_CONF['product_tpl_ver']);
 
         $name = $this->name;
         $l_desc = PLG_replaceTags($this->description);
@@ -1293,8 +1285,7 @@ class Product
             ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) )
             ) {
                 // Free, or unexpired downloads for non-anymous
-                $T = new \Template(PAYPAL_PI_PATH . '/templates');
-                $T->set_file('download', 'buttons/btn_download.thtml');
+                $T = PP_getTemplate('btn_download', 'download', 'buttons');
                 $T->set_var('pi_url', PAYPAL_URL);
                 $T->set_var('id', $this->id);
                 $buttons['download'] = $T->parse('', 'download');
@@ -1308,8 +1299,7 @@ class Product
         } elseif ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
                 !$this->hasAttributes() && $this->price > 0) {
             // Requires login before purchasing
-            $T = new \Template(PAYPAL_PI_PATH . '/templates');
-            $T->set_file('login_req', 'buttons/btn_login_req.thtml');
+            $T = PP_getTemplate('btn_login_req', 'login_req', 'buttons');
             $buttons['login'] = $T->parse('', 'login_req');
         } else {
             // Normal buttons for everyone else
@@ -1336,8 +1326,7 @@ class Product
             // test one template
                 $tpl_add_cart = 'btn_add_cart_attrib.thtml';
 
-            $T = new \Template(PAYPAL_PI_PATH . '/templates');
-            $T->set_file('cart', 'buttons/' . $tpl_add_cart);
+            $T = PP_getTemplate($tpl_add_cart, 'cart', 'buttons');
             $T->set_var(array(
                 'item_name'     => htmlspecialchars($this->name),
                 'item_number'   => $this->id,

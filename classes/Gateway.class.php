@@ -508,10 +508,8 @@ abstract class Gateway
     {
         global $LANG_PP;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
-        $T->set_file(array('tpl' => 'gw_servicechk.thtml'));
+        $T = PP_getTemplate('gw_servicechk', 'tpl');
         $T->set_block('tpl', 'ServiceCheckbox', 'cBox');
-
         foreach ($this->services as $name => $value) {
             $T->set_var(array(
                 'text'      => $LANG_PP['buttons'][$name],
@@ -858,8 +856,7 @@ abstract class Gateway
         if (!$this->_Supports('checkout')) return '';
 
         $gateway_vars = $this->gatewayVars($cart);
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons');
-        $T->set_file(array('btn' => 'btn_checkout.thtml'));
+        $T = PP_getTemplate('btn_checkout', 'btn', 'templates/buttons');
         $T->set_var(array(
             'action'    => $this->getActionUrl(),
             'gateway_vars' => $gateway_vars,
@@ -1046,12 +1043,7 @@ abstract class Gateway
     {
         global $_CONF, $LANG_PP, $_PP_CONF;
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/');
-        if ($_PP_CONF['_is_uikit']) {
-            $T->set_file('tpl', 'gateway_edit.uikit.thtml');
-        } else {
-            $T->set_file('tpl', 'gateway_edit.thtml');
-        }
+        $T = PP_getTemplate('gateway_edit', 'tpl');
         $svc_boxes = $this->getServiceCheckboxes();
 
         $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name,
@@ -1146,7 +1138,7 @@ abstract class Gateway
                 while ($A = DB_fetchArray($res, false)) {
                     // For each available gateway, load its class file and add it
                     // to the static array
-                    $gateways[$key][] = self::getInstance($A['id'], $A);
+                    $gateways[$key][$A['id']] = self::getInstance($A['id'], $A);
                 }
 //                Cache::set($cache_key, $gateways[$key], 'gateways');
 //            }
@@ -1193,6 +1185,30 @@ abstract class Gateway
     public function getCheckoutButton()
     {
         return NULL;
+    }
+
+
+    public static function getUninstalled()
+    {
+        global $LANG32;
+
+        $installed = self::getAll();
+        $gateways = array();
+        $files = glob(__DIR__ . '/gateways/*.class.php');
+        if (is_array($files)) {
+            foreach ($files as $fullpath) {
+                $parts = explode('/', $fullpath);
+                list($class,$x1,$x2) = explode('.', $parts[count($parts)-1]);
+                if (!array_key_exists($class, $installed)) {
+                    // Add only if not installed
+                    $gateways[$class] = array(
+                        $parts[count($parts)-1],    // complete filename
+                        $fullpath,
+                    );
+                }
+            }
+        }
+        return $gateways;
     }
 
 }   // class Gateway

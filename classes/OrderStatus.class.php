@@ -87,8 +87,7 @@ class OrderStatus extends Workflow
 
         self::Init();
 
-        $T = new \Template(PAYPAL_PI_PATH . '/templates');
-        $T->set_file('ordstat', 'orderstatus.thtml');
+        $T = PP_getTemplate('orderstatus', 'ordstat');
         $T->set_var(array(
             'order_id'  => $order_id,
             'oldvalue'  => $selected,

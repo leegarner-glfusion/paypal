@@ -291,8 +291,7 @@ class IPN
             PAYPAL_debug("Sending email to " . $this->pp_data['custom']['uid']);
 
             // setup templates
-            $message = new \Template(PAYPAL_PI_PATH . '/templates');
-            $message->set_file(array(
+            $message = PP_getTemplate(array(
                     'subject' => 'purchase_email_subject.txt',
 //                    'message' => 'purchase_email_message.txt',
                     'msg_admin' => 'purchase_email_admin.txt',
