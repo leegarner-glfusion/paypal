@@ -15,9 +15,9 @@
     {!if have_billto}
     <div id="paypalBilling">
       <b>{$LANG_PP['bill_to']}:</b>
-      {!if not_final}
+{!if not_final}
       <a href="{pi_url}/index.php?view=billto">[{$LANG_ADMIN['edit']}]</a>
-      {!endif}
+{!endif}
       <br />
       {!if billto_name}
       {billto_name}<br />
@@ -84,7 +84,7 @@
     {!else}
     <div id="paypalOrderNumber">
       {$LANG_PP['order_number']}:&nbsp;&nbsp;{order_number}<br />
-      {$LANG_PP['order_date']}:&nbsp;&nbsp;<span title="{order_date_tip}">{order_date}</span>
+      {$LANG_PP['order_date']}:&nbsp;&nbsp;<span class="tooltip" title="{order_date_tip}">{order_date}</span>
     </div>
     {!endif}
 
@@ -92,9 +92,9 @@
       <table>
         <tr>
           <th class="aligncenter">{$LANG_PP['description']}</th>
-          <th class="alignright">{$LANG_PP['price']}</th>
-          <th class="alignright">{$LANG_PP['quantity']}</th>
-          <th class="alignright">{$LANG_PP['total']}</th>
+          <th style="width:10%" class="alignright">{$LANG_PP['price']}</th>
+          <th style="width:10%" class="alignright">{$LANG_PP['quantity']}</th>
+          <th style="width:10%" class="alignright">{$LANG_PP['total']}</th>
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
@@ -124,30 +124,30 @@
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
-        {!if subtotal}
+{!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
           <td class="alignright">{subtotal}</td>
         </tr>
-        {!endif}
-        {!if cart_tax}
+{!endif}
+{!if cart_tax}
         <tr>
           <td colspan="3" class="alignright">{tax_on_items}</td>
           <td class="alignright">{cart_tax}</td>
         </tr>
-        {!endif}
-        {!if shipping}
+{!endif}
+{!if shipping}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['shipping']}</td>
           <td class="alignright">{shipping}</td>
         </tr>
-        {!endif}
-        {!if handling}
+{!endif}
+{!if handling}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['handling']}</td>
           <td class="alignright">{handling}</td>
         </tr>
-        {!endif}
+{!endif}
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
@@ -166,11 +166,14 @@
     </div>
   </div>
 
-{!if order_instr}
   <div id="orderInstructions"><span class="orderInstructionsTitle">{$LANG_PP['order_instr']}:</span><br />
+{!if order_instr}
     {order_instr}
-  </div>
+{!else}
+    <span class="orderInstructions">{$LANG_PP['none']}</span>
 {!endif}
+  </div>
+  <hr />
   <div style="clear:both;">
   {!if checkout}
     <div id="orderPmtMethod">{pmt_logo}</div>
@@ -192,11 +195,26 @@
     <div class="paypalOrderButtons">
       {gateway_vars}
     </div>
+  {!if pmt_method}
+    <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
+{!endif} 
   {!else}
 {!if is_admin}
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: <a href="{site_url}/users.php?mode=profile&uid={purch_uid}">{purch_name} ({purch_uid})</a></p>
   <p>{$LANG_PP['status']}: {stat_update}</p>
 {!endif}
+  {!if pmt_method}
+    <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
+    {!if is_admin}
+    {!if pmt_txn_id}
+    , {$LANG_PP['trans_id']}
+    <a href="{pi_admin_url}/index.php?ipnlog=x&amp;op=single&amp;txn_id={pmt_txn_id}">
+    {pmt_txn_id}
+    </a>
+    {!endif}
+    {!endif}
+    </p>
+  {!endif}
   <p>
     <table id="paypalOrderLog">
     <tr>
@@ -216,18 +234,6 @@
     </tr>
     <!-- END LogMessages -->
     </table>
-  {!endif}
-  {!if pmt_method}
-    <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
-    {!if is_admin}
-    {!if pmt_txn_id}
-    , {$LANG_PP['trans_id']}
-    <a href="{pi_admin_url}/index.php?ipnlog=x&amp;op=single&amp;txn_id={pmt_txn_id}">
-    {pmt_txn_id}
-    </a>
-    {!endif}
-    {!endif}
-    </p>
   {!endif}
   </div>
 </div>

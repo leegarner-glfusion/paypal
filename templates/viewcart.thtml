@@ -10,10 +10,11 @@
   <table id="paypalViewCartTable" class="paypalViewCartTable">
     <tr>
       <th class="aligncenter">{$LANG_PP['description']}</th>
-      <th class="aligncenter">{$LANG_PP['price']}</th>
-      <th class="aligncenter">{$LANG_PP['quantity']}</th>
-      <th class="aligncenter">{$LANG_PP['total']}</th>
-      <th class="aligncenter">{$LANG_PP['delete']}</th>
+      <th style="width:10%" class="aligncenter">{$LANG_PP['price']}</th>
+      <th style="width:10%" class="aligncenter">{$LANG_PP['quantity']}</th>
+      <th style="width:10%" class="aligncenter">{$LANG_PP['total']}</th>
+      <th style="width:5%" class="aligncenter">{$LANG_PP['delete']}</th>
+      <th style="width:5%" class="aligncenter"></th>
     </tr>
     <!-- BEGIN ItemRow -->
     <tr>
@@ -89,7 +90,7 @@
     <tr>
       <td colspan="2" class="alignright">{$LANG_PP['apply_gc']}</td>
       <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{apply_gc}" /></td>
-      <td>{$LANG_PP['balance']}: {gc_bal_disp}</td>
+      <td colspan="2" style="white-space:nowrap;">{$LANG_PP['balance']}: {gc_bal_disp}</td>
     </tr>
 {!endif}
   </table>
