@@ -497,7 +497,7 @@ class Order
         $cart_tax = round($cart_tax, 2);
 
         $dt = new \Date($this->order_date, $_CONF['timezone']);
-        $total = $subtotal + $this->shipping + $this->handling + $this->tax;
+        $total = $subtotal + $this->shipping + $this->handling + $cart_tax;
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'is_admin'      => $isAdmin ? 'true' : '',
@@ -672,10 +672,10 @@ class Order
 
         // setup templates
         $T = PP_getTemplate(array(
-            'subject' => 'purchase_email_subject.txt',
-            'msg_admin' => 'purchase_email_admin.txt',
-            'msg_user' => 'purchase_email_user.txt',
-            'msg_body' => 'purchase_email_body.txt',
+            'subject' => 'purchase_email_subject',
+            'msg_admin' => 'purchase_email_admin',
+            'msg_user' => 'purchase_email_user',
+            'msg_body' => 'purchase_email_body',
         ) );
 
         // Add all the items to the message

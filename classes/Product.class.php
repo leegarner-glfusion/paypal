@@ -1318,15 +1318,7 @@ class Product
         // can't be mixed with products, so don't allow adding to the cart.
         if ($add_cart && $this->btn_type != 'donation' &&
                 ($this->price > 0 || !$this->canBuyNow()) ) {
-            if ($this->hasAttributes()) {
-                $tpl_add_cart = 'btn_add_cart_attrib.thtml';
-            } else {
-                $tpl_add_cart = 'btn_add_cart.thtml';
-            }
-            // test one template
-                $tpl_add_cart = 'btn_add_cart_attrib.thtml';
-
-            $T = PP_getTemplate($tpl_add_cart, 'cart', 'buttons');
+            $T = PP_getTemplate('btn_add_cart_attrib', 'cart', 'buttons');
             $T->set_var(array(
                 'item_name'     => htmlspecialchars($this->name),
                 'item_number'   => $this->id,
