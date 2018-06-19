@@ -106,10 +106,10 @@
           <td class="alignright">{subtotal}</td>
         </tr>
 {!endif}
-{!if tax}
+{!if cart_tax}
         <tr>
-          <td colspan="3" class="alignright">{$LANG_PP['tax']}</td>
-          <td class="alignright">{tax}</td>
+          <td colspan="3" class="alignright">{tax_on_items}</td>
+          <td class="alignright">{cart_tax}</td>
         </tr>
 {!endif}
 {!if shipping}
@@ -133,12 +133,16 @@
   </div>
 
   <div id="orderInstructions"><span class="orderInstructionsTitle">{$LANG_PP['order_instr']}:</span><br />
+{!if order_instr}
     {order_instr}
+{!else}
+    <span class="orderInstructions">{$LANG_PP['none']}</span>
+{!endif}
   </div>
   <div style="clear:both;">
+  <p>{$LANG_PP['status']}: {status}</p>
 {!if is_admin}
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: {purch_name} ({purch_uid})</p>
-  <p>{$LANG_PP['status']}: {status}</p>
   <p>
     <table id="paypalOrderLog">
     <tr>
