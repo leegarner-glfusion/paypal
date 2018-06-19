@@ -15,10 +15,10 @@
 global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
 
 /** Include the default configuration values */
-require_once PAYPAL_PI_PATH . '/install_defaults.php';
+require_once __DIR__ . '/install_defaults.php';
 
 /** Include the table creation strings */
-require_once PAYPAL_PI_PATH . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 
 /**
 *   Perform the upgrade starting at the current version.
@@ -466,7 +466,7 @@ function PAYPAL_do_upgrade()
             }
         }
         // Remove Amazon Simplepay gateway file to prevent re-enabling
-        @unlink(PAYPAL_PI_PATH . '/classes/gateways/amazon.class.php');
+        @unlink(__DIR__ . '/classes/gateways/amazon.class.php');
         if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
@@ -481,7 +481,7 @@ function PAYPAL_do_upgrade()
         // Create default path for downloads (even if not used)
         @mkdir($_CONF['path'] . 'data/' . $pi_name . '/files', true);
         // Remove stray .htaccess file that interferes with plugin removal
-        @unlink(PAYPAL_PI_PATH . '/files/.htaccess');
+        @unlink(__DIR__ . '/files/.htaccess');
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
