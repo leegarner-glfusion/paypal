@@ -1,21 +1,21 @@
 <?php
 /**
- *  Class to manage product options
- *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2010 Lee Garner <lee@leegarner.com>
- *  @package    paypal
- *  @version    0.5.0
- *  @license    http://opensource.org/licenses/gpl-2.0.php
- *              GNU Public License v2 or later
- *  @filesource
- */
+*  Class to manage product options
+*
+*  @author     Lee Garner <lee@leegarner.com>
+*  @copyright  Copyright (c) 2010-2018 Lee Garner <lee@leegarner.com>
+*  @package    paypal
+*  @version    0.6.0
+*  @license    http://opensource.org/licenses/gpl-2.0.php
+*              GNU Public License v2 or later
+*  @filesource
+*/
 namespace Paypal;
 
 /**
- *  Class for product options
- *  @package paypal
- */
+*   Class for product attributes - color, size, etc.
+*   @package paypal
+*/
 class Attribute
 {
     /** Property fields.  Accessed via __set() and __get()

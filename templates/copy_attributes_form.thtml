@@ -1,7 +1,7 @@
 {# begin {templatelocation} #}
 <form class="uk-form" action="{site_admin_url}/plugins/paypal/index.php" method="post">
 <fieldset data-uk-margin>
-<p>{$LANG_PP['copy_attributes']}:<br />
+<p>{$LANG_PP['copy_attributes']}<br />
 {$LANG_PP['copy_from']}: <select name="src_prod">
 <option value="0">-- Make Selection --</option>
 {product_select}
@@ -14,7 +14,7 @@
 <option value="0">-- Make Selection --</option>
 {cat_select}
 </select>&nbsp;&nbsp;
-<input type="checkbox" name="del_existing_attr" value="1" />{$LANG_PP['del_existing']}
+<input type="checkbox" name="del_existing_attr" value="1" />&nbsp;{$LANG_PP['del_existing']}
 </p>
 <p><button 
 {!if uikit}
