@@ -1090,6 +1090,8 @@ abstract class Gateway
         global $_TABLES, $_PP_CONF;
         static $gateways = array();
 
+        if (!$gw_name) return NULL;
+
         //if (!isset(self::$gateways[$gw_name])) {
         if (!isset($gateways[$gw_name])) {
 //            $cache_key = 'gateway_' . $gw_name;
@@ -1100,8 +1102,8 @@ abstract class Gateway
                     include_once $filename;
                     $gw = __NAMESPACE__ . '\\' . $gw_name;
                     $gateways[$gw_name] = new $gw($A);
-                //} else {
-                //    $gateways[$gw_name] = new dummy($A);
+                } else {
+                    $gateways[$gw_name] = new dummy($A);
                 }
 //                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
 //            }

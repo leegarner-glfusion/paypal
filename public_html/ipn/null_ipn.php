@@ -22,9 +22,11 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 
 // Process IPN request
 $ipn = Paypal\IPN::getInstance('null', $_POST);
-$ipn->Process();
+if ($ipn) {
+    $ipn->Process();
+}
 
 // Finished (this isn't necessary...but heck...why not?)
-echo "Thanks";
+COM_refresh(PAYPAL_URL . '?thanks');
 
 ?>

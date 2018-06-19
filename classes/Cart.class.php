@@ -1,13 +1,9 @@
 <?php
 /**
 *   Shopping cart class for the Paypal plugin.
-*   The database is used to save the cart in two forms:
-*   1 - the "cart" table holds the transient cart which is identifed by the
-*   session ID. This allows for anonymous users to shop.
-*   2 - During the login and logout process, the "userinfo" table is read or
-*   updated so logged-in users can have a cart that transcends the PHP session.
-*   The transient cart should be deleted upon logout, and merged into the user's
-*   cart during login.
+*   The cart is saved in the cart table with an ID based on the session_id.
+*   For anonymous users, the cart ID is stored in a cookie so it can be merged
+*   into the user cart at login.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
@@ -666,18 +662,18 @@ class Cart
             'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
-
         // If this is the final checkout, then show the payment buttons
         if ($checkout) {
             $this->Save();      // Update for tax
+            $gw = Gateway::getInstance($this->m_info['gateway']);
             $T->set_var(array(
-                'gateway_vars'  => $this->checkoutButton($this->m_info['gateway']),
+                'gateway_vars'  => $this->checkoutButton($gw),
                 'checkout'      => 'true',
+                'pmt_method'    => $gw->getLogo(),
             ) );
         } else {
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
         }
-
         $T->parse('output', 'cart');
         $form = $T->finish($T->get_var('output'));
         return $form;
@@ -687,10 +683,10 @@ class Cart
     /**
     *   Create a button that takes the buyer to the final order screen
     *
-    *   @param  string  $gw_name    Selected Payment Gateway
+    *   @param  object  $gw Selected Payment Gateway
     *   @return string      HTML for final checkout button
     */
-    public function checkoutButton($gw_name)
+    public function checkoutButton($gw)
     {
         global $_PP_CONF, $_USER;
 
@@ -702,6 +698,8 @@ class Cart
         // or gift cards
         if ($this->custom_info['final_total'] < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
+            $this->custom_info['transtype'] = 'null';
+            $this->custom_info['cart_id'] = $this->CartID();
             $gateway_vars = array(
                 '<input type="hidden" name="processorder" value="by_gc" />',
                 '<input type="hidden" name="cart_id" value="' . $this->CartID() . '" />',
@@ -714,8 +712,7 @@ class Cart
             $T->parse('checkout_btn', 'checkout');
             return $T->finish($T->get_var('checkout_btn'));
         }
-
-        $gw = Gateway::getInstance($gw_name);
+        // Else, if amount > 0, regular checkout button
         if ($gw->Supports('checkout')) {
             $T->set_var(array(
                 'is_uikit' => $_PP_CONF['_is_uikit'],
@@ -724,7 +721,6 @@ class Cart
             ) );
             $T->parse('checkout_btn', 'checkout');
             return $gw->checkoutButton($this);
-            return $T->finish($T->get_var('checkout_btn'));
         } else {
             return 'Gateway does not support checkout';
         }
@@ -1037,7 +1033,7 @@ class Cart
 
     /**
     *   Set the chosen payment gateway into the cart information.
-    *   Uses so the gateway will be pre-selected if the buyer returns to the
+    *   Used so the gateway will be pre-selected if the buyer returns to the
     *   cart update page.
     *
     *   @param  string  $gw_name    Gateway name
