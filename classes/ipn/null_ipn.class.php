@@ -45,6 +45,8 @@ class null_ipn extends IPN
         if (!empty($cart_id)) {
             $this->Cart = Cart::getInstance(0, $cart_id);
         }
+        if (!$this->Cart) return NULL;
+
         $this->pp_data['txn_id'] = $cart_id;
         $billto = $this->Cart->getAddress('billto');
         $shipto = $this->Cart->getAddress('shipto');
@@ -85,6 +87,7 @@ class null_ipn extends IPN
                 $this->pp_data['custom'] = array('uid' => $A['custom']);
             }
         }
+        $this->pp_data['custom']['transtype'] = 'null_ipn';
 
         switch ($this->pp_data['pmt_status']) {
         case 'Pending':
@@ -95,18 +98,6 @@ class null_ipn extends IPN
             break;
         case 'Refunded':
             $this->pp_data['status'] = 'refunded';
-            break;
-        }
-
-        switch (PP_getVar($A, 'txn_type')) {
-        case 'web_accept':
-        case 'send_money':
-            $this->pp_data['pmt_shipping'] = PP_getVar($A, 'shipping', 'float');
-            $this->pp_data['pmt_handling'] = PP_getVar($A, 'handling', 'float');
-            break;
-        case 'cart':
-            $this->pp_data['pmt_shipping'] = PP_getVar($A, 'mc_shipping', 'float');
-            $this->pp_data['pmt_handling'] = PP_getVar($A, 'mc_handling', 'float');
             break;
         }
     }
@@ -123,7 +114,10 @@ class null_ipn extends IPN
     {
         if ($this->Cart === NULL) return false;
         // Order total must be zero to use the null gateway
-        if ($this->Cart->getInfo()['final_total'] > .001) return false;
+        $info = $this->Cart->getInfo();
+        $total = PP_getVar($this->Cart->getInfo(), 'final_total', 'float');
+        if ($total > .001) return false;
+        //if ($this->Cart->getInfo()['final_total'] > .001) return false;
         return true;
     }
 
