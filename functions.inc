@@ -273,8 +273,8 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     if (!plugin_commentsupport_paypal())
         return $retval;
 
-    $item = new Paypal\Product($id);
-    if ($item->isNew)
+    $P = new Paypal\Product($id);
+    if ($P->isNew)
         return $retval;
 
     $allowed = 1;
@@ -1532,10 +1532,10 @@ function plugin_runScheduledTask_paypal()
     // search results, etc.
     $where = " WHERE enabled = 1 AND avail_end < '" .
             PAYPAL_now()->format('Y-m-d', true) . "'";
-    $sql = "SELECT id, type FROM {$_TABLES['paypal.products']} $where";
+    $sql = "SELECT id, prod_type FROM {$_TABLES['paypal.products']} $where";
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
-        PLG_itemDeleted($A['id'], $A['type']);
+        PLG_itemDeleted($A['id'], $A['prod_type']);
         DB_query("UPDATE {$_TABLES['paypal.products']}
                 SET enabled = 0 $where");
     }
@@ -1883,14 +1883,11 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
     global $_TABLES, $_CONF, $LANG_PP;
 
     $properties = explode(',', $what);
-    $fields = array();
+    $fields = array('p.id');        // always get item id
     $retval = array();
     $buildingSearchIndex = false;
     foreach ($properties as $p) {
         switch ($p) {
-        case 'id':
-            $fields[] = 'p.id';
-            break;
         case 'title':
             $fields[] = 'p.name';
             break;
