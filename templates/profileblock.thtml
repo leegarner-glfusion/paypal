@@ -12,7 +12,7 @@
 </div>
 {!endif}
 {!if gc_bal}
-<h3>${LANG_PP['gc_bal']}:&nbsp;&nbsp;{gc_bal}</h3>
+<h3>{${LANG_PP['gc_bal']}:&nbsp;&nbsp;{gc_bal}</h3>
 {!endif}
 {!if orders}
 {$LANG_PP['my_orders']}: <a href="{site_url}/paypal/index.php?orderhist">{orders}</a>
