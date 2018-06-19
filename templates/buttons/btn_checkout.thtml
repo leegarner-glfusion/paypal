@@ -3,7 +3,7 @@
     action="{action}" method="post">
   {gateway_vars}
 {!if button_url}
-  <button type="submit">{button_url}</button>
+  {button_url}
 {!elseif is_uikit}
   <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['checkout']}</button>
 {!else}
