@@ -325,7 +325,7 @@ case 'order':
         if ($order->canView()) {
             $content .= $order->View(true);
         } else {
-            $content .= $LANG_PP['access_denied_msg'];
+            COM_404();
         }
     } else {
         COM_404();
