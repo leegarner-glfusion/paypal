@@ -464,7 +464,6 @@ class Order
         $total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
-            'is_admin'      => $isAdmin ? 'true' : '',
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $currency->Format($total),
             'not_final'     => $final ? '' : 'true',
@@ -485,29 +484,29 @@ class Order
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
             'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $this->tax_items),
+            'status'        => $this->status,
         ) );
 
-        //if ($isAdmin) {
+        if ($isAdmin) {
             $T->set_var(array(
+                'is_admin'  => true,
                 'purch_name' => COM_getDisplayName($this->uid),
                 'purch_uid' => $this->uid,
                 'stat_update' => OrderStatus::Selection($this->order_id, 1, $this->status),
-                'status' => $this->status,
             ) );
-
-            $log = $this->getLog();
-            $T->set_block('order', 'LogMessages', 'Log');
-            foreach ($log as $L) {
-                $dt->setTimestamp(strtotime($L['ts']));
-                $T->set_var(array(
-                    'log_username'  => $L['username'],
-                    'log_msg'       => $L['message'],
-                    'log_ts'        => $dt->format($_PP_CONF['datetime_fmt'], true),
-                    'log_ts_tip'    => $dt->format($_PP_CONF['datetime_fmt'], false),
-                ) );
-                $T->parse('Log', 'LogMessages', true);
-            }
-        //}
+        }
+        $log = $this->getLog();
+        $T->set_block('order', 'LogMessages', 'Log');
+        foreach ($log as $L) {
+            $dt->setTimestamp(strtotime($L['ts']));
+            $T->set_var(array(
+                'log_username'  => $L['username'],
+                'log_msg'       => $L['message'],
+                'log_ts'        => $dt->format($_PP_CONF['datetime_fmt'], true),
+                'log_ts_tip'    => $dt->format($_PP_CONF['datetime_fmt'], false),
+            ) );
+            $T->parse('Log', 'LogMessages', true);
+        }
 
         $status = $this->status;
         if ($this->pmt_method != '') {
@@ -843,6 +842,11 @@ class Order
     }
 
 
+    /**
+    *   Get all the log entries for this order.
+    *
+    *   @return array   Array of log entries
+    */
     public function getLog()
     {
         global $_TABLES, $_CONF;
