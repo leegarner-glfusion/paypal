@@ -262,6 +262,7 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `status` varchar(255) default NULL,
   `expiration` datetime default NULL,
   `price` float(10,2) NOT NULL default '0.00',
+  `taxable` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
   `options_text` text,
@@ -355,6 +356,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
   `instructions` text,
+  `token` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`order_id`)
 ) ENGINE=MyISAM";
 
@@ -387,8 +389,11 @@ $_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
   `cart_order_id` varchar(20) DEFAULT NULL,
   `cart_info` text,
   `cart_contents` text,
-  `apply_gc` float(8,2),
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `apply_gc` float(8,2) DEFAULT NULL,
+  `total` float(8,2) DEFAULT NULL,
+  `tax` float(5,2) DEFAULT NULL,
+  `shipping` float(5,2) DEFAULT NULL,
   PRIMARY KEY (`cart_id`)
 ) ENGINE=MyISAM";
 
@@ -823,7 +828,10 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD by_gc decimal(8,2) unsigned AFTER handling,
         ADD token varchar(20)",
     "ALTER TABLE {$_TABLES['paypal.cart']}
-        ADD apply_gc float(8,2) AFTER cart_contents",
+        ADD `apply_gc` float(8,2) NOT NULL default '0',
+        ADD `total` float(8,2) NOT NULL default '0',
+        ADD `tax` float(5,2) NOT NULL default '0',
+        ADD `shipping` float(5,2) NOT NULL default '0'",
     "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
       `code` varchar(128) NOT NULL,
       `amount` float(8,2) unsigned NOT NULL DEFAULT '0.00',
