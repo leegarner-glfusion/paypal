@@ -224,15 +224,13 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
-    static $dt = NULL;
-    if ($dt === NULL) $dt = new \Date('now', $_USER['tzid']);
-
     $retval = '';
 
     switch($fieldname) {
     case 'order_date':
-        $dt->setTimestamp(strtotime($fieldvalue));
-        $retval = '<span title="' . $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
+        $dt = new \Date($fieldvalue, $_USER['tzid']);
+        $retval = '<span class="tooltip" title="' .
+                $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
                 $dt->format($_PP_CONF['datetime_fmt'], true) . '</span>';
         break;
 
@@ -329,6 +327,20 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= '</a>';
         break;
 
+    case 'ord_total':
+        $total = (float)$fieldvalue;
+        $tip = 'Items: ' . $fieldvalue;
+        foreach (array('tax', 'shipping', 'handling') as $fld) {
+            if (is_numeric($A[$fld]) && $A[$fld] > 0) {
+                $tip .= '<br />' . $LANG_PP[$fld] . ': ' . $A[$fld];
+                $total += (float)$A[$fld];
+            }
+        }
+        if ($total > $fieldvalue) {
+            $tip .= '<br />' . $LANG_PP['total'] . ': ' . $total;
+        }
+        $retval = '<span class="tooltip" title="' . $tip . '">' . $fieldvalue . '</span>';
+        break;
     default:
         $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
         break;
