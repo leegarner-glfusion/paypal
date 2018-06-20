@@ -202,6 +202,8 @@
 {!if is_admin}
   <p id="orderPurchaser">{$LANG_PP['purchaser']}: <a href="{site_url}/users.php?mode=profile&uid={purch_uid}">{purch_name} ({purch_uid})</a></p>
   <p>{$LANG_PP['status']}: {stat_update}</p>
+{!else}
+  <p>{$LANG_PP['status']}: {status}</p>
 {!endif}
   {!if pmt_method}
     <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
