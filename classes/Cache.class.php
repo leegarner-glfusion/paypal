@@ -96,7 +96,8 @@ class Cache
     */
     public static function makeKey($key)
     {
-        $key = \glFusion\Cache::getInstance()->createKey(self::$tag . '_' . $key);
+        //$key = \glFusion\Cache::getInstance()->createKey(self::$tag . '_' . $key);
+        $key = self::$tag . '_' . $key;
         return $key;
     }
 
