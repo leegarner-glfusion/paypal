@@ -2108,6 +2108,18 @@ function PP_getTaxRate()
 
 
 /**
+*   Get the sales tax for a taxable amount
+*
+*   @param  float   $amount     Taxable amount
+*   @return float               Sales Tax
+*/
+function PP_getTax($amount)
+{
+    return round($amount * PP_getTaxRate(), 2);
+}
+
+
+/**
 *   Helper function to get a template object.
 *
 *   @param  string  $name   Base name of template file, e.g. "editor"

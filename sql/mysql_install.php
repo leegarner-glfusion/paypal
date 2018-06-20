@@ -817,9 +817,11 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD KEY `cat_lft` (`lft`),
         ADD KEY `cat_rgt` (`rgt`)",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
-        ADD extras text",
+        ADD extras text,
+        ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`",
     "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD by_gc decimal(8,2) unsigned AFTER handling",
+        ADD by_gc decimal(8,2) unsigned AFTER handling,
+        ADD token varchar(20)",
     "ALTER TABLE {$_TABLES['paypal.cart']}
         ADD apply_gc float(8,2) AFTER cart_contents",
     "CREATE TABLE `{$_TABLES['paypal.coupons']}` (

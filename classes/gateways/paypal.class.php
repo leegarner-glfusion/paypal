@@ -251,7 +251,7 @@ class paypal extends Gateway
                     $opts = array();
                 }
                 $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
-                $fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
+                //$fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
                 $fields['item_number_' . $i] = (int)$cart_item_id;
                 $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
                 $total_amount += $item['price'];
@@ -274,6 +274,7 @@ class paypal extends Gateway
                 $i++;
             }
 
+            $fields['tax_cart'] = (float)$cart->getInfo('cart_tax');
             if ($shipping > 0) $total_amount += $shipping;
             if ($weight > 0) {
                 $fields['weight_cart'] = $weight;
@@ -322,7 +323,10 @@ class paypal extends Gateway
     */
     public function XgetCheckoutButton()
     {
-        return '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png" alt="Check out with PayPal" />';
+        return '<input type="image"
+            src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png"
+            alt="Check out with PayPal"
+            class="tooltip" title="Check out with Paypal" />';
     }
 
 

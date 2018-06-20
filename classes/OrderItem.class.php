@@ -26,7 +26,7 @@ class OrderItem
     private static $fields = array('id', 'order_id', 'product_id',
             'description', 'quantity', 'user_id', 'txn_id', 'txn_type',
             'purchase_date', 'status', 'expiration', 'price', 'token',
-            'options', 'options_text', 'extras',
+            'options', 'options_text', 'extras', 'taxable',
     );
 
     /**
@@ -108,6 +108,12 @@ class OrderItem
             }
             $this->properties[$key] = $value;
             break;
+        case 'price':
+            $this->properties[$key] = (float)$value;
+            break;
+        case 'taxable':
+            $this->properties[$key] = $value == 0 ? 0 : 1;
+            break;
         default:
             $this->properties[$key] = trim($value);
             break;
@@ -182,7 +188,8 @@ class OrderItem
                 txn_type = '" . DB_escapeString($this->txn_type) . "',
                 purchase_date = '$purchase_date',
                 status = '" . DB_escapeString($this->status) . "',
-                price = '" . DB_escapeString($this->price) . "',
+                price = '$this->price',
+                taxable = '{$this->taxable}',
                 token = '" . DB_escapeString($this->token) . "',
                 options = '" . DB_escapeString($this->options) . "',
                 options_text = '" . DB_escapeString(@json_encode($this->options_text)) . "',

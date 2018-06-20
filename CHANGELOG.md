@@ -1,6 +1,6 @@
 # Paypal plugin for glFusion - Changelog
 
-## Ver 0.5.12
+## Ver 0.6.0
 Released TBD
 - Use cookie instead of session to store cart IDs since session changes at login
 - Add privacy_export function
@@ -13,6 +13,8 @@ Released TBD
 - Remove configured file download path, use data/paypal/files always.
 - Implement gift card sales and redemption.
 - Redirect back to catalog if requested product is not available.
+- Add order token to further allow and secure anonymous viewers
+- Refactor order and IPN processing to better handle tax calculations
 
 ## Ver 0.5.11
 Released 2017-07-23

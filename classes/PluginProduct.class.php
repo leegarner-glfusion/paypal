@@ -118,7 +118,7 @@ class PluginProduct extends Product
     *   @param  array   $pp_data    Paypal IPN data
     *   @return integer         Status from plugin's handleRefund function
     */
-    public function handleRefund($pp_data = array())
+    public function handleRefund($Order, $pp_data = array())
     {
         if (empty($pp_data)) return false;
         $vars = array(

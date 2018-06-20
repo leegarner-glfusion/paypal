@@ -12,10 +12,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net>
-*   @copyright  Copyright (c) 2009-2012 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.2
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -77,6 +77,9 @@ class IPN
     *   @var object */
     protected $Order;
 
+    /** Cart object
+    *   @var object */
+    protected $Cart;
 
     /**
     *   Constructor.
@@ -122,30 +125,39 @@ class IPN
     /**
     *   Add an item from the IPN message to our $items array.
     *
-    *   @param  mixed   $item_id    Item ID, integer or string for plugins
-    *   @param  float   $qty        Quantity
-    *   @param  float   $price      Unit price
-    *   @param  string  $item_name  Item name or short description
-    *   @param  float   $shipping   Optional per-item shipping amount
-    *   @param  float   $handling   Optional per-item handling amount
-    *   @param  float   $tax        Optional per-item sales tax amount
+    *   @param  array   $args   Array of arguments
     */
     protected function AddItem($args)
     {
+        // Minimum required arguments: item, quantity, unit price
         if (!isset($args['item_id']) || !isset($args['quantity']) || !isset($args['price'])) {
             return;
         }
 
+        // Separate the item ID and options to get pricing
         $tmp = explode('|', $args['item_id']);
+        $P = Product::getInstance($tmp[0]);
+        if ($P->isNew) {
+            COM_errorLog("Product {$args['item_id']} not found in catalog");
+            return;      // no product found to add
+        }
+        if (isset($tmp[1])) {
+            $opts = explode(',', $tmp[1]);
+        } else {
+            $opts = array();
+        }
+        $price = $P->getPrice($opts, $args['quantity']);
+        //$tax = $P->getTax($price, $args['quantity']);
         $this->items[] = array(
             'item_id'   => $args['item_id'],
             'item_number' => $tmp[0],
             'name'      => isset($args['item_name']) ? $args['item_name'] : '',
             'quantity'  => $args['quantity'],
-            'price'     => $args['price'],
+            'price'     => $price,      // price including options
             'shipping'  => isset($args['shipping']) ? $args['shipping'] : 0,
             'handling'  => isset($args['handling']) ? $args['handling'] : 0,
-            'tax'       => isset($args['tax']) ? $args['tax'] : 0,
+            //'tax'       => $tax,
+            'taxable'   => $P->taxable ? 1 : 0,
             'options'   => isset($tmp[1]) ? $tmp[1] : '',
             'extras'    => isset($args['extras']) ? $args['extras'] : '',
         );
@@ -227,7 +239,8 @@ class IPN
 
         // for each item purchased, check its price and accumulate total
         // Add in any gift card applied.
-        $total = (float)0;
+        $total = 0;
+        $tax = 0;
         $payment_gross = (float)$this->pp_data['pmt_gross'];
         $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
         if ($by_gc > 0) {
@@ -240,27 +253,9 @@ class IPN
             }
         }
 
-        foreach ($this->items as $id => $item) {
-            $P = Product::getInstance($item['item_number']);
-            if (!empty($item['options'])) {
-                $opts = explode(',', $item['options']);
-            } else {
-                $opts = array();
-            }
-            $price = $P->getPrice($opts, $item['quantity']);
-
-            // calculate the total purchase price
-            $total += ($price * $item['quantity']);
-            $total += $P->getTax($price, $item['quantity']);
-        }
-        foreach (array('mc_shipping', 'handling_amount') as $key) {
-            if (isset($this->pp_data[$key])) {
-                $total += (float)$this->pp_data[$key];
-            }
-        }
-
-        // Compare total price to gross payment.  The ".0001" is to help
+        // Compare total order amount to gross payment.  The ".0001" is to help
         // kill any floating-point errors. Include any discount.
+        $total = $this->Order->getTotal();
         if ($total <= $payment_gross + .0001) {
             PAYPAL_debug("$payment_gross received is ok, require $total");
             return true;
@@ -452,20 +447,27 @@ class IPN
             $this->items[$id]['prod_type'] = $P->prod_type;
 
             PAYPAL_debug("Paypal item " . $item['item_number']);
+if (0) {
             if (!empty($item['options'])) {
+                //$this->items[$id]['price'] = $P->getPrice($item['options']);
                 $opts = explode(',', $item['options']);
                 $opt_str = $P->getOptionDesc($opts);
+/*                foreach ($opts as $opt) {
+
+                    if (isset($P->options[$opt])) {
+                        $this->items[$id]['price'] += $P->options[$opt]->price;
+                    }
+                }*/
                 if (!empty($opt_str)) {
             // TODO:            $A['short_description'] .= " ($opt_str)";
                 }
             }
-
+}
             // Mark what type of product this is
             $prod_types |= $P->prod_type;
 
             // If it's a downloadable item, then get the full path to the file.
             if ($P->file != '') {
-                //$this->items[$id]['file'] = $_PP_CONF['download_path'] . $A['file'];
                 $this->items[$id]['file'] = $_PP_CONF['download_path'] . $P->file;
                 $token_base = $this->pp_data['txn_id'] . time() . rand(0,99);
                 $token = md5($token_base);
@@ -493,11 +495,25 @@ class IPN
         }   // foreach item
 
         $status = $this->CreateOrder();
+
         if ($status == 0) {
+            // Now all of the items are in the order object, check for sufficient
+            // funds. If OK, then save the order and call each handlePurchase()
+            // for each item.
+            if (!$this->isSufficientFunds()) {
+                $logId = $this->pp_data['gw_name'] . ' - ' . $this->pp_data['txn_id'];
+                $this->handleFailure(IPN_FAILURE_FUNDS,
+                        "($logId) Insufficient/incorrect funds for purchase");
+                return false;
+            }
+
+            // Save the order record now that funds have been checked.
+            $this->Order->Save();
+
             foreach ($this->Order->items as $item) {
                 $item->getProduct()->handlePurchase($item, $this->Order, $this->pp_data);
             }
-            $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $this->pp_data['pmt_gross'], $this->pp_data['gw_name']));
+            $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $this->pp_data['pmt_gross'], $this->gw->DisplayName()));
             $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
             $this->Order->by_gc = $by_gc;
             if ($by_gc > 0) {
@@ -505,14 +521,17 @@ class IPN
                 Coupon::Redeem($by_gc, $this->Order->uid, $this->Order);
             }
             $this->Order->Notify();
+            // If this was a user's cart, then clear that also
+            if ($this->Cart) {
+                $this->Cart->delete();
+            } else {
+                PAYPAL_debug('no cart to delete');
+            }
         } else {
             COM_errorLog('Error creating order: ' . print_r($status,true));
         }
 
-        // Update the order status to Paid
-        //Order::updateStatus($this->gw->getPaidStatus($prod_types),
-        //            $order_id, false);
-
+        return true;
     }  // function handlePurchase
 
 
@@ -520,11 +539,13 @@ class IPN
     *   Create and populate an Order record for this purchase.
     *   Gets the billto and shipto addresses from the cart, if any.
     *   Items are saved in the purchases table by handlePurchase().
+    *   The order is not saved to the database here. Only after checking
+    *   for sufficient funds is the records saved.
     *
     *   This function is called only by our own handlePurchase() function,
     *   but is made "protected" so a derived class can use it if necessary.
     *
-    *   @return string  Order ID, to link to the purchases table
+    *   @return integer     Zero for success, non-zero on error
     */
     protected function CreateOrder()
     {
@@ -548,14 +569,14 @@ class IPN
         $this->Order = new Order();
 
         if (isset($this->pp_data['custom']['cart_id'])) {
-            $cart = new Cart($this->pp_data['custom']['cart_id']);
-            if (!$cart->hasItems()) {
+            $this->Cart = new Cart($this->pp_data['custom']['cart_id']);
+            if (!$this->Cart->hasItems()) {
                 if (!$_PP_CONF['sys_test_ipn']) {
                     return 1; // shouldn't normally be empty except during testing
                 }
             }
         } else {
-            $cart = NULL;
+            $this->Cart = NULL;
         }
 
         $uid = (int)$this->pp_data['custom']['uid'];
@@ -573,7 +594,10 @@ class IPN
         // removed by a previous IPN, e.g. this is the 'completed' message
         // and we already processed a 'pending' message
         $BillTo = '';
-        if ($cart) $BillTo = $cart->getAddress('billto');
+        if ($this->Cart) {
+            $BillTo = $this->Cart->getAddress('billto');
+            $this->Order->instructions = $this->Cart->getInstructions();
+        }
         if (empty($BillTo) && $uid > 1) {
             $BillTo = $U->getDefaultAddress('billto');
         }
@@ -583,7 +607,7 @@ class IPN
 
         $ShipTo = $this->pp_data['shipto'];
         if (empty($ShipTo)) {
-            if ($cart) $ShipTo = $cart->getAddress('shipto');
+            if ($this->Cart) $ShipTo = $this->Cart->getAddress('shipto');
             if (empty($ShipTo) && $uid > 1) {
                 $ShipTo = $U->getDefaultAddress('shipto');
             }
@@ -596,14 +620,10 @@ class IPN
         }
         $this->Order->pmt_method = $this->gw_id;
         $this->Order->pmt_txn_id = $this->pp_data['txn_id'];
-        $this->Order->tax = $this->pp_data['pmt_tax'];
         $this->Order->shipping = $this->pp_data['pmt_shipping'];
         $this->Order->handling = $this->pp_data['pmt_handling'];
         $this->Order->buyer_email = $this->pp_data['payer_email'];
         $this->Order->log_user = $this->gw->Description();
-        if ($cart) $this->Order->instructions = $cart->getInstructions();
-        $order_id = $this->Order->Save();
-        $db_order_id = DB_escapeString($order_id);
 
         $this->Order->items = array();
         foreach ($this->items as $id=>$item) {
@@ -635,9 +655,8 @@ class IPN
                     $option_desc[] = $P->getCustom($cust_id) . ': ' . $cust_val;
                 }
             }
-//var_dump($item);die;
             $args = array(
-                'order_id' => $order_id,
+                'order_id' => $this->Order->order_id,
                 'product_id' => $item['item_number'],
                 'description' => $item['short_description'],
                 'quantity' => $item['quantity'],
@@ -648,23 +667,14 @@ class IPN
                 'status' => 'paid',
                 'token' => md5(time()),
                 'price' => $item['price'],
+                'taxable' => $P->taxable,
                 'options' => $options,
                 'options_text' => $option_desc,
                 'extras' => $item['extras'],
             );
-            $OrderItem = new OrderItem($args);
-            $OrderItem->Save();
+            $this->Order->addItem($args);
         }   // foreach item
 
-        // Reload the order to get the items
-        $this->Order->Load();
-
-        // If this was a user's cart, then clear that also
-        if ($cart) {
-            $cart->delete();
-        } else {
-            PAYPAL_debug('no cart to delete');
-        }
         return 0;
     }
 
@@ -711,29 +721,13 @@ class IPN
             // but plugin items may need to do something.
             foreach ($Order->items as $key=>$data) {
                 $P = Product::getInstance($data['product_id']);
-                /*if (PAYPAL_is_plugin_item($data['product_id'])) {
-                    // Split the item number into component parts.  It could
-                    // be just a single string, depending on the plugin's needs.
-                    if (strstr($data['product_id'], ':')) {
-                        $pi_info = split(':', $data['product_id']);
-                    } else {
-                        $pi_info = array($data['product_id']);
-                    }
-                    $vars = array(
-                            'item' => $pi_info,
-                            'ipn_data' => $this->pp_data,
-                    );*/
-                    $P->handleRefund($this->pp_data);
-                    //$status = LGLIB_invokeService($pi_info[0], 'handleRefund',
-                    //    $vars, $output, $svc_msg);
-                    // Don't care about the status, really.  May not even be
-                    // a plugin function to handle refunds
-                //}
+                // Don't care about the status, really.  May not even be
+                // a plugin function to handle refunds
+                $P->handleRefund($Order, $this->pp_data);
             }
             // Update the order status to Refunded
             $Order->updateStatus($LANG_PP['orderstatus']['refunded']);
         }
-
     }  // function handleRefund
 
 

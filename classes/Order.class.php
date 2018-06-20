@@ -3,9 +3,9 @@
 *   Order class for the Paypal plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -18,7 +18,7 @@ namespace Paypal;
 */
 class Order
 {
-    public $items = array();
+    public $items = array();        // Array of OrderItem objects
     private $properties = array();
     private $isNew = true;
     var $no_shipping = 1;
@@ -30,7 +30,8 @@ class Order
             'shipto_city', 'shipto_state', 'shipto_country',
             'shipto_zip',
     );
-
+    private $subtotal = 0;
+    private $tax_items = 0;         // count items having sales tax
 
     /**
     *   Constructor
@@ -44,7 +45,7 @@ class Order
 
         $this->isNew = true;
         $this->uid = $_USER['uid'];
-        $this->order_date = PAYPAL_now()->toMySql();
+        $this->order_date = PAYPAL_now()->toMySql(true);
         $this->instructions = '';
         if (!empty($id)) {
             $this->order_id = $id;
@@ -57,6 +58,7 @@ class Order
         }
         if ($this->isNew) {
             $this->order_id = COM_makeSid();
+            $this->token = self::_createToken();
         }
     }
 
@@ -188,41 +190,13 @@ class Order
     *   reads the item information from the database as well.  The entire
     *   item record is added to the $items array as 'data'
     *
-    *   @param  mixed   $item_number    Item number, may be string or integer
-    *   @param  array   $data           Array of item information
+    *   @param  array   $args   Array of item data
     */
-    public function XXAddItem($item_number, $data)
+    public function addItem($args)
     {
-        global $_TABLES;
-
-        if (!is_array($data)) return;
-
-        list($item_id, $item_opts) = explode('|', $item_number);
-        if (!is_array($data['flags'])) {
-            $data['flags'] = array('flag' => $data['flags']);
-        }
-        $X = DB_fetchArray(DB_query("SELECT *
-                    FROM {$_TABLES['paypal.products']}
-                    WHERE id='".DB_escapeString($item_id)."'"), false);
-        $this->items[$item_number] = array(
-                'item_number'   => $item_number,
-                'descrip'       => $data['descrip'],
-                'quantity'      => $data['quantity'],
-                'price'         => $data['price'],
-                'options'       => $item_opts,
-                'data'          => $X,
-        );
-        if (isset($data['options']) && !empty($data['options'])) {
-            $this->items[$item_number]['options'] = $data['options'];
-            $opt_arr = explode(',', $data['options']);
-            $optname_arr = array();
-            foreach($opt_arr as $opt_id) {
-                $optname_arr[] = DB_getItem($_TABLES['paypal.prod_attr'],
-                            'attr_value', "attr_id='".(int)$opt_id."'");
-            }
-            $this->items[$item_number]['descrip'] .=
-                    ' (' . implode(', ', $optname_arr) . ')';
-        }
+        if (!is_array($args)) return;
+        $args['order_id'] = $this->order_id;    // make sure it's set
+        $this->items[] = new OrderItem($args);
     }
 
 
@@ -307,7 +281,7 @@ class Order
         $this->tax = PP_getVar($A, 'tax', 'float');
         $this->instructions = PP_getVar($A, 'instructions');
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
-
+        $this->token = PP_getVar($A, 'token', 'string');
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
         }
@@ -375,6 +349,11 @@ class Order
     {
         global $_TABLES, $_PP_CONF;
 
+        // Save all the order items
+        foreach ($this->items as $item) {
+            $item->Save();
+        }
+
         if ($this->isNew) {
             // Shouldn't have an empty order ID, but double-check
             if ($this->order_id == '') $this->order_id = COM_makeSid();
@@ -388,10 +367,12 @@ class Order
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
             $log_msg = 'Order Created';
+            $tax = $this->calcTax();
         } else {
             $sql1 = "UPDATE {$_TABLES['paypal.orders']} SET ";
             $sql2 = " WHERE order_id = '{$this->order_id}'";
             $log_msg = 'Order Updated';
+            $tax = $this->tax;
         }
 
         $fields = array(
@@ -400,11 +381,12 @@ class Order
                 "pmt_method = '" . DB_escapeString($this->pmt_method) . "'",
                 "by_gc = '{$this->by_gc}'",
                 "phone = '" . DB_escapeString($this->phone) . "'",
-                "tax = '{$this->tax}'",
+                "tax = '{$tax}'",
                 "shipping = '{$this->shipping}'",
                 "handling = '{$this->handling}'",
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
+                "token = '" . DB_escapeString($this->token) . "'",
         );
         foreach ($this->_addr_fields as $fld) {
             $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -459,45 +441,27 @@ class Order
         }
 
         $this->no_shipping = 1;   // no shipping unless physical item ordered
-        $subtotal = 0;
+        $items = $this->getItemView();
         $tax_items = 0;
         $cart_tax = 0;
-        foreach ($this->items as $key => $item) {
-            $item_options = '';
-            $P = $item->getProduct();
-            $opt = $item->options_text;
-            if ($opt && is_array($opt)) {
-                foreach ($opt as $opt_str) {
-                    $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
-                }
-            }
-            $item_total = $item->price * $item->quantity;
-            $subtotal += $item_total;
-            if ($P->taxable) {
-                $cart_tax += $P->getTax($item_total);
-                $tax_items++;       // count the taxable items for display
-            }
+        foreach ($items as $item) {
             $T->set_var(array(
-                'item_id'       => htmlspecialchars($item->product_id),
-                'item_descrip'  => htmlspecialchars($item->description),
-                'item_price'    => COM_numberFormat($item->price, 2),
-                'item_quantity' => (int)$item->quantity,
-                'item_total'    => COM_numberFormat($item_total, 2),
-                'item_options'  => $item_options,
-                'is_admin' => $isAdmin ? 'true' : '',
-                'is_file' => $P->file != '' ? 'true' : '',
-                'taxable'       => $P->taxable,
-                'tax_icon'      => $LANG_PP['tax'][0],
+                'item_id'       => $item['item_id'],
+                'item_descrip'  => $item['dscp'],
+                'item_price'    => $item['price'],
+                'item_quantity' => $item['quantity'],
+                'item_total'    => $item['total'],
+                'item_options'  => $item['options'],
+                'is_admin'      => $isAdmin ? 'true' : '',
+                'is_file'       => $item['is_file'],
+                'taxable'       => $item['taxable'],
+                'tax_icon'      => $item['tax_icon'],
             ) );
             $T->parse('iRow', 'ItemRow', true);
-            if ($P->prod_type == PP_PROD_PHYSICAL) {
-                $this->no_shipping = 0;
-            }
         }
-        $cart_tax = round($cart_tax, 2);
 
         $dt = new \Date($this->order_date, $_CONF['timezone']);
-        $total = $subtotal + $this->shipping + $this->handling + $cart_tax;
+        $total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'is_admin'      => $isAdmin ? 'true' : '',
@@ -509,8 +473,7 @@ class Order
             'order_number' => $this->order_id,
             'shipping'      => $this->shipping > 0 ? $currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $currency->FormatValue($this->handling) : 0,
-            'tax'           => $this->tax > 0 ? $currency->FormatValue($this->tax) : 0,
-            'subtotal'      => $currency->Format($subtotal),
+            'subtotal'      => $currency->Format($this->subtotal),
             'have_billto'   => 'true',
             'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
@@ -520,8 +483,8 @@ class Order
             'apply_gc'      => $this->by_gc > 0 ? $currency->FormatValue($this->by_gc) : 0,
             'net_total'     => $total - $this->by_gc,
             'iconset'       => $_PP_CONF['_iconset'],
-            'cart_tax'      => $cart_tax > 0 ? COM_numberFormat($cart_tax, 2) : 0,
-            'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
+            'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
+            'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $this->tax_items),
         ) );
 
         //if ($isAdmin) {
@@ -596,7 +559,7 @@ class Order
 
         // If the status isn't really changed, don't bother updating anything
         // and just treat it as successful
-//        if ($oldstatus == $newstatus) return true;
+        if ($oldstatus == $newstatus) return true;
 
         $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET status = '". DB_escapeString($newstatus) . "'
@@ -687,14 +650,13 @@ class Order
         $dl_links = '';         // Start with empty download links
 
         foreach ($this->items as $id=>$item) {
-            //$P = Product::getInstance($item->product_id);
-            //if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
-            if ($item->getProduct()->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+            $P = $item->getProduct();
+            if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
                 $have_physical = 1;
 
             // Add the file to the filename array, if any. Download
             // links are only included if the order status is 'paid'
-            $file = $item->getProduct()->file;
+            $file = $P->file;
             if (!empty($file) && $this->status == 'paid') {
                 $files[] = $file;
                 $dl_url = PAYPAL_URL . '/download.php?';
@@ -779,6 +741,7 @@ class Order
             'status'            => $this->status,
             'order_instr'   => $this->instructions,
             'order_id'      => $this->order_id,
+            'token'         => $this->token,
         ) );
         if ($this->by_gc > 0) {
             $T->set_var(array(
@@ -859,14 +822,22 @@ class Order
     *
     *   @return boolean     True if allowed to view, False if denied.
     */
-    public function canView()
+    public function canView($token = '')
     {
         global $_USER;
 
-        if ($_USER['uid'] == $this->uid ||
+        if ($this->isNew) {
+            // Order wasn't found in the DB
+            return false;
+        } elseif ($this->uid > 1 && $_USER['uid'] == $this->uid ||
             plugin_ismoderator_paypal()) {
+            // Administrator, or logged-in buyer
+            return true;
+        } elseif (isset($_GET['token']) && $_GET['token'] == $this->token) {
+            // Anonymous with the correct token
             return true;
         } else {
+            // Unauthorized
             return false;
         }
     }
@@ -889,6 +860,112 @@ class Order
             Cache::set($cache_key, $log, 'order_log');
         }
         return $log;
+    }
+
+
+    /**
+    *   Get the items in this order prepared for viewing.
+    *   Uses the product object to determine if there's a downloadable file
+    *   for the item.
+    *   Also sets global values for tax, shipping, and handling
+    *
+    *   @return array   Array of item information.
+    */
+    public function getItemView()
+    {
+        global $LANG_PP;
+
+        $this->subtotal = 0;
+        foreach ($this->items as $key => $item) {
+            $item_options = '';
+            $P = $item->getProduct();
+            $opt = $item->options_text;
+            if ($opt && is_array($opt)) {
+                foreach ($opt as $opt_str) {
+                    $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
+                }
+            }
+            $item_total = $item->price * $item->quantity;
+            $this->subtotal += $item_total;
+            if ($item->taxable) {
+                $this->tax_items++;       // count the taxable items for display
+            }
+            $items[] = array(
+                'item_id'   => htmlspecialchars($item->product_id),
+                'dscp'      => htmlspecialchars($item->description),
+                'price'     => COM_numberFormat($item->price, 2),
+                'quantity'  => (int)$item->quantity,
+                'total'     => COM_numberFormat($item_total, 2),
+                'options'   => $item_options,
+                'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
+                'is_file'   => $P->file != '' ? 'true' : '',
+                'taxable'   => $P->taxable,
+                'tax_icon'  => $LANG_PP['tax'][0],
+            );
+            if ($P->prod_type == PP_PROD_PHYSICAL) {
+                $this->no_shipping = 0;
+            }
+        }
+        return $items;
+    }
+
+
+    /**
+    *   Calculate the tax on this order.
+    *   Sets the tax property and returns the amount.
+    *
+    *   @return float   Sales Tax amount
+    */
+    public function calcTax()
+    {
+        $tax_amt = 0;
+        $this->tax_items = 0;
+        foreach ($this->items as $item) {
+            if ($item->taxable) {
+                $tax_amt += ($item->price * $item->quantity);
+                $this->tax_items += 1;
+            }
+        }
+        $this->tax = round(PP_getTaxRate() * $tax_amt, 2);
+        return $this->tax;
+    }
+
+
+    /**
+    *   Create a random token string for this order to allow anonymous users
+    *   to view the order from an email link.
+    *
+    *   @uses   Coupon::generate()
+    *   @return string      Token string
+    */
+    private static function _createToken()
+    {
+        $len = rand(5, 20);
+        $options = array(
+            'length'    => $len,
+            'letters'   => true,
+            'numbers'   => true,
+            'symbols'   => false,   // alphanumeric only
+            'mixed_case' => true,
+        );
+        $code = Coupon::generate($options);
+        return $code;
+    }
+
+
+    /**
+    *   Get the order total, including tax, shipping and handling
+    *
+    *   @return float   Total order amount
+    */
+    public function getTotal()
+    {
+        $total = 0;
+        foreach ($this->items as $id => $item) {
+            $total += ($item->price * $item->quantity);
+        }
+        $total += $this->calcTax() + $this->shipping + $this->handling;
+        return round($total, 2);
     }
 
 }

@@ -207,7 +207,21 @@ abstract class Gateway
     *
     *   @return string      Short name of gateway
     */
-    public function Name()         {   return $this->gw_name;  }
+    public function Name()
+    {
+        return $this->gw_name;
+    }
+
+
+    /**
+    *   Return the gateway short name, capitlaized for display.
+    *
+    *   @return string      Short name of gateway
+    */
+    public function DisplayName()
+    {
+        return ucfirst($this->gw_name);
+    }
 
 
     /**

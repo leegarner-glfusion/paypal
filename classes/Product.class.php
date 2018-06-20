@@ -1577,7 +1577,7 @@ class Product
     }
 
 
-    public function handleRefund($ipn_data = array())
+    public function handleRefund($Order, $ipn_data = array())
     {
     }
 

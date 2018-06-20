@@ -251,13 +251,7 @@ class paypal_ipn extends IPN
 
                 $currency = $this->pp_data['currency'];
                 PAYPAL_debug("Net Settled: $payment_gross $currency");
-                if ($this->isSufficientFunds()) {
-                    $this->handlePurchase();
-                } else {
-                    $this->handleFailure(PAYPAL_FAILURE_FUNDS,
-                                "($logId) Insufficient funds for purchase");
-                    return false;
-                }
+                $this->handlePurchase();
             }
             break;
 
@@ -282,11 +276,8 @@ class paypal_ipn extends IPN
                 return false;
             }
 
-            //$num_items = count($Cart);
-            //for ($i = 1; $i <= $num_items; $i++) {
             foreach ($Cart as $item) {
                 $args = array(
-                        //$this->ipn_data["item_number$i"],
                         'item_id' => $item['item_id'],
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
@@ -297,65 +288,12 @@ class paypal_ipn extends IPN
                         'extras' => $item['extras']
                 );
                 $this->AddItem($args);
-
-                // PayPal returns the total price as mc_gross_X, so divide
-                // by the quantity to get back to a unit price.
-/*                if (!isset($this->ipn_data["quantity$i"]) ||
-                    (float)$this->ipn_data["quantity$i"] == 0) {
-                    $this->ipn_data["quantity$i"] = 1;
-                }
-                $item_gross = $this->ipn_data["mc_gross_$i"];
-                if (isset($this->ipn_data["mc_shipping$i"])) {
-                    $item_shipping = (float)$this->ipn_data["mc_shipping$i"];
-                    $item_gross -= $item_shipping;
-                } else {
-                    $item_shipping = 0;
-                }
-                if (isset($this->ipn_data["tax$i"])) {
-                    $item_tax = (float)$this->ipn_data["tax$i"];
-                    $item_gross -= $item_tax;
-                } else {
-                    $item_tax = 0;
-                }
-                if (isset($this->ipn_data["mc_handling$i"])) {
-                    $item_handling = (float)$this->ipn_data["mc_handling$i"];
-                    $item_gross -= $item_handling;
-                } else {
-                    $item_handling = 0;
-                }
-                $unit_price = $item_gross / (float)$this->ipn_data["quantity$i"];
-                // Add the item to the array for the order creation.
-                // IPN item numbers are indexes into the cart, so get the
-                // actual product ID from the cart
-                $args = array(
-                        //$this->ipn_data["item_number$i"],
-                        'item_id' => $Cart[$this->ipn_data["item_number$i"]]['item_id'],
-                        'quantity' => $this->ipn_data["quantity$i"],
-                        'price' => $unit_price,
-                        'item_name' => $this->ipn_data["item_name$i"],
-                        'shipping' => $item_shipping,
-                        'handling' => $item_handling,
-                        'tax' => $item_tax,
-                        'extras' => $Cart[$this->ipn_data["item_number$i"]]['extras']
-                );
-                $this->AddItem($args);
-*/
             }
-/*            $this->pp_data['pmt_tax'] = $
-        $this->Order->shipping = $this->pp_data['pmt_shipping'];
-        $this->Order->handling = $this->pp_data['pmt_handling'];
-*/
 
             $payment_gross = $this->ipn_data['mc_gross'] - $fees_paid;
             PAYPAL_debug("Received $payment_gross gross payment");
             //$currency = $this->ipn_data['mc_currency'];
-            if ($this->isSufficientFunds()) {
-                $this->handlePurchase();
-            } else {
-                $this->handleFailure(PAYPAL_FAILURE_FUNDS,
-                        "($logId) Insufficient/incorrect funds for purchase");
-                return false;
-            }
+            $this->handlePurchase();
             break;
 
         // other, unknown, unsupported

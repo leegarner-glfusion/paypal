@@ -531,8 +531,8 @@ class Cart
         $subtotal = 0;
         $shipping = 0;
         $handling = 0;
-        $cart_tax = 0;
         $tax_items = 0;
+        $tax_amt = 0;
         foreach ($this->m_cart as $id=>$item) {
             $item_price = 0;
             $counter++;
@@ -583,7 +583,7 @@ class Cart
             $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
             if ($P->taxable) {
-                $cart_tax += $P->getTax($item_price, $item['quantity']);
+                $tax_amt += ($item_price * $item['quantity']);
                 $tax_items++;       // count the taxable items for display
             }
             $T->set_var(array(
@@ -612,8 +612,7 @@ class Cart
                 'transtype' => 'cart_upload',
                 'cart_id'   => $this->cartID(),
         );
-        $cart_tax = round($cart_tax, 2);
-        $this->m_info['cart_tax'] = $cart_tax;
+        $cart_tax = PP_getTax($tax_amt);
         $total = $subtotal + $shipping + $handling + $cart_tax;
 
         // A little hack to show only the total if there are no other

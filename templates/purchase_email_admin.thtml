@@ -1,8 +1,8 @@
 Dear Site Administrator;
 <p>
 You have received a new order via your web site.  Check the purchase information at 
-<a href="{pi_admin_url}/index.php?ipnlog=x&op=single&txn_id={txn_id}">{pi_admin_url}/index.php?ipnlog=x&op=single&txn_id={txn_id}</a>
-for any action that you may need to take.
+{site_admin_url}/plugins/paypal/index.php?order={order_id}
+ for any action that you may need to take.
 </p>
 <p>
 Details of the purchase follow: 
@@ -14,7 +14,9 @@ Buyer: {payer_name} (ID {buyer_uid}, {user_name})<br />
 <p>
 {purchase_details}
 </p>
+{!if order_instr}
 <p>Special Instructions: {order_instr}</p>
+{!endif}
 <p>Order Status: {status}</p>
 <p>Payment was made via {gateway_name} on {payment_date}</p>
 

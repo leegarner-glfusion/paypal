@@ -24,7 +24,7 @@ Your payment is pending.  Once your payment is received, you will receive
 another email message confirming your payment.
 </p>
 {!endif}
-<p>You may view your order at {site_url}/paypal/index.php?order={order_id}</p>
+<p>You may view your order at {site_url}/paypal/index.php?order={order_id}&token={token}</p>
 {!if gw_msg}
 <p>{gw_msg}</p>
 {!endif}
