@@ -50,7 +50,7 @@ class PluginProduct extends Product
             $this->price = isset($A['price']) ? $A['price'] : 0;
             $this->item_name = $A['name'];
             $this->short_description = $A['short_description'];
-            $this->description = isset($A['description']) ? $A['description'] : $this->short-description;
+            $this->description = isset($A['description']) ? $A['description'] : $this->short_description;
             $this->taxable = isset($A['taxable']) ? $A['taxable'] : 0;
          } else {
             // probably an invalid product ID
