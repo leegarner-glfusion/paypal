@@ -693,10 +693,10 @@ abstract class Gateway
 
             } else {
                 PAYPAL_debug("Paypal item " . $item_number);
-                //$P = new Product($item_number);
                 $P = Product::getInstance($item_number);
-                $A = array('name' => $P->name,
-                    'short_description' => $P->short_description,
+                $A = array(
+                    'name' => $P->getName(),
+                    'short_description' => $P->getDscp(),
                     'expiration' => $P->expiration,
                     'prod_type' => $P->prod_type,
                     'file' => $P->file,
