@@ -304,7 +304,7 @@ class Order
     *
     *   @param  stirng  $order_id       Order ID, taken from $_SESSION if empty
     */
-    public function Delete($order_id = '')
+    public static function Delete($order_id = '')
     {
         global $_TABLES;
 
