@@ -314,10 +314,12 @@ class Cart
         $P = Product::getInstance($item_id);
         if (!isset($args['options'])) $args['options'] = array();
         $quantity = isset($args['quantity']) ? (float)$args['quantity'] : 1;
-        $price = $P->getPrice($args['options'], $quantity);
+        $override = isset($args['override']) ? $args['price'] : NULL;
+        $price = $P->getPrice($args['options'], $quantity, $override);
         $extras = isset($args['extras']) ? $args['extras'] : array();
         $options = isset($args['options']) ? $args['options'] : array();
-
+        $item_name = isset($args['item_name']) ? $args['item_name'] : '';
+        $item_dscp = isset($args['short_description']) ? $args['short_description'] : '';
         if (!is_array($this->m_cart))
             $this->m_cart = array();
 
@@ -352,8 +354,8 @@ class Cart
             $tmp = array(
                 'item_id'   => $item_id,
                 'quantity'  => $quantity,
-                'name'      => $P->short_description,
-                'descrip'   => $P->short_description,
+                'name'      => $P->getName($item_name),
+                'descrip'   => $P->getDscp($item_dscp),
                 'price'     => sprintf("%.2f", $price),
                 'options'   => $options,
                 'extras'    => $extras,
@@ -367,6 +369,32 @@ class Cart
         }
         $this->Save();
         return $new_quantity;
+    }
+
+
+    /**
+    *   Update an existing cart item.
+    *   This only works where items are unique since the caller has no access
+    *   to the cart ID.
+    *
+    *   @param  string  $item_number    Item number to update
+    *   @param  array   $updates        Array (field=>value) of new values
+    */
+    public function updateItem($item_number, $updates)
+    {
+        // Search through the cart for the item number
+        foreach ($this->m_cart as $id=>$item) {
+            if ($item['item_id'] == $item_number) {
+                // If the item is found, loop through the updates and apply
+                foreach ($updates as $fld=>$val) {
+                    if (isset($item[$fld])) {
+                        $this->m_cart[$id][$fld] = $val;
+                    }
+                }
+                break;
+            }
+        }
+        $this->Save();
     }
 
 
@@ -540,7 +568,7 @@ class Cart
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
 
             $P = Product::getInstance($item_id);
-            $item_price = $P->getPrice($attr_keys, $item['quantity']);
+            $item_price = $P->getPrice($attr_keys, $item['quantity'], $item['price']);
             if (!empty($attr_keys)) {
                 foreach ($attr_keys as $attr_key) {
                     if (!isset($P->options[$attr_key])) continue;   // invalid?
@@ -1064,6 +1092,7 @@ class Cart
     */
     public function delete()
     {
+return;
         global $_TABLES;
         DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->m_cart_id);
         PAYPAL_debug("Cart {$this->m_cart_id} deleted");

@@ -180,23 +180,59 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     }
 
     $ppGCart = Paypal\Cart::getInstance();
+    $price = 0;
+    foreach (array('amount', 'price') as $s) {
+        if (isset($args[$s])) {
+            $price = $args[$s];
+            break;
+        }
+    }
+    $dscp = '';
+    foreach (array('short_description', 'description', 'dscp') as $s) {
+        if (isset($args[$s])) {
+            $dscp = $args[$s];
+            break;
+        }
+    }
+    $item_number = '';
+    foreach (array('item_number', 'product_id', 'item_id') as $s) {
+        if (isset($args[$s])) {
+            $item_number = $args[$s];
+            break;
+        }
+    }
+    if ($item_number == '') {
+        $svc_msg = 'Missing item number';
+        return PLG_RET_ERROR;
+    }
+
+    // Force the price if requested by the caller
+    $override = isset($args['override']) && $args['override'] ? true : false;
 
     $cart_args = array(
-        'item_number' => $args['item_number'],
+        'item_number' => $item_number,
         'quantity' => isset($args['quantity']) ? (float)$args['quantity'] : 1,
         'item_name' => isset($args['item_name']) ? $args['item_name'] : '',
-        'amount' => isset($args['amount']) ? (float)$args['amount'] : 0,
-        'short_description' => isset($args['short_description']) ? $args['short_description'] : '',
+        'price' => $price,
+        'short_description' => $dscp,
         'options' => isset($args['options']) ? $args['options'] : array(),
         'extras' => isset($args['extras']) ? $args['extras'] : array(),
+        'override' => $override,
     );
     if (isset($args['tax'])) {
         $cart_args['tax'] = $args['tax'];
     }
 
-    // Option to add or update an item only if it is not currently in the cart.
+    // If the "unique" flag is present, then only update specific elements
+    // included in the "updates" array. If there are no specific updates, then
+    // do nothing.
     if (isset($args['unique']) && $args['unique']) {
-        if ($ppGCart->Contains($args['item_number']) !== false) return PLG_RET_OK;
+        if ($ppGCart->Contains($item_number) !== false) {
+            if (isset($args['update']) && is_array($args['update'])) {
+                $ppGCart->updateItem($item_number, $args['update']);
+            }
+            return PLG_RET_OK;
+        }
     }
 
     $ppGCart->addItem($cart_args);
