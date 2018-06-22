@@ -250,7 +250,7 @@ class paypal extends Gateway
                 } else {
                     $opts = array();
                 }
-                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity']);
+                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity'], $item['price']);
                 //$fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
                 $fields['item_number_' . $i] = (int)$cart_item_id;
                 $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);

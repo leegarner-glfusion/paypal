@@ -23,12 +23,15 @@ class PluginProduct extends Product
     *   Creates an object for a plugin product and gets data from the
     *   plugin's service function
     *
-    *  @param integer $id Optional Item ID - plugin:item_id|opt1,opt2...
+    *   @param  string  $id     Item ID - plugin:item_id|opt1,opt2...
+    *   @param  array   $A      Array of elements passed to parent::getInstance()
     */
-    public function __construct($item_id)
+    public function __construct($item, $A=array())
     {
         global $_PP_CONF;
 
+        $item = explode('|', $item);
+        $item_id = $item[0];
         $this->properties = array();
         $this->currency = new Currency($_PP_CONF['currency']);
         $this->item_id = $item_id;
@@ -39,6 +42,11 @@ class PluginProduct extends Product
         } else {
             $this->item_id = NULL;
             return;
+        }
+
+        // Get the user ID to pass to the plugin in case it's needed.
+        if (isset($A['uid'])) {
+            $pi_info['uid'] = $A['uid'];
         }
 
         $this->prod_type = PP_PROD_PLUGIN;
@@ -145,9 +153,13 @@ class PluginProduct extends Product
     *   @param  integer $quantity   Quantity, used to calculate discounts (unused)
     *   @return float       Product price, including options
     */
-    public function getPrice($options = array(), $quantity = 1)
+    public function getPrice($options = array(), $quantity = 1, $override = NULL)
     {
-        return $this->price;
+        if ($override !== NULL) {
+            return (float)$override;
+        } else {
+            return $this->price;
+        }
     }
 
 

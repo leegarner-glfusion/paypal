@@ -112,9 +112,10 @@ class Product
     *   $A can be a single item id or an array (DB record) of values.
     *
     *   @param  mixed   $A      Single item ID or array of values
+    *   @param  array   $B      Optional array of product modifiers
     *   @return object          Product Object
     */
-    public static function getInstance($A)
+    public static function getInstance($A, $B=array())
     {
         global $_TABLES;
         static $P = array();
@@ -123,12 +124,13 @@ class Product
             $id = $A['id'];
         } else {
             $id = $A;
+            $A = array($A);
         }
         if (!array_key_exists($id, $P)) {
             $item = explode('|', $id);
             if (self::isPluginItem($item[0])) {
                 // Product provided by another plugin
-                $P[$id] = new PluginProduct($item[0]);
+                $P[$id] = new PluginProduct($item[0], $B);
             } else {
                 // Product internal to this plugin
                 if (!is_array($A)) {
@@ -1448,15 +1450,20 @@ class Product
     *
     *   @param  array   $options    Array of integer option values
     *   @param  integer $quantity   Quantity, used to calculate discounts
+    *   @param  float   $override   Override price
     *   @return float       Product price, including options
     */
-    public function getPrice($options = array(), $quantity = 1)
+    public function getPrice($options = array(), $quantity = 1, $override = NULL)
     {
         if (!is_array($options)) $options = array($options);
-        // Use the sale price if this item is on sale
-        if ($this->isOnSale()) {
+        if ($override !== NULL) {
+            // If an override price is specified, just return it.
+            return round((float)$override, $this->currency->Decimals());
+        } elseif ($this->isOnSale()) {
+            // Use the sale price if this item is on sale
             $price = $this->sale_price;
         } else {
+            // Use the regular price
             $price = $this->price;
         }
 
@@ -1800,7 +1807,31 @@ class Product
         if (!$this->Cat) $this->Cat = Category::getInstance($this->cat_id);
         return $this->Cat->hasAccess();
     }
-   
+
+
+    /**
+    *   Get the product name. Allows for an override
+    *
+    *   @param  string  $overrride  Optional name override
+    *   @return string              Product Name
+    */
+    public function getName($override = '')
+    {
+        return $override == '' ? $this->name : $override;
+    }
+
+
+    /**
+    *   Get the product shoryt description. Allows for an override
+    *
+    *   @param  string  $overrride  Optional description override
+    *   @return string              Product sort description
+    */
+    public function getDscp($override = '')
+    {
+        return $override == '' ? $this->short_description : $override;
+    }
+
 }   // class Product
 
 ?>

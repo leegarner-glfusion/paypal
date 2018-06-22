@@ -136,7 +136,7 @@ class IPN
 
         // Separate the item ID and options to get pricing
         $tmp = explode('|', $args['item_id']);
-        $P = Product::getInstance($tmp[0]);
+        $P = Product::getInstance($tmp[0], $this->pp_data['custom']);
         if ($P->isNew) {
             COM_errorLog("Product {$args['item_id']} not found in catalog");
             return;      // no product found to add
@@ -632,7 +632,7 @@ if (0) {
             //$tmp = explode('|', $item['item_number']);
             //list($item_number,$options) =
             //if (is_numeric($item_number)) {
-            $P = Product::getInstance($item['item_id']);
+            $P = Product::getInstance($item['item_id'], $this->pp_data['custom']);
             $item['short_description'] = $P->short_description;
             if (!empty($options)) {
                 // options is expected as CSV
@@ -720,7 +720,7 @@ if (0) {
             // actions.  None for catalog items (since there's no inventory,
             // but plugin items may need to do something.
             foreach ($Order->items as $key=>$data) {
-                $P = Product::getInstance($data['product_id']);
+                $P = Product::getInstance($data['product_id'], $this->pp_data['custom']);
                 // Don't care about the status, really.  May not even be
                 // a plugin function to handle refunds
                 $P->handleRefund($Order, $this->pp_data);
