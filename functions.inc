@@ -978,7 +978,6 @@ function phpblock_paypal_cart_contents()
             foreach ($opt_ids as $opt_id) {
                 $opt_arr[] = $P->options[$opt_id]['attr_name'] . ': '.
                         $P->options[$opt_id]['attr_value'];
-                $item_price += (float)$P->options[$opt_id]['attr_price'];
             }
         }
         $item_total = $item_price * $item['quantity'];
@@ -2084,6 +2083,12 @@ function PP_getVar($A, $varname, $type = 'string')
         break;
     case 'float':
         return (float)$val;
+        break;
+    case 'array':
+        if (!is_array($val)) {
+            $val = array($val);
+        }
+        return $val;
         break;
     case 'string':
     default:

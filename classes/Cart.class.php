@@ -315,7 +315,6 @@ class Cart
         if (!isset($args['options'])) $args['options'] = array();
         $quantity = isset($args['quantity']) ? (float)$args['quantity'] : 1;
         $override = isset($args['override']) ? $args['price'] : NULL;
-        $price = $P->getPrice($args['options'], $quantity, $override);
         $extras = isset($args['extras']) ? $args['extras'] : array();
         $options = isset($args['options']) ? $args['options'] : array();
         $item_name = isset($args['item_name']) ? $args['item_name'] : '';
@@ -336,6 +335,7 @@ class Cart
             $options = array();
         }
 
+        $price = $P->getPrice($opts, $quantity, $override);
         if ($P->taxable) {
             $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
             $tax = round($tax_rate * $price * $quantity, 2);
@@ -566,7 +566,6 @@ class Cart
             $counter++;
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
-
             $P = Product::getInstance($item_id);
             $item_price = $P->getPrice($attr_keys, $item['quantity'], $item['price']);
             if (!empty($attr_keys)) {
