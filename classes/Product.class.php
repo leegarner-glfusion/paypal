@@ -121,10 +121,15 @@ class Product
         static $P = array();
 
         if (is_array($A)) {
-            $id = $A['id'];
+            // A complete product record
+            $id = isset($A['id']) ? $A['id'] : NULL;
         } else {
+            // A single product ID
             $id = $A;
-            $A = array($A);
+        }
+        if (!$id) {
+            // Missing product ID
+            return NULL;
         }
         if (!array_key_exists($id, $P)) {
             $item = explode('|', $id);
