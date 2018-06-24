@@ -1091,7 +1091,6 @@ class Cart
     */
     public function delete()
     {
-return;
         global $_TABLES;
         DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->m_cart_id);
         PAYPAL_debug("Cart {$this->m_cart_id} deleted");
