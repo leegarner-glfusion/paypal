@@ -319,6 +319,7 @@ $LANG_PP = array (
 'code' => 'Code',
 'coupons' => 'Coupons',
 'gc_bal' => 'Gift Card Balance',
+'hlp_gw_select' => 'Select your payment method below. You will be able to confirm your order on the next page.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
