@@ -553,7 +553,8 @@ form.frm_buy_now {
     color: red;
 }
 .pp-icon-warning {
-    color: #FFD300;
+    /*color: #FFD300;*/
+    color: #FF9900;
 }
 .pp-icon-info {
     color: #0077dd;
@@ -571,6 +572,14 @@ div.ppGatewayRadios {
     margin-top:10px;
     text-align:left;
     font-size: 125%;
+}
+div.gwRadiosOuter {
+    float: left;
+    text-align: left;
+    margin-right: 20px;
+    padding: 5px;
+    border: 1px solid;
+    width: 65%;
 }
 
 div #orderPmtMethod {
