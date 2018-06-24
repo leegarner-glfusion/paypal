@@ -35,7 +35,7 @@ function ProcessForm(opt) {
     }
 
     emsg="";
-    frm = document.getElementById("add_cart");
+    frm = document.getElementById("add_cart_{id}");
     if (frm === null) return;
     price = {price};
     //options = frm.elements['options[]'];
