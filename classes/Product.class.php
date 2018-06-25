@@ -474,7 +474,7 @@ class Product
         } else {
             PAYPAL_debug('Preparing to save a new product.');
             $sql1 = "INSERT INTO {$_TABLES['paypal.products']} SET
-                dt_add = '" . DB_escapeString(PAYPAL_now()->toMySQL()) . "',";
+                dt_add = UTC_TIMESTAMP(), ";
             $sql3 = '';
         }
         //$options = DB_escapeString(@serialize($this->options));
