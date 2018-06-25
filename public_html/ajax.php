@@ -38,14 +38,13 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
         exit;
     }
-    //PAYPAL_setCart();
     $ppGCart = Paypal\Cart::getInstance();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
             $ppGCart->Contains($_POST['item_number']) !== false) {
         break;
     }
     $args = array(
-        'item_number' => isset($_POST['item_number']) ? $_POST['item_number'] : '',
+        'item_number' => $_POST['item_number'],     // isset ensured above
         'item_name' => isset($_POST['item_name']) ? $_POST['item_name'] : '',
         'description' => isset($_POST['item_descr']) ? $_POST['item_descr'] : '',
         'quantity' => isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1,

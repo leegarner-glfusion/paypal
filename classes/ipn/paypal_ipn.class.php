@@ -125,8 +125,6 @@ class paypal_ipn extends IPN
     */
     private function Verify()
     {
-        global $_CONF, $_PP_CONF;
-
         if ($this->gw->getConfig('test_mode')) {
             return true;
         }
