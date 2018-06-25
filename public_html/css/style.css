@@ -330,11 +330,12 @@ div.paypalProductListItem.v1 div.ItemButtons {
 .paypalOrder #paypalBilling {
     float: left;
     margin-left: 0;
+    width: 50%;
 }
 
 .paypalOrder #paypalShipping {
     float: left;
-    margin-left: 20%;
+    width: 50%;
 }
 
 .paypalOrder #paypalOrderNumber {
