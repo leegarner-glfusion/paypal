@@ -324,8 +324,8 @@ class Cart
 
         // Extract the attribute IDs from the options array to create
         // the item_id
+        $opts = array();
         if (is_array($options) && !empty($options)) {
-            $opts = array();
             foreach($options as $optname=>$option) {
                 $opt_tmp = explode('|', $option);
                 $opts[] = $opt_tmp[0];
@@ -1091,7 +1091,11 @@ class Cart
     */
     public function delete()
     {
-        global $_TABLES;
+        global $_TABLES, $_PP_CONF;
+
+        if (isset($_PP_CONF['develop']) && $_PP_CONF['develop']) {
+            return;
+        }
         DB_delete($_TABLES['paypal.cart'], 'cart_id', $this->m_cart_id);
         PAYPAL_debug("Cart {$this->m_cart_id} deleted");
     }
