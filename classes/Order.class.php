@@ -485,6 +485,7 @@ class Order
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
             'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $this->tax_items),
             'status'        => $this->status,
+            'token'         => $this->token,
         ) );
 
         if ($isAdmin) {

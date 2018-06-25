@@ -4,7 +4,7 @@
   <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
 {!if order_number}
   <div class="floatright">
-    <a href="{pi_url}/index.php?printorder={order_number}" target="_new"
+    <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_new"
         title="{$LANG_PP['print']}"><i class="{iconset}-print title="{LANG_PP['print']}"></i>
     </a>
   </div>
