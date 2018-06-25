@@ -45,7 +45,7 @@ class Order
 
         $this->isNew = true;
         $this->uid = $_USER['uid'];
-        $this->order_date = PAYPAL_now()->toMySql(true);
+        $this->order_date = PAYPAL_now()->toMySql(false);
         $this->instructions = '';
         if (!empty($id)) {
             $this->order_id = $id;
@@ -363,7 +363,7 @@ class Order
             Cart::setSession('order_id', $this->order_id);
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
-                    order_date = '{$this->order_date}',
+                    order_date = UTC_TIMESTAMP(),
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
             $log_msg = 'Order Created';
@@ -459,8 +459,7 @@ class Order
             ) );
             $T->parse('iRow', 'ItemRow', true);
         }
-
-        $dt = new \Date($this->order_date, $_CONF['timezone']);
+        $dt = new \Date(strtotime($this->order_date), $_USER['tzid']);
         $total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,

@@ -527,7 +527,7 @@ function PAYPAL_do_upgrade()
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
-    if (!COM_checkVersion($current_ver, '0.5.12')) {
+    if (!COM_checkVersion($current_ver, '0.6.0')) {
         $current_ver = '0.5.12';
         $c->del('download_path', $pi_name);
 
@@ -544,6 +544,12 @@ function PAYPAL_do_upgrade()
                     SET cat_id = 1 WHERE cat_id = 0";
             DB_query($sql);
         }
+        // Change orders to use UTC for dates. Logs already do.
+        date_default_timezone_set($_CONF['timezone']);
+        $offset = date('P');
+        DB_query("UPDATE {$_TABLES['paypal.orders']}
+                SET order_date = convert_tz(order_date, '$offset', '+00:00')");
+
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         Paypal\Category::rebuildTree();

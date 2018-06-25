@@ -224,11 +224,17 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
+    static $dt = NULL;
     $retval = '';
+
+    if ($dt === NULL) {
+        // Instantiate a date object once
+        $dt = new \Date('now', $_USER['tzid']);
+    }
 
     switch($fieldname) {
     case 'order_date':
-        $dt = new \Date($fieldvalue, $_USER['tzid']);
+        $dt->setTimestamp(strtotime($fieldvalue));
         $retval = '<span class="tooltip" title="' .
                 $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
                 $dt->format($_PP_CONF['datetime_fmt'], true) . '</span>';
