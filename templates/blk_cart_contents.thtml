@@ -2,16 +2,16 @@
 <!-- BEGIN CartRow -->
   <div class="CartItem">
     {quantity} x
-    {!if link_item}
-      <a href="{pi_url}/detail.php?id={item_id}">{item_name}</a>
-    {!else}
+{!if item_link}
+      <a href="{item_link}">{item_name}</a>
+{!else}
       {item_name}
-    {!endif}
-    {!if options}
+{!endif}
+{!if options}
       <div class="ItemOptions">
         {options}
       </div>
-    {!endif}
+{!endif}
   </div>
 <!-- END CartRow -->
   <div id="CartTotal">
