@@ -346,8 +346,11 @@ class UserInfo
 
         $T = PP_getTemplate('address', 'address');
 
-        // Set the address to select by default.  Start by using the one
+        // Set the address to select by default. Start by using the one
         // already stored in the cart, if any.
+        if (empty($A)) {
+            $A = $this->getDefaultAddress($type);
+        }
         $addr_id = isset($A['addr_id']) ? $A['addr_id'] : '';
         $count = 0;
         $def_addr = 0;
