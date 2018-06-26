@@ -447,22 +447,7 @@ class IPN
             $this->items[$id]['prod_type'] = $P->prod_type;
 
             PAYPAL_debug("Paypal item " . $item['item_number']);
-if (0) {
-            if (!empty($item['options'])) {
-                //$this->items[$id]['price'] = $P->getPrice($item['options']);
-                $opts = explode(',', $item['options']);
-                $opt_str = $P->getOptionDesc($opts);
-/*                foreach ($opts as $opt) {
 
-                    if (isset($P->options[$opt])) {
-                        $this->items[$id]['price'] += $P->options[$opt]->price;
-                    }
-                }*/
-                if (!empty($opt_str)) {
-            // TODO:            $A['short_description'] .= " ($opt_str)";
-                }
-            }
-}
             // Mark what type of product this is
             $prod_types |= $P->prod_type;
 
