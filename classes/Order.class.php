@@ -451,12 +451,16 @@ class Order
                 'item_price'    => $item['price'],
                 'item_quantity' => $item['quantity'],
                 'item_total'    => $item['total'],
-                'item_options'  => $item['options'],
                 'is_admin'      => $isAdmin ? 'true' : '',
                 'is_file'       => $item['is_file'],
                 'taxable'       => $item['taxable'],
                 'tax_icon'      => $item['tax_icon'],
             ) );
+            $T->set_block('order', 'ItemOptions', 'iOpts');
+            foreach ($item['options'] as $opt_dscp) {
+                $T->set_var('option_dscp', $opt_dscp);
+                $T->parse('iOpts', 'ItemOptions', true);
+            }
             $T->parse('iRow', 'ItemRow', true);
         }
         $dt = new \Date(strtotime($this->order_date), $_USER['tzid']);
@@ -883,12 +887,6 @@ class Order
         foreach ($this->items as $key => $item) {
             $item_options = '';
             $P = $item->getProduct();
-            $opt = $item->options_text;
-            if ($opt && is_array($opt)) {
-                foreach ($opt as $opt_str) {
-                    $item_options .= "&nbsp;&nbsp;--&nbsp;$opt_str<br />\n";
-                }
-            }
             $item_total = $item->price * $item->quantity;
             $this->subtotal += $item_total;
             if ($item->taxable) {
@@ -900,7 +898,7 @@ class Order
                 'price'     => COM_numberFormat($item->price, 2),
                 'quantity'  => (int)$item->quantity,
                 'total'     => COM_numberFormat($item_total, 2),
-                'options'   => $item_options,
+                'options'   => $item->options_text,
                 'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
                 'is_file'   => $P->file != '' ? 'true' : '',
                 'taxable'   => $P->taxable,

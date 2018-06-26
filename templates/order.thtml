@@ -4,8 +4,8 @@
   <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
 {!if order_number}
   <div class="floatright">
-    <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_new"
-        title="{$LANG_PP['print']}"><i class="{iconset}-print title="{LANG_PP['print']}"></i>
+    <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_blank"
+        title="{$LANG_PP['print']}"><i class="{iconset}-print" title="{$LANG_PP['print']}"></i>
     </a>
   </div>
 {!endif}
@@ -95,6 +95,7 @@
           <th style="width:10%" class="alignright">{$LANG_PP['price']}</th>
           <th style="width:10%" class="alignright">{$LANG_PP['quantity']}</th>
           <th style="width:10%" class="alignright">{$LANG_PP['total']}</th>
+          <th style="width:5%">&nbsp;</th>
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
@@ -103,63 +104,72 @@
             <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" class="tooltip" title="{$LANG_PP['orderhist_item']}">
 {!endif}
               {item_descrip}
-{!if is_file}
-            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
-{!endif}
 {!if is_admin}
             </a>
 {!endif}
-            {!if item_options}
-            <br />{item_options}
-            {!endif}
+{!if is_file}
+            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
+{!endif}
+        <!-- BEGIN ItemOptions -->
+            <div class="ItemOptions">{option_dscp}</div>
+        <!-- END ItemOptions -->
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
           <td class="alignright">{item_total}</td>
-{!if taxable}
           <td class="aligncenter">
+{!if taxable}
             <span class="tooltip" title="{$LANG_PP['taxable']}">{tax_icon}</span>
-          </td>
 {!endif}
+          </td>
         </tr>
         <!-- END ItemRow -->
-        <tr><td>&nbsp;</td></tr>
+        <tr>
+          <td colspan="5">&nbsp;</td>
+        </tr>
 {!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
           <td class="alignright">{subtotal}</td>
+          <td></td>
         </tr>
 {!endif}
 {!if cart_tax}
         <tr>
           <td colspan="3" class="alignright">{tax_on_items}</td>
           <td class="alignright">{cart_tax}</td>
+          <td></td>
         </tr>
 {!endif}
 {!if shipping}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['shipping']}</td>
           <td class="alignright">{shipping}</td>
+          <td></td>
         </tr>
 {!endif}
 {!if handling}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['handling']}</td>
           <td class="alignright">{handling}</td>
+          <td></td>
         </tr>
 {!endif}
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
+          <td></td>
         </tr>
 {!if apply_gc}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['apply_gc']}</td>
           <td class="alignright">-&nbsp;{apply_gc}</td>
+          <td></td>
         </tr>
         <tr>
           <td colspan="3" class="alignright"><b>{$LANG_PP['net_total']}</b></td>
           <td class="alignright"><b>{net_total}</b></td>
+          <td></td>
         </tr>
 {!endif}
       </table>
