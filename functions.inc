@@ -956,7 +956,6 @@ function phpblock_paypal_cart_contents()
     $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
         $P = Paypal\Product::getInstance($item['item_id']);
-        $link = Paypal\Product::isPluginItem($item['item_id']) ? false : true;
 
         // See if this is a plugin item, will have a ':' in the item number
         if (strstr($item['item_id'], ':')) {
@@ -999,7 +998,7 @@ function phpblock_paypal_cart_contents()
             'quantity'      => $item['quantity'],
             'item_total'    => COM_numberFormat($item_total, 2),
             'pi_url'        => PAYPAL_URL,
-            'link_item'     => $link,
+            'item_link'     => $P->getLink(),
         ) );
         $T->parse('cRow', 'CartRow', true);
         $total += $item_total;
