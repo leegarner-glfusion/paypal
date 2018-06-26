@@ -562,43 +562,12 @@ class Cart
         $tax_items = 0;
         $tax_amt = 0;
         foreach ($this->m_cart as $id=>$item) {
-            $item_price = 0;
             $counter++;
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
-            $item_price = $P->getPrice($attr_keys, $item['quantity'], $item['price']);
+            $item_price = $P->getPrice($attr_keys, $item['quantity']);
             $item_name = $item['descrip'];
-            if (!empty($attr_keys)) {
-                foreach ($attr_keys as $attr_key) {
-                    if (!isset($P->options[$attr_key])) continue;   // invalid?
-                    $attr_name = $P->options[$attr_key]['attr_name'];
-                    $attr_value = $P->options[$attr_key]['attr_value'];
-                    $attr_desc .= "<br />&nbsp;&nbsp;-- $attr_name: $attr_value";
-                }
-            }
-            if (isset($item['extras']) && is_array($item['extras'])) {
-                if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
-                    $sp_flds = $P->getSpecialFields($item['extras']['special']);
-                    foreach ($sp_flds as $txt=>$val) {
-                        $attr_desc .= "<br />&nbsp;&nbsp;-- $txt: $val";
-                    }
-                }
-            }
-            $text_names = explode('|', $P->custom);
-            if (!empty($text_names) &&
-                    isset($item['extras']['custom']) &&
-                    is_array($item['extras']['custom'])) {
-                foreach ($item['extras']['custom'] as $tid=>$val) {
-                    if (isset($text_names[$tid])) {
-                        $attr_desc .= '<br />&nbsp;&nbsp;-- ' .
-                            htmlspecialchars($text_names[$tid]) . ': ' .
-                            htmlspecialchars($val);
-                    }
-                }
-            }
-            $item_name .= $attr_desc;
-
             // Get shipping amount and weight
             if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
                 // fixed shipping amount per item. Update actual cart
@@ -622,6 +591,7 @@ class Cart
                 'item_id'       => $item_id,
                 'item_name'     => $item_name,
                 'item_descrip'  => $item['descrip'],
+                'item_options'  => $P->getOptionDisplay($item),
                 'item_price'    => COM_numberFormat($item_price, 2),
                 'item_quantity' => $item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),

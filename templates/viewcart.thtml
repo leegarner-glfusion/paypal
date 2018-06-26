@@ -24,21 +24,13 @@
 {!else}
         {item_name}
 {!endif}
-        <!-- BEGIN ItemOptions -->
-          <br />
-          &nbsp;&nbsp;<small>--{opt_name}: {opt_value}
-          {!if opt_price}
-            &nbsp;({opt_price})
-          {!endif}
-          </small>
-        <!-- END ItemOptions -->
+        {item_options}
       </td>
       <td class="alignright">{item_price}</td>
       <td class="aligncenter">
         <input type="text" name="quantity[{cart_item_id}]" value="{item_quantity}" 
           size="3"
           />
-<!--          onchange="javascript:document.getElementById('submit').disabled=true;"-->
       </td>
       <td class="alignright">{item_total}</td>
       <td class="aligncenter">

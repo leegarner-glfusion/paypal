@@ -8,9 +8,7 @@
       {item_name}
 {!endif}
 {!if options}
-      <div class="ItemOptions">
         {options}
-      </div>
 {!endif}
   </div>
 <!-- END CartRow -->

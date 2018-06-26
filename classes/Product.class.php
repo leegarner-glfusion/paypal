@@ -20,17 +20,17 @@ class Product
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
-    var $properties;
+    protected $properties;
 
     /** Product Attributes
     *   @var array */
-    var $options;
+    public $options;
 
     /** Indicate whether the current user is an administrator
     *   @var boolean */
-    var $isAdmin;
+    public $isAdmin;
 
-    var $isNew;
+    public $isNew;
 
     /** Array of error messages
      *  @var mixed */
@@ -44,6 +44,7 @@ class Product
     protected $special_fields = array();
 
     public $Cat;        // Category object
+
 
     /**
      *  Constructor.
@@ -1510,6 +1511,79 @@ class Product
         } else {
             return 0;
         }
+    }
+
+
+    /**
+    *   Get the options display to be shown in the cart and on the order
+    *   Returns a string like so:
+    *       -- option1: option1_value
+    *       -- option2: optoin2_value
+    *
+    *   @param  array   $item   Item information from the cart
+    *   @return string      Option display
+    */
+    public function getOptionDisplay($item)
+    {
+        $retval = '';
+        $opts = array();
+
+        // Get attributes selected from the available options
+        if (isset($item['options']) && is_array($item['options'])) {
+            $options = $item['options'];
+        } else {
+            $options = array();
+        }
+        foreach ($options as $option) {
+            $opt = explode('|', $option);
+            if (!isset($this->options[$opt[0]])) continue;   // invalid?
+            $opts[] = array(
+                'opt_name'  => $this->options[$opt[0]]['attr_name'],
+                'opt_value' => $this->options[$opt[0]]['attr_value'],
+            );
+        }
+
+        // Get special fields submitted with the purchase
+        if (isset($item['extras']) && is_array($item['extras'])) {
+            if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
+                $sp_flds = $P->getSpecialFields($item['extras']['special']);
+                foreach ($sp_flds as $txt=>$val) {
+                    $opts[] = array(
+                        'opt_name'  => $txt,
+                        'opt_value' => $val,
+                    );
+                }
+            }
+        }
+
+        // Get text fields defined with the product
+        $text_names = explode('|', $this->custom);
+        if (!empty($text_names) &&
+                isset($item['extras']['custom']) &&
+                is_array($item['extras']['custom'])) {
+            foreach ($item['extras']['custom'] as $tid=>$val) {
+                if (isset($text_names[$tid])) {
+                    $opts[] = array(
+                        'opt_name'  => htmlspecialchars($text_names[$tid]),
+                        'opt_value' => htmlspecialchars($val),
+                    );
+                }
+            }
+        }
+
+        if (!empty($opts)) {
+            $T = PP_getTemplate('view_options', 'options');
+            $T->set_block('options', 'ItemOptions', 'ORow');
+            foreach ($opts as $opt) {
+                $T->set_var(array(
+                    'opt_name'  => $opt['opt_name'],
+                    'opt_value' => $opt['opt_value'],
+                ) );
+                $T->parse('ORow', 'ItemOptions', true);
+            }
+            $retval .= $T->parse('output', 'options');
+        }
+        return $retval;
     }
 
 

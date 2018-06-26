@@ -957,41 +957,16 @@ function phpblock_paypal_cart_contents()
     foreach ($cart->Cart() as $id=>$item) {
         $P = Paypal\Product::getInstance($item['item_id']);
 
-        // See if this is a plugin item, will have a ':' in the item number
-        if (strstr($item['item_id'], ':')) {
-            $item_info = explode(':', $item['item_id']);
-        }
         if (strpos($item['item_id'], '|')) {
             list($item_id, $options) = explode('|', $item['item_id']);
         } else {
             $item_id = $item['item_id'];
             $options = '';
         }
-        $item_price = $item['price'];
-        // Store the text for each attribute and custom field in an array,
-        // then implode around linebreaks to display them
-        $opt_str = '';
-        $opt_arr = array();
-        if ($options) {
-            $opt_ids = explode(',', $options);
-            foreach ($opt_ids as $opt_id) {
-                $opt_arr[] = $P->options[$opt_id]['attr_name'] . ': '.
-                        $P->options[$opt_id]['attr_value'];
-            }
-        }
-        $item_total = $item_price * $item['quantity'];
-        $text_names = explode('|', $P->custom);
-        if (!empty($text_names) && isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
-            foreach ($item['extras']['custom'] as $id=>$val) {
-                if (isset($text_names[$id]) && !empty($val)) {
-                    $opt_arr[] = $text_names[$id] . ': ' . $val;
-                }
-            }
-        }
-        $opt_str = implode('<br />', $opt_arr);
+        $item_total = (float)$item['price'] * $item['quantity'];
         $T->set_var(array(
             'item_id'       => $item_id,
-            'options'       => $opt_str,
+            'options'       => $P->getOptionDisplay($item),
             'item_name'     => $P->short_description,
             'item_dscp'     => $P->descrip,
             'price'         => COM_numberFormat($item['price'], 2),
