@@ -222,6 +222,7 @@ class Attribute
             }
             $this->ReOrder();
             //Cache::delete('prod_attr_' . $this->item_id);
+            Cache::clear('product');
             return true;
         } else {
             $this->AddError($err);
@@ -237,18 +238,15 @@ class Attribute
     *   @param  integer $attr_id    Attribute ID, empty for current object
     *   @return boolean     True on success, False on invalid ID
     */
-    public function Delete($attr_id = 0)
+    public static function Delete($attr_id)
     {
         global $_TABLES;
 
-        if ($attr_id == 0 && is_object($this)) {
-            $attr_id = $this->attr_id;
-            $this->attr_id = 0;
-        }
         if ($attr_id <= 0)
             return false;
 
         DB_delete($_TABLES['paypal.prod_attr'], 'attr_id', $attr_id);
+        Cache::clear('product');
         return true;
     }
 
