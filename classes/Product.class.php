@@ -1837,6 +1837,17 @@ class Product
         return $override == '' ? $this->short_description : $override;
     }
 
+
+    /**
+    *   Get the URL to the item detail page
+    *
+    *   @return string      Item detail URL
+    */
+    public function getLink()
+    {
+        return PAYPAL_URL . '/detail.php?id=' . $this->id;
+    }
+
 }   // class Product
 
 ?>

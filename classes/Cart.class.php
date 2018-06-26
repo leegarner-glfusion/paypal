@@ -625,7 +625,7 @@ class Cart
                 'item_price'    => COM_numberFormat($item_price, 2),
                 'item_quantity' => $item['quantity'],
                 'item_total'    => COM_numberFormat($item_total, 2),
-                'item_link'     => is_numeric($item_id) ? 'true' : '',
+                'item_link'     => $P->getLink(),
                 'iconset'       => $_PP_CONF['_iconset'],
                 'is_uikit'      => $_PP_CONF['_is_uikit'],
                 'taxable'       => $P->taxable,

@@ -18,6 +18,8 @@ namespace Paypal;
 */
 class PluginProduct extends Product
 {
+    public $url;        // URL to product detail page, if any
+
     /**
     *   Constructor.
     *   Creates an object for a plugin product and gets data from the
@@ -55,11 +57,12 @@ class PluginProduct extends Product
         $status = LGLIB_invokeService($this->pi_name, 'productinfo',
                     $pi_info, $A, $svc_msg);
         if ($status == PLG_RET_OK) {
-            $this->price = isset($A['price']) ? $A['price'] : 0;
+            $this->price = PP_getVar($A, 'price', 'float', 0);
             $this->item_name = $A['name'];
             $this->short_description = $A['short_description'];
-            $this->description = isset($A['description']) ? $A['description'] : $this->short_description;
-            $this->taxable = isset($A['taxable']) ? $A['taxable'] : 0;
+            $this->description = PP_getVar($A, 'description', 'string', $this->short_description);
+            $this->taxable = PP_getVar($A, 'taxable', 'integer', 0);
+            $this->url = PP_getVar($A, 'url');
          } else {
             // probably an invalid product ID
             $price = 0;
@@ -67,6 +70,8 @@ class PluginProduct extends Product
             $this->short_description = '';
             $this->item_id = NULL;
             $this->isNew = true;
+            $this->url = '';
+            $this->taxable = 0;
         }
     }
 
@@ -174,7 +179,18 @@ class PluginProduct extends Product
     {
         return true;
     }
- 
+
+
+    /**
+    *   Get the URL to the item detail page
+    *
+    *   @return string      Item detail URL
+    */
+    public function getLink()
+    {
+        return $this->url;
+    }
+
 }   // class PluginProduct
 
 ?>

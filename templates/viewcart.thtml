@@ -19,13 +19,11 @@
     <!-- BEGIN ItemRow -->
     <tr>
       <td>
-        {!if item_link}
-        <a href="{pi_url}/detail.php?id={item_id}">
-        {!endif}
+{!if item_link}
+        <a href="{item_link}">{item_name}</a>
+{!else}
         {item_name}
-        {!if item_link}
-        </a>
-        {!endif}
+{!endif}
         <!-- BEGIN ItemOptions -->
           <br />
           &nbsp;&nbsp;<small>--{opt_name}: {opt_value}
