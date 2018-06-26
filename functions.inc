@@ -1850,6 +1850,17 @@ function PAYPAL_now()
 }
 
 
+function PAYPAL_timezone()
+{
+    global $_CONF;
+    static $tz = NULL;
+    if ($tz === NULL) {
+        $tz = new DateTimeZone($_CONF['timezone']);
+    }
+    return $tz;
+}
+
+
 /**
 *   Get an icon from the CSS icon set, either UIkit or FontAwesome
 *
@@ -2069,11 +2080,12 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 *   @param  array   $A          Array where var should be
 *   @param  string  $varname    Name of array element
 *   @param  string  $type       Type of return value
+*   @param  mixed   $default    Default value, if any
 *   @return     Array element or NULL, cast to $type
 */
-function PP_getVar($A, $varname, $type = 'string')
+function PP_getVar($A, $varname, $type = 'string', $default = NULL)
 {
-    $val = isset($A[$varname]) ? $A[$varname] : NULL;
+    $val = isset($A[$varname]) ? $A[$varname] : $default;
     switch ($type) {
     case 'int':
         return (int)$val;
