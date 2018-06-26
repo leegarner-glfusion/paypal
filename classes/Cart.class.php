@@ -568,6 +568,7 @@ class Cart
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
             $item_price = $P->getPrice($attr_keys, $item['quantity'], $item['price']);
+            $item_name = $item['descrip'];
             if (!empty($attr_keys)) {
                 foreach ($attr_keys as $attr_key) {
                     if (!isset($P->options[$attr_key])) continue;   // invalid?
@@ -596,7 +597,7 @@ class Cart
                     }
                 }
             }
-            $item['name'] .= $attr_desc;
+            $item_name .= $attr_desc;
 
             // Get shipping amount and weight
             if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
@@ -619,7 +620,7 @@ class Cart
                 'cart_id'       => $item['item_id'],
                 'pp_id'         => $counter,
                 'item_id'       => $item_id,
-                'item_name'     => $item['name'],
+                'item_name'     => $item_name,
                 'item_descrip'  => $item['descrip'],
                 'item_price'    => COM_numberFormat($item_price, 2),
                 'item_quantity' => $item['quantity'],
