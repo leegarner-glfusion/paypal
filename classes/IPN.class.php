@@ -146,8 +146,15 @@ class IPN
         } else {
             $opts = array();
         }
-        $price = $P->getPrice($opts, $args['quantity']);
-        //$tax = $P->getTax($price, $args['quantity']);
+
+        // If the product allows the price to be overridden, just take the
+        // IPN-supplied price. This is the case for donations.
+        if ($P->override_price) {
+            $price = $args['price'];
+        } else {
+            $price = $P->getPrice($opts, $args['quantity']);
+        }
+
         $this->items[] = array(
             'item_id'   => $args['item_id'],
             'item_number' => $tmp[0],

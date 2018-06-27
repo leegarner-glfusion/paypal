@@ -45,6 +45,7 @@ class Product
 
     public $Cat;        // Category object
 
+    public $override_price = false;
 
     /**
      *  Constructor.

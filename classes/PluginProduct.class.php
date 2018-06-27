@@ -63,6 +63,7 @@ class PluginProduct extends Product
             $this->description = PP_getVar($A, 'description', 'string', $this->short_description);
             $this->taxable = PP_getVar($A, 'taxable', 'integer', 0);
             $this->url = PP_getVar($A, 'url');
+            $this->override_price = PP_getVar($A, 'override_price', 'integer', 0);
          } else {
             // probably an invalid product ID
             $price = 0;
