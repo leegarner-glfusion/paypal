@@ -91,7 +91,8 @@
 {!if is_uikit}
   <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">
     <i class="{iconset}-refresh"></i>&nbsp;{$LANG_PP['update_cart']}</button>
-  <button style="float:none;" type="submit" class="uk-button uk-button-danger" name="emptycart">
+  <button style="float:none;" type="reset" class="uk-button uk-button-danger" name="emptycart"
+    onclick="document.location.href='{pi_url}/index.php?emptycart=x';">
     <i class="{iconset}-trash-o"></i>&nbsp;{$LANG_PP['empty_cart']}</button>
 {!else}
   <input type="submit" class="paypalButton blue" name="updatecart" 
