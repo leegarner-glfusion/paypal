@@ -178,7 +178,6 @@ class paypal extends Gateway
         }
 
         $cartID = $cart->CartID();
-
         $custom_arr = array(
             'uid' => $_USER['uid'],
             'transtype' => 'cart_upload',
@@ -233,7 +232,7 @@ class paypal extends Gateway
                 $item_parts = explode('|', $item['item_id']);
                 $db_item_id = $item_parts[0];
                 $options = isset($item_parts[1]) ? $item_parts[1] : '';
-                $P = Product::getInstance($db_item_id);
+                $P = Product::getInstance($db_item_id, $custom_arr);
                 $db_item_id = DB_escapeString($db_item_id);
                 $oc = 0;
                 if (is_array($item['options'])) {
@@ -250,7 +249,11 @@ class paypal extends Gateway
                 } else {
                     $opts = array();
                 }
-                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity'], $item['price']);
+                $overrides = array(
+                    'price' => $item['price'],
+                    'uid'   => $_USER['uid'],
+                );
+                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity'], $overrides);
                 //$fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
                 $fields['item_number_' . $i] = (int)$cart_item_id;
                 $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
