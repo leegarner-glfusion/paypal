@@ -2059,9 +2059,14 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 */
 function PP_getVar($A, $varname, $type = 'string', $default = NULL)
 {
-    $val = isset($A[$varname]) ? $A[$varname] : $default;
+    if (!isset($A[$varname])) {
+        return $default;
+    } else {
+        $val = $A[$varname];
+    }
     switch ($type) {
     case 'int':
+    case 'integer':
         return (int)$val;
         break;
     case 'bool':
@@ -2071,7 +2076,9 @@ function PP_getVar($A, $varname, $type = 'string', $default = NULL)
         return (float)$val;
         break;
     case 'array':
-        if (!is_array($val)) {
+        if ($val === NULL) {
+            $val = array();
+        } elseif (!is_array($val)) {
             $val = array($val);
         }
         return $val;
@@ -2112,6 +2119,8 @@ function PP_getTax($amount)
 
 /**
 *   Helper function to get a template object.
+*   If a name is supplied as a string with no ID, an empty template
+*   object will be returned with the default path set.
 *
 *   @param  string  $name   Base name of template file, e.g. "editor"
 *   @param  string  $id     ID of template, e.g. "editform"
