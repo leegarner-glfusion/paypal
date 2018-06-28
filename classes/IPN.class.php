@@ -146,14 +146,11 @@ class IPN
         } else {
             $opts = array();
         }
-
         // If the product allows the price to be overridden, just take the
         // IPN-supplied price. This is the case for donations.
-        if ($P->override_price) {
-            $price = $args['price'];
-        } else {
-            $price = $P->getPrice($opts, $args['quantity']);
-        }
+        $overrides = $this->pp_data['custom'];
+        $overrides['price'] = $args['price'];
+        $price = $P->getPrice($opts, $args['quantity'], $overrides);
 
         $this->items[] = array(
             'item_id'   => $args['item_id'],
@@ -501,7 +498,6 @@ class IPN
 
             // Save the order record now that funds have been checked.
             $this->Order->Save();
-
             foreach ($this->Order->items as $item) {
                 $item->getProduct()->handlePurchase($item, $this->Order, $this->pp_data);
             }

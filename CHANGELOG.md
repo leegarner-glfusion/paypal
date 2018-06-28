@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- New option for products to accept IPN value as actual price
 - Use cookie instead of session to store cart IDs since session changes at login
 - Add privacy_export function
 - Additional refactoring to support multiple product types

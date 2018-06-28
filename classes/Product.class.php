@@ -47,6 +47,8 @@ class Product
 
     public $override_price = false;
 
+    private $_uid = 0;  // user id, for pricing
+
     /**
      *  Constructor.
      *  Reads in the specified class, if $id is set.  If $id is zero,
@@ -120,7 +122,7 @@ class Product
     public static function getInstance($A, $B=array())
     {
         global $_TABLES;
-        static $P = array();
+        static $P = array();    // cache for internal products
 
         if (is_array($A)) {
             // A complete product record
@@ -133,12 +135,13 @@ class Product
             // Missing product ID
             return NULL;
         }
-        if (!array_key_exists($id, $P)) {
-            $item = explode('|', $id);
-            if (self::isPluginItem($item[0])) {
-                // Product provided by another plugin
-                $P[$id] = new PluginProduct($item[0], $B);
-            } else {
+
+        $item = explode('|', $id);
+        if (self::isPluginItem($item[0])) {
+            // Product provided by another plugin
+            return new PluginProduct($item[0], $B);
+        } else {
+            if (!array_key_exists($id, $P)) {
                 // Product internal to this plugin
                 if (!is_array($A)) {
                     $cache_key = self::_makeCacheKey($item[0]);
@@ -163,8 +166,8 @@ class Product
                     $P[$id]->loadAttributes();
                 }
             }
+            return $P[$id];
         }
-        return $P[$id];
     }
 
 
@@ -1457,15 +1460,15 @@ class Product
     *
     *   @param  array   $options    Array of integer option values
     *   @param  integer $quantity   Quantity, used to calculate discounts
-    *   @param  float   $override   Override price
-    *   @return float       Product price, including options
+    *   @param  array   $override   Override elements (price, uid)
+    *   @return float       Product price, including option
     */
-    public function getPrice($options = array(), $quantity = 1, $override = NULL)
+    public function getPrice($options = array(), $quantity = 1, $override = array())
     {
         if (!is_array($options)) $options = array($options);
-        if ($override !== NULL) {
+        if ($this->override_price && isset($override['price'])) {
             // If an override price is specified, just return it.
-            return round((float)$override, $this->currency->Decimals());
+            return round((float)$override['price'], $this->currency->Decimals());
         } elseif ($this->isOnSale()) {
             // Use the sale price if this item is on sale
             $price = $this->sale_price;

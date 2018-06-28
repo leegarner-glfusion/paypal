@@ -19,6 +19,7 @@ namespace Paypal;
 class PluginProduct extends Product
 {
     public $url;        // URL to product detail page, if any
+    public $pi_info;    // plugin info with item_id and other vars
 
     /**
     *   Constructor.
@@ -26,36 +27,31 @@ class PluginProduct extends Product
     *   plugin's service function
     *
     *   @param  string  $id     Item ID - plugin:item_id|opt1,opt2...
-    *   @param  array   $A      Array of elements passed to parent::getInstance()
+    *   @param  array   $mods   Array of modifiers from parent::getInstance()
     */
-    public function __construct($item, $A=array())
+    public function __construct($item, $mods=array())
     {
         global $_PP_CONF;
 
+        $this->pi_info = array();
         $item = explode('|', $item);
         $item_id = $item[0];
         $this->properties = array();
         $this->currency = new Currency($_PP_CONF['currency']);
-        $this->item_id = $item_id;
-        $pi_info = explode(':', $item_id);
-        $this->pi_name = $pi_info[0];
-        if (isset($pi_info[1])) {
-            $this->product_id = $pi_info[1];
-        } else {
-            $this->item_id = NULL;
-            return;
-        }
+        $this->item_id = $item_id;  // Full item id
+        $item_parts = explode(':', $item_id);
+        $this->pi_name = $item_parts[0];
+        array_shift($item_parts);         // Remove plugin name
+        $this->pi_info['item_id'] = $item_parts;
+        $this->product_id = $item_parts[0];
 
         // Get the user ID to pass to the plugin in case it's needed.
-        if (isset($A['uid'])) {
-            $pi_info['uid'] = $A['uid'];
-        }
-
+        $this->pi_info['mods'] = $mods;
         $this->prod_type = PP_PROD_PLUGIN;
 
         // Try to call the plugin's function to get product info.
         $status = LGLIB_invokeService($this->pi_name, 'productinfo',
-                    $pi_info, $A, $svc_msg);
+                    $this->pi_info, $A, $svc_msg);
         if ($status == PLG_RET_OK) {
             $this->price = PP_getVar($A, 'price', 'float', 0);
             $this->item_name = $A['name'];
@@ -157,14 +153,22 @@ class PluginProduct extends Product
     *
     *   @param  array   $options    Array of integer option values (unused)
     *   @param  integer $quantity   Quantity, used to calculate discounts (unused)
+    *   @param  array   $override   Array of override options (price, uid)
     *   @return float       Product price, including options
     */
-    public function getPrice($options = array(), $quantity = 1, $override = NULL)
+    public function getPrice($options = array(), $quantity = 1, $override = array())
     {
-        if ($override !== NULL) {
-            return (float)$override;
+        if ($this->override_price && isset($override['price'])) {
+            return (float)$override['price'];
         } else {
-            return $this->price;
+            if (isset($override['uid'])) $this->pi_info['uid'] = $override['uid'];
+            $status = LGLIB_invokeService($this->pi_name, 'productinfo',
+                    $this->pi_info, $A, $svc_msg);
+            if ($status == PLG_RET_OK && isset($A['price'])) {
+                return $A['price'];
+            } else {
+                return $this->price;
+            }
         }
     }
 
