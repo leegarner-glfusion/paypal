@@ -227,9 +227,15 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     // included in the "updates" array. If there are no specific updates, then
     // do nothing.
     if (isset($args['unique']) && $args['unique']) {
+        // If the item exists, don't add it, but check if there's an update
         if ($ppGCart->Contains($item_number) !== false) {
             if (isset($args['update']) && is_array($args['update'])) {
-                $ppGCart->updateItem($item_number, $args['update']);
+                // Collect the updated field=>value pairs to send to updateItem()
+                $updates = array();
+                foreach ($args['update'] as $fld) {
+                    $updates[$fld] = $args[$fld];
+                }
+                $ppGCart->updateItem($item_number, $updates);
             }
             return PLG_RET_OK;
         }
