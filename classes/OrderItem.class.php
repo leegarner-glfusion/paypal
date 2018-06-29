@@ -26,7 +26,7 @@ class OrderItem
     private static $fields = array('id', 'order_id', 'product_id',
             'description', 'quantity', 'user_id', 'txn_id', 'txn_type',
             'purchase_date', 'status', 'expiration', 'price', 'token',
-            'options', 'options_text', 'extras', 'taxable',
+            'options', 'options_text', 'extras', 'taxable', 'paid',
     );
 
     /**
@@ -109,6 +109,7 @@ class OrderItem
             $this->properties[$key] = $value;
             break;
         case 'price':
+        case 'paid':
             $this->properties[$key] = (float)$value;
             break;
         case 'taxable':

@@ -164,6 +164,7 @@ class IPN
             'taxable'   => $P->taxable ? 1 : 0,
             'options'   => isset($tmp[1]) ? $tmp[1] : '',
             'extras'    => isset($args['extras']) ? $args['extras'] : '',
+            'overrides' => $overrides,
         );
     }
 
@@ -659,6 +660,7 @@ class IPN
                 'options' => $options,
                 'options_text' => $option_desc,
                 'extras' => $item['extras'],
+                'paid' => PP_getVar($item['overrides'], 'price', 'float', $item['price']),
             );
             $this->Order->addItem($args);
         }   // foreach item

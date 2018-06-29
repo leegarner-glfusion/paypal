@@ -106,18 +106,19 @@ class PluginProduct extends Product
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
         PAYPAL_debug('Paypal\\PluginProduct::handlePurchase() pi_info: ' . $this->pi_name);
-        $vars = array(
+        $args = array(
             'item'  => array(
                 'item_id' => $Item->product_id,
                 'quantity' => $Item->quantity,
                 'name' => $Item->item_name,
                 'price' => $Item->price,
+                'paid' => $Item->paid,
             ),
             'ipn_data'  => $ipn_data,
             'order' => $Order,      // Pass the order object, may be used in the future
         );
         if ($ipn_data['status'] == 'paid') {
-            $status = LGLIB_invokeService($this->pi_name, 'handlePurchase', $vars, $output, $svc_msg);
+            $status = LGLIB_invokeService($this->pi_name, 'handlePurchase', $args, $output, $svc_msg);
         }
     }
 
@@ -131,12 +132,12 @@ class PluginProduct extends Product
     public function handleRefund($Order, $pp_data = array())
     {
         if (empty($pp_data)) return false;
-        $vars = array(
+        $args = array(
             'item_id'   => explode(':', $this->item_id),
             'ipn_data'  => $pp_data,
         );
         $status = LGLIB_invokeService($this->pi_name, 'handleRefund',
-                $vars, $output, $svc_msg);
+                $args, $output, $svc_msg);
         return $status == PLG_RET_OK ? true : false;
     }
 
@@ -161,7 +162,9 @@ class PluginProduct extends Product
         if ($this->override_price && isset($override['price'])) {
             return (float)$override['price'];
         } else {
-            if (isset($override['uid'])) $this->pi_info['uid'] = $override['uid'];
+            if (isset($override['uid'])) {
+                $this->pi_info['mods']['uid'] = $override['uid'];
+            }
             $status = LGLIB_invokeService($this->pi_name, 'productinfo',
                     $this->pi_info, $A, $svc_msg);
             if ($status == PLG_RET_OK && isset($A['price'])) {

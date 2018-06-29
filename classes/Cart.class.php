@@ -319,6 +319,7 @@ class Cart
         $options = isset($args['options']) ? $args['options'] : array();
         $item_name = isset($args['item_name']) ? $args['item_name'] : '';
         $item_dscp = isset($args['short_description']) ? $args['short_description'] : '';
+        $uid = PP_getVar($args, 'uid', 'int', 1);
         if (!is_array($this->m_cart))
             $this->m_cart = array();
 
@@ -335,7 +336,8 @@ class Cart
             $options = array();
         }
 
-        $price = $P->getPrice($opts, $quantity, $override);
+        //$price = $P->getPrice($opts, $quantity, $override);
+        $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
         if ($P->taxable) {
             $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
             $tax = round($tax_rate * $price * $quantity, 2);
@@ -566,7 +568,8 @@ class Cart
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
-            $item_price = $P->getPrice($attr_keys, $item['quantity']);
+            //$item_price = $P->getPrice($attr_keys, $item['quantity']);
+            $item_price = $item['price'];
             $item_name = $item['descrip'];
             // Get shipping amount and weight
             if ($P->shipping_type == 2 && $P->shipping_amt > 0) {

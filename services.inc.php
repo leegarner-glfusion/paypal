@@ -218,6 +218,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
         'options' => isset($args['options']) ? $args['options'] : array(),
         'extras' => isset($args['extras']) ? $args['extras'] : array(),
         'override' => $override,
+        'uid' => PP_getVar($args, 'uid', 'int', 1),
     );
     if (isset($args['tax'])) {
         $cart_args['tax'] = $args['tax'];
@@ -240,7 +241,6 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
             return PLG_RET_OK;
         }
     }
-
     $ppGCart->addItem($cart_args);
     return PLG_RET_OK;
 }
