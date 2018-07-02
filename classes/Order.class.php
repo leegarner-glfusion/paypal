@@ -91,6 +91,7 @@ class Order
     {
         switch ($name) {
         case 'uid':
+        case 'ux_date':
             $this->properties[$name] = (int)$value;
             break;
 
@@ -138,7 +139,8 @@ class Order
         if ($id != '') {
             $this->order_id = $id;
 
-            $sql = "SELECT * FROM {$_TABLES['paypal.orders']}
+            $sql = "SELECT *, UNIX_TIMESTAMP(order_date) as ux_date
+                    FROM {$_TABLES['paypal.orders']}
                     WHERE order_id='{$this->order_id}'";
             $res = DB_query($sql);
             if (!$res) return false;    // requested order not found
@@ -282,6 +284,7 @@ class Order
         $this->instructions = PP_getVar($A, 'instructions');
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
+        $this->ux_date = PP_getVar($A, 'ux_date', 'int');
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
         }
@@ -463,7 +466,7 @@ class Order
             }
             $T->parse('iRow', 'ItemRow', true);
         }
-        $dt = new \Date(strtotime($this->order_date), $_USER['tzid']);
+        $dt = new \Date($this->ux_date, $_USER['tzid']);
         $total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
@@ -502,7 +505,7 @@ class Order
         $log = $this->getLog();
         $T->set_block('order', 'LogMessages', 'Log');
         foreach ($log as $L) {
-            $dt->setTimestamp(strtotime($L['ts']));
+            $dt->setTimestamp($L['ux_ts']);
             $T->set_var(array(
                 'log_username'  => $L['username'],
                 'log_msg'       => $L['message'],
@@ -614,6 +617,34 @@ class Order
         $cache_key = 'orderlog_' . $order_id;
         Cache::delete($cache_key);
         return true;
+    }
+
+
+    /**
+    *   Get the last log entry.
+    *   Called from admin ajax to display the log after the status is updated.
+    *   Resets the "ts" field to the formatted timestamp.
+    *
+    *   @return array   Array of DB fields.
+    */
+    public function getLastLog()
+    {
+        global $_TABLES, $_PP_CONF, $_CONF;
+
+        $sql = "SELECT *, UNIX_TIMESTAMP(ts) as ux_ts
+                FROM {$_TABLES['paypal.order_log']}
+                WHERE order_id = '" . DB_escapeString($this->order_id) . "'
+                ORDER BY ts DESC
+                LIMIT 1";
+        //echo $sql;die;
+        if (!DB_error()) {
+            $L = DB_fetchArray(DB_query($sql), false);
+            if (!empty($L)) {
+                $dt = new \Date($L['ux_ts'], $_CONF['timezone']);
+                $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
+            }
+        }
+        return $L;
     }
 
 
@@ -860,7 +891,9 @@ class Order
         $log = Cache::get($cache_key);
         if ($log === NULL) {
             $log = array();
-            $sql = "SELECT * FROM {$_TABLES['paypal.order_log']} WHERE order_id = '$order_id'";
+            $sql = "SELECT *, UNIX_TIMESTAMP(ts) as ux_ts
+                    FROM {$_TABLES['paypal.order_log']}
+                    WHERE order_id = '$order_id'";
             $res = DB_query($sql);
             while ($L = DB_fetchArray($res, false)) {
                 $log[] = $L;

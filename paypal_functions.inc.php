@@ -42,7 +42,9 @@ function listOrders($admin = false, $uid = '')
 
     $isAdmin = $admin == true ? 1 : 0;
 
-    $sql = "SELECT ord.*, SUM(itm.quantity * itm.price) as ord_total,
+    $sql = "SELECT ord.*,
+            UNIX_TIMESTAMP(order_date) as ux_date,
+            SUM(itm.quantity * itm.price) as ord_total,
             u.username, $isAdmin as isAdmin
         FROM {$_TABLES['paypal.orders']} AS ord
         LEFT JOIN {$_TABLES['users']} AS u
@@ -56,7 +58,7 @@ function listOrders($admin = false, $uid = '')
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
-                'field' => 'order_date', 'sort' => true),
+                'field' => 'ux_date', 'sort' => true),
         array('text' => $LANG_PP['order_number'],
                 'field' => 'order_id', 'sort' => true),
         array('text' => $LANG_PP['total'],
@@ -233,8 +235,8 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     }
 
     switch($fieldname) {
-    case 'order_date':
-        $dt->setTimestamp(strtotime($fieldvalue));
+    case 'ux_date':
+        $dt->setTimestamp($fieldvalue);
         $retval = '<span class="tooltip" title="' .
                 $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
                 $dt->format($_PP_CONF['datetime_fmt'], true) . '</span>';
@@ -765,10 +767,10 @@ function ProductList($cat_id = 0)
                 } else {
                     $item_url = '';
                 }
-                $item_name = isset($A['name']) ? $A['name'] : $A['id'];
-                $item_dscp = isset($A['short_description']) ? $A['short_description'] : $item_name;
-                $img = isset($A['image']) && !empty($A['image']) ? PAYPAL_ImageUrl($A['image']) : '';
-                $price = isset($A['price']) ? (float)$A['price'] : 0;
+                $item_name = PP_getVar($A, 'name', 'string', $A['id']);
+                $item_dscp = PP_getVar($A, 'short_description', 'string', $item_name);
+                $img = PP_getVar($A, 'image', 'string', '');
+                $price = PP_getVar($A, 'price', 'float', 0);
                 $product->set_var(array(
                     'id'        => $A['id'],        // required
                     'name'      => $item_name,

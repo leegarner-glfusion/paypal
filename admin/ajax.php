@@ -23,29 +23,20 @@ if (!plugin_ismoderator_paypal()) {
 switch ($_POST['action']) {
 case 'updatestatus':
     if (!empty($_POST['order_id']) &&
-        !empty($_POST['newstatus'])) {
-        $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        $log_ts = '';
-        $log_user = '';
-        $log_msg = '';
+            !empty($_POST['newstatus'])) {
         $newstatus = $_POST['newstatus'];
         $order_id = $_POST['order_id'];
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        $ord = Paypal\Order::getInstance($_POST['order_id']);
-        if ($ord->isNew) break;     // non-existant order
-        if ($ord->updateStatus($newstatus)) {
-            // Get the log message that was just added
-            $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
-                WHERE order_id = '" . DB_escapeString($order_id) . "'
-                ORDER BY ts DESC
-                LIMIT 1";
-            //echo $sql;die;
-            $L = DB_fetchArray(DB_query($sql), false);
+        $ord = Paypal\Order::getInstance($order_id);
+        if ($ord->isNew)  {     // non-existant order
+            $L = array(
+                'showlog' => 0,
+            );
+        } elseif ($ord->updateStatus($newstatus)) {
+            $L = $ord->getLastLog();
             if (!empty($L)) {
                 // Add flag to indicate whether to update on-screen log
                 $L['showlog'] = $showlog;
-                $dt = new \Date($L['ts'], $_CONF['timezone']);
-                $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
                 $L['newstatus'] = $newstatus;
             }
         }
