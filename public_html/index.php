@@ -52,7 +52,7 @@ if (!empty($action)) {
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
-        'cart', 'pidetail'
+        'cart', 'pidetail',
     );
     $action = 'productlist';    // default view
     foreach($expected as $provided) {

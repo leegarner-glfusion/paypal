@@ -1527,7 +1527,7 @@ function PAYPAL_couponlist()
 */
 function PAYPAL_itemhist($item_id = '')
 {
-    global $_TABLES, $LANG_PP;
+    global $_TABLES, $LANG_PP, $_PP_CONF;
 
     if (is_numeric($item_id)) {
         $Item = new Paypal\Product($item_id);
