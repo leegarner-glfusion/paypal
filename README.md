@@ -97,3 +97,78 @@ $args = amount
 
 $ouptut contains the formatted string
 ```
+
+## Functions Provided by Plugins
+These service functions should be provided by plugins wishing to leveraget the Paypal plugin.
+
+### `service_getproducts_piname`
+Returns an array of product information to be included in the catalog display.
+```
+$args = not used
+$output = array(
+    array(
+        'id'        => pi_name . ':' . item_id (. '|' . item_options),
+        'item_id'   => item ID, without plugin name or options,
+        'name'      => item name or SKU,
+        'short_description' => One-line item description,
+        'description' => Full item description,
+        'price'     => Unit price,
+        'buttons' => array(
+            button_type => button_contents (see plugin_genButton_paypal()),
+        ),
+        'url'       => URL to item detail page, or...
+        'have_detail_svc' => True to wrap the detail detail page in the catalog format (see plugin_getDetailPage_piname()),
+    ),
+    array(
+        ...
+    ),
+);
+```
+
+### `service_getDetailPage_piname`
+Returns the product detail page HTML to be displayed by the Paypal plugin
+```
+$args = array(
+    'item_id' => piname . ':' . item_id ( . '|' . item_options)
+);
+$output = HTML for product detail
+```
+
+## `service_handlePurchase_piname`
+Handle the purchase of a plugin item
+```
+$args = array(
+    'item' => array(
+        'item_id' => piname . ':' . item_id ( . '|' . item_options)
+    ),
+    'ipn_data' => array(
+        // complete IPN data array
+    ),
+);
+$output = array(
+    'product_id' => Full item id,
+    'name'      => Product name or SKU,
+    'short_description' => One-line product description,
+    'description' => Full product description,
+    'price'     => Unit price,
+    'expiration' => Expiration date for downloads,
+    'download'  => 1 if downloadable, else 0,
+    'file'      => Filename for downloadable product,
+);
+```
+
+### `service_productinfo_piname`
+Gets the basic product information to populate the PluginProduct object
+```
+$args = array(
+    'item_id' => Full item ID
+);
+$output = array(
+    'product_id' => Full item id,
+    'name'      => Product name or SKU,
+    'short_description' => One-line product description,
+    'description' => Full product description,
+    'price'     => Unit price,
+    'taxable'   => 1 if the product is taxable, else 0,
+);
+```
