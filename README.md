@@ -69,8 +69,6 @@ $output = array(        // Note: currently not used for plugin items
 ### `service_addCartItem_paypal()`
 This is a function provided by the Paypal plugin to allow other plugins to add their items to the shopping cart.
 ```
-    $override = isset($args['override']) && $args['override'] ? true : false;
-
 $args = array(
     'item_id'   => Item number string, including plugin name (plugin:item_id:sub1:sub2),
     'quantity'  => Quantity,
@@ -88,3 +86,14 @@ $args = array(
 $output is not set
 ```
 
+### `service_formatAmount_paypal()`
+Get a currency amount formatted based on the default currency.
+```
+$args = array(
+    'amount' => Floating-point amount
+);
+//or//
+$args = amount
+
+$ouptut contains the formatted string
+```
