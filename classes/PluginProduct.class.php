@@ -97,8 +97,7 @@ class PluginProduct extends Product
     *   Handle the purchase of this item.
     *   1. Update qty on hand if track_onhand is set (min. value 0)
     *
-    *   @param  integer $qty        Quantity ordered
-    *   @param  object  $Item       Item record, to get options, etc.
+    *   @param  object  $Item       Item object, to get options, etc.
     *   @param  object  $Order      Optional order object (not used yet)
     *   @param  array   $ipn_data   IPN data
     *   @return integer     Zero or error value

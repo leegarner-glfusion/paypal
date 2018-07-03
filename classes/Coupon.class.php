@@ -42,25 +42,32 @@ class Coupon extends Product
     *   @see        https://github.com/joashp/simple-php-coupon-code-generator
     *   @param array $options
     *   @return string
-    *   @throws Exception
     */
-    public static function generate($options = [])
+    public static function generate($options = array())
     {
-        $length         = (isset($options['length']) ? filter_var($options['length'], FILTER_VALIDATE_INT, ['options' => ['default' => self::MIN_LENGTH, 'min_range' => 1]]) : self::MIN_LENGTH );
-        $prefix         = (isset($options['prefix']) ? self::cleanString(filter_var($options['prefix'], FILTER_SANITIZE_STRING)) : '' );
-        $suffix         = (isset($options['suffix']) ? self::cleanString(filter_var($options['suffix'], FILTER_SANITIZE_STRING)) : '' );
-        $useLetters     = (isset($options['letters']) ? filter_var($options['letters'], FILTER_VALIDATE_BOOLEAN) : true );
-        $useNumbers     = (isset($options['numbers']) ? filter_var($options['numbers'], FILTER_VALIDATE_BOOLEAN) : false );
-        $useSymbols     = (isset($options['symbols']) ? filter_var($options['symbols'], FILTER_VALIDATE_BOOLEAN) : false );
-        $useMixedCase   = (isset($options['mixed_case']) ? filter_var($options['mixed_case'], FILTER_VALIDATE_BOOLEAN) : false );
-        $mask           = (isset($options['mask']) ? filter_var($options['mask'], FILTER_SANITIZE_STRING) : false );
+        $length = PP_getVar($options, 'length', 'int', self::MIN_LENGTH);
+        $prefix = PP_getVar($options, 'prefix', 'string');
+        $suffix = PP_getVar($options, 'suffix', 'string');
+        $useLetters = PP_getVar($options, 'letters', 'bool', true);
+        $useNumbers = PP_getVar($options, 'numbers', 'bool', false);
+        $useSymbols = PP_getVar($options, 'symbols', 'bool', false);
+        $useMixedCase = PP_getVar($options, 'mixed_case', 'bool', false);
+        $mask = PP_getVar($options, 'mask', 'string');
 
-        $uppercase    = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M'];
-        $lowercase    = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
-        $numbers      = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        $symbols      = ['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '\\', '|', '/', '[', ']', '{', '}', '"', "'", ';', ':', '<', '>', ',', '.', '?'];
-
-        $characters   = [];
+        $uppercase = array('Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+                            'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
+                            'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+        );
+        $lowercase = array('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+                            'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',
+                            'z', 'x', 'c', 'v', 'b', 'n', 'm',
+        );
+        $numbers = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        $symbols = array('`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                        '-', '_', '=', '+', '\\', '|', '/', '[', ']', '{', '}',
+                        '"', "'", ';', ':', '<', '>', ',', '.', '?',
+        );
+        $characters = array();
         $coupon = '';
 
         if ($useLetters) {
@@ -80,8 +87,11 @@ class Coupon extends Product
         }
         $charcount = count($characters);
 
+        // If a mask is specified, use it and substitute 'X' for coupon chars.
+        // Otherwise use the specified lenght.
         if ($mask) {
-            for ($i = 0; $i < strlen($mask); $i++) {
+            $len = strlen($mask);
+            for ($i = 0; $i < $len; $i++) {
                 if ($mask[$i] === 'X') {
                     $coupon .= $characters[mt_rand(0, $charcount - 1)];
                 } else {
@@ -124,15 +134,11 @@ class Coupon extends Product
     */
     static private function cleanString($string, $options = array())
     {
-        $toUpper = (isset($options['uppercase']) ? filter_var($options['uppercase'], FILTER_VALIDATE_BOOLEAN) : false);
-        $toLower = (isset($options['lowercase']) ? filter_var($options['lowercase'], FILTER_VALIDATE_BOOLEAN) : false);
-
+        $toUpper = PP_getVar($options, 'uppercase', 'bool', false);
+        $toLower = PP_getVar($options, 'lowercase', 'bool', false);
         $stripped = preg_replace('/[^a-zA-Z0-9]/', '', $string);
 
-        // make uppercase
-        if ($toLower && $toUpper) {
-            throw new Exception('You cannot set both options (uppercase|lowercase) to "true"!');
-        } else if ($toLower) {
+        if ($toLower) {
             return strtolower($stripped);
         } else if ($toUpper) {
             return strtoupper($stripped);
@@ -189,7 +195,7 @@ class Coupon extends Product
     *
     *   @param  string  $code   Coupon code
     *   @param  integer $uid    Optional user ID, current user by default
-    *   @return string          Message text
+    *   @return integer     Status code (0=success, 1=already done, 2=error)
     */
     public static function Apply($code, $uid = 0)
     {
@@ -203,11 +209,11 @@ class Coupon extends Product
         $res = DB_query("SELECT * FROM {$_TABLES['paypal.coupons']}
                 WHERE code = '$code'");
         if (DB_numRows($res) == 0) {
-            return "Not Found";
+            return 2;
         } else {
             $A = DB_fetchArray($res, false);
             if (!is_null($A['redeemed'])) {
-                return "Already Redeemed by {$A['redeemer']} on {$A['redeemed']}";
+                return 1;
             }
         }
         $amount = (float)$A['amount'];
@@ -217,8 +223,9 @@ class Coupon extends Product
                     redeemed = '" . PAYPAL_now()->toMySQL(true) . "'
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
+            if (DB_error()) return 2;
         }
-        return 'OK';
+        return 0;
     }
 
 
@@ -268,9 +275,8 @@ class Coupon extends Product
 
     /**
     *   Handle the purchase of this item.
-    *   1. Update qty on hand if track_onhand is set (min. value 0)
     *
-    *   @param  integer $qty        Quantity ordered
+    *   @param  object  $Item       Item object, to get options, etc.
     *   @param  object  $Order      Order object
     *   @param  array   $ipn_data   Paypal IPN data
     *   @return integer     Zero or error value
@@ -280,35 +286,25 @@ class Coupon extends Product
         global $_TABLES, $LANG_PP_EMAIL, $_PP_CONF, $_CONF;
 
         $status = 0;
-        $qty = (int)$Item['quantity'];
-        $amount = (float)$Item['price'];
-        $item_id = (int)$Item['id'];
-        $extras = @json_decode($Item['extras'],true);
-        $recip_email = '';
-        $sender_name = '';
-        if (is_array($extras) && isset($extras['special'])) {
-            if (isset($extras['special']['recipient_email'])) {
-                $recip_email = $extras['special']['recipient_email'];
-            }
-            if (isset($extras['special']['sender_name'])) {
-                $sender_name = $extras['special']['sender_name'];
-            }
-        }
+        $amount = (float)$Item->price;
+        $special = PP_getVar($Item->extras, 'special', 'array');
+        $recip_email = PP_getVar($special, 'recipient_email', 'string');
+        $sender_name = PP_getVar($special, 'sender_name', 'string');
 
-        $gc_code = self::Purchase($amount, $Item['user_id']);
+        $gc_code = self::Purchase($amount, $Item->user_id);
         parent::handlePurchase($Item, $Order);
 
         if ($recip_email != '') {
-            PAYPAL_debug("Sending email to " . $recip_email);
-
+            PAYPAL_debug("Sending Coupon to " . $recip_email);
             $T = PP_getTemplate('coupon_email_message', 'message');
             $T->set_var(array(
                 'gc_code'   => $gc_code,
+                'sender_name' => $sender_name,
             ) );
             $T->parse('output', 'message');
             $msg_text = $T->finish($T->get_var('output'));
             COM_emailNotification(array(
-                    'to' => array($recip_email),
+                    'to' => array(array('email'=>$recip_email, 'name' => $recip_email)),
                     'from' => $_CONF['site_mail'],
                     'htmlmessage' => $msg_text,
                     'subject' => $LANG_PP_EMAIL['coupon_subject'],

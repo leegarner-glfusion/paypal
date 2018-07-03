@@ -226,7 +226,16 @@ case 'redeem':
     }
     $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
     $uid = $_USER['uid'];
-    Paypal\Coupon::Apply($code, $uid);
+    $status = Paypal\Coupon::Apply($code, $uid);
+    if ($status > 0) {
+        $persist = true;
+        $type = 'error';
+    } else {
+        $persist = false;
+        $type = 'info';
+    }
+    $content .= COM_showMessageText($LANG_PP['coupon_apply_msg' . $status],
+                '', $persist, $type);
     break;
     
 case 'action':      // catch all the "?action=" urls

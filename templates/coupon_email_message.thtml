@@ -1,4 +1,7 @@
 <p>{$LANG_PP_EMAIL['coupon_1']}</p>
+{!if sender_name}
+<p>{$LANG_PP['from']}: {sender_name}</p>
+{!endif}
 <p>
 {$LANG_PP_EMAIL['coupon_id']}: <a href="{site_url}/paypal/index.php?redeem=x&code={gc_code}">{gc_code}</a>
 </p>
