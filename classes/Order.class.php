@@ -465,6 +465,7 @@ class Order
                 $T->parse('iOpts', 'ItemOptions', true);
             }
             $T->parse('iRow', 'ItemRow', true);
+            $T->clear_var('iOpts');
         }
         $dt = new \Date($this->ux_date, $_USER['tzid']);
         $total = $this->getTotal();     // also calls calcTax()
