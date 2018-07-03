@@ -1181,26 +1181,6 @@ function phpblock_paypal_recent($cat='')
 
 
 /**
-*   Return the configured currency.
-*   This is an API function to allow other plugins to find out what
-*   currency we accept.
-*
-*   This function is deprecated, but is kept to avoid completely breaking
-*   if some plugin that calls this function is still in place.
-*
-*   Plugins should call LGLIB_invokeService('paypal, 'getCurrency'...) instead.
-*
-*   @deprecated 0.5.0
-*   @return string      Our configured currency code.
-*/
-function X_PAYPAL_getCurrency()
-{
-    global $_PP_CONF;
-    return $_PP_CONF['currency'];
-}
-
-
-/**
 *   Display a formatted error message.
 *   This returns the provided message formatted using glFusion's
 *   typography options.
@@ -1430,27 +1410,6 @@ function plugin_canuserrate_paypal($item_id, $uid)
 
 
 /**
-*   Save the current user's shopping cart
-*
-*   @uses   Cart::SaveUserCart()
-*   @since  version 0.5.0
-*   @param  integer $uid    User ID (not really used
-*/
-function X_plugin_user_logout_paypal($uid)
-{
-    global $_PP_CONF;
-
-    // Does not apply to anonymouse users or if cart is disabled
-    if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
-
-    //PAYPAL_setCart();
-    $cart = Paypal\Cart::getInstance();
-    $cart->SaveUserCart($uid);
-    $cart->Clear($uid);
-}
-
-
-/**
 *   Handle actions needed when the current user logs in.
 *   Merges the saved cart with any values added while browsing anonymously
 *
@@ -1644,55 +1603,8 @@ function plugin_configmanager_select_currency_paypal()
 }
 
 
-/*   Displays account information in the user's profile.
-*
-*   @param  integer $uid    User ID whose profile is being displayed
-*   @param  object  &$T     Pointer to template object
-*   @return string          HTML to include in profile page
-*/
-function Xplugin_profilevariablesdisplay_paypal($uid, &$T)
-{
-    global $_TABLES, $_USER, $_PP_CONF;
-
-    $retval = '';
-
-    // Make sure that a valid UID was passed in.
-    if (empty($uid) || (!plugin_ismoderator_paypal() && $uid != $_USER['uid'])) {
-        return '';
-    }
-
-    $LT = new \Template(__DIR__ . '/templates/');
-    $LT->set_file(array(
-        'block' => 'profileblock.thtml',
-    ));
-    $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
-    $U = Paypal\UserInfo::getInstance($uid);
-    $Cur = new Paypal\Currency();
-    $gc_bal = Paypal\Coupon::getUserBalance($uid);
-    if ($gc_bal > 0) {
-        $LT->set_var('gc_bal', $Cur->Format($gc_bal));
-    }
-    if (!empty($U->cart)) {
-        $cart = true;
-        $LT->set_var('cart', true);
-    } else {
-        $cart = false;
-    }
-    $ord_count = DB_count($_TABLES['paypal.orders'], "uid = $uid");
-    $LT->set_var('orders', $ord_count);
-
-    // Only display the template if there's something to show
-    if ($ord_count > 0 || $cart || $gc_bal > 0) {
-        $LT->parse('output', 'block');
-        $existingFields = $T->get_var('plugin_fields');
-        $T->set_var('plugin_fields',
-                $existingFields . $T->finish($LT->get_var('output')));
-    }
-}
-
-
 /**
-*   Display variables related to the shop
+*   Display variables related to the shop in Account Settings
 *
 *   @param  integer $uid        User ID
 *   @param  string  $panel      Panel being populated
