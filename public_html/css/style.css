@@ -389,7 +389,7 @@ div.paypalProductListItem.v1 div.ItemButtons {
     float: right;
 }
 
-.paypalBlock div.ItemOptions {
+div.ItemOptions {
     font-size: smaller;
     padding-left: 2em;
 }
