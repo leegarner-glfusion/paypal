@@ -7,5 +7,5 @@
     <phpversion>5.6.0</phpversion>
     <url>http://www.glfusion.org</url>
     <maintainer>Lee Garner</maintainer>
-    <requires>lglib</requires>
+    <requires>lglib,1.0.7</requires>
 </plugin>
