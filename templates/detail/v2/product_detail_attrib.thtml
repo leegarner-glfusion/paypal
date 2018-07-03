@@ -1,98 +1,5 @@
 {# begin {templatelocation} #}
-<noscript>
-  <span class="alert">{$LANG_PP['no_javascript']}</span>
-</noscript>
-<script type="text/javascript">
-function PPupdateImage(disp_img, lg_img)
-{
-    document.getElementById("disp_img").src = "{site_url}/lglib/img.php?src=" +
-        disp_img + "&plugin=paypal&sess={session_id}&width=460&height=460";
-//    document.getElementById("disp_img").src = disp_img;
-//    document.getElementById("lg_img").href = lg_img;
-}
-</script>
-{!if have_attributes}
-<script type="text/javascript" language="JavaScript">
-var emsg = "";
-function isValidField(obj)
-{
-    if (null == obj) {
-        return false;
-    }
-    if ("undefined" == typeof(obj)) {
-        return false;
-    }
-    return true;
-}
-
-function ProcessForm(opt) {
-    var rec,i,j;
-    var price, frm;
-    var on_elem, os_elem;
-
-    if (typeof(opt) === "undefined") {
-        return;
-    }
-
-    emsg="";
-    frm = document.getElementById("add_cart_{id}");
-    if (frm === null) return;
-    price = {price};
-    //options = frm.elements['options[]'];
-    options = opt;
-
-    // If there's only one option selection, then 'options' will be an array
-    // of all it's option items.  We need to handle them differently than if
-    // there are multiple option selections.
-    if (typeof(options.value) === "undefined") {
-        for (i = 0; i < options.length; i++) {
-            if (!isValidField(options[i])) {
-                break;
-            }
-
-            // Expecting value as "id|desc|price"
-            rec = options[i].value.split("|");
-            if (typeof(rec[2]) != "undefined") {
-                price = (price * 1) + (rec[2]*1);
-            }
-            //frm["os"+i].value = rec[0];
-        }
-    } else {
-        rec = options.value.split("|");
-        if (typeof(rec[2]) != "undefined") {
-            // convert to a number
-            adjustment = rec[2] * 1
-            // look for an "=" sign for fixed prices
-            if (typeof(rec[3]) != "undefined" && rec[3] == "=") {
-                price = adjustment
-            } else {
-                price = (price * 1) + (rec[2]*1);
-            }
-        }
-    }
-
-    price = price.toFixed({cur_decimals});
-    if (typeof(frm.amount) != "undefined") {
-        frm.amount.value = price;
-    }
-    document.getElementById('price').innerHTML = price;
-    return;
-}
-
-function checkForJavascript()
-{
-    e = document.getElementById('add_cart');
-    if (e !== null)
-        e.style.display = "inline";
-}
-
-$(document).ready(function() {
-    checkForJavascript();
-    ProcessForm();
-});
-</script>
-{!endif}
-
+{javascript}
 <div class="paypalProductDetail" id="paypalShortDesc">
   <h1>{short_description}
 {!if can_edit}
@@ -181,7 +88,7 @@ action="{site_url}/paypal/index.php" method="post">
       <div class=uk-form-row>
         <label class="uk-form-label" for="{sf_name}">{sf_text}:</label>
         <div class="uk-form-controls">
-          <input type="text" class="paypalProductCustomText" name="extras[special][{sf_name}]" id="{sf_name}" size="40" />
+          <input type="text" class="{sf_class}" name="extras[special][{sf_name}]" id="{sf_name}" size="40" />
         </div>
       </div>
 <!-- END SpecialFields -->

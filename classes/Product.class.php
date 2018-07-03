@@ -998,6 +998,8 @@ class Product
         // Set the template dir based on the configured template version
         $T = PP_getTemplate('product_detail_attrib', 'product',
                 'detail/' . $_PP_CONF['product_tpl_ver']);
+        $JT = new \Template(__DIR__ . '/../templates/detail');
+        $JT->set_file('js', 'detail_js.thtml');
 
         $name = $this->name;
         $l_desc = PLG_replaceTags($this->description);
@@ -1154,6 +1156,7 @@ class Product
             $T->set_var(array(
                 'sf_name' => $fld['name'],
                 'sf_text' => $fld['text'],
+                'sf_class' => isset($fld['class']) ? $fld['class'] : '',
             ) );
             $T->parse('SF', 'SpecialFields', true);
         }
@@ -1212,6 +1215,15 @@ class Product
                 'can_edit'      => 'true',
             ) );
         }
+        $JT->set_var(array(
+            'have_attributes'   => $T->get_var('have_attributes'),
+            'price'             => $T->get_var('price'),
+            'id'                => $T->get_var('id'),
+            'cur_decimals'      => $T->get_var('cur_decimals'),
+        ) );
+        $JT->parse('output', 'js');
+        $T->set_var('javascript', $JT->finish ($JT->get_var('output')));
+
         $retval .= $T->parse('output', 'product');
 
         // Update the hit counter
@@ -1409,7 +1421,7 @@ class Product
     *   @param  string  $fld_name   Field Name
     *   @param  stirng  $fld_lang   Field prompt, language string
     */
-    public function addSpecialField($fld_name, $fld_lang = '')
+    public function addSpecialField($fld_name, $fld_lang = '', $opts=array())
     {
         global $LANG_PP;
 
@@ -1428,6 +1440,9 @@ class Product
                 'name' => $fld_name,
                 'text' => $fld_lang,
             );
+            foreach ($opts as $opt_name=>$opt_data) {
+                $this->special_fields[$fld_name][$opt_name] = $opt_data;
+            }
         }
     }
 
