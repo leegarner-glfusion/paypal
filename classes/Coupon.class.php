@@ -315,6 +315,27 @@ class Coupon extends Product
 
 
     /**
+    *   Get the display price for the catalog.
+    *   Returns "See Details" if the price is zero, or the price if
+    *   one is set.
+    *
+    *   @param  mixed   $price  Fixed price override (not used)
+    *   @return string          Formatted price, or "See Details"
+    */
+    public function getDisplayPrice($price = NULL)
+    {
+        global $LANG_PP;
+
+        $price = $this->getPrice();
+        if ($price == 0) {
+            return $LANG_PP['see_details'];
+        } else {
+            return $this->currency->Format($price);
+        }
+    }
+
+
+    /**
     *   Get all the current Gift Card records for a user
     *   If $all is true then all records are returned, if false then only
     *   those that are not redeemed and not expired are returned.

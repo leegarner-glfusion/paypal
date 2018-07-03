@@ -687,23 +687,23 @@ function ProductList($cat_id = 0)
                 "product_id = '{$A['id']}'");
 
         $product->set_var(array(
-            'id'        => $A['id'],
-            'name'      => htmlspecialchars($P->name),
+            'id'            => $A['id'],
+            'name'          => htmlspecialchars($P->name),
             //'name'      => $A['name'],
             //'short_description' => PLG_replacetags($A['short_description']),
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
-            'encrypted' => '',
-            'item_url'  => PAYPAL_URL . '/detail.php?id='. $A['id'],
-            'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
-            'track_onhand' => $P->track_onhand ? 'true' : '',
-            'qty_onhand' => $P->onhand,
+            'encrypted'     => '',
+            'item_url'      => PAYPAL_URL . '/detail.php?id='. $A['id'],
+            'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
+            'track_onhand'  => $P->track_onhand ? 'true' : '',
+            'qty_onhand'    => $P->onhand,
             'has_discounts' => $P->hasDiscounts() ? 'true' : '',
-            'price'     => $P->currency->Format($P->getPrice()),
-            'orig_price' => $P->currency->Format($P->price),
-            'on_sale'   => $P->isOnSale(),
-            'small_pic' => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
-            'tpl_ver'   => $_PP_CONF['list_tpl_ver'],
+            'price'         => $P->getDisplayPrice(),
+            'orig_price'    => $P->getDisplayPrice($P->price),
+            'on_sale'       => $P->isOnSale(),
+            'small_pic'     => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
+            'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
         ) );
 
         if ($isAdmin) {

@@ -1502,6 +1502,20 @@ class Product
 
 
     /**
+    *   Get the formatted price for display.
+    *   Used mainly to allow child classes to override the displayed price.
+    *
+    *   @param  mixed   $price  Fixed price to use, NULL to use getPrice()
+    *   @return string          Formatted price for display
+    */
+    public function getDisplayPrice($price = NULL)
+    {
+        if ($price === NULL) $price = $this->getPrice();
+        return $this->currency->Format($price);
+    }
+
+
+    /**
     *   Get the sales tax for this item based on the configured tax rate.
     *
     *   @param  float   $price  Unit price
