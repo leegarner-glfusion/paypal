@@ -1733,8 +1733,10 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
 
         // Only display the template if there's something to show
         if ($ord_count > 0 || $cart || $gc_bal > 0) {
+            USES_paypal_functions();
             $LT->parse('output', 'block');
             $retval .= $LT->finish($LT->get_var('output'));
+            $retval .= Paypal\listOrders();
         }
     }
     return $retval;

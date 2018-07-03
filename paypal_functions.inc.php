@@ -24,17 +24,18 @@ namespace Paypal;
 *   @param  integer $uid    User ID to view, current user by default
 *   @return string          HTML for order list
 */
-function listOrders($admin = false, $uid = '')
+function listOrders($admin = false, $uid = 0)
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
 
     if (!$admin) {
         $uid = $_USER['uid'];
     }
+    $uid = (int)$uid;
 
     USES_lib_admin();
 
-    if (!empty($uid)) {
+    if ($uid > 0) {
         $where = " WHERE ord.uid = '" . (int)$uid . "'";
     } else {
         $where = 'WHERE 1=1';
@@ -51,9 +52,9 @@ function listOrders($admin = false, $uid = '')
             ON ord.uid = u.uid
         LEFT JOIN {$_TABLES['paypal.purchases']} AS itm
             ON ord.order_id = itm.order_id";
-    if (!$admin) {
+    /*if (!$admin) {
         $sql .= " $where GROUP BY ord.order_id";
-    }
+    }*/
 
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
@@ -73,7 +74,8 @@ function listOrders($admin = false, $uid = '')
 
     $defsort_arr = array(
         'field' => 'ord.order_date',
-        'direction' => 'DESC');
+        'direction' => 'DESC',
+    );
 
     if ($admin) {
         $options = array(
@@ -109,6 +111,7 @@ function listOrders($admin = false, $uid = '')
     $text_arr = array(
         'has_extras' => $admin ? true : false,
         'form_url' => $base_url . '/index.php?orderhist=x',
+        'has_limit' => true,
     );
 
     if (!isset($_REQUEST['query_limit']))
