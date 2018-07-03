@@ -1045,6 +1045,23 @@ class Cart
 
 
     /**
+    *   Check if this cart has any physical items.
+    *   Not currently used, may be used later to adapt workflows based on
+    *   product types
+    *
+    *   @return boolean     True if at least one physical product is present
+    */
+    public function hasPhysical()
+    {
+        foreach ($this->m_cart as $id=>$item) {
+            if ($item['type'] & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+                return true;
+        }
+        return false;
+    }
+
+
+    /**
     *   Delete any cart(s) for a user.
     *
     *   @param  integer $uid    User ID
