@@ -1550,7 +1550,7 @@ class Product
         // Get special fields submitted with the purchase
         if (isset($item['extras']) && is_array($item['extras'])) {
             if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
-                $sp_flds = $P->getSpecialFields($item['extras']['special']);
+                $sp_flds = $this->getSpecialFields($item['extras']['special']);
                 foreach ($sp_flds as $txt=>$val) {
                     $opts[] = array(
                         'opt_name'  => $txt,
