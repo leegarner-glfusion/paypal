@@ -283,7 +283,7 @@ class Coupon extends Product
     */
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
-        global $_TABLES, $LANG_PP_EMAIL, $_PP_CONF, $_CONF;
+        global $_TABLES, $LANG_PP, $LANG_PP_EMAIL, $_PP_CONF, $_CONF;
 
         $status = 0;
         $amount = (float)$Item->price;
@@ -292,6 +292,7 @@ class Coupon extends Product
         $sender_name = PP_getVar($special, 'sender_name', 'string');
 
         $gc_code = self::Purchase($amount, $Item->user_id);
+        $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code);
         parent::handlePurchase($Item, $Order);
 
         if ($recip_email != '') {

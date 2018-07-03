@@ -159,6 +159,23 @@ class OrderItem
 
 
     /**
+    *   Add an option text item to the order item.
+    *   This allows products to add additional information when purchased,
+    *   beyond the standard options selected.
+    *
+    *   @param  string  $text   Text to add
+    *   @param  boolean $save   True to immediately save the item
+    */
+    public function addOptionText($text, $save=true)
+    {
+        $opts = $this->options_text;
+        $opts[] = $text;
+        $this->options_text = $opts;
+        if ($save) $this->Save();
+    }
+
+
+    /**
     *   Save an order item to the database.
     *
     *   @param  array   $A  Optional array of data to save
