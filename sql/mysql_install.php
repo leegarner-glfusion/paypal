@@ -449,6 +449,7 @@ $_SQL['paypal.coupons'] = "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
   `redeemed` datetime DEFAULT NULL,
   `expires` date DEFAULT '9999-12-31',
   PRIMARY KEY (`code`),
+  KEY `purchased` (`purchased`),
   KEY `owner` (`redeemer`,`balance`,`expires`)
 ) ENGINE=MyIsam";
 
@@ -842,6 +843,7 @@ $PP_UPGRADE['0.6.0'] = array(
       `redeemed` datetime DEFAULT NULL,
       `expires` date DEFAULT '9999-12-31',
       PRIMARY KEY (`code`),
+      KEY `purchased` (`purchased`),
       KEY `owner` (`redeemer`,`balance`,`expires`)
     ) ENGINE=MyIsam",
     "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
