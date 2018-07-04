@@ -1646,13 +1646,36 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         // Only display the template if there's something to show
         if ($ord_count > 0 || $cart || $gc_bal > 0) {
             USES_paypal_functions();
+            //$LT->set_var('order_hist', Paypal\listOrders());
             $LT->parse('output', 'block');
             $retval .= $LT->finish($LT->get_var('output'));
-            $retval .= Paypal\listOrders();
         }
     }
     return $retval;
 }
+
+
+/**
+*   Save the Paypal profile settings when updated from Account Settings
+*/
+function plugin_profilesave_paypal($uid=0)
+{
+    global $_USER;
+
+    if ($uid == 0) {
+        $uid = (int)$_USER['uid'];
+    }
+
+    if (COM_isAnonUser()) {
+        return;
+    }
+
+    $apply_gc = PP_getVar($_POST, 'pp_apply_gc', 'string');
+    if (!empty($apply_gc)) {
+        Paypal\Coupon::Apply($apply_gc, $uid);
+    }
+}
+
 
 
 
@@ -2072,6 +2095,34 @@ function PP_getTemplate($name, $id='', $path='')
     $T = new Template(__DIR__ . '/' . $path);
     $T->set_file($templates);
     return $T;
+}
+
+
+/**
+*   Check that the currently installed version matches the code version.
+*   This is to disable functions that might not work due to a mismatch.
+*   Just check the major.minor.revision values.  Any fourth element is ignored.
+*
+*   @param  string  $required   Required version, default to code version
+*   @return boolean     True if current >= installed version, False if not
+*/
+function PP_isMinVersion($required = '')
+{
+    global $_PP_CONF, $_PLUGIN_INFO;
+
+    // If not specified, use the current code version as required.
+    if ($required == '') $required = $_PP_CONF['pi_version'];
+
+    $pi_name = $_PP_CONF['pi_name'];
+    if (isset($_PLUGIN_INFO[$pi_name])) {
+        if (is_array($_PLUGIN_INFO[$pi_name])) {
+            // glFusion > = 1.6.6
+            $installed = $_PLUGIN_INFO[$pi_name]['pi_version'];
+        } else {
+            $installed = $_PLUGIN_INFO[$pi_name];
+        }
+    }
+    return COM_checkVersion($installed, $required);
 }
 
 ?>

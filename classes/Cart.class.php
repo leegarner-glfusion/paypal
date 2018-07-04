@@ -154,29 +154,31 @@ class Cart
     {
         global $_TABLES, $_PP_CONF;
 
-        $sql = "SELECT cart_info, apply_gc, cart_contents
-               FROM {$_TABLES['paypal.cart']}
-               WHERE cart_id = '$cart_id'";
-        //echo $sql;die;
         $info = array();
         $cart = array();
-        $res = DB_query($sql);
-        $A = DB_fetchArray($res, false);
-        if (is_array($A)) {
-            if (isset($A['cart_info']) && !empty($A['cart_info'])) {
-                $info = @unserialize($A['cart_info']);
+        if (PP_isMinVersion('0.6.0')) {
+            $sql = "SELECT cart_info, apply_gc, cart_contents
+                   FROM {$_TABLES['paypal.cart']}
+                   WHERE cart_id = '$cart_id'";
+            //echo $sql;die;
+            $res = DB_query($sql);
+            $A = DB_fetchArray($res, false);
+            if (is_array($A)) {
+                if (isset($A['cart_info']) && !empty($A['cart_info'])) {
+                    $info = @unserialize($A['cart_info']);
+                }
+                $info['apply_gc'] = $_PP_CONF['gc_enabled'] ? $A['apply_gc'] : 0;
+                if (isset($A['cart_contents']) && !empty($A['cart_contents'])) {
+                    $cart = @unserialize($A['cart_contents']);
+                }
             }
-            $info['apply_gc'] = $_PP_CONF['gc_enabled'] ? $A['apply_gc'] : 0;
-            if (isset($A['cart_contents']) && !empty($A['cart_contents'])) {
-                $cart = @unserialize($A['cart_contents']);
+            // Reset these back to empty arrays in case unserialize() was NULL
+            if (!$info) {
+                $info = array();
             }
-        }
-        // Reset these back to empty arrays in case unserialize() was NULL
-        if (!$info) {
-            $info = array();
-        }
-        if (!$cart) {
-            $cart = array();
+            if (!$cart) {
+                $cart = array();
+            }
         }
         return array('info' => $info, 'cart' => $cart);
     }
@@ -637,7 +639,7 @@ class Cart
                 }
                 $apply_gc = min($total, $apply_gc);
             } elseif ($this->m_info['apply_gc'] !== NULL) {
-                $apply_gc = min($this->m_info['apply_gc'], $total);
+                $apply_gc = min((float)$this->m_info['apply_gc'], $total);
             }
         }
 
