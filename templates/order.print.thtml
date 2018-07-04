@@ -93,6 +93,9 @@
             {!if item_options}
             <br />{item_options}
             {!endif}
+        <!-- BEGIN ItemOptions -->
+            <div class="ItemOptions">{option_dscp}</div>
+        <!-- END ItemOptions -->
           </td>
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
