@@ -3,16 +3,16 @@
 *   Upgrade routines for the Paypal plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.12
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
 
-// Required to get the ADVT_DEFAULTS config values
-global $_CONF, $_CONF_ADVT, $_ADVT_DEFAULT, $_DB_dbms;
+// Required to get the _PP_DEFAULTS config values
+global $_CONF, $_PP_CONF, $_PP_DEFAULTS, $_DB_dbms;
 
 /** Include the default configuration values */
 require_once __DIR__ . '/install_defaults.php';
@@ -277,7 +277,7 @@ function PAYPAL_do_upgrade()
         $c->add('get_state', $_PP_DEFAULTS['get_state'],
                 'select', 0, 60, 14, 30, true, $pi_name);
         $c->add('get_country', $_PP_DEFAULTS['get_country'],
-                'select', 0, 60, 14, 40, true, $pi_name;
+                'select', 0, 60, 14, 40, true, $pi_name);
         $c->add('get_postal', $_PP_DEFAULTS['get_postal'],
                 'select', 0, 60, 14, 50, true, $pi_name);
         $c->add('weight_unit', $_PP_DEFAULTS['weight_unit'],
@@ -528,27 +528,36 @@ function PAYPAL_do_upgrade()
     }
 
     if (!COM_checkVersion($current_ver, '0.6.0')) {
-        $current_ver = '0.5.12';
+        $current_ver = '0.6.0';
         $c->del('download_path', $pi_name);
+        $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('fs_gc', NULL, 'fieldset', 20, 0, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('gc_enabled', $_PP_DEFAULTS['gc_enabled'],
+                'select', 20, 0, 2, 10, true, $_PP_CONF['pi_name']);
+        $c->add('gc_exp_days', $_PP_DEFAULTS['gc_exp_days'],
+                'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
 
         // Previously, categories were not required. With the MPTT method,
         // there must be at least one.
         $cats = DB_count($_TABLES['paypal.categories']);
         if ($cats == 0) {
             $sql = "INSERT INTO {$_TABLES['paypal.categories']}
-                    (cat_id, cat_name, description)
+                    (cat_id, cat_name, description, lft, rgt)
                 VALUES
                     (1, 'Home', 'Root Category', 1, 2)";
-            DB_query($sql);
+            $_PP_UPGRADE['0.6.0'][] = $sql;
             $sql = "UPDATE {$_TABLES['paypal.products']}
                     SET cat_id = 1 WHERE cat_id = 0";
-            DB_query($sql);
+            $_PP_UPGRADE['0.6.0'][] = $sql;
         }
         // Change orders to use UTC for dates. Logs already do.
         date_default_timezone_set($_CONF['timezone']);
         $offset = date('P');
-        DB_query("UPDATE {$_TABLES['paypal.orders']}
-                SET order_date = convert_tz(order_date, '$offset', '+00:00')");
+        $sql = "UPDATE {$_TABLES['paypal.orders']}
+                SET order_date = convert_tz(order_date, '$offset', '+00:00')";
+        $_PP_UPGRADE['0.6.0'][] = $sql;
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
@@ -559,7 +568,8 @@ function PAYPAL_do_upgrade()
     if (!COM_checkVersion($current_ver, $installed_ver)) {
         if (!PAYPAL_do_set_version($installed_ver)) return false;
     }
-
+    Paypal\Cache::clear();
+    PAYPAL_remove_old_files();
     CTL_clearCache($pi_name);
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
     return true;
@@ -628,5 +638,32 @@ function PAYPAL_do_set_version($ver)
         return true;
     }
 }
+
+
+/**
+*   Remove deprecated files
+*/
+function PAYPAL_remove_old_files()
+{
+    global $_CONF;
+
+    $paths = array(
+        // private/plugins/paypal
+        __DIR__ => array(
+            'templates/viewcart.uikit.thtml',
+            'templates/order.uikit.thtml',
+        ),
+        // public_html/paypal
+        $_CONF['path_html'] . 'paypal' => array(
+        ),
+    );
+
+    foreach ($paths as $path=>$files) {
+        foreach ($files as $file) {
+            @unlink("$path/$file");
+        }
+    }
+}
+
 
 ?>

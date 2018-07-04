@@ -125,37 +125,13 @@ class Coupon extends Product
 
 
     /**
-    *   Strip all characters but letters and numbers
-    *
-    *   @param  string  $string     Original string
-    *   @param  array   $options    Options for string formatting
-    *   @return string      Stripped string
-    *   @throws Exception
-    */
-    static private function cleanString($string, $options = array())
-    {
-        $toUpper = PP_getVar($options, 'uppercase', 'bool', false);
-        $toLower = PP_getVar($options, 'lowercase', 'bool', false);
-        $stripped = preg_replace('/[^a-zA-Z0-9]/', '', $string);
-
-        if ($toLower) {
-            return strtolower($stripped);
-        } else if ($toUpper) {
-            return strtoupper($stripped);
-        } else {
-            return $stripped;
-        }
-    }
-
-
-    /**
     *   Record a coupon purchase
     *
     *   @param  float   $amount     Coupon value
     *   @param  integer $uid        User ID, default = current user
     *   @return mixed       Coupon code, or false on error
     */
-    public static function Purchase($amount = 0, $uid = 0, $exp = NULL)
+    public static function Purchase($amount = 0, $uid = 0, $exp = '')
     {
         global $_TABLES, $_USER;
 
@@ -165,7 +141,7 @@ class Coupon extends Product
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
-        if ($exp == NULL) $exp = '9999-12-31';
+        if ($exp == '') $exp = '9999-12-31';
         $options = array(
         //    'length'    => 12,    // not used if mask is specified
             'letters'   => true,
@@ -182,8 +158,13 @@ class Coupon extends Product
         }
         $code = DB_escapeString($code);
         $exp = DB_escapeString($exp);
-        DB_save($_TABLES['paypal.coupons'],
-            'code,buyer,amount,balance,expires', "'$code',$uid,$amount,$amount,'$exp'");
+        $sql = "INSERT INTO {$_TABLES['paypal.coupons']} SET
+                code = '" . DB_escapeString($code) . "',
+                buyer = $uid,
+                amount = $amount,
+                purchased = UTC_TIMESTAMP(),
+                expires = '" . DB_escapeString($exp) . "'";
+        DB_query($sql);
         return $code;
     }
 
@@ -220,7 +201,7 @@ class Coupon extends Product
         if ($amount > 0) {
             DB_query("UPDATE {$_TABLES['paypal.coupons']} SET
                     redeemer = $uid,
-                    redeemed = '" . PAYPAL_now()->toMySQL(true) . "'
+                    redeemed = UTC_TIMESTAMP()
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
             if (DB_error()) return 2;
@@ -283,7 +264,7 @@ class Coupon extends Product
     */
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
-        global $_TABLES, $LANG_PP, $LANG_PP_EMAIL, $_PP_CONF, $_CONF;
+        global $LANG_PP;
 
         $status = 0;
         $amount = (float)$Item->price;
@@ -294,24 +275,31 @@ class Coupon extends Product
         $gc_code = self::Purchase($amount, $Item->user_id);
         $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code);
         parent::handlePurchase($Item, $Order);
+        self::Notify($recip_email, $amount, $sender_name);
+        return $status;
+    }
 
-        if ($recip_email != '') {
-            PAYPAL_debug("Sending Coupon to " . $recip_email);
+
+    public static function Notify($gc_code, $recip, $amount, $sender='')
+    {
+        global $_CONF, $LANG_PP_EMAIL;
+
+        if ($recip!= '') {
+            PAYPAL_debug("Sending Coupon to " . $recip);
             $T = PP_getTemplate('coupon_email_message', 'message');
             $T->set_var(array(
                 'gc_code'   => $gc_code,
-                'sender_name' => $sender_name,
+                'sender_name' => $sender,
             ) );
             $T->parse('output', 'message');
             $msg_text = $T->finish($T->get_var('output'));
             COM_emailNotification(array(
-                    'to' => array(array('email'=>$recip_email, 'name' => $recip_email)),
+                    'to' => array(array('email'=>$recip, 'name' => $recip)),
                     'from' => $_CONF['site_mail'],
                     'htmlmessage' => $msg_text,
                     'subject' => $LANG_PP_EMAIL['coupon_subject'],
             ) );
         }
-        return $status;
     }
 
 

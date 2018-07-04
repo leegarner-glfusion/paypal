@@ -1,0 +1,78 @@
+{# begin {templatelocation} #}
+<script src="{site_url}/javascript/moveusers.js"></script>
+<form id="submit" action="{site_admin_url}/plugins/paypal/index.php" method="post" class="uk-form uk-form-horizontal">
+
+    <div class="uk-form-row">
+      <div class="uk-form-controls">{$LANG_PP['sendgc_header']}</div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label">{$LANG_PP['amount']}:</label>
+      <div class="uk-form-controls">
+        <input type="text" name="amount" style="text-align:right;" placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label">{$LANG_PP['expiration']}:</label>
+      <div class="uk-form-controls">
+        <input type="text" name="expires" data-uk-datepicker="{format:'YYYY-MM-DD'}" value="{expires}" />
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label">{$LANG31[27]}:
+      </label>
+      <div class="uk-form-controls">
+        <select id="group_id" name="group_id">
+          <option value="0">{$LANG31[25]}</option>
+          {grp_select}
+        </select>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <label class="uk-form-label">{$LANG01[17]}:</label>
+      <div class="uk-form-controls">
+        <input type="hidden" name="groupmembers" />
+        <table width="59%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td class="blocktitle alignright" style="padding:5px 40px 5px 5px;">{$LANG_ACCESS['availmembers']}</td>
+          <td>&nbsp;</td>
+          <td class="blocktitle alignleft" style="padding:5px 5px 5px 40px;">{$LANG28[94]}</td>
+        </tr>
+        <tr>
+          <td class="alignright" width="40%" style="padding-right:5px;">
+            <select multiple="multiple" size="10" name="fieldFrom"
+              style="width: 15em; height: 20em; padding: 2px;"
+              ondblclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)">
+              {excluded}
+            </select>
+          </td>
+          <td class="aligncenter">
+            <input type="button" name="right" value="Include >>"
+              onclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)" />
+            <br /><br />
+            <input type="button" name="left" value="<< Exclude"
+              onclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false)" />
+          </td>
+          <td width="40%" class="alignleft" style="padding-left:5px;">
+            <select multiple="multiple" size="10" name="fieldTo"
+              style="width: 15em; height: 20em; padding: 2px;"
+              ondblclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false)">
+            </select>
+          </td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="uk-form-row">
+      <div class="uk-form-controls">
+        <button type="submit" class="uk-button uk-button-success" name="sendcards"
+            value="{$LANG_PP['send_giftcards']}"
+            onclick="return confirm('{$LANG_PP['confirm_send_gc']}') && setUsers(this.form);">{$LANG_PP['send_giftcards']}</button>
+      </div>
+    </div>
+</form>
+{# begin {templatelocation} #}

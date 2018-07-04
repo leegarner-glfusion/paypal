@@ -3,10 +3,10 @@
 *   Configuration Defaults Paypal plugin for glFusion.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.9
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @version    0.6.0
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 *
@@ -38,9 +38,9 @@ $_PP_DEFAULTS['anonymous_buy'] = true;
  *  Specify whether "on purchase" emails will be sent.
  *  Be sure to edit the files templates/purchase_email_subject.txt and
  *  templates/purchase_email_message.txt to customize the email message.
- *  You should disable the *_attach options below if you are distributing 
- *  large files or it is likely that a purchaser will be buying many medium 
- *  files otherwise the email will become too large and will likely never be 
+ *  You should disable the *_attach options below if you are distributing
+ *  large files or it is likely that a purchaser will be buying many medium
+ *  files otherwise the email will become too large and will likely never be
  *  received.
  *
  * purch_email_user true if logged in users should get a purchase email
@@ -164,6 +164,9 @@ $_PP_DEFAULTS['list_tpl_ver'] = 'v1';   // default product list item template
 $_PP_DEFAULTS['cache_max_age'] = 900;   // default cache file age, 15 minutes
 $_PP_DEFAULTS['tc_link'] = '';     // Link to terms and conditions
 
+$_PP_DEFAULTS['gc_enabled'] = 1;        // enable gift cards? 1=yes, 0=no
+$_PP_DEFAULTS['gc_exp_days'] = 365;     // default expiration for gift cards
+
 /**
  *  Initialize Paypal plugin configuration
  *
@@ -191,9 +194,9 @@ function plugin_initconfig_paypal($group_id = 0)
     if (!$c->group_exists($_PP_CONF['pi_name'])) {
 
         // Main configuration, shop email addresses, encrypted button settings
-        $c->add('sg_main', NULL, 'subgroup', 0, 0, NULL, 0, true, 
+        $c->add('sg_main', NULL, 'subgroup', 0, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
-        $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true, 
+        $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
 
         $c->add('admin_email_addr', $_PP_DEFAULTS['admin_email_addr'],
@@ -204,12 +207,12 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 0, 2, 60, true, $_PP_CONF['pi_name']);
         $c->add('purch_email_user', $_PP_DEFAULTS['purchase_email_user'],
                 'select', 0, 0, 2, 70, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_user_attach', 
+        $c->add('purch_email_user_attach',
                 $_PP_DEFAULTS['purchase_email_user_attach'],
                 'select', 0, 0, 2, 80, true, $_PP_CONF['pi_name']);
         $c->add('purch_email_anon', $_PP_DEFAULTS['purchase_email_anon'],
                 'select', 0, 0, 2, 90, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_anon_attach', 
+        $c->add('purch_email_anon_attach',
                 $_PP_DEFAULTS['purchase_email_anon_attach'],
                 'select', 0, 0, 2, 100, true, $_PP_CONF['pi_name']);
         $c->add('purch_email_admin', $_PP_DEFAULTS['purch_email_admin'],
@@ -240,7 +243,7 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 0, 15, 230, true, $_PP_CONF['pi_name']);
 
         // Path and image handling
-        $c->add('fs_paths', NULL, 'fieldset', 0, 10, NULL, 0, true, 
+        $c->add('fs_paths', NULL, 'fieldset', 0, 10, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('max_images', $_PP_DEFAULTS['max_images'],
                 'text', 0, 10, 0, 10, true, $_PP_CONF['pi_name']);
@@ -255,7 +258,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('max_file_size', $_PP_DEFAULTS['max_file_size'],
                 'text', 0, 10, 0, 70, true, $_PP_CONF['pi_name']);
 
-        $c->add('fs_prod_defaults', NULL, 'fieldset', 0, 30, NULL, 0, true, 
+        $c->add('fs_prod_defaults', NULL, 'fieldset', 0, 30, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('def_enabled', $_PP_DEFAULTS['def_enabled'],
                 'select', 0, 30, 2, 10, true, $_PP_CONF['pi_name']);
@@ -274,7 +277,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('list_tpl_ver', $_PP_DEFAULTS['list_tpl_ver'],
                 'select', 0, 30, 0, 80, true, $_PP_CONF['pi_name']);
 
-        $c->add('fs_blocks', NULL, 'fieldset', 0, 40, NULL, 0, true, 
+        $c->add('fs_blocks', NULL, 'fieldset', 0, 40, NULL, 0, true,
                 $_PP_CONF['pi_name']);
          $c->add('blk_random_limit', $_PP_DEFAULTS['blk_random_limit'],
                 'text', 0, 40, 2, 10, true, $_PP_CONF['pi_name']);
@@ -287,7 +290,7 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
                 'text', 0, 40, 2, 50, true, $_PP_CONF['pi_name']);
 
-        $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true, 
+        $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('debug', $_PP_DEFAULTS['debug'],
                 'select', 0, 50, 2, 10, true, $_PP_CONF['pi_name']);
@@ -295,7 +298,7 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 50, 2, 20, true, $_PP_CONF['pi_name']);
 
 
-        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true, 
+        $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('get_street', $_PP_DEFAULTS['get_street'],
                 'select', 0, 60, 14, 10, true, $_PP_CONF['pi_name']);
@@ -308,9 +311,9 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('get_postal', $_PP_DEFAULTS['get_postal'],
                 'select', 0, 60, 14, 50, true, $_PP_CONF['pi_name']);
 
-        $c->add('sg_shop', NULL, 'subgroup', 10, 0, NULL, 0, true, 
+        $c->add('sg_shop', NULL, 'subgroup', 10, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
-        $c->add('fs_shop', NULL, 'fieldset', 10, 100, NULL, 0, true, 
+        $c->add('fs_shop', NULL, 'fieldset', 10, 100, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('shop_name', $_PP_DEFAULTS['shop_name'],
                 'text', 10, 100, 0, 10, true, $_PP_CONF['pi_name']);
@@ -321,6 +324,14 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
 
+        $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('fs_gc', NULL, 'fieldset', 20, 0, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('gc_enabled', $_PP_DEFAULTS['gc_enabled'],
+                'select', 20, 0, 2, 10, true, $_PP_CONF['pi_name']);
+        $c->add('gc_exp_days', $_PP_DEFAULTS['gc_exp_days'],
+                'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
      }
 
      return true;

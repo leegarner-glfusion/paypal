@@ -46,11 +46,11 @@ $expected = array(
     'deleteproduct', 'deletecatimage', 'deletecat', 'delete_img',
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
-    'dup_product', 'runreport', 'configreport',
+    'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
-    'wfadmin', 'order', 'itemhist', 'reports', 'coupons',
+    'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -262,6 +262,46 @@ case 'runreport':
     }
     break;
 
+case 'sendcards':
+    $amt = PP_getVar($_POST, 'amount', 'float');
+    $uids = PP_getVar($_POST, 'groupmembers', 'string');
+    $gid = PP_getVar($_POST, 'group_id', 'int');
+    $exp = PP_getVar($_POST, 'expires', 'string');
+    if (!empty($uids)) {
+        $uids = explode('|', $uids);
+    }
+    if ($gid > 0) {
+        $sql = "SELECT uid FROM {$_TABLES['group_assignments']}
+                WHERE ug_main_grp_id = $gid AND uid > 1";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $uids[] = $A['uid'];
+        }
+    }
+    $errs = array();
+    if ($amt < .01) $errs[] = "Must have a positive amount";
+    if (empty($uids)) $errs[] = "Must indicate at least one user or group";
+    if (empty($errs)) {
+        foreach ($uids as $uid) {
+            $code = Paypal\Coupon::Purchase($amt, $uid, $exp);
+            $email = DB_getItem($_TABLES['users'], 'email', "uid = $uid");
+            if (!empty($email)) {
+                Paypal\Coupon::Notify($code, $email, $amt);
+            }
+        }
+        COM_setMsg(count($uids) . ' coupons sent');
+    } else {
+        $msg = '<ul><li>' . implode('</li><li>', $errs) . '</li></ul>';
+        COM_setMsg($msg, 'error', true);
+    }
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sendcards_form=x');
+    break;
+
+case 'purgecache':
+    Paypal\Cache::clear();
+    COM_refresh(PAYPAL_ADMIN_URL);
+    break;
+
 default:
     $view = $action;
     break;
@@ -362,9 +402,43 @@ case 'editattr':
     break;
 
 case 'other':
-    $content .= '<a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?resetbuttons=x' . '">' . $LANG_PP['resetbuttons'] . "</a>\n";
+    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
+            '/index.php?resetbuttons=x' . '">' . $LANG_PP['resetbuttons'] . "</a></div>\n";
+    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
+            '/index.php?sendcards_form=x' . '">' . $LANG_PP['send_giftcards'] . "</a></div>\n";
+    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
+            '/index.php?purgecache=x' . '">' . $LANG_PP['purge_cache'] . "</a></div>\n";
     break;
+
+case 'sendcards_form':
+    $T = PP_getTemplate('send_cards', 'cards');
+    $sql = "SELECT uid,fullname FROM {$_TABLES['users']}
+                WHERE status > 0 AND uid > 1";
+    $res = DB_query($sql, 1);
+    $included = '';
+    $excluded = '';
+    if ($_PP_CONF['gc_exp_days'] > 0) {
+        $period = 'P' . (int)$_PP_CONF['gc_exp_days'] . 'D';
+        $dt = new \Date('now', $_CONF['timezone']);
+        $dt->add(new DateInterval($period));
+        $expires = $dt->format('Y-m-d');
+    } else {
+        $expires = '9999-12-31';
+    }
+    $tmp = array();
+    while ($A = DB_fetchArray($res, false)) {
+        $excluded .= "<option value=\"{$A['uid']}\">{$A['fullname']}</option>\n";
+    }
+    $T->set_var(array(
+        'excluded' => $excluded,
+        'grp_select' => COM_optionList($_TABLES['groups'],
+                            'grp_id,grp_name', '', 1),
+        'expires' => $expires,
+    ) );
+    $T->parse('output', 'cards');
+    $content = $T->finish($T->get_var('output'));
+    break;
+
 
 case 'gwadmin':
     $content .= PAYPAL_adminList_Gateway();
@@ -702,8 +776,6 @@ function PAYPAL_adminMenu($view='')
                     'text' => $LANG_PP['workflows']);
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?other=x',
                     'text' => $LANG_PP['other_func']);
-    $menu_arr[] = array('url'  => PAYPAL_URL . '/index.php',
-                    'text' => $LANG_PP['storefront']);
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
                     'text' => $LANG_PP['coupons']);
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
@@ -1466,7 +1538,7 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
 */
 function PAYPAL_couponlist()
 {
-    global $_TABLES, $LANG_PP;
+    global $_TABLES, $LANG_PP, $_PP_CONF;
 
     $filt_sql = '';
     if (isset($_GET['filter']) && isset($_GET['value'])) {

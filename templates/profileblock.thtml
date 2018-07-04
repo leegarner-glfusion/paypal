@@ -3,19 +3,28 @@
 {!if is_uikit}
 <nav class="uk-navbar uk-margin-top">
   <div class="uk-navbar-content">
-  {$LANG_PP['my_orders']}
+  {$LANG_PP['my_account']}
   </div>
 </nav>
 {!else}
 <div class="profile-header">
-  {$LANG_DON['block_title']}
+  {$LANG_PP['block_title']}
 </div>
 {!endif}
 {!if gc_bal}
 <h3>{$LANG_PP['gc_bal']}:&nbsp;&nbsp;{gc_bal}</h3>
+<div class="uk-form-row">
+  <label class="uk-form-label">{$LANG_PP['apply_gc']}:</label>
+  <div class="uk-form-controls">
+    <input type="text" name="pp_apply_gc" />
+  </div>
+</div>
 {!endif}
 {!if orders}
 {$LANG_PP['my_orders']}: <a href="{site_url}/paypal/index.php?orderhist">{orders}</a>
+<div>
+    {order_hist}
+</div>
 {!endif}
 </div>
 {# end {templatelocation} #}
