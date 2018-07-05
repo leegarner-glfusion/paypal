@@ -1204,6 +1204,12 @@ abstract class Gateway
     }
 
 
+    /**
+    *   Get an array of uninstalled gateways.
+    *   Used to provide a list of links to install the gateway.
+    *
+    *   @return array   Array of gateways(filename, fullpath)
+    */
     public static function getUninstalled()
     {
         global $LANG32;
@@ -1232,6 +1238,17 @@ abstract class Gateway
 
 class dummy extends Gateway
 {
+    /**
+    *   Constructor.
+    *   Set gateway-specific items and call the parent constructor.
+    */
+    public function __construct()
+    {
+        // These are used by the parent constructor, set them first.
+        $this->gw_name = 'dummy';
+        $this->gw_desc = 'Dummy Payment Gateway';
+        parent::__construct();
+    }
 }
 
 ?>
