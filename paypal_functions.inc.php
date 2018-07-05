@@ -724,7 +724,7 @@ function ProductList($cat_id = 0)
         $product->set_block('product', 'BtnBlock', 'Btn');
         if (!$P->hasAttributes() && !$P->hasCustomFields() && !$P->hasSpecialFields()) {
             // Buttons only show in the list if there are no options to select
-            $buttons = $P->PurchaseLinks();
+            $buttons = $P->PurchaseLinks('list');
             foreach ($buttons as $name=>$html) {
                 $product->set_var('button', $html);
                 $product->parse('Btn', 'BtnBlock', true);

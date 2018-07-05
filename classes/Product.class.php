@@ -49,6 +49,8 @@ class Product
 
     private $_uid = 0;  // user id, for pricing
 
+    private $_view = 'detail';  // type of button to create (list or detail)
+
     /**
      *  Constructor.
      *  Reads in the specified class, if $id is set.  If $id is zero,
@@ -1287,11 +1289,12 @@ class Product
     *
     *   @return array   Array of buttons as name=>html.
     */
-    public function PurchaseLinks()
+    public function PurchaseLinks($type='detail')
     {
         global $_CONF, $_USER, $_PP_CONF, $_TABLES;
 
         $buttons = array();
+        $this->_view = $type;
 
         // Indicate that an "add to cart" button should be returned along with
         // the "buy now" button.  If the product has already been purchased
@@ -1350,7 +1353,8 @@ class Product
                 'amount'        => $this->getPrice(),
                 'pi_url'        => PAYPAL_URL,
                 //'form_url'  => $this->hasAttributes() ? '' : 'true',
-                'form_url'  => false,
+                //'form_url'  => false,
+                'form_url'  => $this->_view == 'list' ? true : false,
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
                 'iconset'   => $_PP_CONF['_iconset'],
