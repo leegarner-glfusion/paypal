@@ -818,6 +818,9 @@ class Product
 
         $T->set_block('product', 'ProdTypeRadio', 'ProdType');
         foreach ($LANG_PP['prod_types'] as $value=>$text) {
+            if ($value == PP_PROD_COUPON && $_PP_CONF['gc_enabled'] == 0) {
+                continue;
+            }
             $T->set_var(array(
                 'type_val'  => $value,
                 'type_txt'  => $text,
@@ -1311,12 +1314,12 @@ class Product
         if ($this->prod_type == PP_PROD_DOWNLOAD &&
             ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) )
             ) {
-                // Free, or unexpired downloads for non-anymous
-                $T = PP_getTemplate('btn_download', 'download', 'buttons');
-                $T->set_var('pi_url', PAYPAL_URL);
-                $T->set_var('id', $this->id);
-                $buttons['download'] = $T->parse('', 'download');
-                $add_cart = false;
+            // Free, or unexpired downloads for non-anymous
+            $T = PP_getTemplate('btn_download', 'download', 'buttons');
+            $T->set_var('pi_url', PAYPAL_URL);
+            $T->set_var('id', $this->id);
+            $buttons['download'] = $T->parse('', 'download');
+            $add_cart = false;
 
         } elseif ($this->track_onhand == 1 && $this->onhand < 1 &&
                 $this->oversell == 1) {
@@ -1461,11 +1464,12 @@ class Product
     */
     public function canBuyNow()
     {
-        if ($this->hasAttributes()
-            || $this->hasDiscounts()
-            || $this->hasCustomFields()
-            || $this->hasSpecialFields()
+        if ($this->hasAttributes()      // no attributes to select
+            || $this->hasDiscounts()    // no quantity-based discounts
+            || $this->hasCustomFields() // no text fields to fill in
+            || $this->hasSpecialFields()    // no special fields to fill in
         ) {
+            // If any of the above apply, then the buy-now button can't be used.
             return false;
         }
         return true;
