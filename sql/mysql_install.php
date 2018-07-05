@@ -47,7 +47,7 @@ $PP_UPGRADE['0.5.4'] = array(
     ('AFN','Af','Afghan Afghani',971,'hidden',' ','after',0,0.00,',','.','Afghani','Pul',1.00000,'2014-01-03 20:54:44'),
 	('ANG','NAf.','Netherlands Antillean Guilder',532,'hidden',' ','after',2,0.00,',','.','Guilder','Cent',1.00000,'2014-01-03 20:54:44'),
 	('AOA','Kz','Angolan Kwanza',973,'hidden',' ','after',2,0.00,',','.','Kwanza','Cêntimo',1.00000,'2014-01-03 20:54:44'),
-	('ARM','m$n','Argentine Peso Moneda Nacional',NULL,'hidden',' ','after',2,0.00,',','.','Peso','Centavos',1.00000,'2014-01-03 20:54:44'),
+	('ARM','m\$n','Argentine Peso Moneda Nacional',NULL,'hidden',' ','after',2,0.00,',','.','Peso','Centavos',1.00000,'2014-01-03 20:54:44'),
 	('ARS','AR$','Argentine Peso',32,'hidden',' ','after',2,0.00,',','.','Peso','Centavo',1.00000,'2014-01-03 20:54:44'),
 	('AUD','$','Australian Dollar',36,'before',' ','after',2,0.00,',','.','Dollar','Cent',1.00000,'2014-01-03 20:54:44'),
 	('AWG','Afl.','Aruban Florin',533,'hidden',' ','after',2,0.00,',','.','Guilder','Cent',1.00000,'2014-01-03 20:54:44'),
@@ -177,7 +177,7 @@ $PP_UPGRADE['0.5.4'] = array(
 	('UAH','???.','Ukrainian Hryvnia',980,'after',' ','hidden',2,0.00,',','.','Hryvnia','Kopiyka',1.00000,'2014-01-03 20:49:55'),
 	('UGX','USh','Ugandan Shilling',800,'hidden',' ','after',0,0.00,',','.','Shilling','Cent',1.00000,'2014-01-03 20:54:44'),
 	('USD','$','United States Dollar',840,'before',' ','hidden',2,0.00,',','.','Dollar','Cent',1.00000,'2014-01-03 20:49:55'),
-	('UYU','$U','Uruguayan Peso',858,'hidden',' ','after',2,0.00,',','.','Peso','Centésimo',1.00000,'2014-01-03 20:54:44'),
+	('UYU','\$U','Uruguayan Peso',858,'hidden',' ','after',2,0.00,',','.','Peso','Centésimo',1.00000,'2014-01-03 20:54:44'),
 	('VEF','Bs.F.','Venezuelan Bolívar Fuerte',NULL,'hidden',' ','after',2,0.00,',','.','Bolivares Fuerte','Céntimo',1.00000,'2014-01-03 20:54:44'),
 	('VND','?','Vietnamese Dong',704,'after','','hidden',0,0.00,'.','.','Dong','Hà',1.00000,'2014-01-03 20:53:33'),
 	('VUV','VT','Vanuatu Vatu',548,'hidden',' ','after',0,0.00,',','.','Vatu',NULL,1.00000,'2014-01-03 20:54:44'),
@@ -303,7 +303,7 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   PRIMARY KEY  (`cat_id`),
   KEY `idxName` (`cat_name`,`cat_id`),
   KEY `cat_lft` (`lft`),
-  KEY `cat_rgt` (`rgt`),
+  KEY `cat_rgt` (`rgt`)
 ) ENGINE=MyISAM";
 
 $_SQL['paypal.prod_attr'] = "CREATE TABLE `{$_TABLES['paypal.prod_attr']}` (
@@ -699,7 +699,7 @@ $PP_UPGRADE['0.5.0'] = array(
             rdfurl, rdfupdated, onleft, phpblockfn, help, group_id, owner_id,
             perm_owner, perm_group, perm_members,perm_anon)
         VALUES
-            ('', 1, 'paypal_cart', 'phpblock', '{$LANG_PP['cart_blocktitle']}',
+            ('', 1, 'paypal_cart', 'phpblock', 'Shopping Cart',
             'all', 5, '',
             '', '', 1, 'phpblock_paypal_cart', '', 13, 2,
             3, 2, 2, 2)",
