@@ -257,7 +257,6 @@ class IPN
                 COM_errorLog("Insufficient Gift Card Balance, need $by_gc, have $gc_bal");
             }
         }
-
         // Compare total order amount to gross payment.  The ".0001" is to help
         // kill any floating-point errors. Include any discount.
         $total = $this->Order->getTotal();
@@ -402,13 +401,13 @@ class IPN
                 PAYPAL_mailAttachment($this->pp_data['payer_email'],
                                     $subject,
                                     $user_text,
-                                    $_CONF['site_email'],
+                                    $_CONF['site_mail'],
                                     true,
                                     0, '', '', $files);
             } else {
                 COM_mail($this->pp_data['payer_email'],
                             $subject, $user_text,
-                            $_CONF['site_email'],
+                            $_CONF['site_mail'],
                             true);
             }
 
@@ -485,7 +484,6 @@ class IPN
         }   // foreach item
 
         $status = $this->CreateOrder();
-
         if ($status == 0) {
             // Now all of the items are in the order object, check for sufficient
             // funds. If OK, then save the order and call each handlePurchase()
@@ -573,7 +571,6 @@ class IPN
         $this->Order->buyer_email = $this->pp_data['payer_email'];
         $this->Order->status = !empty($this->pp_data['status']) ?
                 $this->pp_data['status'] : 'pending';
-
         if ($uid > 1) {
             $U = new UserInfo($uid);
         }
@@ -660,11 +657,12 @@ class IPN
                 'options' => $options,
                 'options_text' => $option_desc,
                 'extras' => $item['extras'],
+                'shipping' => PP_getVar($item, 'shipping', 'float'),
+                'handling' => PP_getVar($item, 'handling', 'float'),
                 'paid' => PP_getVar($item['overrides'], 'price', 'float', $item['price']),
             );
             $this->Order->addItem($args);
         }   // foreach item
-
         return 0;
     }
 
