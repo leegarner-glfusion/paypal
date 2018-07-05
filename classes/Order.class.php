@@ -91,7 +91,7 @@ class Order
     {
         switch ($name) {
         case 'uid':
-        case 'ux_date':
+        case 'ux_ts':
             $this->properties[$name] = (int)$value;
             break;
 
@@ -139,9 +139,11 @@ class Order
         if ($id != '') {
             $this->order_id = $id;
 
-            $sql = "SELECT *, UNIX_TIMESTAMP(order_date) as ux_date
+            $sql = "SELECT *,
+                    UNIX_TIMESTAMP(CONVERT_TZ(`order_date`, '+00:00', @@session.time_zone)) AS ux_ts
                     FROM {$_TABLES['paypal.orders']}
                     WHERE order_id='{$this->order_id}'";
+            //echo $sql;die;
             $res = DB_query($sql);
             if (!$res) return false;    // requested order not found
             $A = DB_fetchArray($res, false);
@@ -198,7 +200,12 @@ class Order
     {
         if (!is_array($args)) return;
         $args['order_id'] = $this->order_id;    // make sure it's set
-        $this->items[] = new OrderItem($args);
+        $item = new OrderItem($args);
+        $this->items[] = $item;
+        $shipping = PP_getVar($args, 'shipping', 'float');
+        if ($shipping > 0) {
+            $this->shipping = $this->shipping + $shipping;
+        }
     }
 
 
@@ -284,7 +291,7 @@ class Order
         $this->instructions = PP_getVar($A, 'instructions');
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
-        $this->ux_date = PP_getVar($A, 'ux_date', 'int');
+        $this->ux_ts = PP_getVar($A, 'ux_ts', 'int');
         foreach ($this->_addr_fields as $fld) {
             $this->$fld = $A[$fld];
         }
@@ -401,7 +408,6 @@ class Order
             $this->Log($log_msg);
         }
         $this->isNew = false;
-
         return $this->order_id;
     }
 
@@ -467,7 +473,7 @@ class Order
             $T->parse('iRow', 'ItemRow', true);
             $T->clear_var('iOpts');
         }
-        $dt = new \Date($this->ux_date, $_USER['tzid']);
+        $dt = new \Date($this->ux_ts, $_USER['tzid']);
         $total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
@@ -632,7 +638,9 @@ class Order
     {
         global $_TABLES, $_PP_CONF, $_CONF;
 
-        $sql = "SELECT *, UNIX_TIMESTAMP(ts) as ux_ts
+        $sql = "SELECT *,
+                UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone))
+                    as ux_ts
                 FROM {$_TABLES['paypal.order_log']}
                 WHERE order_id = '" . DB_escapeString($this->order_id) . "'
                 ORDER BY ts DESC
@@ -808,7 +816,7 @@ class Order
                 PAYPAL_mailAttachment($this->buyer_email,
                                     $subject,
                                     $user_text,
-                                    $_CONF['site_email'],
+                                    $_CONF['site_mail'],
                                     true,
                                     0, '', '', $files);
             } else {
@@ -892,7 +900,8 @@ class Order
         $log = Cache::get($cache_key);
         if ($log === NULL) {
             $log = array();
-            $sql = "SELECT *, UNIX_TIMESTAMP(ts) as ux_ts
+            $sql = "SELECT *,
+                    UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone)) as ux_ts
                     FROM {$_TABLES['paypal.order_log']}
                     WHERE order_id = '$order_id'";
             $res = DB_query($sql);
