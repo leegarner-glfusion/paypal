@@ -330,6 +330,11 @@ $LANG_PP = array (
 'purge_cache' => 'Purge Cache',
 'confirm_send_gc' => 'Are you sure you want to send gift cards to the selected users and groups?',
 'sendgc_header' => 'Select a group and/or individual users to receive gift cards.',
+'pmt_total' => 'Payment Total',
+'del_existing' => 'Delete Existing?',
+'err_gc_amt' => 'Must supply a positive amount for the gift cards.',
+'err_gc_nousers' => 'No users specified, or none are in the specified group.',
+'enter_gc' => 'Enter Coupon Code (click Update to apply)',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -417,12 +422,16 @@ $LANG_confignames['paypal'] = array(
     'cache_max_age' => 'Max file cache age in seconds',
     'tc_link' => 'Link to Terms and Conditions',
     'show_plugins' => 'Include plugin products in catalog?',
+    'gc_enabled'    => 'Enable Gift Cards',
+    'gc_exp_days'   => 'Default Gift Card Expiration (days)',
+    'tax_rate'      => 'Tax Rate',
 );
 
 /** Language strings for the subgroup names in the config section */
 $LANG_configsubgroups['paypal'] = array(
     'sg_main' => 'Main Settings',
     'sg_shop'   => 'Shop Information',
+    'sg_gc'     => 'Gift Cards',
 );
 
 /** Language strings for the field set names in the config section */
@@ -436,6 +445,7 @@ $LANG_fs['paypal'] = array(
     'fs_debug'  => 'Debugging',
     'fs_addresses' => 'Address Collection',
     'fs_shop'   => 'Shop Details',
+    'fs_gc'     => 'Gift Card Configuration',
 );
 
 /**

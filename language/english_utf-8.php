@@ -429,6 +429,7 @@ $LANG_confignames['paypal'] = array(
     'show_plugins' => 'Include plugin products in catalog?',
     'gc_enabled'    => 'Enable Gift Cards',
     'gc_exp_days'   => 'Default Gift Card Expiration (days)',
+    'tax_rate'      => 'Tax Rate',
 );
 
 /** Language strings for the subgroup names in the config section */
