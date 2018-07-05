@@ -806,7 +806,6 @@ function plugin_autouninstall_paypal ()
                 'paypal.gateways',
                 'paypal.images',
                 'paypal.ipnlog',
-                'paypal.order_items',
                 'paypal.order_log',
                 'paypal.orderstatus',
                 'paypal.orders',
@@ -1648,8 +1647,8 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
             USES_paypal_functions();
             //$LT->set_var('order_hist', Paypal\listOrders());
             $LT->parse('output', 'block');
-            $retval .= $LT->finish($LT->get_var('output'));
         }
+        $retval .= $LT->finish($LT->get_var('output'));
     }
     return $retval;
 }
