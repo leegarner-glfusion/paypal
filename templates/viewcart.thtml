@@ -1,126 +1,134 @@
 {# begin {templatelocation} #}
 <a href="{pi_url}">{$LANG_PP['back_to_catalog']}</a>
-<div align="center">
-<h1>{$LANG_PP['cart_blocktitle']}</h1>
-<form action="{pi_url}/index.php" method="post">
-  <input type="hidden" name="cmd" value="_cart" />
-  <input type="hidden" name="upload" value="1" />
-  <input type="hidden" name="business" value="{receiver_email}" />
+<div style="text-align:center; margin-left:auto;">
+  <h1>{$LANG_PP['cart_blocktitle']}</h1>
+  <form action="{pi_url}/index.php" method="post">
+    <input type="hidden" name="cmd" value="_cart" />
+    <input type="hidden" name="upload" value="1" />
+    <input type="hidden" name="business" value="{receiver_email}" />
 
-  <table id="paypalViewCartTable" class="paypalViewCartTable">
-    <tr>
-      <th class="aligncenter">{$LANG_PP['description']}</th>
-      <th style="width:10%" class="aligncenter">{$LANG_PP['price']}</th>
-      <th style="width:10%" class="aligncenter">{$LANG_PP['quantity']}</th>
-      <th style="width:10%" class="aligncenter">{$LANG_PP['total']}</th>
-      <th style="width:5%" class="aligncenter">{$LANG_PP['delete']}</th>
-      <th style="width:5%" class="aligncenter"></th>
-    </tr>
-    <!-- BEGIN ItemRow -->
-    <tr>
-      <td>
+    <table id="paypalViewCartTable" class="paypalViewCartTable">
+      <tr>
+        <th class="aligncenter">{$LANG_PP['description']}</th>
+        <th style="width:10%" class="aligncenter">{$LANG_PP['price']}</th>
+        <th style="width:10%" class="aligncenter">{$LANG_PP['quantity']}</th>
+        <th style="width:10%" class="aligncenter">{$LANG_PP['total']}</th>
+        <th style="width:5%" class="aligncenter">{$LANG_PP['delete']}</th>
+        <th style="width:5%" class="aligncenter"></th>
+      </tr>
+      <!-- BEGIN ItemRow -->
+      <tr>
+        <td>
 {!if item_link}
-        <a href="{item_link}">{item_name}</a>
+          <a href="{item_link}">{item_name}</a>
 {!else}
-        {item_name}
+          {item_name}
 {!endif}
-        {item_options}
-      </td>
-      <td class="alignright">{item_price}</td>
-      <td class="aligncenter">
-        <input type="text" name="quantity[{cart_item_id}]" value="{item_quantity}" 
-          size="3"
-          />
-      </td>
-      <td class="alignright">{item_total}</td>
-      <td class="aligncenter">
-        <a href="{pi_url}/index.php?delcartitem=x&id={cart_item_id}"><i
-            class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
-      </td>
+          {item_options}
+        </td>
+        <td class="alignright">{item_price}</td>
+        <td class="aligncenter">
+          <input type="text" name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" />
+        </td>
+        <td class="alignright">{item_total}</td>
+        <td class="aligncenter">
+          <a href="{pi_url}/index.php?delcartitem=x&id={cart_item_id}"><i
+              class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
+        </td>
 {!if taxable}
-      <td class="aligncenter">
-        <span class="tooltip" title="{$LANG_PP['taxable']}">{tax_icon}</i>
-      </td>
+        <td class="aligncenter">
+          <span class="tooltip" title="{$LANG_PP['taxable']}">{tax_icon}</i>
+        </td>
+{!else}
+        <td></td>
 {!endif}
-      <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
-      <input type="hidden" name="item_number_{pp_id}" value="{item_id}">
-      <input type="hidden" name="amount_{pp_id}" value="{item_price}">
-    </tr>
-    <!-- END ItemRow -->
+        <input type="hidden" name="item_name_{pp_id}" value="{item_descrip}" />
+        <input type="hidden" name="item_number_{pp_id}" value="{item_id}">
+        <input type="hidden" name="amount_{pp_id}" value="{item_price}">
+      </tr>
+      <!-- END ItemRow -->
 {!if subtotal}
-    <tr>
-      <td colspan="2" class="alignright"><b>{$LANG_PP['item_total']}</b></td>
-      <td colspan="2" class="alignright"><b>{subtotal}</b></td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright"><b>{$LANG_PP['item_total']}</b></td>
+        <td colspan="2" class="alignright"><b>{subtotal}</b></td>
+        <td></td>
+      </tr>
 {!endif}
 {!if cart_tax}
-    <tr>
-      <td colspan="2" class="alignright">{tax_on_items}</td>
-      <td colspan="2" class="alignright">{cart_tax}</td>
-      <td></td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright">{tax_on_items}</td>
+        <td colspan="2" class="alignright">{cart_tax}</td>
+        <td></td>
+      </tr>
 {!endif}
 {!if shipping}
-    <tr>
-      <td colspan="2" class="alignright">{$LANG_PP['shipping']}</td>
-      <td colspan="2" class="alignright">{shipping}</td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright">{$LANG_PP['shipping']}</td>
+        <td colspan="2" class="alignright">{shipping}</td>
+        <td></td>
+      </tr>
 {!endif}
 {!if handling}
-    <tr>
-      <td colspan="2" class="alignright">{$LANG_PP['hangling']}</td>
-      <td colspan="2" class="alignright">{handling}</td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright">{$LANG_PP['hangling']}</td>
+        <td colspan="2" class="alignright">{handling}</td>
+        <td></td>
+      </tr>
 {!endif}
-    <tr>
-      <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
-      <td colspan="2" class="alignright"><b>{total}</b></td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
+        <td colspan="2" class="alignright"><b>{total}</b></td>
+        <td></td>
+      </tr>
 {!if gc_bal_disp}
-    <tr>
-      <td colspan="2" class="alignright">{$LANG_PP['apply_gc']}</td>
-      <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{apply_gc}" /></td>
-      <td colspan="2" style="white-space:nowrap;">{$LANG_PP['balance']}: {gc_bal_disp}</td>
-    </tr>
+      <tr>
+        <td colspan="2" class="alignright">{$LANG_PP['apply_gc']}</td>
+        <td colspan="2" class="alignright"><input style="text-align:right;" type="text" size="5" name="apply_gc" value="{apply_gc}" /></td>
+        <td colspan="2" style="white-space:nowrap;">{$LANG_PP['balance']}: {gc_bal_disp}</td>
+      </tr>
 {!endif}
-  </table>
-  <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
-    <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
-  </div>
-  <input type="hidden" name="custom" value='{custom}' />
+    </table>
+{!if use_gc}
+    <div id="enterGC">{$LANG_PP['enter_gc']}: <input type="text" name="gc_code" />
+    </div>
+{!endif}
+    <div id="orderInstructions">{$LANG_PP['order_instr']}:<br />
+      <textarea name="order_instr" rows="4" cols="80">{order_instr}</textarea>
+    </div>
+    <input type="hidden" name="custom" value='{custom}' />
 {!if is_uikit}
-  <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">
-    <i class="{iconset}-refresh"></i>&nbsp;{$LANG_PP['update_cart']}</button>
-  <button style="float:none;" type="reset" class="uk-button uk-button-danger" name="emptycart"
-    onclick="document.location.href='{pi_url}/index.php?emptycart=x';">
-    <i class="{iconset}-trash-o"></i>&nbsp;{$LANG_PP['empty_cart']}</button>
+    <button style="float:none;" type="submit" class="uk-button uk-button-primary" name="updatecart">
+      <i class="{iconset}-refresh"></i>&nbsp;{$LANG_PP['update_cart']}</button>
+    <button style="float:none;" type="reset" class="uk-button uk-button-danger" name="emptycart"
+      onclick="document.location.href='{pi_url}/index.php?emptycart=x';">
+      <i class="{iconset}-trash-o"></i>&nbsp;{$LANG_PP['empty_cart']}</button>
 {!else}
-  <input type="submit" class="paypalButton blue" name="updatecart" 
+    <input type="submit" class="paypalButton blue" name="updatecart" 
         value="{$LANG_PP['update_cart']}" />
-  <input type="submit" class="paypalButton red" name="emptycart"
+    <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" />
 {!endif}
-<div style="width:70%; clear:both;margin-top:15px;">
-<div class="gwRadiosOuter">
-    <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
-  {$LANG_PP['hlp_gw_select']}<br />
-  {gateway_radios}
-</div>
-<div style="float:right;">
+    <div style="width:70%; clear:both;margin-top:15px;">
+      <div class="gwRadiosOuter">
+        <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
+        {$LANG_PP['hlp_gw_select']}<br />
+        {gateway_radios}
+      </div>
+      <div style="float:right;">
 {!if is_uikit}
-  <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
-    <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
+        <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
+          <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
 {!else}
-  <input id="submit" type="submit" class="paypalButton green" name="checkout"
-        value="{$LANG_PP['checkout']} >>" />
+          <input id="submit" type="submit" class="paypalButton green" name="checkout"
+            value="{$LANG_PP['checkout']} >>" />
 {!endif}
-</div>
-</div>
-</form>
+      </div>
+    </div>
+  </form>
 {!if tc_link}
-<div class="ppTOCLink">
+  <div class="ppTOCLink">
     <a href="{tc_link}" target="_new">{$LANG_PP['terms_and_cond']}</a>
-</div>
+  </div>
 {!endif}
 </div>
 {# end {templatelocation} #}
