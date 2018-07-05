@@ -162,6 +162,7 @@ class Coupon extends Product
                 code = '" . DB_escapeString($code) . "',
                 buyer = $uid,
                 amount = $amount,
+                balance = $amount,
                 purchased = UTC_TIMESTAMP(),
                 expires = '" . DB_escapeString($exp) . "'";
         DB_query($sql);
@@ -187,8 +188,9 @@ class Coupon extends Product
         }
         $uid = (int)$uid;
         $code = DB_escapeString($code);
-        $res = DB_query("SELECT * FROM {$_TABLES['paypal.coupons']}
-                WHERE code = '$code'");
+        $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
+                WHERE code = '$code'";
+        $res = DB_query($sql);
         if (DB_numRows($res) == 0) {
             return 2;
         } else {
@@ -275,7 +277,7 @@ class Coupon extends Product
         $gc_code = self::Purchase($amount, $Item->user_id);
         $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code);
         parent::handlePurchase($Item, $Order);
-        self::Notify($recip_email, $amount, $sender_name);
+        self::Notify($gc_code, $recip_email, $amount, $sender_name);
         return $status;
     }
 
