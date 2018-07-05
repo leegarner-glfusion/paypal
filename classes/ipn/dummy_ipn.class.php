@@ -1,6 +1,6 @@
 <?php
 /**
-*   This file contains the NULL IPN class.
+*   This file contains the Dummy IPN class.
 *   It is used with orders that have zero balances and thus don't go through
 *   an actual payment processor.
 *
@@ -25,10 +25,8 @@ if (!defined ('GVERSION')) {
 *   @since 0.5.12
 *   @package paypal
 */
-class null_ipn extends IPN
+class dummy_ipn extends IPN
 {
-
-    private $Cart = NULL;  // Cart object
 
     /**
     *   Constructor.
@@ -38,7 +36,7 @@ class null_ipn extends IPN
     */
     function __construct($A=array())
     {
-        $this->gw_id = 'null';
+        $this->gw_id = 'dummy';
         parent::__construct($A);
 
         $cart_id = PP_getVar($A, 'cart_id');
@@ -87,7 +85,7 @@ class null_ipn extends IPN
                 $this->pp_data['custom'] = array('uid' => $A['custom']);
             }
         }
-        $this->pp_data['custom']['transtype'] = 'null_ipn';
+        $this->pp_data['custom']['transtype'] = 'dummy_ipn';
 
         switch ($this->pp_data['pmt_status']) {
         case 'Pending':
@@ -113,11 +111,10 @@ class null_ipn extends IPN
     private function Verify()
     {
         if ($this->Cart === NULL) return false;
-        // Order total must be zero to use the null gateway
+        // Order total must be zero to use the dummy gateway
         $info = $this->Cart->getInfo();
         $total = PP_getVar($this->Cart->getInfo(), 'final_total', 'float');
         if ($total > .001) return false;
-        //if ($this->Cart->getInfo()['final_total'] > .001) return false;
         return true;
     }
 
@@ -186,41 +183,41 @@ class null_ipn extends IPN
         $Cart = $this->Cart->Cart();
 
         if (empty($Cart)) {
-            COM_errorLog("Paypal\\null_ipn::Process() - Empty Cart for id {$this->Cart->CartID()}");
+            COM_errorLog("Paypal\\dummy_ipn::Process() - Empty Cart for id {$this->Cart->CartID()}");
             return false;
         }
         $items = array();
+        $total_shipping = 0;
+        $total_handling = 0;
 
+        // Add the item to the array for the order creation.
+        // IPN item numbers are indexes into the cart, so get the
+        // actual product ID from the cart
         foreach ($Cart as $idx=>$item) {
-
-            // Add the item to the array for the order creation.
-            // IPN item numbers are indexes into the cart, so get the
-            // actual product ID from the cart
+            $shipping = PP_getVar($item, 'shipping', 'float');
+            $handling = PP_getVar($item, 'handling', 'float');
             $args = array(
                 'item_id' => $item['item_id'],
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
                 'item_name' => $item['name'],
-                'shipping' => 0,
-                'handling' => 0,
-                'tax' => 0,
+                'shipping' => $shipping,
+                'handling' => $handling,
+                'tax' => PP_getVar($item, 'tax', 'float'),
                 'extras' => $item['extras']
             );
             $this->AddItem($args);
-  
-            $payment_gross = $this->Cart->getInfo()['apply_gc'];
-            PAYPAL_debug("Received $payment_gross gift card payment");
-            $this->pp_data['pmt_gross'] = $payment_gross;
-
-            if ($this->isSufficientFunds()) {
-                $this->handlePurchase();
-            } else {
-                $this->handleFailure(IPN_FAILURE_FUNDS,
-                        "($logId) Insufficient/incorrect funds for purchase");
-                return false;
-            }
+            $total_shipping += $shipping;
+            $total_handling += $handling;
         }
-        return true;
+        $by_gc = $this->Cart->getInfo()['apply_gc'];
+        PAYPAL_debug("Received $by_gc gift card payment");
+        $this->pp_data['pmt_gross'] = 0;    // This only handles fully-paid items
+        $this->pp_data['custom']['by_gc'] = $by_gc;
+        $this->pp_data['pmt_shipping'] = $total_shipping;
+        $this->pp_data['pmt_handling'] = $total_handling;
+
+        return $this->handlePurchase();
     }   // function Process
 
 }   // class paypal_ipn
