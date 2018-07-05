@@ -8,6 +8,8 @@
 {!if breadcrumbs}
 {breadcrumbs}
 {!endif}
-{todo}
+{!if todo}
+<div class="uk-alert uk-alert-danger">{todo}</div>
+{!endif}
 <div style="margin-top: 10px;clear:both;"></div>
 {# end {templatelocation} #}
