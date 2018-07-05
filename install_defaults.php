@@ -14,7 +14,6 @@
 *   @copyright Copyright (C) 2005-2006 Vincent Furia <vinny01@users.sourceforge.net>
 */
 
-
 // This file can't be used on its own
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
@@ -64,7 +63,7 @@ $_PP_DEFAULTS['purch_email_admin']      = 2;
 
 /** Admin email override.
 *   If this is not empty, notification email will be sent to this
-*   address instead of $_CONF['site_email']
+*   address instead of $_CONF['site_mail']
 */
 $_PP_DEFAULTS['admin_email_addr'] = '';
 
@@ -129,6 +128,7 @@ $_PP_DEFAULTS['def_taxable'] = 1;
 $_PP_DEFAULTS['def_enabled'] = 1;
 $_PP_DEFAULTS['def_featured'] = 0;
 $_PP_DEFAULTS['def_oversell'] = 0;
+$_PP_DEFAULTS['def_track_onhand'] = 0;  // Track qty onhand?
 
 // Limits on number of products shown in blocks:
 $_PP_DEFAULTS['blk_random_limit'] = 1;
@@ -137,7 +137,6 @@ $_PP_DEFAULTS['blk_popular_limit'] = 1;
 
 // Default expiration days for downloads (days)
 $_PP_DEFAULTS['def_expiration'] = 3;
-
 
 // Required address fields for shipping & billing workflows
 // 0 = Don't Collect, 1 = optional, 2 = required
@@ -153,18 +152,17 @@ $_PP_DEFAULTS['weight_unit'] = 'lbs';   // Unit of weight measure (lb/kg)
 
 $_PP_DEFAULTS['shop_name'] = $_CONF['site_name'];
 $_PP_DEFAULTS['shop_addr'] = '';
-$_PP_DEFAULTS['shop_email'] = $_CONF['site_email'];
+$_PP_DEFAULTS['shop_email'] = isset($_CONF['site_mail']) ? $_CONF['site_mail'] : '';
+$_PP_DEFAULTS['tax_rate'] = 0;      // Default tax rate
 
 $_PP_DEFAULTS['centerblock'] = 0;   // Enable centerblock?
 
-$_PP_DEFAULTS['track_onhand'] = 0;  // Track qty onhand?
-$_PP_DEFAULTS['oversell'] = 0;      // Allow over-selling
 $_PP_DEFAULTS['product_tpl_ver'] = 'v1';   // default product detail template
 $_PP_DEFAULTS['list_tpl_ver'] = 'v1';   // default product list item template
 $_PP_DEFAULTS['cache_max_age'] = 900;   // default cache file age, 15 minutes
 $_PP_DEFAULTS['tc_link'] = '';     // Link to terms and conditions
 
-$_PP_DEFAULTS['gc_enabled'] = 1;        // enable gift cards? 1=yes, 0=no
+$_PP_DEFAULTS['gc_enabled'] = 0;        // enable gift cards? 1=yes, 0=no
 $_PP_DEFAULTS['gc_exp_days'] = 365;     // default expiration for gift cards
 
 /**
@@ -190,7 +188,6 @@ function plugin_initconfig_paypal($group_id = 0)
         $group_id = $_PP_DEFAULTS['defgrp'];
 
     $c = config::get_instance();
-
     if (!$c->group_exists($_PP_CONF['pi_name'])) {
 
         // Main configuration, shop email addresses, encrypted button settings
@@ -297,7 +294,6 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('debug_ipn', $_PP_DEFAULTS['debug_ipn'],
                 'select', 0, 50, 2, 20, true, $_PP_CONF['pi_name']);
 
-
         $c->add('fs_addresses', NULL, 'fieldset', 0, 60, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('get_street', $_PP_DEFAULTS['get_street'],
@@ -323,6 +319,8 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 10, 100, 0, 30, true, $_PP_CONF['pi_name']);
         $c->add('shop_email', $_PP_DEFAULTS['shop_email'],
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
+        $c->add('tax_rate', $_PP_DEFAULTS['tax_rate'],
+                'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
 
         $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
@@ -333,7 +331,6 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('gc_exp_days', $_PP_DEFAULTS['gc_exp_days'],
                 'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
      }
-
      return true;
 }
 

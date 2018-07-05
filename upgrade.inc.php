@@ -538,6 +538,8 @@ function PAYPAL_do_upgrade()
                 'select', 20, 0, 2, 10, true, $_PP_CONF['pi_name']);
         $c->add('gc_exp_days', $_PP_DEFAULTS['gc_exp_days'],
                 'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
+        $c->add('tax_rate', $_PP_DEFAULTS['tax_rate'],
+                'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
 
         // Previously, categories were not required. With the MPTT method,
         // there must be at least one.
