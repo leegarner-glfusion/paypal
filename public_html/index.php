@@ -46,7 +46,7 @@ if (!empty($action)) {
         // Actions
         'updatecart', 'checkout', 'searchcat',
         'savebillto', 'saveshipto',
-        'updatecart', 'emptycart', 'delcartitem',
+        'emptycart', 'delcartitem',
         'addcartitem', 'addcartitem_x', 'checkoutcart',
         'processorder', 'thanks', 'action',
         'redeem',
@@ -79,7 +79,7 @@ $content = '';
 
 switch ($action) {
 case 'updatecart':
-    $ppGCart->UpdateAllQty($_POST['quantity']);
+    $ppGCart->Update($_POST);
     $view = 'cart';
     break;
 
@@ -89,7 +89,7 @@ case 'checkout':
     }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
-        $ppGCart->UpdateAllQty($_POST['quantity']);
+        $ppGCart->Update($_POST);
     }
     if (isset($_POST['order_instr'])) {
         $ppGCart->setInstructions($_POST['order_instr']);
@@ -183,7 +183,7 @@ case 'delcartitem':
 
 case 'updatecart':
     $view = 'cart';
-    $ppGCart->UpdateAllQty($_POST['quantity']);
+    $ppGCart->Update($_POST);
     break;
 
 case 'emptycart':
@@ -230,12 +230,14 @@ case 'redeem':
     if ($status > 0) {
         $persist = true;
         $type = 'error';
+        $msg = $LANG_PP['coupon_apply_msg0'];
     } else {
         $persist = false;
         $type = 'info';
+        $msg = sprintf($LANG_PP['coupon_apply_msg2'], $_CONF['site_mail']);
     }
-    $content .= COM_showMessageText($LANG_PP['coupon_apply_msg' . $status],
-                '', $persist, $type);
+    $msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
+    $content .= COM_showMessageText($msg, '', $persist, $type);
     break;
     
 case 'action':      // catch all the "?action=" urls
@@ -426,13 +428,6 @@ $T->set_var(array(
     'is_admin' => plugin_ismoderator_paypal(),
 ) );
 $display .= $T->parse('', 'title');
-if (!empty($msg)) {
-    //msg block
-    $display .= COM_startBlock('','','blockheader-message.thtml');
-    $display .= $msg;
-    $display .= COM_endBlock('blockfooter-message.thtml');
-}
-$display .= LGLIB_showAllMessages();
 $display .= $content;
 $display .= Paypal\siteFooter();
 echo $display;

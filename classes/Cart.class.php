@@ -406,19 +406,33 @@ class Cart
     *   Update the quantity for all cart items.
     *   Called from the View Cart form to update any quantities that have
     *   changed.
+    *   Also applies a coupon code, if entered.
     *
     *   @see    Cart::UpdateQty()
     *   @param  array   $items  Array if items as itemID=>newQty
     *   @return array           Updated cart contents
     */
-    public function UpdateAllQty($items)
+    public function Update($A)
     {
+        global $_PP_CONF;
+
+        $items = $A['quantity'];
         if (!is_array($items)) {
+            // No items in the cart?
             return;
         }
         foreach ($items as $id=>$value) {
             $value = (float)$value;
             $this->UpdateQty($id, $value, false);
+        }
+        // Now look for a coupon code to apply.
+        if ($_PP_CONF['gc_enabled']) {
+            $gc = PP_getVar($A, 'gc_code');
+            if (!empty($gc)) {
+                if (Coupon::Apply($gc) == 0) {
+                    unset($this->m_info['apply_gc']);
+                }
+            }
         }
         $this->Save();  // UpdateQty didn't save the cart, so do it here
         return $this->m_cart;
@@ -636,10 +650,12 @@ class Cart
             if (!$checkout) {
                 if (isset($this->m_info['apply_gc'])) {
                     $apply_gc = $this->m_info['apply_gc'];
+                    $apply_gc = min($total, $apply_gc, $gc_bal);
+                } else {
+                    $apply_gc = min($total, $gc_bal);
                 }
-                $apply_gc = min($total, $apply_gc);
             } elseif ($this->m_info['apply_gc'] !== NULL) {
-                $apply_gc = min((float)$this->m_info['apply_gc'], $total);
+                $apply_gc = min((float)$this->m_info['apply_gc'], $total, $gc_bal);
             }
         }
 
@@ -660,6 +676,7 @@ class Cart
             'tc_link'  => $tc_link,
             'apply_gc'  => $apply_gc ? $currency->FormatValue($apply_gc) : 0,
             'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
+            'use_gc'    => $_PP_CONF['gc_enabled'] ? true : false,
             'net_total' => $currency->Format(max($total - $apply_gc, 0)),
             'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
@@ -700,7 +717,7 @@ class Cart
         // or gift cards
         if ($this->custom_info['final_total'] < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
-            $this->custom_info['transtype'] = 'null';
+            $this->custom_info['transtype'] = 'dummy';
             $this->custom_info['cart_id'] = $this->CartID();
             $gateway_vars = array(
                 '<input type="hidden" name="processorder" value="by_gc" />',
@@ -708,7 +725,7 @@ class Cart
                 '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
             );
             $T->set_var(array(
-                'action' => PAYPAL_URL . '/ipn/null_ipn.php',
+                'action' => PAYPAL_URL . '/ipn/dummy_ipn.php',
                 'gateway_vars' => implode("\n", $gateway_vars),
             ) );
             $T->parse('checkout_btn', 'checkout');
