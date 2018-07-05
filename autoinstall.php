@@ -156,13 +156,6 @@ $INSTALL_plugin['paypal'] = array(
             'onleft' => 1,
             'is_enabled' => 1,
         ),
-
-    array(  'type' => 'mkdir',
-            'dirs' => array(
-                $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'],
-                $_CONF['path'] . 'data/' . $_PP_CONF['pi_name'] . '/files',
-            ),
-        ),
 );
 
 $tables = array(
