@@ -1,6 +1,6 @@
 <?php
 /**
-*   Null IPN processor for orders with zero balances.
+*   Dummy IPN processor for orders with zero balances.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
@@ -21,7 +21,7 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 }
 
 // Process IPN request
-$ipn = Paypal\IPN::getInstance('null', $_POST);
+$ipn = Paypal\IPN::getInstance('dummy', $_POST);
 if ($ipn) {
     $ipn->Process();
 }
