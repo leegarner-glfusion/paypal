@@ -139,9 +139,9 @@ case 'saveopt':
     }
     if (isset($_POST['attr_id']) && !empty($_POST['attr_id'])) {
         // Updating an existing option, return to the list
-        $view = 'attributes';
+        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?attributes=x');
     } else {
-        $view = 'editattr';
+        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?editattr=x&item_id=' . $_POST['item_id']);
     }
     break;
 
@@ -269,18 +269,20 @@ case 'sendcards':
     $exp = PP_getVar($_POST, 'expires', 'string');
     if (!empty($uids)) {
         $uids = explode('|', $uids);
+    } else {
+        $uids = array();
     }
     if ($gid > 0) {
-        $sql = "SELECT uid FROM {$_TABLES['group_assignments']}
-                WHERE ug_main_grp_id = $gid AND uid > 1";
+        $sql = "SELECT ug_uid FROM {$_TABLES['group_assignments']}
+                WHERE ug_main_grp_id = $gid AND ug_uid > 1";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $uids[] = $A['uid'];
+            $uids[] = $A['ug_uid'];
         }
     }
     $errs = array();
-    if ($amt < .01) $errs[] = "Must have a positive amount";
-    if (empty($uids)) $errs[] = "Must indicate at least one user or group";
+    if ($amt < .01) $errs[] = $LANG_PP['err_gc_amt'];
+    if (empty($uids)) $errs[] = $LANG_PP['err_gc_nousers'];
     if (empty($errs)) {
         foreach ($uids as $uid) {
             $code = Paypal\Coupon::Purchase($amt, $uid, $exp);
@@ -396,16 +398,15 @@ case 'attributes':
     break;
 
 case 'editattr':
-    $attr_id = isset($_REQUEST['attr_id']) ? $_REQUEST['attr_id'] : '';
+    $attr_id = PP_getVar($_GET, 'attr_id');
     $Attr = new Paypal\Attribute($attr_id);
+    $Attr->item_id = PP_getVar($_GET, 'item_id');
     $content .= $Attr->Edit();
     break;
 
 case 'other':
     $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
             '/index.php?resetbuttons=x' . '">' . $LANG_PP['resetbuttons'] . "</a></div>\n";
-    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?sendcards_form=x' . '">' . $LANG_PP['send_giftcards'] . "</a></div>\n";
     $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
             '/index.php?purgecache=x' . '">' . $LANG_PP['purge_cache'] . "</a></div>\n";
     break;
@@ -776,8 +777,11 @@ function PAYPAL_adminMenu($view='')
                     'text' => $LANG_PP['workflows']);
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?other=x',
                     'text' => $LANG_PP['other_func']);
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
+    if ($_PP_CONF['gc_enabled']) {
+        // Show the Coupons menu option only if enabled
+        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
                     'text' => $LANG_PP['coupons']);
+    }
 //    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
 //                    'text' => $LANG_PP['reports']);
 
@@ -787,16 +791,16 @@ function PAYPAL_adminMenu($view='')
         'is_admin' => true,
     ) );
     $todo_arr = PAYPAL_adminTodo();
-    foreach ($todo_arr as $item_todo) {
-        $todo_list .= "<li>$item_todo</li>" . LB;
-    }
-    if (!empty($todo_list)) {
+    if (!empty($todo_arr)) {
+        $todo_list = '';
+        foreach ($todo_arr as $item_todo) {
+            $todo_list .= "<li>$item_todo</li>" . LB;
+        }
         $T->set_var('todo', '<ul>' . $todo_list . '</ul>');
     }
     $retval = $T->parse('', 'title');
     $retval .= ADMIN_createMenu($menu_arr, $hdr_txt,
             plugin_geticon_paypal());
-
     return $retval;
 }
 
@@ -1103,7 +1107,10 @@ function PAYPAL_adminlist_Attributes()
         array('text' => $LANG_PP['order'],
                 'field' => 'orderby', 'sort' => true),
         array('text' => $LANG_PP['attr_price'],
-                'field' => 'attr_price', 'sort' => true),
+                'field' => 'attr_price',
+                'align' => 'right',
+                'sort' => true,
+        ),
         array('text' => $LANG_ADMIN['delete'],
                 'field' => 'delete', 'sort' => 'false',
                 'align' => 'center'),
@@ -1581,7 +1588,9 @@ function PAYPAL_couponlist()
 
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
-    $display .= $LANG_PP['couponlist'];
+    $display .= '<h2>' . $LANG_PP['couponlist'] . '</h2>';
+    $display .= '<div><a href="' . PAYPAL_ADMIN_URL .
+            '/index.php?sendcards_form=x' . '">' . $LANG_PP['send_giftcards'] . "</a></div>\n";
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_couponlist',
             __NAMESPACE__ . '\getAdminField_coupons',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
