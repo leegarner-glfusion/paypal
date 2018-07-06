@@ -546,9 +546,9 @@ function PAYPAL_do_upgrade()
         $cats = DB_count($_TABLES['paypal.categories']);
         if ($cats == 0) {
             $sql = "INSERT INTO {$_TABLES['paypal.categories']}
-                    (cat_id, cat_name, description, lft, rgt)
+                    (cat_id, cat_name, description, grp_access, lft, rgt)
                 VALUES
-                    (1, 'Home', 'Root Category', 1, 2)";
+                    (1, 'Home', 'Root Category', 2, 1, 2)";
             $_PP_UPGRADE['0.6.0'][] = $sql;
             $sql = "UPDATE {$_TABLES['paypal.products']}
                     SET cat_id = 1 WHERE cat_id = 0";

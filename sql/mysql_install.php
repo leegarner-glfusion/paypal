@@ -469,9 +469,9 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
 // Sample data to load up the Paypal gateway configuration
 $_PP_SAMPLEDATA = array(
     "INSERT INTO {$_TABLES['paypal.categories']}
-            (cat_id, parent_id, cat_name, description, lft, rgt)
+            (cat_id, parent_id, cat_name, description, grp_access, lft, rgt)
         VALUES
-            (1, 0, 'Home', 'Root Category', 1, 2)",
+            (1, 0, 'Home', 'Root Category', 2, 1, 2)",
     "INSERT INTO {$_TABLES['paypal.gateways']}
             (id, orderby, enabled, description, config, services)
         VALUES
