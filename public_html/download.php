@@ -6,10 +6,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01 AT users DOT sourceforge DOT net>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.8
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -22,8 +22,8 @@ require_once('../lib-common.php');
 require_once($_CONF['path'] . 'system/classes/downloader.class.php');
 
 // Sanitize the product ID and token
-$id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-$token = isset($_REQUEST['token']) ? DB_escapeString($_REQUEST['token']) : '';
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$token = isset($_GET['token']) ? DB_escapeString($_GET['token']) : '';
 
 // Need to have one or the other, prefer token
 if (empty($token) && $id == 0) {
