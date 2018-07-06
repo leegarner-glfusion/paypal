@@ -526,7 +526,9 @@ class paypal extends Gateway
                 break;
             }
 
-            $vars['tax_rate'] = sprintf("%0.4f", PP_getTaxRate() * 100);
+            if ($P->isTaxable) {
+                $vars['tax_rate'] = sprintf("%0.4f", PP_getTaxRate() * 100);
+            }
 
             // Buy-now product button, set default billing/shipping addresses
             $U = self::UserInfo();
