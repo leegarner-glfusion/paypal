@@ -157,7 +157,9 @@ class Order
 
         // Now load the items
         $this->items = array();
-        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
+        $sql = "SELECT *,
+                UNIX_TIMESTAMP(CONVERT_TZ(`expiration`, '+00:00', @@session.time_zone)) AS ux_exp
+                FROM {$_TABLES['paypal.purchases']}
                 WHERE order_id = '{$this->order_id}'";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
@@ -413,13 +415,11 @@ class Order
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
+        $isAdmin = plugin_ismoderator_paypal() ? true : false;
 
         $tplname = 'order';
         if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
-
-        $isAdmin = plugin_ismoderator_paypal() ? true : false;
-
         foreach ($this->_addr_fields as $fldname) {
             $T->set_var($fldname, $this->$fldname);
         }
@@ -450,6 +450,8 @@ class Order
                 'is_file'       => $item['is_file'],
                 'taxable'       => $item['taxable'],
                 'tax_icon'      => $item['tax_icon'],
+                'token'         => $item['token'],
+                'iconset'       => $_PP_CONF['_iconset'],
             ) );
             $T->set_block('order', 'ItemOptions', 'iOpts');
             foreach ($item['options'] as $opt_dscp) {
@@ -929,9 +931,10 @@ class Order
                 'total'     => COM_numberFormat($item_total, 2),
                 'options'   => $item->options_text,
                 'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
-                'is_file'   => $P->file != '' ? 'true' : '',
+                'is_file'   => $P->file != '' && $item->ux_exp > time() ? true : false,
                 'taxable'   => $P->taxable,
                 'tax_icon'  => $LANG_PP['tax'][0],
+                'token'     => $item->token,
             );
             if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;
