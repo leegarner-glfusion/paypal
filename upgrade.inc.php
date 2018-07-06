@@ -572,7 +572,7 @@ function PAYPAL_do_upgrade()
     }
     Paypal\Cache::clear();
     PAYPAL_remove_old_files();
-    CTL_clearCache($pi_name);
+    CTL_clearCache();   // clear cache to ensure CSS updates come through
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
     return true;
 }
