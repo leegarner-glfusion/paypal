@@ -306,6 +306,7 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   KEY `cat_rgt` (`rgt`)
 ) ENGINE=MyISAM";
 
+// since 0.4.5
 $_SQL['paypal.prod_attr'] = "CREATE TABLE `{$_TABLES['paypal.prod_attr']}` (
   `attr_id` int(11) unsigned NOT NULL auto_increment,
   `item_id` int(11) unsigned default NULL,
@@ -318,6 +319,7 @@ $_SQL['paypal.prod_attr'] = "CREATE TABLE `{$_TABLES['paypal.prod_attr']}` (
   UNIQUE KEY `item_id` (`item_id`,`attr_name`, `attr_value`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.buttons'] = "CREATE TABLE `{$_TABLES['paypal.buttons']}` (
   `item_id` int(11) NOT NULL,
   `gw_name` varchar(10) NOT NULL DEFAULT '',
@@ -326,6 +328,7 @@ $_SQL['paypal.buttons'] = "CREATE TABLE `{$_TABLES['paypal.buttons']}` (
   PRIMARY KEY (`item_id`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `order_id` varchar(40) NOT NULL,
   `uid` int(11) NOT NULL DEFAULT '0',
@@ -352,6 +355,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `tax` decimal(5,2) unsigned DEFAULT NULL,
   `shipping` decimal(5,2) unsigned DEFAULT NULL,
   `handling` decimal(5,2) unsigned DEFAULT NULL,
+  `by_gc` decimal(5,2) unsigned DEFAULT NULL,
   `status` varchar(25) DEFAULT 'pending',
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
@@ -360,6 +364,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   PRIMARY KEY (`order_id`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.address'] = "CREATE TABLE `{$_TABLES['paypal.address']}` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uid` int(11) unsigned NOT NULL DEFAULT '1',
@@ -377,12 +382,14 @@ $_SQL['paypal.address'] = "CREATE TABLE `{$_TABLES['paypal.address']}` (
   KEY `uid` (`uid`,`zip`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.userinfo'] = "CREATE TABLE `{$_TABLES['paypal.userinfo']}` (
   `uid` int(11) unsigned NOT NULL,
   `cart` text,
   PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
   `cart_id` varchar(40) NOT NULL,
   `cart_uid` int(11) unsigned NOT NULL,
@@ -394,9 +401,11 @@ $_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
   `total` float(8,2) DEFAULT NULL,
   `tax` float(5,2) DEFAULT NULL,
   `shipping` float(5,2) DEFAULT NULL,
+  `is_order` tinyint(1) unsigned not null default 0,
   PRIMARY KEY (`cart_id`)
 ) ENGINE=MyISAM";
 
+// since .5.0
 $_SQL['paypal.gateways'] = "CREATE TABLE `{$_TABLES['paypal.gateways']}` (
   `id` varchar(25) NOT NULL,
   `orderby` int(3) NOT NULL DEFAULT '0',
@@ -408,6 +417,7 @@ $_SQL['paypal.gateways'] = "CREATE TABLE `{$_TABLES['paypal.gateways']}` (
   KEY `orderby` (`orderby`)
 ) ENGINE=MyISAM";
 
+// since 0.5.0
 $_SQL['paypal.workflows'] = "CREATE TABLE `{$_TABLES['paypal.workflows']}` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `wf_name` varchar(40) DEFAULT NULL,
@@ -417,6 +427,7 @@ $_SQL['paypal.workflows'] = "CREATE TABLE `{$_TABLES['paypal.workflows']}` (
   KEY `orderby` (`orderby`)
 ) ENGINE=MyISAM";
 
+// since 0.5.2
 $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `orderby` INT(3) UNSIGNED NOT NULL DEFAULT '0',
@@ -427,6 +438,7 @@ $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
   INDEX `orderby` (`orderby`)
 ) ENGINE=MyISAM";
 
+// since 0.5.2
 $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `ts` datetime NOT NULL,
@@ -437,8 +449,10 @@ $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   INDEX `order_id` (`order_id`)
 ) ENGINE=MyISAM";
 
+// sicne 0.5.4
 $_SQL['paypal.currency'] = $PP_UPGRADE['0.5.4'][0];
 
+// since 0.6.0
 $_SQL['paypal.coupons'] = "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
   `code` varchar(128) NOT NULL,
   `amount` float(8,2) unsigned NOT NULL DEFAULT '0.00',
@@ -453,10 +467,11 @@ $_SQL['paypal.coupons'] = "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
   KEY `owner` (`redeemer`,`balance`,`expires`)
 ) ENGINE=MyIsam";
 
+// since 0.6.0
 $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(128) NOT NULL,
-  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `order_id` varchar(50) DEFAULT NULL,
   `amount` float(8,2) DEFAULT NULL,
   `msg` varchar(255) DEFAULT NULL,
@@ -472,11 +487,11 @@ $_PP_SAMPLEDATA = array(
             (cat_id, parent_id, cat_name, description, grp_access, lft, rgt)
         VALUES
             (1, 0, 'Home', 'Root Category', 2, 1, 2)",
-    "INSERT INTO {$_TABLES['paypal.gateways']}
+/*    "INSERT INTO {$_TABLES['paypal.gateways']}
             (id, orderby, enabled, description, config, services)
         VALUES
             ('paypal', 10, 0, 'Paypal Website Payments Standard', '', 
-             'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",
+             'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",*/
     "INSERT INTO {$_TABLES['paypal.workflows']}
             (id, wf_name, orderby, enabled)
         VALUES
@@ -832,7 +847,8 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD `apply_gc` float(8,2) NOT NULL default '0',
         ADD `total` float(8,2) NOT NULL default '0',
         ADD `tax` float(5,2) NOT NULL default '0',
-        ADD `shipping` float(5,2) NOT NULL default '0'",
+        ADD `shipping` float(5,2) NOT NULL default '0',
+        ADD is_order tinyint(1) unsigned not null default '0'",
     "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
       `code` varchar(128) NOT NULL,
       `amount` float(8,2) unsigned NOT NULL DEFAULT '0.00',
@@ -849,7 +865,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
       `code` varchar(128) NOT NULL,
-      `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
       `order_id` varchar(50) DEFAULT NULL,
       `amount` float(8,2) DEFAULT NULL,
       `msg` varchar(255) DEFAULT NULL,
