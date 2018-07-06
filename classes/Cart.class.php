@@ -100,7 +100,7 @@ class Cart
         $uid = (int)$uid;
         if ($uid > 1) {
             if (!array_key_exists($uid, $carts)) {
-                $carts[$uid] = new self();
+                $carts[$uid] = new self($cart_id);
             }
             $cart = $carts[$uid];
         } else {
@@ -664,7 +664,7 @@ class Cart
         $this->m_info['apply_gc'] = $apply_gc;
         $this->m_info['final_total'] = $total - $apply_gc;
         $this->m_info['shipping'] = $shipping;
-        $this->m_info['cart_tax'] = $cart_tax;
+        $this->m_info['tax'] = $cart_tax;
         $T->set_var(array(
             //'paypal_url'        => $_PP_CONF['paypal_url'],
             //'receiver_email'    => $_PP_CONF['receiver_email'][0],
@@ -700,7 +700,8 @@ class Cart
 
 
     /**
-    *   Create a button that takes the buyer to the final order screen
+    *   Create a fake checkout button to be used when the order value is zero
+    *   due to coupons. This takes the user directly to the dummy IPN processor.
     *
     *   @param  object  $gw Selected Payment Gateway
     *   @return string      HTML for final checkout button
@@ -727,18 +728,22 @@ class Cart
             $T->set_var(array(
                 'action' => PAYPAL_URL . '/ipn/dummy_ipn.php',
                 'gateway_vars' => implode("\n", $gateway_vars),
+                'cart_id'       => $this->m_cart_id,
+                'uid'           => $_USER['uid'],
             ) );
             $T->parse('checkout_btn', 'checkout');
             return $T->finish($T->get_var('checkout_btn'));
         }
         // Else, if amount > 0, regular checkout button
         if ($gw->Supports('checkout')) {
-            $T->set_var(array(
+            /*$T->set_var(array(
                 'is_uikit' => $_PP_CONF['_is_uikit'],
                 'gateway_vars' => $gw->gatewayVars($this),
                 'action' => $gw->getActionUrl(),
-            ) );
-            $T->parse('checkout_btn', 'checkout');
+                'cart_id' => $this->m_cart_id,
+                'uid' => $_USER['uid'],
+            ) );*/
+            //$T->parse('checkout_btn', 'checkout');
             return $gw->checkoutButton($this);
         } else {
             return 'Gateway does not support checkout';
@@ -866,7 +871,7 @@ class Cart
     {
         global $_CONF;
 
-        return md5(session_id() . $_CONF['site_name']);
+        return md5(time() . session_id() . $_CONF['site_name']);
     }
 
 
@@ -956,7 +961,7 @@ class Cart
             $cart_id = self::getAnonCartID();
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
-                "cart_uid = $uid ORDER BY last_update DESC limit 1");
+                "cart_uid = $uid AND is_order = 0 ORDER BY last_update DESC limit 1");
             if (!empty($cart_id) && !COM_isAnonUser()) {
                 // For logged-in usrs, delete superfluous carts
                 DB_query("DELETE FROM {$_TABLES['paypal.cart']}
@@ -1159,6 +1164,31 @@ class Cart
         } else {
             return NULL;
         }
+    }
+
+
+    /**
+    *   Set the is_order flag in a cart to indicate that it is finalized
+    *   and submitted for payment. The status should always be "true"
+    *   Also removes the cart_id cookie for anonymous users.
+    *
+    *   @param  string  $cart_id    Cart ID to update
+    *   @param  boolean $status     Status to set, currently only "true"
+    */
+    public static function setFinal($cart_id, $status=true)
+    {
+        global $_TABLES;
+
+        $status = $status ? 1 : 0;
+        $cart_id = DB_escapeString($cart_id);
+        $sql = "UPDATE {$_TABLES['paypal.cart']}
+                SET is_order = $status
+                WHERE cart_id = '{$cart_id}'";
+        DB_query($sql);
+        if ($status == 1) {
+            unset($_COOKIE[self::$session_var]);
+        }
+        return DB_error() ? 1 : 0;
     }
 
 }   // class Cart

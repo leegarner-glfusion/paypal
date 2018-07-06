@@ -257,9 +257,9 @@ class paypal_ipn extends IPN
             // shopping cart
             // Create a cart and read the info from the cart table.
             $Cart = new Cart($this->pp_data['custom']['cart_id']);
-            $this->pp_data['pmt_tax'] = (float)$Cart->getInfo('cart_tax');
-            $this->pp_data['pmt_shipping'] = (float)$Cart->getInfo('cart_shipping');
-            $this->pp_data['pmt_handling'] = (float)$Cart->getInfo('cart_handling');
+            $this->pp_data['pmt_tax'] = (float)$Cart->getInfo('tax');
+            $this->pp_data['pmt_shipping'] = (float)$Cart->getInfo('shipping');
+            $this->pp_data['pmt_handling'] = (float)$Cart->getInfo('handling');
             /*$fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];*/
