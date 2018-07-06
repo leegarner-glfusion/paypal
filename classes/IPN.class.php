@@ -8,7 +8,7 @@
 *   The derived class may implement a "Process" function, or other master
 *   control.  The protected functions here are available for derived classes,
 *   or they may implement their own methods for handlePurchase(),
-*   CreateOrder(), etc.
+*   createOrder(), etc.
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net>
@@ -242,29 +242,28 @@ class IPN
 
         USES_paypal_functions();
 
-        // for each item purchased, check its price and accumulate total
-        // Add in any gift card applied.
-        $total = 0;
-        $tax = 0;
-        $payment_gross = (float)$this->pp_data['pmt_gross'];
+        // Get the amount paid along with any gift card balance used and
+        // check against the total order amount.
+        $pmt = PP_getVar($this->pp_data, 'pmt_gross', 'float');
         $by_gc = PP_getVar($this->pp_data['custom'], 'by_gc', 'float');
         if ($by_gc > 0) {
-            $uid = (int)$this->pp_data['custom']['uid'];
-            if (Coupon::verifyBalance($by_gc, $uid)) {
-                $payment_gross += $by_gc;
-            } else {
+            $uid = PP_getVar($this->pp_data['custom'], 'uid', 'int');
+            if (!Coupon::verifyBalance($by_gc, $uid)) {
                 $gc_bal = Coupon::getUserBalance($uid);
                 COM_errorLog("Insufficient Gift Card Balance, need $by_gc, have $gc_bal");
+                $by_gc = 0;     // ignore the gift card amount
             }
         }
+        $total_credit = $pmt + $by_gc;
         // Compare total order amount to gross payment.  The ".0001" is to help
         // kill any floating-point errors. Include any discount.
-        $total = $this->Order->getTotal();
-        if ($total <= $payment_gross + .0001) {
-            PAYPAL_debug("$payment_gross received is ok, require $total");
+        $total_order = $this->Order->getTotal();
+        $msg = "$pmt received plus $by_gc coupon, require $total_order";
+        if ($total_order <= $total_credit + .0001) {
+            PAYPAL_debug("OK: $msg");
             return true;
         } else {
-            PAYPAL_debug("$payment_gross received is less than required $total");
+            PAYPAL_debug("Insufficient Funds: $msg");
             return false;
         }
     }   // isSufficientFunds()
@@ -431,7 +430,7 @@ class IPN
     *   records the purchases.  Purchased files will be emailed to the
     *   customer by Order::Notify().
     *
-    *   @uses   CreateOrder()
+    *   @uses   createOrder()
     */
     protected function handlePurchase()
     {
@@ -483,7 +482,7 @@ class IPN
             }
         }   // foreach item
 
-        $status = $this->CreateOrder();
+        $status = $this->createOrder();
         if ($status == 0) {
             // Now all of the items are in the order object, check for sufficient
             // funds. If OK, then save the order and call each handlePurchase()
@@ -534,7 +533,7 @@ class IPN
     *
     *   @return integer     Zero for success, non-zero on error
     */
-    protected function CreateOrder()
+    protected function createOrder()
     {
         global $_TABLES, $_PP_CONF;
 
@@ -556,7 +555,7 @@ class IPN
         $this->Order = new Order();
 
         if (isset($this->pp_data['custom']['cart_id'])) {
-            $this->Cart = new Cart($this->pp_data['custom']['cart_id']);
+            $this->Cart = new Cart($this->pp_data['custom']['cart_id'], false);
             if (!$this->Cart->hasItems()) {
                 if (!$_PP_CONF['sys_test_ipn']) {
                     return 1; // shouldn't normally be empty except during testing

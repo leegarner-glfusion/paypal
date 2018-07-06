@@ -41,7 +41,7 @@ class dummy_ipn extends IPN
 
         $cart_id = PP_getVar($A, 'cart_id');
         if (!empty($cart_id)) {
-            $this->Cart = Cart::getInstance(0, $cart_id);
+            $this->Cart = new Cart($cart_id, false);
         }
         if (!$this->Cart) return NULL;
 
