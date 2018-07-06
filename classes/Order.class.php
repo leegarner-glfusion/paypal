@@ -687,10 +687,10 @@ class Order
                 $dl_url = PAYPAL_URL . '/download.php?';
                 // There should always be a token, but fall back to the
                 // product ID if there isn't
-                if (!empty($item->token)) {
+                if ($item->token != '') {
                     $dl_url .= 'token=' . urlencode($item->token);
                 } else {
-                    $dl_url .= 'id=' . $item->item_number;
+                    $dl_url .= 'id=' . $item->product_id;
                 }
                 $dl_links .= "<a href=\"$dl_url\">$dl_url</a><br />";
             }
