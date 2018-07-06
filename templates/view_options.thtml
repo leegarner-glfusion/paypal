@@ -1,0 +1,12 @@
+{# begin {templatelocation} #}
+        <!-- BEGIN ItemOptions -->
+    <div class="ItemOptions">
+        --&nbsp;{opt_name}:&nbsp;{opt_value}
+{!if 0}
+          {!if opt_price}
+            &nbsp;({opt_price})
+          {!endif}
+{!endif}
+    </div>
+        <!-- END ItemOptions -->
+{# end {templatelocation} #}
