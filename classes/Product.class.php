@@ -1307,7 +1307,7 @@ class Product
         // Get the free download button, if this is a downloadable product
         // already purchased and not expired
         $exptime = DB_getItem($_TABLES['paypal.purchases'],
-                'MAX(UNIX_TIMESTAMP(expiration))',
+                "MAX(UNIX_TIMESTAMP(CONVERT_TZ(`expiration`, '+00:00', @@session.time_zone)))",
                 "user_id = {$_USER['uid']} AND product_id = '" .
                 DB_escapeString($this->id) . "'");
 
