@@ -2,6 +2,9 @@
 
 ## Ver 0.6.0
 Released TBD
+- New config items:
+  - Tax Rate
+  - Gift cards (enabled, default expiration)
 - Finalize and hide cart immediately when order id placed.
 - Store order and log dates as UTC timestamps and convert by site timezone.
 - Create directories outside of auto-installer, to preserve data after plugin removal.
