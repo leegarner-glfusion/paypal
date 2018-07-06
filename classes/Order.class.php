@@ -49,6 +49,7 @@ class Order
         $this->uid = $_USER['uid'];
         $this->order_date = PAYPAL_now()->toMySql(false);
         $this->instructions = '';
+        $this->tax_rate = PP_getTaxRate();
         if (!empty($id)) {
             $this->order_id = $id;
             if (!$this->Load($id)) {
@@ -98,6 +99,7 @@ class Order
             break;
 
         case 'tax':
+        case 'tax_rate':
         case 'shipping':
         case 'handling':
         case 'by_gc':
@@ -354,9 +356,11 @@ class Order
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
             Cart::setSession('order_id', $this->order_id);
+            // Set field values that can only be set once and not updated
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
                     order_date = UTC_TIMESTAMP(),
+                    tax_rate = '{$this->tax_rate}',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
             $log_msg = 'Order Created';
@@ -478,7 +482,7 @@ class Order
             'net_total'     => $total - $this->by_gc,
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
-            'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $this->tax_items),
+            'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], $this->tax_rate * 100, $this->tax_items),
             'status'        => $this->status,
             'token'         => $this->token,
         ) );
@@ -953,7 +957,7 @@ class Order
                 $this->tax_items += 1;
             }
         }
-        $this->tax = round(PP_getTaxRate() * $tax_amt, 2);
+        $this->tax = round($this->tax_rate * $tax_amt, 2);
         return $this->tax;
     }
 
@@ -991,7 +995,8 @@ class Order
         foreach ($this->items as $id => $item) {
             $total += ($item->price * $item->quantity);
         }
-        $total += $this->calcTax() + $this->shipping + $this->handling;
+        //$total += $this->calcTax() + $this->shipping + $this->handling;
+        $total += $this->tax + $this->shipping + $this->handling;
         return round($total, $this->Currency->Decimals());
     }
 
