@@ -108,7 +108,7 @@
             </a>
 {!endif}
 {!if is_file}
-            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
+            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}&token={token}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
 {!endif}
         {item_options}
         <!-- BEGIN ItemOptions -->
