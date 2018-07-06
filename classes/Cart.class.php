@@ -314,14 +314,13 @@ class Cart
         if (!isset($args['item_number'])) return false;
         $item_id = $args['item_number'];    // may contain options
         $P = Product::getInstance($item_id);
-        if (!isset($args['options'])) $args['options'] = array();
-        $quantity = isset($args['quantity']) ? (float)$args['quantity'] : 1;
-        $override = isset($args['override']) ? $args['price'] : NULL;
-        $extras = isset($args['extras']) ? $args['extras'] : array();
-        $options = isset($args['options']) ? $args['options'] : array();
-        $item_name = isset($args['item_name']) ? $args['item_name'] : '';
-        $item_dscp = isset($args['short_description']) ? $args['short_description'] : '';
-        $uid = PP_getVar($args, 'uid', 'int', 1);
+        $quantity   = PP_getVar($args, 'quantity', 'float', 1);
+        $override   = isset($args['override']) ? $args['price'] : NULL;
+        $extras     = PP_getVar($args, 'extras', 'array');
+        $options    = PP_getVar($args, 'options', 'array');
+        $item_name  = PP_getVar($args, 'item_name');
+        $item_dscp  = PP_getVar($args, 'short_description');
+        $uid        = PP_getVar($args, 'uid', 'int', 1);
         if (!is_array($this->m_cart))
             $this->m_cart = array();
 
@@ -338,14 +337,6 @@ class Cart
             $options = array();
         }
 
-        //$price = $P->getPrice($opts, $quantity, $override);
-        $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
-        if ($P->isTaxable()) {
-            $tax = round(PP_getTaxRate() * $price * $quantity, 2);
-        } else {
-            $tax = 0;
-        }
-
         // Look for identical items, including options (to catch
         // attributes).  If found, just update the quantity.
         $have_id = $this->Contains($item_id, $extras);
@@ -354,6 +345,7 @@ class Cart
             $this->m_cart[$have_id]['tax'] = $tax;
             $new_quantity = $this->m_cart[$have_id]['quantity'];
         } else {
+            $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
             $tmp = array(
                 'item_id'   => $item_id,
                 'quantity'  => $quantity,
@@ -362,7 +354,7 @@ class Cart
                 'price'     => sprintf("%.2f", $price),
                 'options'   => $options,
                 'extras'    => $extras,
-                'tax'       => $tax,
+                'taxable'   => $P->isTaxable() ? 1 : 0,
             );
             if (isset($args['tax'])) {
                 $tmp['tax'] = $args['tax'];
@@ -597,7 +589,8 @@ class Cart
             }
             $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
-            if ($P->isTaxable()) {
+            $item_taxable = PP_getVar($item, 'taxable', 'int', 0);
+            if ($item_taxable) {
                 $tax_amt += ($item_price * $item['quantity']);
                 $tax_items++;       // count the taxable items for display
             }
@@ -616,7 +609,7 @@ class Cart
                 'item_link'     => $P->getLink(),
                 'iconset'       => $_PP_CONF['_iconset'],
                 'is_uikit'      => $_PP_CONF['_is_uikit'],
-                'taxable'       => $P->isTaxable(),
+                'taxable'       => $item_taxable,
                 'tax_icon'      => $LANG_PP['tax'][0],
             ) );
             $T->parse('iRow', 'ItemRow', true);
