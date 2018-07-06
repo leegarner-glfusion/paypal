@@ -652,11 +652,15 @@ function PAYPAL_remove_old_files()
     $paths = array(
         // private/plugins/paypal
         __DIR__ => array(
+            // 0.6.0
             'templates/viewcart.uikit.thtml',
             'templates/order.uikit.thtml',
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
+        ),
+        // admin/plugins/paypal
+        $_CONF['path_html'] . 'admin/plugins/paypal' => array(
         ),
     );
 
