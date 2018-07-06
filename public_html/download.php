@@ -22,8 +22,10 @@ require_once('../lib-common.php');
 require_once($_CONF['path'] . 'system/classes/downloader.class.php');
 
 // Sanitize the product ID and token
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$token = isset($_GET['token']) ? DB_escapeString($_GET['token']) : '';
+// Could be POST if downloading from the product list, or GET if downloading
+// from a link in the order view or receipt
+$id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
+$token = isset($_REQUEST['token']) ? DB_escapeString($_REQUEST['token']) : '';
 
 // Need to have one or the other, prefer token
 if (empty($token) && $id == 0) {
