@@ -32,6 +32,7 @@ class Order
     );
     private $subtotal = 0;
     private $tax_items = 0;         // count items having sales tax
+    private $Currency;              // Currency object
 
     /**
     *   Constructor
@@ -43,6 +44,7 @@ class Order
     {
         global $_USER, $_PP_CONF;
 
+        $this->Currency = new Currency();
         $this->isNew = true;
         $this->uid = $_USER['uid'];
         $this->order_date = PAYPAL_now()->toMySql(false);
@@ -202,10 +204,10 @@ class Order
         $args['order_id'] = $this->order_id;    // make sure it's set
         $item = new OrderItem($args);
         $this->items[] = $item;
-        $shipping = PP_getVar($args, 'shipping', 'float');
+        /*$shipping = PP_getVar($args, 'shipping', 'float');
         if ($shipping > 0) {
             $this->shipping = $this->shipping + $shipping;
-        }
+        }*/
     }
 
 
@@ -333,25 +335,6 @@ class Order
     }
 
 
-    public function CreateFromCart($cart)
-    {
-        foreach (array('billto', 'shipto') as $t) {
-            $A = $cart->getAddress($t);
-            $this->{$t . '_name'}   = $A['name'];
-            $this->{$t . '_company'}  = $A['company'];
-            $this->{$t . '_address1'} = $A['address1'];
-            $this->{$t . '_address2'} = $A['address2'];
-            $this->{$t . '_city'}     = $A['city'];
-            $this->{$t . '_state'}    = $A['state'];
-            $this->{$t . '_country'}  = $A['country'];
-            $this->{$t.'_zip'}      = $A['zip'];
-        }
-        $this->status = '';
-        $this->pmt_method = '';
-        $this->pmt_txn_id = '';
-    }
-
-
     /**
     *   Save the current order to the database
     */
@@ -432,7 +415,6 @@ class Order
         $T = PP_getTemplate($tplname, 'order');
 
         $isAdmin = plugin_ismoderator_paypal() ? true : false;
-        $currency = new Currency();
 
         foreach ($this->_addr_fields as $fldname) {
             $T->set_var($fldname, $this->$fldname);
@@ -478,21 +460,21 @@ class Order
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
-            'total'         => $currency->Format($total),
+            'total'         => $this->Currency->Format($total),
             'not_final'     => $final ? '' : 'true',
             'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
-            'shipping'      => $this->shipping > 0 ? $currency->FormatValue($this->shipping) : 0,
-            'handling'      => $this->handling > 0 ? $currency->FormatValue($this->handling) : 0,
-            'subtotal'      => $currency->Format($this->subtotal),
+            'shipping'      => $this->shipping > 0 ? $this->Currency->FormatValue($this->shipping) : 0,
+            'handling'      => $this->handling > 0 ? $this->Currency->FormatValue($this->handling) : 0,
+            'subtotal'      => $this->Currency->Format($this->subtotal),
             'have_billto'   => 'true',
             'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
             'shop_phone'    => $_PP_CONF['shop_phone'],
-            'apply_gc'      => $this->by_gc > 0 ? $currency->FormatValue($this->by_gc) : 0,
+            'apply_gc'      => $this->by_gc > 0 ? $this->Currency->FormatValue($this->by_gc) : 0,
             'net_total'     => $total - $this->by_gc,
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
@@ -1010,7 +992,7 @@ class Order
             $total += ($item->price * $item->quantity);
         }
         $total += $this->calcTax() + $this->shipping + $this->handling;
-        return round($total, 2);
+        return round($total, $this->Currency->Decimals());
     }
 
 }
