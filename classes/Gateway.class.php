@@ -865,7 +865,7 @@ abstract class Gateway
     */
     public function checkoutButton($cart)
     {
-        global $_PP_CONF;
+        global $_PP_CONF, $_USER;
 
         if (!$this->_Supports('checkout')) return '';
 
@@ -876,6 +876,8 @@ abstract class Gateway
             'gateway_vars' => $gateway_vars,
             'is_uikit'  => $_PP_CONF['_is_uikit'],
             'button_url' => $this->getCheckoutButton(),
+            'cart_id'   => $cart->cartID(),
+            'uid'       => $_USER['uid'],
         ) );
         return $T->parse('', 'btn');
     }

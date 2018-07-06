@@ -36,10 +36,43 @@ var ppAddToCart = function(frm_id)
     return false;
 };
 
+/**
+*   Set the visibility of the cart block so it only appears if there are items
+*/
 function blk_setvis_paypal_cart(newvis)
 {
     blk = document.getElementById("paypal_cart");
     if (typeof(blk) != 'undefined' && blk != null) {
         blk.style.display = newvis;
     }
+}
+
+/**
+*   Finalize the cart.
+*/
+function finalizeCart(cart_id, uid)
+{
+     var dataS = {
+        "cart_id": cart_id,
+        "uid": uid,
+    };
+    data = $.param(dataS);
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: glfusionSiteUrl + "/paypal/ajax.php?action=finalizecart",
+        data: data,
+        success: function(result) {
+            try {
+                if (result.status == 0) {
+                    status = true;
+                } else {
+                    status = false;
+                }
+                //return (result.status == 0 ? true : false;
+            } catch(err) {
+            }
+        }
+    });
+    return status;
 }

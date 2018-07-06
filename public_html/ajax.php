@@ -25,6 +25,7 @@ case 'delAddress':          // Remove a shipping address
     Paypal\UserInfo::deleteAddress($id);
     //DB_delete($_TABLES['paypal.address'], array('id','uid'), array($id,$uid));
     break;
+
 case 'getAddress':
     if ($uid < 2) break;
     $id = (int)$_GET['id'];
@@ -44,16 +45,15 @@ case 'addcartitem':
         break;
     }
     $args = array(
-        'item_number' => $_POST['item_number'],     // isset ensured above
-        'item_name' => isset($_POST['item_name']) ? $_POST['item_name'] : '',
-        'description' => isset($_POST['item_descr']) ? $_POST['item_descr'] : '',
-        'quantity' => isset($_POST['quantity']) ? (float)$_POST['quantity'] : 1,
-        'price' => isset($_POST['base_price']) ? $_POST['base_price'] : 0,
-        'options' => isset($_POST['options']) ? $_POST['options'] : array(),
-        'extras' => isset($_POST['extras']) ? $_POST['extras'] : array(),
-        //'tax' => isset($_POST['tax']) ? $_POST['tax'] : NULL,
+        'item_number'   => $_POST['item_number'],     // isset ensured above
+        'item_name'     => PP_getVar($_POST, 'item_name'),
+        'description'   => PP_getVar($_POST, 'item_descr'),
+        'quantity'      => PP_getVar($_POST, 'quantity', 'int'),
+        'price'         => PP_getVar($_POST, 'base_price', 'float'),
+        'options'       => PP_getVar($_POST, 'options', 'array'),
+        'extras'        => PP_getVar($_POST, 'extras', 'array'),
+        //'tax'           => PP_getVar($_POST, 'tax', 'float'),
     );
-
     $ppGCart->addItem($args);
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
@@ -61,6 +61,16 @@ case 'addcartitem':
         'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url']) ?
                 $_POST['_ret_url'] : '',
         'unique' => isset($_POST['_unique']) ? true : false,
+    );
+    echo json_encode($A);
+    exit;
+    break;
+
+case 'finalizecart':
+    $cart_id = PP_getVar($_POST, 'cart_id');
+    $status = Paypal\Cart::setFinal($cart_id);
+    $A = array(
+        'status' => $status,
     );
     echo json_encode($A);
     exit;
