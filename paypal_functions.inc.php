@@ -5,10 +5,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2017 Lee Garner
+*   @copyright  Copyright (c) 2009-2018 Lee Garner
 *   @copyright  Copyright (C) 2005-2006 Vincent Furia
 *   @package    paypal
-*   @version    0.5.10
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -44,7 +44,7 @@ function listOrders($admin = false, $uid = 0)
     $isAdmin = $admin == true ? 1 : 0;
 
     $sql = "SELECT ord.*,
-            UNIX_TIMESTAMP(order_date) as ux_date,
+            UNIX_TIMESTAMP(CONVERT_TZ(`order_date`, '+00:00', @@session.time_zone)) AS ux_ts,
             SUM(itm.quantity * itm.price) as ord_total,
             u.username, $isAdmin as isAdmin
         FROM {$_TABLES['paypal.orders']} AS ord
@@ -59,7 +59,7 @@ function listOrders($admin = false, $uid = 0)
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
-                'field' => 'ux_date', 'sort' => true),
+                'field' => 'ux_ts', 'sort' => true),
         array('text' => $LANG_PP['order_number'],
                 'field' => 'order_id', 'sort' => true),
         array('text' => $LANG_PP['total'],
@@ -238,7 +238,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     }
 
     switch($fieldname) {
-    case 'ux_date':
+    case 'ux_ts':
         $dt->setTimestamp($fieldvalue);
         $retval = '<span class="tooltip" title="' .
                 $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
@@ -356,7 +356,6 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
         break;
     }
-
     return $retval;
 }
 
