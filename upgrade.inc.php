@@ -561,7 +561,7 @@ function PAYPAL_do_upgrade()
                 SET order_date = convert_tz(order_date, '$offset', '+00:00')";
         $_PP_UPGRADE['0.6.0'][] = $sql;
 
-        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         Paypal\Category::rebuildTree();
         if (!PAYPAL_do_set_version($current_ver)) return false;
