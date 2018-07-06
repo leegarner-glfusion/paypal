@@ -222,7 +222,7 @@ class Currency
     * @return
     *   The rounded numeric amount value for the price.
     */
-    function currencyRound($amount, $currency)
+    private function currencyRound($amount, $currency)
     {
         if ($currency['rounding_step'] < .01) {
             return round($amount, $currency['decimals']);
