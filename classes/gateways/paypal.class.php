@@ -253,8 +253,8 @@ class paypal extends Gateway
                     'price' => $item['price'],
                     'uid'   => $_USER['uid'],
                 );
-                $fields['amount_' . $i] = $P->getPrice($opts, $item['quantity'], $overrides);
-                //$fields['tax_cart'] += $P->getTax($fields['amount_' . $i], $item['quantity']);
+                $item_amount = $P->getPrice($opts, $item['quantity'], $overrides);
+                $fields['amount_' . $i] = $item_amount;
                 $fields['item_number_' . $i] = (int)$cart_item_id;
                 $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
                 $total_amount += $item['price'];
@@ -277,7 +277,7 @@ class paypal extends Gateway
                 $i++;
             }
 
-            $fields['tax_cart'] = (float)$cart->getInfo('cart_tax');
+            $fields['tax_cart'] = (float)$cart->getInfo('tax');
             if ($shipping > 0) $total_amount += $shipping;
             if ($weight > 0) {
                 $fields['weight_cart'] = $weight;
