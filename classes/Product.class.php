@@ -1583,7 +1583,6 @@ class Product
                 'opt_value' => $this->options[$opt[0]]['attr_value'],
             );
         }
-
         // Get special fields submitted with the purchase
         if (isset($item['extras']) && is_array($item['extras'])) {
             if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
@@ -1843,6 +1842,20 @@ class Product
         } else {
             return true;
         }
+    }
+
+
+    /**
+    *   Check if tax should be charged on this item.
+    *   Checks both the product taxable flag and the configured tax
+    *   rate.
+    *
+    *   @return boolean     True if taxable and there is a tax rate
+    */
+    public function isTaxable()
+    {
+        global $_PP_CONF;
+        return $this->taxable && PP_getTaxRate() > 0;
     }
 
 

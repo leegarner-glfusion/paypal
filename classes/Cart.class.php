@@ -340,9 +340,8 @@ class Cart
 
         //$price = $P->getPrice($opts, $quantity, $override);
         $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
-        if ($P->taxable) {
-            $tax_rate = PP_getVar($_PP_CONF, 'tax_rate', 'float');
-            $tax = round($tax_rate * $price * $quantity, 2);
+        if ($P->isTaxable()) {
+            $tax = round(PP_getTaxRate() * $price * $quantity, 2);
         } else {
             $tax = 0;
         }
@@ -598,7 +597,7 @@ class Cart
             }
             $this->m_cart[$id]['type'] = $P->prod_type;
             $item_total = $item_price * $item['quantity'];
-            if ($P->taxable) {
+            if ($P->isTaxable()) {
                 $tax_amt += ($item_price * $item['quantity']);
                 $tax_items++;       // count the taxable items for display
             }
@@ -617,7 +616,7 @@ class Cart
                 'item_link'     => $P->getLink(),
                 'iconset'       => $_PP_CONF['_iconset'],
                 'is_uikit'      => $_PP_CONF['_is_uikit'],
-                'taxable'       => $P->taxable,
+                'taxable'       => $P->isTaxable(),
                 'tax_icon'      => $LANG_PP['tax'][0],
             ) );
             $T->parse('iRow', 'ItemRow', true);
