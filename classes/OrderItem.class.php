@@ -62,7 +62,9 @@ class OrderItem
         global $_PP_CONF, $_TABLES;
 
         $rec_id = (int)$rec_id;
-        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
+        $sql = "SELECT *,
+                UNIX_TIMESTAMP(CONVERT_TZ(`expiration`, '+00:00', @@session.time_zone)) AS ux_exp
+                FROM {$_TABLES['paypal.purchases']}
                 WHERE id = $rec_id";
         //echo $sql;die;
         $res = DB_query($sql);
@@ -88,6 +90,7 @@ class OrderItem
                 $this->$field = $A[$field];
             }
         }
+        $this->ux_exp = PP_getVar($A, 'ux_exp');
         return true;
     }
 
