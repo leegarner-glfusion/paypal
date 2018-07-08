@@ -1,8 +1,8 @@
 {# begin {templatelocation} #}
 {javascript}
 <form id="add_cart_{id}" action="{site_url}/paypal/index.php" method="post">
-  <div class="paypalProductDetail">
-    <div id="paypalShortDesc" class="ppShortDesc ver1">
+  <div class="paypalProductDetail v1">
+    <div id="paypalShortDesc" class="ppShortDesc v1">
       <h1>{short_description}
       {!if can_edit}
         <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
@@ -72,16 +72,16 @@
       </div>
       {!endif}
 
-    <div id="paypalProductDesc" class="ppProductDesc ver1">
+    <div id="paypalProductDesc" class="ppProductDesc v1">
       {description}
     </div>
 
 {!if rating_bar}
     <div class="ppRatingBar detail v1">{rating_bar}</div>
 {!endif}
-    <div class="paypalProductThumbWrapper ver1">
+    <div class="paypalProductThumbWrapper v1">
       <!-- BEGIN Thumbnail -->
-      <div class="paypalProductThumb ver1">
+      <div class="paypalProductThumb v1">
       {!if thumb_url}
         {!if is_uikit}
         <a href="{img_url}/{img_file}" data-uk-lightbox="{group:'product'}">
