@@ -179,6 +179,26 @@ class OrderItem
 
 
     /**
+    *   Add a special text element to an order item.
+    *   This allows products to add additional information when purchased,
+    *   beyond the items entered at purchase.
+    *
+    *   @param  string  $name   Name of element
+    *   @param  string  $value  Value of element
+    *   @param  boolean $save   True to immediately save the item
+    */
+    public function addSpecial($name, $value, $save=true)
+    {
+        // extras is set by __set so it has to be extracted to get at
+        // the sub-elements
+        $x = $this->extras;
+        $x['special'][$name] = $value;
+        $this->extras = $x;
+        if ($save) $this->Save();
+    }
+
+
+    /**
     *   Save an order item to the database.
     *
     *   @param  array   $A  Optional array of data to save

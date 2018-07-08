@@ -48,11 +48,11 @@ if (!empty($action)) {
         'savebillto', 'saveshipto',
         'emptycart', 'delcartitem',
         'addcartitem', 'addcartitem_x', 'checkoutcart',
-        'processorder', 'thanks', 'action',
+        'processorder', 'thanks', 'do_apply_gc', 'action',
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
-        'cart', 'pidetail',
+        'cart', 'pidetail', 'apply_gc',
     );
     $action = 'productlist';    // default view
     foreach($expected as $provided) {
@@ -224,6 +224,8 @@ case 'redeem':
         $content .= 'Must be a valid user';
         break;
     }
+    // Using REQUEST here since this could be from a link in an email of from
+    // the apply_gc form
     $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
     $uid = $_USER['uid'];
     $status = Paypal\Coupon::Apply($code, $uid);
@@ -237,9 +239,15 @@ case 'redeem':
         $msg = sprintf($LANG_PP['coupon_apply_msg2'], $_CONF['site_mail']);
     }
     $msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
-    $content .= COM_showMessageText($msg, '', $persist, $type);
+    // Redirect back to the apply_gc form, or to the default page
+    if (isset($_REQUEST['refresh'])) {
+        COM_setMsg($msg);
+        COM_refresh(PAYPAL_URL . '/index.php?' . $_REQUEST['refresh']);
+    } else {
+        $content .= COM_showMessageText($msg, '', $persist, $type);
+    }
     break;
-    
+
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':
@@ -276,30 +284,6 @@ case 'processorder':
         }
         $view = 'thanks';
         $ppGCart->Clear(false);
-        /*if (USES_paypal_gateway($actionval)) {
-            $gw = new $actionval;
-            $tVars = $gw->thanksVars();
-            if (!empty($tVars)) {
-                $T = new \Template($_CONF['path'] . 'plugins/paypal/templates');
-                $T ->set_file(array('msg'   => 'thanks_for_order.thtml'));
-                $T->set_var(array(
-                    'site_name'     => $_CONF['site_name'],
-                    'payment_date'  => $tVars['payment_date'],
-                    'currency'      => $tVars['currency'],
-                    'mc_gross'      => $tVars['payment_amount'],
-                    'gateway_url'   => $tVars['gateway_url'],
-                    'gateway_name'  => $tVars['gateway_name'],
-                ) );
-                $message = $T->parse('output', 'msg');
-            } else {
-                // Allow for no thanksVars function
-                $message = $LANG_PP['thanks_title'];
-            }
-        } else {
-            // Allow for missing or unknown payment gateway name
-            $message = $LANG_PP['thanks_title'];
-        }*/
-        //$content .= COM_showMessageText($message, $LANG_PP['thanks_title'], true);
     }
     $view = 'productlist';
     break;
@@ -414,6 +398,17 @@ default:
     $content .= Paypal\ProductList($cat_id);
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['main_title'];
+    break;
+
+case 'apply_gc':
+    $C = new Paypal\Currency();
+    $code = PP_getVar($_GET, 'code');
+    $T = PP_getTemplate('apply_gc', 'tpl');
+    $T->set_var(array(
+        'gc_bal' => $C->format(Paypal\Coupon::getUserBalance($_USER['uid'])),
+        'code' => $code,
+    ) );
+    $content .= $T->finish($T->parse('output', 'tpl'));
     break;
 
 case 'none':

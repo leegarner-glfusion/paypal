@@ -25,6 +25,9 @@ another email message confirming your payment.
 </p>
 {!endif}
 <p>You may view your order at {site_url}/paypal/index.php?order={order_id}&token={token}</p>
+{!if email_extras}
+<p>{email_extras}</p>
+{!endif}
 {!if gw_msg}
 <p>{gw_msg}</p>
 {!endif}

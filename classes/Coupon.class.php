@@ -275,13 +275,25 @@ class Coupon extends Product
         $sender_name = PP_getVar($special, 'sender_name', 'string');
 
         $gc_code = self::Purchase($amount, $Item->user_id);
-        $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code);
+        // Add the code to the options text. Saving the item will happen
+        // next during addSpecial
+        $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code, false);
+        $Item->addSpecial('gc_code', $gc_code);
+
         parent::handlePurchase($Item, $Order);
         self::Notify($gc_code, $recip_email, $amount, $sender_name);
         return $status;
     }
 
 
+    /**
+    *   Send a notification email to the recipient of the gift card.
+    *
+    *   @param  string  $gc_code    Gift Cart Code
+    *   @param  string  $recip      Recipient Email, from the custom text field
+    *   @param  float   $amount     Gift Card Amount
+    *   @param  string  $sender     Optional sender, from the custom text field
+    */
     public static function Notify($gc_code, $recip, $amount, $sender='')
     {
         global $_CONF, $LANG_PP_EMAIL;
@@ -302,6 +314,27 @@ class Coupon extends Product
                     'subject' => $LANG_PP_EMAIL['coupon_subject'],
             ) );
         }
+    }
+
+
+    /**
+    *   Get additional text to add to the buyer's recipt for a product
+    *
+    *   @param  object  $item   Order Item object, to get the code
+    *   @return string          Additional message to include in email
+    */
+    public function EmailExtra($item)
+    {
+        global $LANG_PP;
+        $code = PP_getVar($item->extras['special'], 'gc_code', 'string');
+        $s = '';
+        if (!empty($code)) {
+            $s = sprintf($LANG_PP['apply_gc_email'],
+                PAYPAL_URL . '/index.php?redeem=x&code=' . $code,
+                PAYPAL_URL . '/index.php?apply_gc&code=' . $code,
+                PAYPAL_URL . '/index.php?apply_gc&code=' . $code);
+        }
+        return $s;
     }
 
 

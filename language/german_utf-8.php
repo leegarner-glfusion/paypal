@@ -327,6 +327,10 @@ $LANG_PP = array (
 'err_gc_amt' => 'Must supply a positive amount for the gift cards.',
 'err_gc_nousers' => 'No users specified, or none are in the specified group.',
 'enter_gc' => 'Enter Coupon Code (click Update to apply)',
+'update' => 'Update',
+'apply_gc_title' => 'Apply a Gift Card to Your Account',
+'apply_gc_help' => 'Enter the gift card code below and click the &quot;Update&quot; button to apply to your account.',
+'apply_gc_email' => 'You may apply the gift card to your account by clicking <a href="%s">here</a>, or by visiting <a href="%s">%s</a> and entering the coupon code manually.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

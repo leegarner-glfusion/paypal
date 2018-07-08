@@ -1976,6 +1976,15 @@ class Product
         return PAYPAL_URL . '/detail.php?id=' . $this->id;
     }
 
+
+    /**
+    *   Get additional text to add to the buyer's recipt for a product
+    */
+    public function EmailExtra($orderitem)
+    {
+        return '';
+    }
+
 }   // class Product
 
 ?>

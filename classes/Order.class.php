@@ -679,6 +679,7 @@ class Order
         $item_total = 0;
         $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
+        $email_extras = array();
 
         foreach ($this->items as $id=>$item) {
             $P = $item->getProduct();
@@ -721,6 +722,8 @@ class Order
                 'options_text' => $options_text,
             ) );
             $T->parse('List', 'ItemList', true);
+            $x = $P->EmailExtra($item);
+            if ($x != '') $email_extras[] = $x;
         }
 
         // Determine if files will be attached to this message based on
@@ -773,6 +776,7 @@ class Order
             'order_instr'   => $this->instructions,
             'order_id'      => $this->order_id,
             'token'         => $this->token,
+            'email_extras'  => implode('<br />' . LB, $email_extras),
         ) );
         if ($this->by_gc > 0) {
             $T->set_var(array(
