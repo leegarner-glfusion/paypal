@@ -6,10 +6,10 @@ Released TBD
   - Tax Rate
   - Gift cards (enabled, default expiration)
 - Add download link to order view while not expired
-- Finalize and hide cart immediately when order id placed.
+- Finalize and hide cart immediately when order is placed.
 - Store order and log dates as UTC timestamps and convert by site timezone.
 - Create directories outside of auto-installer, to preserve data after plugin removal.
-- New option for products to accept IPN value as actual price
+- New option for products to accept IPN value as actual price, for donations, etc.
 - Use cookie instead of session to store cart IDs since session changes at login
 - Add privacy_export function
 - Additional refactoring to support multiple product types
