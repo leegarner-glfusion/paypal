@@ -209,9 +209,6 @@ class Cart
                     'options' => isset($item[1]) ? $item[1] : '',
                     'extras' => $A['extras'],
                 );
-                if (isset($A['tax'])) {
-                    $args['tax'] = $A['tax'];
-                }
                 $this->addItem($args);
             }
             $this->Save();
@@ -342,7 +339,6 @@ class Cart
         $have_id = $this->Contains($item_id, $extras);
         if ($have_id !== false) {
             $this->m_cart[$have_id]['quantity'] += $quantity;
-            $this->m_cart[$have_id]['tax'] = $tax;
             $new_quantity = $this->m_cart[$have_id]['quantity'];
         } else {
             $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
@@ -356,9 +352,6 @@ class Cart
                 'extras'    => $extras,
                 'taxable'   => $P->isTaxable() ? 1 : 0,
             );
-            if (isset($args['tax'])) {
-                $tmp['tax'] = $args['tax'];
-            }
             $this->m_cart[] = $tmp;
             $new_quantity = $quantity;
         }
@@ -817,7 +810,7 @@ class Cart
     *   Check for "false" return value as the return may be zero for the
     *   first item in the cart.
     *
-    *   @param  string  $item_id    Item ID to check
+    *   @param  string  $item_id    Item ID to check, e.g. "1|2,3,4"
     *   @param  array   $extras     Option custom values, e.g. text fields
     *   @return mixed       Item cart ID if item exists in cart, False if not
     */
@@ -825,7 +818,7 @@ class Cart
     {
         foreach ($this->m_cart as $id=>$info) {
             if ($info['item_id'] == $item_id) {
-                if (isset($info['extras'])) {
+                if (array_key_exists('extras', $info)) {
                     if ($info['extras'] == $extras) {
                         return $id;
                     } else {
