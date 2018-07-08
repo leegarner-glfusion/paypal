@@ -1641,7 +1641,7 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         } else {
             $cart = false;
         }
-        $ord_count = DB_count($_TABLES['paypal.orders'], "uid = $uid");
+        $ord_count = DB_count($_TABLES['paypal.orders'], 'uid', $uid);
         $LT->set_var('orders', $ord_count);
 
         // Only display the template if there's something to show
@@ -1649,8 +1649,8 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
             USES_paypal_functions();
             //$LT->set_var('order_hist', Paypal\listOrders());
             $LT->parse('output', 'block');
+            $retval .= $LT->finish($LT->get_var('output'));
         }
-        $retval .= $LT->finish($LT->get_var('output'));
     }
     return $retval;
 }
