@@ -1,5 +1,4 @@
 {# begin {templatelocation} #}
-
 <form class="paypalProductForm" action="{action_url}/index.php" method="POST">
   <input type="hidden" name="attr_id" value="{attr_id}" />
 
@@ -8,7 +7,7 @@
   <p>
     <label>{$LANG_PP['product']}:
       <a href="#" onclick="popupWindow('{doc_url}#desc_item_id', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
+        <img src="{layout_url}/images/button_help.png"
             alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
@@ -20,7 +19,7 @@
   <p>
     <label>{$LANG_PP['attr_name']}:
       <a href="#" onclick="popupWindow('{doc_url}#desc_attr_name', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
+        <img src="{layout_url}/images/button_help.png"
             alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
@@ -28,57 +27,44 @@
       {option_group_select}
     </select>
     &nbsp;&nbsp;Or create:
-    <input type="text" name="attr_name" value="" 
-        size="32" maxlength="32" />
+    <input type="text" name="attr_name" value="" size="32" maxlength="32" />
   </p>
 
   <p>
     <label>{$LANG_PP['attr_value']}:
       <a href="#" onclick="popupWindow('{doc_url}#desc_attr_value', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
+        <img src="{layout_url}/images/button_help.png" alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
-    <!--<select name="attr_value_sel">
-      {option_name_select}
-    </select>
-    &nbsp;&nbsp;Or create:--> 
-    <input type="text" name="attr_value" value="{attr_value}" 
-        size="32" maxlength="32" />
+    <input type="text" name="attr_value" value="{attr_value}" size="32" maxlength="32" />
   </p>
 
   <p>
     <label>{$LANG_PP['attr_price']}:
       <a href="#" onclick="popupWindow('{doc_url}#desc_attr_price', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
+        <img src="{layout_url}/images/button_help.png" alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
-    <input type="text" name="attr_price" value="{attr_price}" 
-        size="32" maxlength="32" />
+    <input type="text" name="attr_price" value="{attr_price}" size="32" maxlength="32" />
   </p>
 
   <p>
     <label>{$LANG_PP['order']}:
       <a href="#" onclick="popupWindow('{doc_url}#desc_orderby', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
+        <img src="{layout_url}/images/button_help.png" alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
-    <input type="text" name="orderby" value="{orderby}" 
-        size="6" maxlength="6" />
+    <input type="text" name="orderby" value="{orderby}" size="6" maxlength="6" />
   </p>
 
   <p>
     <label>{$LANG_PP['enabled']}?
       <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar">
-        <img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" />
+        <img src="{layout_url}/images/button_help.png" alt="{$LANG_PP['clk_help']}" />
       </a>
     </label>
     <input type="checkbox" name="enabled" value="1" {ena_chk} />
   </p>
-
 
   <div align="center">
     <input type="submit" name="saveopt" value="{$LANG_PP['saveopt']}" />

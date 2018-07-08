@@ -5,8 +5,8 @@
   <fieldset>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="item_id">{$LANG_PP['product']}:
-      <span id="item_id" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['product']}:
+      <span id="item_id" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
     <select name="item_id" id="item_id">
@@ -16,56 +16,48 @@
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="attr_name_sel">{$LANG_PP['attr_name']}:
-      <span id="attr_name" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['attr_name']}:
+      <span id="attr_name" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
     <select name="attr_name_sel" id="attr_name_sel">
       {option_group_select}
     </select>
     &nbsp;&nbsp;Or create:
-    <input type="text" name="attr_name" value="" 
-        size="32" maxlength="32" />
+    <input type="text" name="attr_name" value="" size="32" maxlength="32" />
     </div>
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="attr_value">{$LANG_PP['attr_value']}:
-      <span id="attr_value" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['attr_value']}:
+      <span id="attr_value" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
-    <!--<select name="attr_value_sel">
-      {option_name_select}
-    </select>
-    &nbsp;&nbsp;Or create:--> 
-    <input type="text" name="attr_value" value="{attr_value}" 
-        size="32" maxlength="32" />
+    <input type="text" name="attr_value" value="{attr_value}" size="32" maxlength="32" />
     </div>
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="attr_price">{$LANG_PP['attr_price']}:
-      <span id="attr_price" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['attr_price']}:
+      <span id="attr_price" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
-    <input type="text" id="attr_price" name="attr_price" value="{attr_price}" 
-        size="32" maxlength="32" />
+    <input type="text" id="attr_price" name="attr_price" value="{attr_price}" size="32" maxlength="32" />
     </div>
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="orderby">{$LANG_PP['order']}:
-      <span id="orderby" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['order']}:
+      <span id="orderby" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
-    <input type="text" name="orderby" id="orderby" value="{orderby}" 
-        size="6" maxlength="6" />
+    <input type="text" name="orderby" id="orderby" value="{orderby}" size="6" maxlength="6" />
     </div>
   </div>
 
   <div class="uk-form-row">
-    <label class="uk-form-label for="enabled">{$LANG_PP['enabled']}?
-      <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
+    <label class="uk-form-label">{$LANG_PP['enabled']}?
+      <span id="enabled" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
     <input type="checkbox" name="enabled" value="1" {ena_chk} />
