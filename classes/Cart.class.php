@@ -518,6 +518,21 @@ class Cart
 
 
     /**
+    *   Delete all carts in the table
+    *   This may be called during plugin upgrades to ensure the data
+    *   is not corrupt.
+    *
+    *   @since  0.6.0
+    */
+    public static function deleteAll()
+    {
+        global $_TABLES;
+
+        DB_query("TRUNCATE {$_TABLES['paypal.cart']}");
+    }
+
+
+    /**
     *   View the cart.
     *   This function shows the shopping cart, either with the quantity fields
     *   and option to update, or with the checkout buttons depending on the
