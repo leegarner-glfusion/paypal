@@ -587,15 +587,6 @@ function ProductList($cat_id = 0)
     $x = DB_fetchArray($res, false);
     $count = isset($x['cnt']) ? (int)$x['cnt'] : 0;
 
-    // Display a "not found" message if count == 0
-    if ($count == 0) {
-        if ($_PP_CONF['_is_uikit']) {
-            $display .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
-        } else {
-            $display .= '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
-        }
-    }
-
     // If applicable, handle pagination of query
     if (isset($_PP_CONF['prod_per_page']) && $_PP_CONF['prod_per_page'] > 0) {
         // Make sure page requested is reasonable, if not, fix it
@@ -830,6 +821,15 @@ function ProductList($cat_id = 0)
                         ceil($count / $_PP_CONF['prod_per_page'])));
     } else {
         $product->set_var('pagination', '');
+    }
+
+    // Display a "not found" message if count == 0
+    if ($prodrows == 0) {
+        if ($_PP_CONF['_is_uikit']) {
+            $display .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
+        } else {
+            $display .= '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
+        }
     }
 
     $display .= $product->parse('', 'end');
