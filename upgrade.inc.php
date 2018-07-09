@@ -654,6 +654,8 @@ function PAYPAL_remove_old_files()
         __DIR__ => array(
             // 0.6.0
             'templates/viewcart.uikit.thtml',
+            'templates/detail/v2/product_detail.thtml',
+            'templates/detail/v1/product_detail.thtml',
             'templates/order.uikit.thtml',
             'classes/paymentgw.class.php',
         ),
