@@ -64,7 +64,7 @@ class Product
 
         $this->properties = array();
         $this->isNew = true;
-        $this->currency = new Currency($_PP_CONF['currency']);
+        $this->currency = Currency::getInstance();
 
         if (is_array($id)) {
             $this->setVars($id, true);
@@ -1879,6 +1879,7 @@ class Product
     *   Looks for a colon in the item number, which will indicate a plugin
     *   item number formated as "pi_name:item_number:other_opts"
     *
+    *   @since  0.6.0
     *   @param  mixed   $item_number    Item Number to check
     *   @return boolean     True if it's a plugin item, false if it's ours
     */
@@ -1919,6 +1920,7 @@ class Product
     /**
     *   Helper function to create the cache key.
     *
+    *   @since  0.6.0
     *   @return string  Cache key
     */
     private static function _makeCacheKey($id)
@@ -1945,6 +1947,7 @@ class Product
     /**
     *   Get the product name. Allows for an override
     *
+    *   @since  0.6.0
     *   @param  string  $overrride  Optional name override
     *   @return string              Product Name
     */
@@ -1957,6 +1960,7 @@ class Product
     /**
     *   Get the product shoryt description. Allows for an override
     *
+    *   @since  0.6.0
     *   @param  string  $overrride  Optional description override
     *   @return string              Product sort description
     */
@@ -1969,6 +1973,7 @@ class Product
     /**
     *   Get the URL to the item detail page
     *
+    *   @since  0.6.0
     *   @return string      Item detail URL
     */
     public function getLink()
@@ -1979,6 +1984,8 @@ class Product
 
     /**
     *   Get additional text to add to the buyer's recipt for a product
+    *
+    *   @since  0.6.0
     */
     public function EmailExtra($orderitem)
     {

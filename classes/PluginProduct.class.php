@@ -5,7 +5,8 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.7
+*   @version    0.6.0
+*   @since      0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -31,13 +32,11 @@ class PluginProduct extends Product
     */
     public function __construct($item, $mods=array())
     {
-        global $_PP_CONF;
-
         $this->pi_info = array();
         $item = explode('|', $item);
         $item_id = $item[0];
         $this->properties = array();
-        $this->currency = new Currency($_PP_CONF['currency']);
+        $this->currency = Currency::getInstance();
         $this->item_id = $item_id;  // Full item id
         $item_parts = explode(':', $item_id);
         $this->pi_name = $item_parts[0];
@@ -196,6 +195,22 @@ class PluginProduct extends Product
     public function getLink()
     {
         return $this->url;
+    }
+
+
+    /**
+    *   Get additional text to add to the buyer's recipt for a product
+    *
+    *   @param  object  $item   Order Item object (not used)
+    *   @return string          Additional message to include in email
+    */
+    public function EmailExtra($item)
+    {
+        $text = '';
+        // status from the service function isn't used.
+        LGLIB_invokeService($this->pi_name, 'emailReciptInfo',
+                    $this->pi_info, $text, $svc_msg);
+        return $text;
     }
 
 }   // class PluginProduct

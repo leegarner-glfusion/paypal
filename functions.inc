@@ -1631,7 +1631,7 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
         $U = Paypal\UserInfo::getInstance($uid);
         $gc_bal = Paypal\Coupon::getUserBalance($uid);
-        $Cur = new Paypal\Currency();
+        $Cur = Paypal\Currency::getInstance();
         if ($gc_bal > 0) {
             $LT->set_var('gc_bal', $Cur->Format($gc_bal));
         }

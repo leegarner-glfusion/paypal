@@ -44,7 +44,7 @@ class Order
     {
         global $_USER, $_PP_CONF;
 
-        $this->Currency = new Currency();
+        $this->Currency = Currency::getInstance();
         $this->isNew = true;
         $this->uid = $_USER['uid'];
         $this->order_date = PAYPAL_now()->toMySql(false);

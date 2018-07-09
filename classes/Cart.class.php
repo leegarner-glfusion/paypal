@@ -533,7 +533,7 @@ class Cart
     public function View($checkout = false)
     {
         global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
-        $currency = new Currency();
+        $currency = Currency::getInstance();
 
         if (!isset($this->m_cart) ||
                 empty($this->m_cart)) {

@@ -747,7 +747,7 @@ function ProductList($cat_id = 0)
     if ($_PP_CONF['show_plugins'] && $page == 1 &&
                 empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
-        $Cur = new Currency($_PP_CONF['currency']);
+        $Cur = Currency::getInstance();
         $product->clear_var('rating_bar');  // no ratings for plugins (yet)
         foreach ($_PLUGINS as $pi_name) {
             $status = LGLIB_invokeService($pi_name, 'getproducts',

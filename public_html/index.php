@@ -401,7 +401,7 @@ default:
     break;
 
 case 'apply_gc':
-    $C = new Paypal\Currency();
+    $C = Paypal\Currency::getInstance();
     $code = PP_getVar($_GET, 'code');
     $T = PP_getTemplate('apply_gc', 'tpl');
     $T->set_var(array(

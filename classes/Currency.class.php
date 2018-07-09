@@ -3,9 +3,9 @@
 *   Class to handle currency display
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2014 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2014-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.0
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *              GNU Public License v2 or later
 *   @filesource
@@ -14,48 +14,51 @@ namespace Paypal;
 
 class Currency
 {
-    var $defaultCurrency;
-    private $prefixes = array();
-    private $postfixes = array();
-    public $currencies;
+    private $properties = array();
 
     /**
     *   Constructor. Simply sets an initial default currency.
     *
-    *   @param  string  $defCur Currency code to set as default
+    *   @param  mixed   $code   Currency code, or DB record as an array
     */
-    public function __construct($defCur=NULL)
+    public function __construct($code = NULL)
     {
-        global $_PP_CONF;
+        global $_PP_CONF, $_TABLES;
 
-        if ($defCur === NULL) $defCur = $_PP_CONF['currency'];
-        $this->setDefault($defCur);
+        if (is_array($code)) {      // a DB record already read
+            $this->setVars($code);
+        } else {                    // just a currency code supplied
+            if ($code === NULL) $code = $_PP_CONF['currency'];
+            $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}
+                        WHERE code = '" . DB_escapeString($code) . "'");
+            if ($res) {
+                $A = DB_fetchArray($res, false);
+                $this->setVars($A);
+            }
+        }
     }
 
 
-    /*
-    *   Load a single currency type from the database
-    *   Uses a static array so repeated calls don't cause repeated DB queries.
+    /**
+    *   Get an instance of a currency.
+    *   Caches in a static variable for quick repeated retrivals,
+    *   and also caches using glFusion 1.8.0 caching if available.
     *
-    *   @param  string  $code   Currency code, e.g. "USD", "GBP"
-    *   @return array       Complete record from DB
+    *   @param  string  $code   Currency Code
+    *   @return array           Array of information
     */
-    public function Load($code)
+    public static function getInstance($code = NULL)
     {
-        global $_TABLES;
-
+        global $_PP_CONF;
         static $currencies = array();
 
+        if ($code === NULL) $code = $_PP_CONF['currency'];
+        
         if (!isset($currencies[$code])) {
             $key = 'currency_' . $code;
             $currencies[$code] = Cache::get($key);
             if (!$currencies[$code]) {
-                $currencies[$code] = FALSE;
-                $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}
-                        WHERE code = '" . DB_escapeString($code) . "'");
-                if ($res) {
-                    $currencies[$code] = DB_fetchArray($res, false);
-                }
+                $currencies[$code] = new self($code);
                 Cache::set($key, $currencies[$code]);
             }
         }
@@ -64,78 +67,133 @@ class Currency
 
 
     /**
-    *   Sets and loads a new default currency
+    *   Set all the record values into properties
     *
-    *   @param  string  $code   New currency code
+    *   @since  0.6.0
+    *   @param  array   $A      Array of key->value pairs
     */
-    public function setDefault($code)
+    public function setVars($A)
     {
-        $this->defaultCurrency = $code;
-        $this->Load($code);
+        $fields = array(
+            'code', 'symbol', 'name', 'numeric_code',
+            'symbol_placement', 'symbol_spacer',
+            'code_placement', 'decimals',
+            'rounding_step', 'thousands_sep', 'decimal_sep',
+            'major_unit', 'minor_unit',
+            'conversion_rate', 'conversion_ts',
+        );
+        foreach ($fields as $field) {
+            $this->$field = $A[$field];
+        }
+     }
+
+
+    /**
+    *   Set a property value
+    *
+    *   @since  0.6.0
+    *   @param  string  $key    Property Name
+    *   @param  mixed   $value  Property Value
+    */
+    public function __set($key, $value)
+    {
+        switch ($key) {
+        case 'code':
+        case 'symbol':
+        case 'name':
+        case 'symbol_placement':
+        case 'symbol_spacer':
+        case 'code_placement':
+        case 'thousands_sep':
+        case 'decimals_sep':
+        case 'major_unit':
+        case 'minor_unit':
+        case 'conversion_ts':
+            $this->properties[$key] = trim($value);
+            break;
+
+        case 'numeric_code':
+        case 'decimals':
+            $this->properties[$key] = (int)$value;
+            break;
+
+        case 'rounding_step':
+        case 'conversion_rate':
+            $this->properties[$key] = (float)$value;
+            break;
+        }
+    }
+
+
+    /**
+    *   Get a property value
+    *
+    *   @since  0.6.0
+    *   @param  string  $key    Property Name
+    *   @return mixed           Property Value, NULL if not set
+    */
+    public function __get($key)
+    {
+        if (array_key_exists($key, $this->properties)) {
+            return $this->properties[$key];
+        } else {
+            return NULL;
+        }
     }
 
 
     /**
     *   Return the number of decimal places associated with a currency
     *
-    *   @param  string  $code   Currency code to check, blank for default
     *   @return integer     Number of decimal places used for the currency
     */
-    public function Decimals($code='')
+    public function Decimals()
     {
-        if (empty($code)) $code = $this->defaultCurrency;
-        $currency = $this->Load($code);
-        return $currency['decimals'];
+        return $this->decimals;
     }
 
 
     /**
     *   Return the prefix, if any, for a currency
     *
-    *   @param  string  $code   Currency code to check, blank for default
     *   @return string      Prefix, e.g. dollar sign
     */
-    public function Pre($code='')
+    public function Pre()
     {
-        if (empty($code)) $code = $this->defaultCurrency;
-
-        if (!isset($this->prefixes[$code])) {
-            $currency = $this->Load($code);
-            $this->prefixes[$code] = '';
-            if ($currency['symbol_placement'] == 'before') {
-                $this->prefixes[$code] .= $currency['symbol'] . $currency['symbol_spacer'];
+        static $prefix = NULL;  // cache for repeated use
+        if ($prefix === NULL) {
+            $prefix = '';
+            if ($this->symbol_placement == 'before') {
+                $prefix .= $this->symbol . $this->symbol_spacer;
             }
 
-            if ($currency['code_placement'] == 'before') {
-                $this->prefixes[$code] .= $currency['code'] . $currency['code_spacer'];
+            if ($this->code_placement == 'before') {
+                $prefix .= $this->code . $this->code_spacer;
             }
         }
-        return $this->prefixes[$code];
+        return $prefix;
     }
 
 
     /**
     *   Return the postfix, if any, for a currency
     *
-    *   @param  string  $code   Currency code to check, blank for default
     *   @return string      Postfix, e.g. Euro sign
     */
-    public function Post($code='')
+    public function Post()
     {
-        if (empty($code)) $code = $this->defaultCurrency;
-
-        if (!isset($this->postfixes[$code])) {
-            $currency = $this->Load($code);
-            $this->postfixes[$code] = '';
-            if ($currency['symbol_placement'] == 'after') {
-                $this->postfixes[$code] .= $currency['symbol'] . $currency['symbol_spacer'];
+        static $postfix = NULL;     // cache for repeated use
+        if ($postfix === NULL) {
+            $postfix = '';
+            if ($this->symbol_placement == 'after') {
+                $postfix .= $this->symbol . $this->symbol_spacer;
             }
 
-            if ($currency['code_placement'] == 'after') {
-                $this->postfixes[$code] .= $currency['code'] . $currency['code_spacer'];
+            if ($this->code_placement == 'after') {
+                $postfix .= $this->code . $this->code_spacer;
             }
         }
-        return $this->postfixes[$code];
+        return $postfix;
     }
 
  
@@ -144,12 +202,11 @@ class Currency
     *   e.g. "$ 125.00"
     *
     *   @param  float   $amount Dollar amount
-    *   @param  string  $code   Currency code used, blank for default
     *   @return string      Formatted string for display
     */
-    public function Format($amount, $code='')
+    public function Format($amount)
     {
-        $val = $this->_Format($amount, $code);
+        $val = $this->_Format($amount);
         return $val[0] . $val[1] . $val[2];
     }
 
@@ -159,12 +216,11 @@ class Currency
     *   e.g. "125.00" for "125"
     *
     *   @param  float   $amount Dollar amount
-    *   @param  string  $code   Currency code used, blank for default
     *   @return float       Formatted numeric value
     */
-    public function FormatValue($amount, $code='')
+    public function FormatValue($amount)
     {
-        $val = $this->_Format($amount, $code);
+        $val = $this->_Format($amount);
         return $val[1];
     }
 
@@ -179,58 +235,42 @@ class Currency
     */
     private function _Format($amount, $code='')
     {
-        static $formatted = array();
+        static $amounts = array();
 
-        // First load the currency array.
-        if (empty($code)) {
-            $code = $this->defaultCurrency;
-        }
-
-        $key = "{$code}{$amount}";
-        if (!isset($formatted[$key])) {
-            $currency = $this->Load($code);
-
+        $key = (string)$amount;
+        if (!array_key_exists($key, $amounts)) {
             // Format the price as a number.
-            $price = number_format($this->currencyRound(abs($amount), $currency), 
-                    $currency['decimals'], 
-                    $currency['decimal_sep'],
-                    $currency['thousands_sep']);
-
+            $price = number_format($this->currencyRound(abs($amount)), 
+                    $this->decimals, 
+                    $this->decimal_sep,
+                    $this->thousands_sep);
             $negative = $amount < 0 ? '-' : '';
-            $formatted[$key] = array($this->Pre($code), $negative.$price, $this->Post($code));
+            $formatted = array($this->Pre(), $negative.$price, $this->Post());
+            $amounts[$key] = $formatted;
         }
-        return $formatted[$key];
+        return $amounts[$key];
     }
 
 
     /**
-    * Rounds a price amount for the specified currency.
+    *   Rounds a price amount for the specified currency.
     *
-    * Rounding of the minor unit with a currency specific step size. For example,
-    * Swiss Francs are rounded using a step size of 0.05. This means a price of
-    * 10.93 is converted to 10.95.
+    *   Rounding of the minor unit with a currency specific step size. For example,
+    *   Swiss Francs are rounded using a step size of 0.05. This means a price of
+    *   10.93 is converted to 10.95.
     *
-    * @param $amount
-    *   The numeric amount value of the price to be rounded.
-    * @param $currency
-    *   The currency array containing the rounding information pertinent to this
-    *     price. Specifically, this function looks for the 'rounding_step' property
-    *     for the step size to round to, supporting '0.05' and '0.02'. If the value
-    *     is 0, this function performs normal rounding to the nearest supported
-    *     decimal value.
-    *
-    * @return
-    *   The rounded numeric amount value for the price.
+    *   @param  float   $amount The numeric amount value of the price to be rounded.
+    *   @return string          The rounded numeric amount value for the price.
     */
-    private function currencyRound($amount, $currency)
+    private function currencyRound($amount)
     {
-        if ($currency['rounding_step'] < .01) {
-            return round($amount, $currency['decimals']);
+        if ($this->rounding_step < .01) {
+            return round($amount, $this->decimals);
         }
-
-        $modifier = 1 / $currency['rounding_step'];
+        $modifier = 1 / $this->rounding_step;
         return round($amount * $modifier) / $modifier;
     }
+
 
     /**
     * Converts a price amount from a currency to the target currency based on the
@@ -264,12 +304,14 @@ class Currency
     *   @param  string  $fromCurrency   Starting currency code
     *   @return float       Conversion rate to get $from to $to
     */
-    public function ConversionRate($toCurrency, $fromCurrency='')
+    public static function ConversionRate($toCurrency, $fromCurrency='')
     {
+        global $_PP_CONF;
         static $rates = array();
 
-        if (empty($fromCurrency)) $fromCurrency = $this->defaultCurrency;
+        if (empty($fromCurrency)) $fromCurrency = $_PP_CONF['currency'];
 
+        // check if this conversion has already been done this session
         if (!isset($rates[$fromCurrency][$toCurrency])) {
             $amount = urlencode($amount);
             $from_Currency = urlencode($fromCurrency);
@@ -308,7 +350,7 @@ class Currency
             $currencies = array();
             $res = DB_query("SELECT * FROM {$_TABLES['paypal.currency']}");
             while ($A = DB_fetchArray($res, false)) {
-                $currencies[$A['code']] = $A;
+                $currencies[$A['code']] = new self($A);
             }
         }
         return $currencies;
