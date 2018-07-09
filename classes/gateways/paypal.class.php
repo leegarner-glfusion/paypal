@@ -460,7 +460,6 @@ class paypal extends Gateway
 
         //  Return the now-encrypted form content
         return "-----BEGIN PKCS7-----\n" . $encText . "\n-----END PKCS7-----";
-
     }
 
 
@@ -771,7 +770,7 @@ class paypal extends Gateway
     *   @param  string  $email  Email address to check (receiver_email)
     *   @return boolean         True if valid, False if not.
     */
-    function isBusinessEmail($email)
+    public function isBusinessEmail($email)
     {
         switch ($email) {
         case $this->config['bus_prod_email']:
@@ -924,10 +923,16 @@ class paypal extends Gateway
     }
 
 
+    /**
+    *   Get a logo image to show on the order as the payment method.
+    *
+    *   @since  0.6.0
+    *   @return string      HTML for logo image
+    */
     public function getLogo()
     {
         return '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal Logo">';
-        return $this->button_url;
+        //return $this->button_url;
     }
 
 }   // class paypal
