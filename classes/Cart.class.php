@@ -778,6 +778,7 @@ class Cart
         $T->set_block('radios', 'Radios', 'row');
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
+            if (empty($gateways)) return NULL;  // no available gateways
             if (isset($this->m_info['gateway'])) {
                 // Select the previously selected gateway
                 $gw_sel = $this->m_info['gateway'];

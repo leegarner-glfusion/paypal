@@ -112,15 +112,21 @@
       <div class="gwRadiosOuter">
         <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
         {$LANG_PP['hlp_gw_select']}<br />
+{!if gateway_radios}
         {gateway_radios}
+{!else}
+        <div class="uk-alert uk-alert-danger">{$LANG_PP['todo_nogateways']}</div>
+{!endif}
       </div>
       <div style="float:right;">
+{!if gateway_radios}
 {!if is_uikit}
         <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
           <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>
 {!else}
           <input id="submit" type="submit" class="paypalButton green" name="checkout"
             value="{$LANG_PP['checkout']} >>" />
+{!endif}
 {!endif}
       </div>
     </div>
