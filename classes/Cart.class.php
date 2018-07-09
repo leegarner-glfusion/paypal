@@ -106,10 +106,7 @@ class Cart
         } else {
             // Get a cart for another user. Used to get the anonymous
             // cart by ID to merge when logging in. Can't cache this.
-            if ($cart_id == '') {
-                $cart_id = self::_makeCartID();
-            }
-            $cart = new self($cart_id);
+            $cart = new self();
         }
         return $cart;
     }
@@ -941,13 +938,15 @@ class Cart
 
         $cart_id = NULL;
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
-
         if (COM_isAnonUser()) {
             $cart_id = self::getAnonCartID();
+            if ($cart_id === NULL) {
+                $cart_id = self::_makeCartID();
+            }
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
                 "cart_uid = $uid AND is_order = 0 ORDER BY last_update DESC limit 1");
-            if (!empty($cart_id) && !COM_isAnonUser()) {
+            if (!empty($cart_id)) {
                 // For logged-in usrs, delete superfluous carts
                 DB_query("DELETE FROM {$_TABLES['paypal.cart']}
                     WHERE cart_uid = $uid
@@ -1110,7 +1109,7 @@ class Cart
     */
     public static function setAnonCartID($cart_id)
     {
-        setcookie(self::$session_var, $cart_id);
+        setcookie(self::$session_var, $cart_id, 0, '/');
     }
 
 
