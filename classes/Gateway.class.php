@@ -333,7 +333,7 @@ abstract class Gateway
                 SET $varname=$newvalue
                 WHERE id='$id'";
         //echo $sql;die;
-        COM_errorLog($sql);
+        DB_query($sql, 1);
         if (DB_error()) {
             return $oldvalue;
         } else {
