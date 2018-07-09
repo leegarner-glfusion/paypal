@@ -542,26 +542,41 @@ function PAYPAL_do_upgrade()
                 'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
 
         // Previously, categories were not required. With the MPTT method,
-        // there must be at least one.
-        $cats = DB_count($_TABLES['paypal.categories']);
-        if ($cats == 0) {
-            $sql = "INSERT INTO {$_TABLES['paypal.categories']}
+        // there must be at least one. Collect all the categories, increment
+        // the ID and parent_id, add the home category, and update the products
+        // to match.
+        $res = DB_query("SELECT * FROM {$_TABLES['paypal.categories']}");
+        $cats = array();
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $cats[] = $A;
+            }
+            $sql_cats = array();
+            foreach ($cats as $id=>$cat) {
+                $cats[$id]['cat_id']++;
+                $cats[$id]['parent_id']++;
+                $sql_cats[] = "('" . implode("','", $cats[$id]) . "')";
+            }
+            $sql_cats = implode(', ', $sql_cats);
+            $PP_UPGRADE['0.6.0'][] = "TRUNCATE {$_TABLES['paypal.categories']}";
+            $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
                     (cat_id, cat_name, description, grp_access, lft, rgt)
                 VALUES
                     (1, 'Home', 'Root Category', 2, 1, 2)";
-            $_PP_UPGRADE['0.6.0'][] = $sql;
-            $sql = "UPDATE {$_TABLES['paypal.products']}
-                    SET cat_id = 1 WHERE cat_id = 0";
-            $_PP_UPGRADE['0.6.0'][] = $sql;
+            $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
+                    (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
+                VALUES $sql_cats";
+            $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
+                    SET cat_id = cat_id + 1";
         }
         // Change orders to use UTC for dates. Logs already do.
         date_default_timezone_set($_CONF['timezone']);
         $offset = date('P');
         $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET order_date = convert_tz(order_date, '$offset', '+00:00')";
-        $_PP_UPGRADE['0.6.0'][] = $sql;
+        $PP_UPGRADE['0.6.0'][] = $sql;
 
-        if (!PAYPAL_do_upgrade_sql($current_ver, true)) return false;
+        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         Paypal\Category::rebuildTree();
         if (!PAYPAL_do_set_version($current_ver)) return false;
@@ -599,7 +614,7 @@ function PAYPAL_do_upgrade_sql($version, $ignore_error=false)
     // Execute SQL now to perform the upgrade
     COM_errorLog("--- Updating Paypal to version $version", 1);
     foreach($PP_UPGRADE[$version] as $sql) {
-        COM_errorLOG("Paypal Plugin $version update: Executing SQL => $sql");
+        COM_errorLog("Paypal Plugin $version update: Executing SQL => $sql");
         DB_query($sql, '1');
         if (DB_error()) {
             COM_errorLog("SQL Error during Paypal Plugin update", 1);
