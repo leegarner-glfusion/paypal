@@ -24,8 +24,8 @@ require_once($_CONF['path'] . 'system/classes/downloader.class.php');
 // Sanitize the product ID and token
 // Could be POST if downloading from the product list, or GET if downloading
 // from a link in the order view or receipt
-$id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-$token = isset($_REQUEST['token']) ? DB_escapeString($_REQUEST['token']) : '';
+$id = PP_getVar($_REQUEST, 'id', 'int');
+$token = PP_getVar($_REQUEST, 'token');
 
 // Need to have one or the other, prefer token
 if (empty($token) && $id == 0) {
@@ -35,11 +35,18 @@ if (empty($token) && $id == 0) {
 
 if (!empty($token)) {
     // Get product by token
+    // Also check for a product ID
+    $id = PP_getVar($_REQUEST, 'i', 'int');
+    if ($id > 0) {
+        $id_sql = "p.id = '$id' AND ";
+    } else {
+        $id_sql = '';
+    }
     $sql = "SELECT d.id, d.file, d.prod_type
         FROM {$_TABLES['paypal.purchases']} AS p 
         LEFT JOIN {$_TABLES['paypal.products']} AS d 
             ON d.id = p.product_id 
-        WHERE p.token = '$token'
+        WHERE $id_sql p.token = '$token'
         AND p.expiration > '" . PAYPAL_now()->toMySQL() . "'";
 } else {
     // Get product by product ID.  Have to check the user id also

@@ -206,6 +206,7 @@ class Order
     {
         if (!is_array($args)) return;
         $args['order_id'] = $this->order_id;    // make sure it's set
+        $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
         $this->items[] = $item;
         /*$shipping = PP_getVar($args, 'shipping', 'float');
@@ -696,6 +697,7 @@ class Order
                 // product ID if there isn't
                 if ($item->token != '') {
                     $dl_url .= 'token=' . urlencode($item->token);
+                    $dl_url .= '&i=' . $item->id;
                 } else {
                     $dl_url .= 'id=' . $item->product_id;
                 }
