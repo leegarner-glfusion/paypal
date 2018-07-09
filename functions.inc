@@ -1598,7 +1598,7 @@ function plugin_configmanager_select_currency_paypal()
     $A = array();
     $tmp = Paypal\Currency::GetAll();
     foreach ($tmp as $code => $data) {
-        $A["{$code} - {$data['name']}"] = $code;
+        $A["{$code} - {$data->name}"] = $code;
     }
     return $A;
 }
