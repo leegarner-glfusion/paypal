@@ -161,7 +161,7 @@ $output = array(
 Gets the basic product information to populate the PluginProduct object
 ```
 $args = array(
-    'item_id' => Full item ID
+    'item_id' => Array of item ID components (item_number, option1, option2, etc.)
 );
 $output = array(
     'product_id' => Full item id,
