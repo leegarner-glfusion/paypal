@@ -1424,7 +1424,7 @@ function plugin_user_login_paypal($uid)
 
     $anon_cart = Paypal\Cart::getAnonCartID();  // get the anonymous cart ID
     if (empty($anon_cart)) return;             // save a step if there's no anon cart
-    $user_cart = Paypal\Cart::getInstance();    // get the logged-in user's cart
+    $user_cart = Paypal\Cart::getInstance($uid);    // get the logged-in user's cart
     $user_cart->Merge($anon_cart);
 }
 

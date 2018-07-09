@@ -106,7 +106,7 @@ class Cart
         } else {
             // Get a cart for another user. Used to get the anonymous
             // cart by ID to merge when logging in. Can't cache this.
-            $cart = new self();
+            $cart = new self($cart_id);
         }
         return $cart;
     }
