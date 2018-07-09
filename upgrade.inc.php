@@ -655,6 +655,7 @@ function PAYPAL_remove_old_files()
             // 0.6.0
             'templates/viewcart.uikit.thtml',
             'templates/order.uikit.thtml',
+            'classes/paymentgw.class.php',
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
@@ -664,6 +665,21 @@ function PAYPAL_remove_old_files()
         ),
     );
 
+    if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+        // Files that were renamed, changing case only.
+        // Only delete thes on non-windows systems.
+        $files = array(
+            'classes/attribute.class.php',
+            'classes/cart.class.php',
+            'classes/category.class.php',
+            'classes/currency.class.php',
+            'classes/order.class.php',
+            'classes/orderstatus.class.php',
+            'classes/product.class.php',
+            'classes/workflow.class.php',
+        );
+        $paths[__DIR__] = array_merge($paths[__DIR__], $files);
+    }
     foreach ($paths as $path=>$files) {
         foreach ($files as $file) {
             @unlink("$path/$file");
