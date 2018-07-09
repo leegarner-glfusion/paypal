@@ -400,6 +400,10 @@ function ProductList($cat_id = 0)
                         (int)$cat->cat_id) . '</li>' . LB;
             }
         }
+        $show_plugins = false;
+    } else {
+        // Only show plugins on the root category page
+        $show_plugins = true;
     }
 
     $cat_name = $Cat->cat_name;
@@ -735,7 +739,7 @@ function ProductList($cat_id = 0)
     // Get products from plugins.
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
-    if ($_PP_CONF['show_plugins'] && $page == 1 &&
+    if ($_PP_CONF['show_plugins'] && $page == 1 && $show_plugins &&
                 empty($cat_list) && empty($search)) {
         // Get the currency class for formatting prices
         $Cur = Currency::getInstance();
