@@ -489,13 +489,14 @@ class paypal extends Gateway
         $gateway_vars = '';
 
         // See if the button is in our cache table
+        $btn_key = $P->btn_type . '_' . $P->getPrice();
         if ($this->config['encrypt']) {
-            $gateway_vars = $this->_ReadButton($P->id, $btn_type);
+            $gateway_vars = $this->_ReadButton($P->id, $btn_key);
         }
         if (empty($gateway_vars)) {
             $vars = array();
             $vars['cmd'] = $btn_info['cmd'];
-            $this->setReceiver($P->price);
+            $this->setReceiver($P->getPrice());
             $vars['business'] = $this->receiver_email;
             $vars['item_number'] = htmlspecialchars($P->id);
             $vars['item_name'] = htmlspecialchars($P->short_description);
@@ -569,7 +570,7 @@ class paypal extends Gateway
                         '" value="' . $value . '" />' . "\n";
                 }
             } else {
-                $this->_SaveButton($P->id, $btn_type, $gateway_vars);
+                $this->_SaveButton($P->id, $btn_key, $gateway_vars);
             }
         }
 

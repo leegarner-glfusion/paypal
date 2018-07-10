@@ -1476,6 +1476,11 @@ function plugin_runScheduledTask_paypal()
         DB_query("UPDATE {$_TABLES['paypal.products']}
                 SET enabled = 0 $where");
     }
+
+    // Delete old cached buttons which are keyed by item_id and price.
+    // Sale-priced items will get stuck in the DB.
+    DB_query("DELETE FROM {$_TABLES['paypal.buttons']}
+            WHERE last_update < NOW() - INTERVAL 120 DAY");
 }
 
 
