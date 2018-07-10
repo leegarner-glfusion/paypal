@@ -322,9 +322,9 @@ $_SQL['paypal.prod_attr'] = "CREATE TABLE `{$_TABLES['paypal.prod_attr']}` (
 // since 0.5.0
 $_SQL['paypal.buttons'] = "CREATE TABLE `{$_TABLES['paypal.buttons']}` (
   `pi_name` varchar(20) NOT NULL DEFAULT 'paypal',
-  `item_id` int(11) NOT NULL,
+  `item_id` varchar(40),
   `gw_name` varchar(10) NOT NULL DEFAULT '',
-  `btn_key` varchar(10),
+  `btn_key` varchar(20),
   `button` text,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`pi_name`, `item_id`, `gw_name`, `btn_key`)
@@ -879,7 +879,8 @@ $PP_UPGRADE['0.6.0'] = array(
     ) ENGINE=MyIsam",
     "ALTER TABLE {$_TABLES['paypal.buttons']}
         ADD `pi_name` varchar(20) NOT NULL DEFAULT 'paypal' FIRST,
-        ADD `btn_key` varchar(10) AFTER gw_name,
+        ADD `btn_key` varchar(20) AFTER gw_name,
+        CHANGE item_id item_id varchar(40),
         DROP PRIMARY KEY,
         ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
 );
