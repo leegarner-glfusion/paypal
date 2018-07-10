@@ -324,10 +324,10 @@ $_SQL['paypal.buttons'] = "CREATE TABLE `{$_TABLES['paypal.buttons']}` (
   `pi_name` varchar(20) NOT NULL DEFAULT 'paypal',
   `item_id` int(11) NOT NULL,
   `gw_name` varchar(10) NOT NULL DEFAULT '',
-  `btn_type` varchar(10),
+  `btn_key` varchar(10),
   `button` text,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`pi_name`, `item_id`, `gw_name`, `btn_type`)
+  PRIMARY KEY (`pi_name`, `item_id`, `gw_name`, `btn_key`)
 ) ENGINE=MyISAM";
 
 // since 0.5.0
