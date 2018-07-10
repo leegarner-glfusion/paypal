@@ -361,6 +361,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `pmt_txn_id` varchar(255) DEFAULT NULL,
   `instructions` text,
   `token` varchar(20) DEFAULT NULL,
+  `tax_rate` decimal(6,5) NOT NULL DEFAULT '0.00000',
   PRIMARY KEY (`order_id`)
 ) ENGINE=MyISAM";
 
@@ -842,7 +843,8 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD by_gc decimal(8,2) unsigned AFTER handling,
-        ADD token varchar(20)",
+        ADD token varchar(20),
+        ADD tax_rate decimal(6,5) NOT NULL DEFAULT '0.00000'",
     "ALTER TABLE {$_TABLES['paypal.cart']}
         ADD `apply_gc` float(8,2) NOT NULL default '0',
         ADD `total` float(8,2) NOT NULL default '0',
