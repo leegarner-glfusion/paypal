@@ -88,7 +88,7 @@ case 'deletecatimage':
     $id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
     if ($id > 0) {
         $C = new Paypal\Category($id);
-        $C->DeleteImage();
+        $C->deleteImage();
         $view = 'editcat';
         $_REQUEST['id'] = $id;
     } else {
@@ -110,7 +110,7 @@ case 'deletecat':
 
 case 'delete_img':
     $img_id = (int)$_REQUEST['img_id'];
-    Paypal\Product::DeleteImage($img_id);
+    Paypal\Product::deleteImage($img_id);
     $view = 'editproduct';
     break;
 

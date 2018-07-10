@@ -547,7 +547,7 @@ class Product
             }
 
             // Clear the button cache
-            self::DeleteButtons($this->id);
+            self::deleteButtons($this->id);
         }
 
         if (empty($this->Errors)) {
@@ -567,8 +567,8 @@ class Product
     *   update the purchases or IPN log at all. Does not delete an item
     *   that has orders associated with it.
     *
-    *   @uses   DeleteImage()
-    *   @uses   DeleteButtons()
+    *   @uses   deleteImage()
+    *   @uses   deleteButtons()
     *   @return boolean     True when deleted, False if invalid ID
     */
     public function Delete()
@@ -586,12 +586,12 @@ class Product
         $photo= DB_query($sql);
         if ($photo) {
             while ($prow = DB_fetchArray($photo, false)) {
-                self::DeleteImage($prow['img_id'], $prow['filename']);
+                self::deleteImage($prow['img_id'], $prow['filename']);
             }
         }
         DB_delete($_TABLES['paypal.products'], 'id', $this->id);
         DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $this->id);
-        self::DeleteButtons($this->id);
+        self::deleteButtons($this->id);
         PLG_itemDeleted($this->id, $_PP_CONF['pi_name']);
         $this->id = 0;
         return true;
@@ -605,7 +605,7 @@ class Product
     *
     *   @param  integer $item_id    Product ID to delete
     */
-    private static function DeleteButtons($item_id)
+    private static function deleteButtons($item_id)
     {
         global $_TABLES;
 
@@ -621,7 +621,7 @@ class Product
     *   @param  integer $img_id     DB ID of image to delete
     *   @param  string  $filename   Filename, if known
     */
-    public static function DeleteImage($img_id, $filename='')
+    public static function deleteImage($img_id, $filename='')
     {
         global $_TABLES, $_PP_CONF;
 

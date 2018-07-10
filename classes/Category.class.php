@@ -246,7 +246,7 @@ class Category
                 // category, then delete the old image file, if any.
                 // The DB still has the old filename at this point.
                 if (!$this->isNew) {
-                    $this->DeleteImage(false);
+                    $this->deleteImage(false);
                 }
             }
         }
@@ -332,7 +332,7 @@ class Category
         if ($this->cat_id <= 1)
             return false;
 
-        $this->DeleteImage(false);
+        $this->deleteImage(false);
         DB_delete($_TABLES['paypal.categories'], 'cat_id', $this->cat_id);
         PLG_itemDeleted($this->cat_id, 'paypal_category');
         Cache::clear('categories');
@@ -349,7 +349,7 @@ class Category
     *
     *   @param  boolean $del_db     True to update the database.
     */
-    public function DeleteImage($del_db = true)
+    public function deleteImage($del_db = true)
     {
         global $_TABLES, $_PP_CONF;
 
