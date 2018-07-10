@@ -877,9 +877,9 @@ $PP_UPGRADE['0.6.0'] = array(
       KEY `code` (`code`,`ts`)
     ) ENGINE=MyIsam",
     "ALTER TABLE {$_TABLES['paypal.buttons']}
-        ADD btn_type varchar(10) AFTER gw_name,
+        ADD btn_key varchar(10) AFTER gw_name,
         DROP PRIMARY KEY,
-        ADD PRIMARY KEY (`item_id`,`gw_name`,`btn_type`)",
+        ADD PRIMARY KEY (`item_id`,`gw_name`,`btn_key`)",
 );
 
 ?>
