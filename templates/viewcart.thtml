@@ -18,7 +18,7 @@
       </tr>
       <!-- BEGIN ItemRow -->
       <tr>
-        <td>
+        <td class="alignleft">
 {!if item_link}
           <a href="{item_link}">{item_name}</a>
 {!else}
