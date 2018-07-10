@@ -1401,12 +1401,16 @@ function plugin_itemrated_paypal($id, $rating, $votes)
 function plugin_canuserrate_paypal($item_id, $uid)
 {
     global $_PP_CONF;
+    static $canRate = NULL;
 
-    if ($_PP_CONF['anon_can_rate'] == 0 && COM_isAnonUser()) {
-        return false;
-    } else {
-        return true;
+    if ($canRate === NULL) {
+        if ($_PP_CONF['anon_can_rate'] == 0 && COM_isAnonUser()) {
+            $canRate = false;
+        } else {
+            $canRate = true;
+        }
     }
+    return $canRate;
 }
 
 
