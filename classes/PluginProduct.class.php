@@ -61,6 +61,7 @@ class PluginProduct extends Product
             $this->url = PP_getVar($A, 'url');
             $this->override_price = PP_getVar($A, 'override_price', 'integer', 0);
             $this->btn_type = PP_getVar($A, 'btn_type', 'string', 'buy_now');
+            $this->btn_text = PP_getVar($A, 'btn_text');
          } else {
             // probably an invalid product ID
             $price = 0;

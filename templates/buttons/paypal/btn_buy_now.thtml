@@ -7,7 +7,7 @@
     name="submit"
     alt="{btn_text}" title="{$LANG_PP['buy_now']}" />-->
   <button type="submit" class="paypalButton blue" border="0" name="submit" alt="{btn_text}">
-    <i class="{iconset}-paypal">&nbsp;</i>{$LANG_PP['buy_now']}
+    <i class="{iconset}-paypal">&nbsp;</i>{btn_text}
   </button>
 </form>
 {# end {templatelocation} #}

@@ -576,9 +576,11 @@ class paypal extends Gateway
 
         // Set the text for the button, falling back to our Buy Now
         // phrase if not available
-        $btn_text = isset($LANG_PP['buttons'][$btn_type]) ?
+        $btn_text = $P->btn_text;    // maybe provided by a plugin
+        if ($btn_text == '') {
+            $btn_text = isset($LANG_PP['buttons'][$btn_type]) ?
                 $LANG_PP['buttons'][$btn_type] : $LANG_PP['buy_now'];
-
+        }
         $T = PP_getTemplate('btn_' . $btn_info['tpl'], 'btn', 'buttons/' . $this->gw_name);
         $T->set_var('paypal_url', $this->getActionUrl());
         $T->set_var('btn_text', $btn_text);

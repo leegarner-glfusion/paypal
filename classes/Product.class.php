@@ -66,6 +66,7 @@ class Product
         $this->isNew = true;
         $this->currency = Currency::getInstance();
         $this->pi_name = $_PP_CONF['pi_name'];
+        $this->btn_text = '';
 
         if (is_array($id)) {
             $this->setVars($id, true);
@@ -232,6 +233,7 @@ class Product
         case 'keywords':
         case 'btn_type':
         case 'item_id':
+        case 'btn_text':
             // String values
             $this->properties[$var] = trim($value);
             break;
