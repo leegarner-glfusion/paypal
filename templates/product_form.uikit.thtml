@@ -82,7 +82,7 @@
       </label>
       <div class="uk-form-controls">
       <i class="{iconset}-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetSale();" ></i>
-      <input type="text" id="sale_price" name="sale_price" value="{sale_price}" size="12" 
+      <input type="text" id="f_sale_price" name="sale_price" value="{sale_price}" size="12" 
         maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
         {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
             data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}" data-uk-tooltip
@@ -451,9 +451,10 @@ function PP_resetAvailDates()
 }
 function PP_resetSale()
 {
+
     document.getElementById('sale_beg').value = '';
     document.getElementById('sale_end').value = '';
-    document.getElementById('sale_price').value = '';
+    document.getElementById('f_sale_price').value = '';
 }
 
 var ConfigDocUrl = '{doc_url}';

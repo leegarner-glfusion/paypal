@@ -85,7 +85,7 @@
             alt="{$LANG_PP['clk_help']}" /></a>
       </label>
       <i class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['reset']}" onclick="PP_resetSale();" ></i>
-      <input type="text" id="sale_price" name="sale_price" value="{sale_price}" size="12" 
+      <input type="text" id="f_sale_price" name="sale_price" value="{sale_price}" size="12" 
         maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
       {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
               value="{sale_beg}" maxlength="12" />
@@ -407,7 +407,7 @@ function PP_resetSale()
 {
     document.getElementById('sale_beg').value = '';
     document.getElementById('sale_end').value = '';
-    document.getElementById('sale_price').value = '';
+    document.getElementById('f_sale_price').value = '';
 }
 
 Calendar.setup({
