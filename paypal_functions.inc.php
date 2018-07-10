@@ -667,9 +667,21 @@ function ProductList($cat_id = 0)
         }
 
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
-            // can't rate from list page, messes with product links
-            $static = true;
-            $rating_box = RATING_ratingBar($_PP_CONF['pi_name'], $A['id'],
+            $static = 1;
+            // can't rate from list page, messes with product links on some
+            // templates. Uncomment the following to enable ratings from the
+            // list page.
+            /*if (in_array($P->id, $PP_ratedIds)) {
+                $static = true;
+                $voted = 1;
+            } elseif (plugin_canuserrate_paypal($P->id, $_USER['uid'])) {
+                $static = 0;
+                $voted = 0;
+            } else {
+                $static = 1;
+                $voted = 0;
+            }*/
+            $rating_box = RATING_ratingBar($_PP_CONF['pi_name'], $P->id,
                     $P->votes, $P->rating,
                     $voted, 5, $static, 'sm');
             $product->set_var('rating_bar', $rating_box);
