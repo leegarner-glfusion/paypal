@@ -951,7 +951,7 @@ class Order
 
     /**
     *   Calculate the tax on this order.
-    *   Sets the tax property and returns the amount.
+    *   Sets the tax and tax_items properties and returns the tax amount.
     *
     *   @return float   Sales Tax amount
     */
@@ -1003,8 +1003,9 @@ class Order
         foreach ($this->items as $id => $item) {
             $total += ($item->price * $item->quantity);
         }
-        //$total += $this->calcTax() + $this->shipping + $this->handling;
-        $total += $this->tax + $this->shipping + $this->handling;
+        // Need to call calcTax() since this function may be called before
+        // the order is saved.
+        $total += $this->calcTax() + $this->shipping + $this->handling;
         return round($total, $this->Currency->Decimals());
     }
 
