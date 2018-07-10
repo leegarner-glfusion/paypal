@@ -357,10 +357,12 @@ class paypal extends Gateway
             return '';
         }
 
+        $keys = array();
         // Now check that the files exist and can be read
         foreach (array('prv_key', 'pub_key', 'pp_cert') as $idx=>$name) {
-            if (!is_file($this->config[$name]) ||
-                !is_readable($this->config[$name])) {
+            $keys[$name] = $_PP_CONF['tmpdir'] . 'keys/' . $this->config[$name];
+            if (!is_file($keys[$name]) ||
+                !is_readable($keys[$name])) {
                 return '';
             }
         }
@@ -375,19 +377,19 @@ class paypal extends Gateway
         $signedText = array();
         $encText = '';
 
-        $pub_key = @openssl_x509_read(file_get_contents($this->config['pub_key']));
+        $pub_key = @openssl_x509_read(file_get_contents($keys['pub_key']));
         if (!$pub_key) {
-            COM_errorLog("Failed reading public key from {$this->config['pub_key']}", 1);
+            COM_errorLog("Failed reading public key from {$keys['pub_key']}", 1);
             return '';
         }
-        $prv_key = @openssl_get_privatekey(file_get_contents($this->config['prv_key']));
+        $prv_key = @openssl_get_privatekey(file_get_contents($keys['prv_key']));
         if (!$prv_key) {
-            COM_errorLog("Failed reading private key from {$this->config['prv_key']}", 1);
+            COM_errorLog("Failed reading private key from {$keys['prv_key']}", 1);
             return '';
         }
-        $pp_cert = @openssl_x509_read(file_get_contents($this->config['pp_cert']));
+        $pp_cert = @openssl_x509_read(file_get_contents($keys['pp_cert']));
         if (!$pp_cert) {
-            COM_errorLog("Failed reading PayPal certificate from {$this->config['pp_cert']}", 1);
+            COM_errorLog("Failed reading PayPal certificate from {$keys['pp_cert']}", 1);
             return '';
         }
 
@@ -418,7 +420,6 @@ class paypal extends Gateway
         @fclose($fh);
 
         // Now sign the plaintext values into the signed file
-        //$fh = fopen($dataFile . "_signed.txt", "w+");
         if (!openssl_pkcs7_sign($dataFile . '_plain.txt',
                     $dataFile . '_signed.txt',
                     $pub_key,
@@ -489,7 +490,7 @@ class paypal extends Gateway
 
         // See if the button is in our cache table
         if ($this->config['encrypt']) {
-            $gateway_vars = $this->_ReadButton($P->id);
+            $gateway_vars = $this->_ReadButton($P->id, $btn_type);
         }
         if (empty($gateway_vars)) {
             $vars = array();
@@ -568,7 +569,7 @@ class paypal extends Gateway
                         '" value="' . $value . '" />' . "\n";
                 }
             } else {
-                $this->_SaveButton($P->id, $gateway_vars);
+                $this->_SaveButton($P->id, $btn_type, $gateway_vars);
             }
         }
 

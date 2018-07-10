@@ -235,16 +235,20 @@ abstract class Gateway
     /**
     *   Get a single buy_now-type button from the database.
     *
-    *   @param  string   $item_id    Item ID
+    *   @param  string  $item_id    Item ID
+    *   @param  string  $btn_type   Button Type
     *   @return string      Button code, or empty if not available
     */
-    protected function _ReadButton($item_id)
+    protected function _ReadButton($item_id, $btn_type)
     {
         global $_TABLES;
 
+        $item_id = DB_escapeString($item_id);
+        $btn_type = DB_escapeString($btn_type);
         $btn  = DB_getItem($_TABLES['paypal.buttons'], 'button',
-                "item_id = '" . DB_escapeString($item_id) . "' AND
-                gw_name = '{$this->gw_name}'");
+                "item_id = '{$item_id}' AND
+                gw_name = '{$this->gw_name}' AND
+                btn_type = '{$btn_type}'");
         return $btn;
     }
 
@@ -252,22 +256,25 @@ abstract class Gateway
     /**
     *   Save a single button to the button cache table.
     *
-    *   @param  mixed   $item_id    ID of item for this button
+    *   @param  string  $item_id    ID of item for this button
+    *   @param  string  $btn_type   Button type
     *   @param  string  $btn_value  HTML code for this button
     */
-    protected function _SaveButton($item_id, $btn_value)
+    protected function _SaveButton($item_id, $btn_type, $btn_value)
     {
         global $_TABLES;
 
         $item_id = DB_escapeString($item_id);
+        $btn_type = DB_escapeString($btn_type);
         $btn_value = DB_escapeString($btn_value);
 
         $sql = "INSERT INTO {$_TABLES['paypal.buttons']}
-                (item_id, gw_name, button)
+                (item_id, gw_name, btn_type, button)
             VALUES
-                ('{$item_id}', '{$this->gw_name}', '{$btn_value}')
+                ('{$item_id}', '{$this->gw_name}', '{$btn_type}', '{$btn_value}')
             ON DUPLICATE KEY UPDATE
                 button = '{$btn_value}'";
+        //echo $sql;die;
         DB_query($sql);
     }
 
