@@ -239,16 +239,16 @@ abstract class Gateway
     *   @param  string  $btn_key    Button Key, btn_type + price
     *   @return string      Button code, or empty if not available
     */
-    protected function _ReadButton($item_id, $btn_key)
+    protected function _ReadButton($P, $btn_key)
     {
         global $_TABLES;
 
-        $item_id = DB_escapeString($item_id);
+        $pi_name = DB_escapeString($P->pi_name);
+        $item_id = DB_escapeString($P->item_id);
         $btn_key = DB_escapeString($btn_key);
         $btn  = DB_getItem($_TABLES['paypal.buttons'], 'button',
-                "item_id = '{$item_id}' AND
-                gw_name = '{$this->gw_name}' AND
-                btn_key = '{$btn_key}'");
+                "pi_name = '{$pi_name}' AND item_id = '{$item_id}' AND
+                gw_name = '{$this->gw_name}' AND btn_key = '{$btn_key}'");
         return $btn;
     }
 
@@ -260,18 +260,19 @@ abstract class Gateway
     *   @param  string  $btn_type   Button type
     *   @param  string  $btn_value  HTML code for this button
     */
-    protected function _SaveButton($item_id, $btn_key, $btn_value)
+    protected function _SaveButton($P, $btn_key, $btn_value)
     {
         global $_TABLES;
 
-        $item_id = DB_escapeString($item_id);
+        $pi_name = DB_escapeString($P->pi_name);
+        $item_id = DB_escapeString($P->item_id);
         $btn_key = DB_escapeString($btn_key);
         $btn_value = DB_escapeString($btn_value);
 
         $sql = "INSERT INTO {$_TABLES['paypal.buttons']}
-                (item_id, gw_name, btn_key, button)
+                (pi_name, item_id, gw_name, btn_key, button)
             VALUES
-                ('{$item_id}', '{$this->gw_name}', '{$btn_key}', '{$btn_value}')
+                ('{$pi_name}', '{$item_id}', '{$this->gw_name}', '{$btn_key}', '{$btn_value}')
             ON DUPLICATE KEY UPDATE
                 button = '{$btn_value}'";
         //echo $sql;die;

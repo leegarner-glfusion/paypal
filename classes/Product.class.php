@@ -65,12 +65,14 @@ class Product
         $this->properties = array();
         $this->isNew = true;
         $this->currency = Currency::getInstance();
+        $this->pi_name = $_PP_CONF['pi_name'];
 
         if (is_array($id)) {
             $this->setVars($id, true);
             $this->isNew = false;
             $this->Cat = Category::getInstance($this->cat_id);
         } elseif ($id == 0) {
+            $this->item_id = '';
             $this->id = 0;
             $this->name = '';
             $this->cat_id = '';
@@ -229,6 +231,7 @@ class Product
         case 'file':
         case 'keywords':
         case 'btn_type':
+        case 'item_id':
             // String values
             $this->properties[$var] = trim($value);
             break;
@@ -291,11 +294,12 @@ class Product
      *  @param  array   $row        Array of values, from DB or $_POST
      *  @param  boolean $fromDB     True if read from DB, false if from $_POST
      */
-    public function SetVars($row, $fromDB=false)
+    public function setVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
 
         $this->id = $row['id'];
+        $this->item_id = $row['id'];
         $this->description = $row['description'];
         $this->enabled = isset($row['enabled']) ? $row['enabled'] : 0;
         $this->featured = isset($row['featured']) ? $row['featured'] : 0;
@@ -390,7 +394,7 @@ class Product
             }
         }
         if (!empty($row)) {
-            $this->SetVars($row, true);
+            $this->setVars($row, true);
             $this->isNew = false;
             $this->loadAttributes();
             return true;
@@ -439,7 +443,7 @@ class Product
         global $_TABLES, $_PP_CONF;
 
         if (is_array($A)) {
-            $this->SetVars($A);
+            $this->setVars($A);
         }
 
         // Zero out the shipping amount if a non-fixed value is chosen

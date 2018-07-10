@@ -38,6 +38,7 @@ class PluginProduct extends Product
         $this->properties = array();
         $this->currency = Currency::getInstance();
         $this->item_id = $item_id;  // Full item id
+        $this->id = $item_id;       // TODO: convert Product class to use item_id
         $item_parts = explode(':', $item_id);
         $this->pi_name = $item_parts[0];
         array_shift($item_parts);         // Remove plugin name
@@ -53,12 +54,13 @@ class PluginProduct extends Product
                     $this->pi_info, $A, $svc_msg);
         if ($status == PLG_RET_OK) {
             $this->price = PP_getVar($A, 'price', 'float', 0);
-            $this->item_name = $A['name'];
-            $this->short_description = $A['short_description'];
+            $this->item_name = PP_getVar($A, 'name');
+            $this->short_description = PP_getVar($A, 'short_description');
             $this->description = PP_getVar($A, 'description', 'string', $this->short_description);
             $this->taxable = PP_getVar($A, 'taxable', 'integer', 0);
             $this->url = PP_getVar($A, 'url');
             $this->override_price = PP_getVar($A, 'override_price', 'integer', 0);
+            $this->btn_type = PP_getVar($A, 'btn_type', 'string', 'buy_now');
          } else {
             // probably an invalid product ID
             $price = 0;

@@ -369,7 +369,7 @@ class paypal extends Gateway
 
         // Create a temporary file to begin storing our data.  If this fails,
         // then return.
-        $dataFile = tempnam($_PP_CONF['tmpdir'], 'data');
+        $dataFile = tempnam($_PP_CONF['tmpdir'].'cache/', 'data');
         if (!is_writable($dataFile))
             return '';
 
@@ -491,7 +491,7 @@ class paypal extends Gateway
         // See if the button is in our cache table
         $btn_key = $P->btn_type . '_' . $P->getPrice();
         if ($this->config['encrypt']) {
-            $gateway_vars = $this->_ReadButton($P->id, $btn_key);
+            $gateway_vars = $this->_ReadButton($P, $btn_key);
         }
         if (empty($gateway_vars)) {
             $vars = array();
@@ -570,7 +570,7 @@ class paypal extends Gateway
                         '" value="' . $value . '" />' . "\n";
                 }
             } else {
-                $this->_SaveButton($P->id, $btn_key, $gateway_vars);
+                $this->_SaveButton($P, $btn_key, $gateway_vars);
             }
         }
 
