@@ -654,7 +654,7 @@ class Order
     */
     public function Notify($status='', $gw_msg='')
     {
-        global $_CONF, $_PP_CONF, $_TABLES;
+        global $_CONF, $_PP_CONF, $LANG_PP;
 
         // Check if we're supposed to send a notification
         if ( ($this->uid > 1 &&
@@ -795,7 +795,6 @@ class Order
         }
 
         // parse templates for subject/text
-        $subject = trim($T->parse('output', 'subject'));
         $T->set_var('purchase_details',
                         $T->parse('detail', 'msg_body'));
         $user_text  = $T->parse('user_out', 'msg_user');
@@ -808,7 +807,7 @@ class Order
                 // Make sure plugin functions are available
                 USES_paypal_functions();
                 PAYPAL_mailAttachment($this->buyer_email,
-                                    $subject,
+                                    $LANG_PP['subj_email_user'],
                                     $user_text,
                                     $_CONF['site_mail'],
                                     true,
@@ -819,7 +818,7 @@ class Order
                         'to' => array($this->buyer_email),
                         'from' => $_CONF['site_mail'],
                         'htmlmessage' => $user_text,
-                        'subject' => $subject,
+                        'subject' => $LANG_PP['subj_email_user'],
                 ) );
             }
         }
@@ -835,7 +834,7 @@ class Order
                         'to' => array($email_addr),
                         'from' => $_CONF['noreply_mail'],
                         'htmlmessage' => $admin_text,
-                            'subject' => $subject,
+                        'subject' => $LANG_PP['subj_email_admin'],
                 ) );
             }
         }
