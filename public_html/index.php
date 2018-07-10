@@ -371,6 +371,13 @@ case 'detail':
 
 case 'cart':
 case 'viewcart':
+    // If a cart ID is supplied, probably coming from a cancelled purchase.
+    // Restore cart since the payment was not processed.
+    $cid = PP_getVar($_REQUEST, 'cid');
+    if (!empty($cid)) {
+        Paypal\Cart::setFinal($cid, false);
+        COM_refresh(PAYPAL_URL. '/index.php?view=cart');
+    }
     $menu_opt = $LANG_PP['viewcart'];
     if ($ppGCart->hasItems()) {
         $content .= $ppGCart->View();

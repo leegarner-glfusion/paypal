@@ -1169,7 +1169,7 @@ class Cart
 
     /**
     *   Set the is_order flag in a cart to indicate that it is finalized
-    *   and submitted for payment. The status should always be "true"
+    *   and submitted for payment.
     *   Also removes the cart_id cookie for anonymous users.
     *
     *   @param  string  $cart_id    Cart ID to update
@@ -1187,6 +1187,9 @@ class Cart
         DB_query($sql);
         if ($status == 1) {
             unset($_COOKIE[self::$session_var]);
+        } else {
+            // restoring the cart, put back the cookie
+            self::setAnonCartID($cart_id);
         }
         return DB_error() ? 1 : 0;
     }

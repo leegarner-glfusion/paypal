@@ -188,7 +188,7 @@ class paypal extends Gateway
         $fields = array(
             'cmd'       => '_cart',
             'upload'    => '1',
-            'cancel_return' => PAYPAL_URL.'/index.php?view=cart',
+            'cancel_return' => PAYPAL_URL.'/index.php?view=cart&cid=' . urlencode($cart->CartID()),
             'return'    => PAYPAL_URL.'/index.php?thanks=paypal',
             'rm'        => '1',     // simple GET return url
             'paymentaction' => 'sale',
