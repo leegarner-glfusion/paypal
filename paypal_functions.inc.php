@@ -752,7 +752,7 @@ function ProductList($cat_id = 0)
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
     if ($_PP_CONF['show_plugins'] && $page == 1 && $show_plugins &&
-                empty($cat_list) && empty($search)) {
+                empty($search)) {
         // Get the currency class for formatting prices
         $Cur = Currency::getInstance();
         $product->clear_var('rating_bar');  // no ratings for plugins (yet)
