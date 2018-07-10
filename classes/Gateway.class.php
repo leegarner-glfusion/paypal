@@ -945,10 +945,9 @@ abstract class Gateway
 
     /**
     *   Get the values to show in the "Thank You" message when a customer
-    *   returns to our site.  This example is from PayPal, which includes
-    *   purchase variables in a $_POST.  The returned array should be
-    *   formatted as shown.  There are no parameters, any data will be
-    *   via $_GET or $_POST.
+    *   returns to our site. The returned array should be
+    *   formatted as shown. There are no parameters, any data will be
+    *   via $_GET.
     *
     *   This stub function returns only an empty array, which will cause
     *   a simple "Thanks for your order" message to appear, without any
@@ -958,14 +957,10 @@ abstract class Gateway
     */
     public function thanksVars()
     {
-        /*$R = array(
-            'payment_date'  => $_POST['payment_date'],
-            'currency'      => $_POST['mc_currency'],
-            'payment_amount' => $_POST['mc_gross'],
-            'gateway_url'   => 'http://www.paypal.com',
-            'gateway_name'  => self::Description(),
-        );*/
-        $R = array();
+        $R = array(
+            //'gateway_url'   => Gateway URL for use to check purchase
+            //'gateway_name'  => self::Description(),
+        );
         return $R;
     }
 

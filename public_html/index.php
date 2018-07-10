@@ -203,13 +203,8 @@ case 'thanks':
                 $T = PP_getTemplate('thanks_for_order', 'msg');
                 $T->set_var(array(
                     'site_name'     => $_CONF['site_name'],
-                    'payment_date'  => $tVars['payment_date'],
-                    'currency'      => $tVars['currency'],
-                    'mc_gross'      => $tVars['payment_amount'],
-                    'gateway_url'   => $tVars['gateway_url'],
-                    'gateway_name'  => $tVars['gateway_name'],
-                    'payment_status' => $tVars['payment_status'],
-                    'completed' => $tVars['_status'] == 'completed' ? 'true' : '',
+                    'gateway_url'   => PP_getVar($tVars, 'gateway_url'),
+                    'gateway_name'  => PP_getVar($tVars, 'gateway_name'),
                 ) );
                 $message = $T->parse('output', 'msg');
             }

@@ -1,7 +1,13 @@
 {# begin {templatelocation} #}
+<p>
 Thank you for your purchase from {site_name}.<br />
-Payment was made via {gateway_name} and a receipt for your purchase has been emailed to you
-.<p />
-You may log into your account at <a href="{gateway_url}">{gateway_url}</a>
- to view details of this transaction.<br />
+{!if gateway_name}
+Payment was made via {gateway_name} and a receipt for your purchase has been emailed to you.
+{!endif}
+</p>
+<p>
+{!if gateway_url}
+You may log into your account at <a href="{gateway_url}">{gateway_url}</a> to view details of this transaction.
+{!endif}
+</p>
 {# end {templatelocation} #}

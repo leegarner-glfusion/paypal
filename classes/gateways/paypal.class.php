@@ -747,17 +747,11 @@ class paypal extends Gateway
     *   @uses   Gateway::Description()
     *   @return array       Array of name=>value pairs
     */
-    public function DEPR_thanksVars()
+    public function thanksVars()
     {
         $R = array(
-            'payment_date'  => $_POST['payment_date'],
-            'currency'      => $_POST['mc_currency'],
-            'payment_amount' => $_POST['mc_gross'],
             'gateway_url'   => self::getMainUrl(),
             'gateway_name'  => self::Description(),
-            'payment_status' => $_POST['payment_status'],
-            '_status'       => $_POST['payment_status'] == 'Completed' ?
-                        'completed' : 'pending',
         );
         return $R;
     }
