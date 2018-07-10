@@ -1996,6 +1996,49 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 
 
 /**
+*   Actions to perform when notified by a plugin that an item has been saved.
+*   - Delete cached encrypted buttons
+*
+*   @param  string  $id     Item ID
+*   @param  string  $type   Item Type, e.g. plugin name
+*   @param  string  $old_id Old ID, in case the ID was changed
+*/
+function plugin_itemsaved_paypal($id, $type, $old_id = '')
+{
+    global $_TABLES;
+
+    // Just deleting cached buttons, so don't currently care about new ID
+    if ($old_id != $id) $id = $old_id;
+    $type = DB_escapeString($type);
+    $id = DB_escapeString($id);
+    $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
+            WHERE pi_name = '$type' AND item_id = '{$id}'";
+    DB_query($sql);
+}
+
+
+/**
+*   Actions to perform when notified by a plugin that an item has been deleted.
+*   - Delete cached encrypted buttons.
+*
+*   @param  string  $id     Item ID
+*   @param  string  $type   Item Type, e.g. plugin name
+*   @param  string  $children   Optional comma-separated values to delete
+*/
+function plugin_itemdeleted_paypal($id, $type, $children='')
+{
+    $type = DB_escapeString($type);
+    $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
+            WHERE pi_name = '$type'";
+    if ($id != '*') {
+        $id = DB_escapeString($id);
+        $sql .= " AND item_id = '{$id}'";
+    }
+    DB_query($sql);
+}
+
+
+/**
 *   Get an array variable, first checking whether it's set
 *
 *   @param  array   $A          Array where var should be
