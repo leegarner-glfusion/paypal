@@ -55,7 +55,9 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
     if (!empty($btn_type)) {
         foreach (Paypal\Gateway::getall() as $gw) {
             if ($gw->Supports('external') && $gw->Supports($btn_type)) {
-                $output[] = $gw->ExternalButton($args, $btn_type);
+                //$output[] = $gw->ExternalButton($args, $btn_type);
+                $P = Paypal\Product::getInstance($args['item_number']);
+                $output[] = $gw->ProductButton($P);
             }
         }
     }
