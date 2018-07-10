@@ -894,6 +894,14 @@ function plugin_itemdeleted_paypal($id, $type)
         unset($_POST['enabledplugins'][$_PP_CONF['pi_name']]);
         unset($_POST['pluginarray'][$_PP_CONF['pi_name']]);
     }
+    $type = DB_escapeString($type);
+    $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
+            WHERE pi_name = '$type'";
+    if ($id != '*') {
+        $id = DB_escapeString($id);
+        $sql .= " AND item_id = '{$id}'";
+    }
+    DB_query($sql);
 }
 
 
@@ -2013,27 +2021,6 @@ function plugin_itemsaved_paypal($id, $type, $old_id = '')
     $id = DB_escapeString($id);
     $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
             WHERE pi_name = '$type' AND item_id = '{$id}'";
-    DB_query($sql);
-}
-
-
-/**
-*   Actions to perform when notified by a plugin that an item has been deleted.
-*   - Delete cached encrypted buttons.
-*
-*   @param  string  $id     Item ID
-*   @param  string  $type   Item Type, e.g. plugin name
-*   @param  string  $children   Optional comma-separated values to delete
-*/
-function plugin_itemdeleted_paypal($id, $type, $children='')
-{
-    $type = DB_escapeString($type);
-    $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
-            WHERE pi_name = '$type'";
-    if ($id != '*') {
-        $id = DB_escapeString($id);
-        $sql .= " AND item_id = '{$id}'";
-    }
     DB_query($sql);
 }
 
