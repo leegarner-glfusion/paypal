@@ -540,6 +540,22 @@ function PAYPAL_do_upgrade()
                 'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
         $c->add('tax_rate', $_PP_DEFAULTS['tax_rate'],
                 'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
+        $c->add('fs_gc_format', NULL, 'fieldset', 20, 10, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('gc_letters', $_PP_DEFAULTS['gc_letters'],
+                'select', 20, 10, 17, 10, true, $_PP_CONF['pi_name']);
+        $c->add('gc_numbers', $_PP_DEFAULTS['gc_numbers'],
+                'select', 20, 10, 2, 20, true, $_PP_CONF['pi_name']);
+        $c->add('gc_symbols', $_PP_DEFAULTS['gc_symbols'],
+                'select', 20, 10, 2, 30, true, $_PP_CONF['pi_name']);
+        $c->add('gc_prefix', $_PP_DEFAULTS['gc_prefix'],
+                'text', 20, 10, 0, 40, true, $_PP_CONF['pi_name']);
+        $c->add('gc_suffix', $_PP_DEFAULTS['gc_suffix'],
+                'text', 20, 10, 0, 50, true, $_PP_CONF['pi_name']);
+        $c->add('gc_length', $_PP_DEFAULTS['gc_length'],
+                'text', 20, 10, 0, 60, true, $_PP_CONF['pi_name']);
+        $c->add('gc_mask', $_PP_DEFAULTS['gc_mask'],
+                'text', 20, 10, 0, 70, true, $_PP_CONF['pi_name']);
 
         // Previously, categories were not required. With the MPTT method,
         // there must be at least one. Collect all the categories, increment

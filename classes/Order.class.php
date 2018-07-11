@@ -986,6 +986,7 @@ class Order
             'numbers'   => true,
             'symbols'   => false,   // alphanumeric only
             'mixed_case' => true,
+            'mask'      => '',
         );
         $code = Coupon::generate($options);
         return $code;

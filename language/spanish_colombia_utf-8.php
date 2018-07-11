@@ -431,6 +431,13 @@ $LANG_confignames['paypal'] = array(
     'gc_enabled'    => 'Enable Gift Cards',
     'gc_exp_days'   => 'Default Gift Card Expiration (days)',
     'tax_rate'      => 'Tax Rate',
+    'gc_letters'    => 'Use Letters',
+    'gc_numbers'    => 'Use Numbers',
+    'gc_symbols'    => 'Use Symbols',
+    'gc_prefix'     => 'Use Prefix',
+    'gc_suffix'     => 'Use Suffix',
+    'gc_length'     => 'Code Length',
+    'gc_mask'       => 'Code Mask',
 );
 
 /** Language strings for the subgroup names in the config section */
@@ -452,6 +459,7 @@ $LANG_fs['paypal'] = array(
     'fs_addresses' => 'Address Collection',
     'fs_shop'   => 'Shop Details',
     'fs_gc'     => 'Gift Card Configuration',
+    'fs_gc_format' => 'Gift Card Format',
 );
 
 /**
@@ -495,6 +503,7 @@ $LANG_configselects['paypal'] = array(
     16 => array('Allow Backordering' => 0,
             'Show in Catalog, Prevent Sales' => 1,
             'Hide from Catalog' => 2),
+    17 => array('Upper-case' => 1, 'Lower-case' => 2, 'Mixed-case' => 3, 'None' => 0),
 );
 
 

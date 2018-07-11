@@ -164,6 +164,13 @@ $_PP_DEFAULTS['tc_link'] = '';     // Link to terms and conditions
 
 $_PP_DEFAULTS['gc_enabled'] = 0;        // enable gift cards? 1=yes, 0=no
 $_PP_DEFAULTS['gc_exp_days'] = 365;     // default expiration for gift cards
+$_PP_DEFAULTS['gc_mask'] = 'XXXX-XXXX-XXXX-XXXX';
+$_PP_DEFAULTS['gc_letters'] = 1;
+$_PP_DEFAULTS['gc_numbers'] = 0;
+$_PP_DEFAULTS['gc_symbols'] = 0;
+$_PP_DEFAULTS['gc_length'] = 0;
+$_PP_DEFAULTS['gc_prefix'] = '';
+$_PP_DEFAULTS['gc_suffix'] = '';
 
 /**
  *  Initialize Paypal plugin configuration
@@ -330,6 +337,23 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 20, 0, 2, 10, true, $_PP_CONF['pi_name']);
         $c->add('gc_exp_days', $_PP_DEFAULTS['gc_exp_days'],
                 'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
+        // coupon code format defaults
+        $c->add('fs_gc_format', NULL, 'fieldset', 20, 10, NULL, 0, true,
+                $_PP_CONF['pi_name']);
+        $c->add('gc_letters', $_PP_DEFAULTS['gc_letters'],
+                'select', 20, 10, 17, 10, true, $_PP_CONF['pi_name']);
+        $c->add('gc_numbers', $_PP_DEFAULTS['gc_numbers'],
+                'select', 20, 10, 2, 20, true, $_PP_CONF['pi_name']);
+        $c->add('gc_symbols', $_PP_DEFAULTS['gc_symbols'],
+                'select', 20, 10, 2, 30, true, $_PP_CONF['pi_name']);
+        $c->add('gc_prefix', $_PP_DEFAULTS['gc_prefix'],
+                'text', 20, 10, 0, 40, true, $_PP_CONF['pi_name']);
+        $c->add('gc_suffix', $_PP_DEFAULTS['gc_suffix'],
+                'text', 20, 10, 0, 50, true, $_PP_CONF['pi_name']);
+        $c->add('gc_length', $_PP_DEFAULTS['gc_length'],
+                'text', 20, 10, 0, 60, true, $_PP_CONF['pi_name']);
+        $c->add('gc_mask', $_PP_DEFAULTS['gc_mask'],
+                'text', 20, 10, 0, 70, true, $_PP_CONF['pi_name']);
      }
      return true;
 }

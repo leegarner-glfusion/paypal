@@ -9,6 +9,8 @@
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
+*
+*   Based on https://github.com/joashp/simple-php-coupon-code-generator
 */
 namespace Paypal;
 
@@ -18,12 +20,11 @@ namespace Paypal;
 */
 class Coupon extends Product
 {
-    const MIN_LENGTH = 8;
-
     public function __construct($prod_id = 0)
     {
         parent::__construct($prod_id);
         $this->prod_type == PP_PROD_COUPON;
+        $this->taxable = 0; // coupons are not taxable
 
         // Add special fields for Coupon products
         // Relies on $LANG_PP for the text prompts
@@ -45,14 +46,15 @@ class Coupon extends Product
     */
     public static function generate($options = array())
     {
-        $length = PP_getVar($options, 'length', 'int', self::MIN_LENGTH);
-        $prefix = PP_getVar($options, 'prefix', 'string');
-        $suffix = PP_getVar($options, 'suffix', 'string');
-        $useLetters = PP_getVar($options, 'letters', 'bool', true);
-        $useNumbers = PP_getVar($options, 'numbers', 'bool', false);
-        $useSymbols = PP_getVar($options, 'symbols', 'bool', false);
-        $useMixedCase = PP_getVar($options, 'mixed_case', 'bool', false);
-        $mask = PP_getVar($options, 'mask', 'string');
+        global $_PP_CONF;
+
+        $length = PP_getVar($options, 'length', 'int', $_PP_CONF['gc_length']);
+        $prefix = PP_getVar($options, 'prefix', 'string', $_PP_CONF['gc_prefix']);
+        $suffix = PP_getVar($options, 'suffix', 'string', $_PP_CONF['gc_suffix']);
+        $useLetters = PP_getVar($options, 'letters', 'int', $_PP_CONF['gc_letters']);
+        $useNumbers = PP_getVar($options, 'numbers', 'int', $_PP_CONF['gc_numbers']);
+        $useSymbols = PP_getVar($options, 'symbols', 'int', $_PP_CONF['gc_symbols']);
+        $mask = PP_getVar($options, 'mask', 'string', $_PP_CONF['gc_mask']);
 
         $uppercase = array('Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
                             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
@@ -70,25 +72,30 @@ class Coupon extends Product
         $characters = array();
         $coupon = '';
 
-        if ($useLetters) {
-            if ($useMixedCase) {
-                $characters = array_merge($characters, $lowercase, $uppercase);
-            } else {
-                $characters = array_merge($characters, $uppercase);
-            }
+        switch ($useLetters) {
+        case 1:     // uppercase only
+            $characters = $uppercase;
+            break;
+        case 2:     // lowercase only
+            $characters = $lowercase;
+            break;
+        case 3:     // both upper and lower
+            $characters = array_merge($characters, $uppercase, $lowercase);
+            break;
+        case 0:     // no letters
+        default:
+            break;
         }
-
         if ($useNumbers) {
             $characters = array_merge($characters, $numbers);
         }
-
         if ($useSymbols) {
             $characters = array_merge($characters, $symbols);
         }
         $charcount = count($characters);
 
         // If a mask is specified, use it and substitute 'X' for coupon chars.
-        // Otherwise use the specified lenght.
+        // Otherwise use the specified length.
         if ($mask) {
             $len = strlen($mask);
             for ($i = 0; $i < $len; $i++) {
@@ -135,38 +142,30 @@ class Coupon extends Product
     {
         global $_TABLES, $_USER;
 
-        $amount = (float)$amount;
         if ($amount == 0) return false;
         if ($uid == 0) {
             $uid = $_USER['uid'];
         }
-        $uid = (int)$uid;
         if ($exp == '') $exp = '9999-12-31';
-        $options = array(
-        //    'length'    => 12,    // not used if mask is specified
-            'letters'   => true,
-            'numbers'   => true,
-            'symbols'   => false,   // alphanumeric only
-            'mixed_case' => false,  // only upper-case
-            'mask'      => 'XXXX-XXXX-XXXX-XXXX',
-        );
-
-        $code = self::generate($options);
-        while (DB_count($_TABLES['paypal.coupons'], 'code', $code)) {
+        $options = array();     // Use all options from global config
+        do {
             // Make sure there are no duplicates
             $code = self::generate($options);
-        }
-        $code = DB_escapeString($code);
+            $code = DB_escapeString($code);
+        } while (DB_count($_TABLES['paypal.coupons'], 'code', $code));
+
+        $uid = (int)$uid;
         $exp = DB_escapeString($exp);
+        $amount = (float)$amount;
         $sql = "INSERT INTO {$_TABLES['paypal.coupons']} SET
-                code = '" . DB_escapeString($code) . "',
+                code = '$code',
                 buyer = $uid,
                 amount = $amount,
                 balance = $amount,
                 purchased = UTC_TIMESTAMP(),
-                expires = '" . DB_escapeString($exp) . "'";
+                expires = '$exp'";
         DB_query($sql);
-        return $code;
+        return DB_error() ? false : $code;
     }
 
 
@@ -181,7 +180,7 @@ class Coupon extends Product
     */
     public static function Apply($code, $uid = 0)
     {
-        global $_TABLES, $_USER, $_PP_CONF;
+        global $_TABLES, $_USER;
 
         if ($uid == 0) {
             $uid = $_USER['uid'];
