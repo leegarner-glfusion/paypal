@@ -293,11 +293,12 @@ abstract class Gateway
 
         $this->enabled = isset($A['enabled']) ? 1 : 0;
         $this->orderby = (int)$A['orderby'];
-
+        $services = PP_getVar($A, 'service', 'array');
         $config = @serialize($this->config);
         if (!$config) return false;
+
         $config = DB_escapeString($config);
-        $services = DB_escapeString(@serialize($A['service']));
+        $services = DB_escapeString(@serialize($services));
         $id = DB_escapeString($this->gw_name);
 
         $sql = "UPDATE {$_TABLES['paypal.gateways']} SET
