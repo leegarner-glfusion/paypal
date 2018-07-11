@@ -298,6 +298,9 @@ $_SQL['paypal.categories'] = "CREATE TABLE {$_TABLES['paypal.categories']} (
   `enabled` tinyint(1) unsigned default '1',
   `grp_access` mediumint(8) unsigned NOT NULL default '1',
   `image` varchar(255) default '',
+  `discount_pct` decimal(5,3) DEFAULT NULL,
+  `discount_beg` date NOT NULL DEFAULT '1900-01-01',
+  `discount_end` date NOT NULL DEFAULT '1900-01-01',
   `lft` smallint(5) unsigned NOT NULL DEFAULT '0',
   `rgt` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`cat_id`),
@@ -836,6 +839,9 @@ $PP_UPGRADE['0.5.11'] = array(
 $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.products']} DROP comments",
     "ALTER TABLE {$_TABLES['paypal.categories']}
+        ADD `discount_pct` decimal(5,3) DEFAULT NULL,
+        ADD `discount_beg` date NOT NULL DEFAULT '1900-01-01',
+        ADD `discount_end` date NOT NULL DEFAULT '1900-01-01',
         ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0',
         ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0',
         ADD KEY `cat_lft` (`lft`),
