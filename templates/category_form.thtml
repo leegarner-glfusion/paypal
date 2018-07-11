@@ -1,27 +1,29 @@
 {# begin {templatelocation} #}
-<form action="{action_url}/index.php" method="post" 
-    enctype="multipart/form-data">
-
+<form action="{action_url}/index.php" method="post" enctype="multipart/form-data">
   <input type="hidden" name="old_parent" value="{old_parent}" />
   <input type="hidden" name="old_grp" value="{old_grp}" />
   <input type="hidden" name="cat_id" value="{cat_id}" />
 
   <table>
     <tr>
-      <td><font color="red">*</font>&nbsp;{$LANG_PP['cat_name']}:</td>
+      <td><font color="red">*</font>&nbsp;{$LANG_PP['cat_name']}:
+        <span id="cat_name" class="tooltip_cfg tooltipstered"></span>
+      </td>
       <td>
-        <input type="text" name="cat_name" value="{cat_name}" 
+        <input type="text" name="cat_name" value="{cat_name}"
             size="40" maxlength="255" />
       </td>
     </tr>
 
     <tr>
-      <td>{$LANG_PP['parent_cat']}:</td>
+      <td>{$LANG_PP['parent_cat']}:
+        <span id="parent_id" class="tooltip_cfg tooltipstered"></span>
+      </td>
       <td>
 {!if parent_sel}
-       <select name="parent_id" id="parent_id">
-         {parent_sel}
-       </select>
+      <select name="parent_id" id="parent_id">
+        {parent_sel}
+      </select>
 {!else}
       <input type="hidden" name="parent_id" value="0" />{$LANG_PP['dscp_root_cat']}
 {!endif}
@@ -29,67 +31,115 @@
     </tr>
 
     <tr>
-      <td>{$LANG_PP['description']}:</td>
+      <td>{$LANG_PP['description']}:
+        <span id="descrip" class="tooltip_cfg tooltipstered"></span>
+      </td>
       <td>
-        <textarea name="description" rows="4" cols="100">{description}</textarea>
+        <textarea name="description" id="description" rows="4" cols="100">{description}</textarea>
       </td>
     </tr>
 
     <tr>
-      <td>{$LANG_PP['cat_image']}:</td>
+      <td>{$LANG_PP['discount']}:
+        <span id="discount" class="tooltip_cfg tooltipstered"></span>
+      </td>
       <td>
-        <input type="file" name="imagefile" />
-        {!if img_url}
-          <img src="{img_url}" border="0" />
-          <a href="{action_url}/index.php?deletecatimage=x&cat_id={cat_id}">
+        <i class="{iconset}-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetDiscount();" ></i>
+        <input type="text" id="discount_pct" name="discount_pct" value="{discount_pct}" size="5"
+          maxlength="10" />&nbsp;%&nbsp;&nbsp;
+          {$LANG_PP['from']}: <input type="text" id="discount_beg" name="discount_beg" size="12"
+            value="{discount_beg}" maxlength="12" />&nbsp;&nbsp;
+          {$LANG_PP['to']}: <input type="text" id="discount_end" name="discount_end" size="12"
+              value="{discount_end}" maxlength="12" />
+      </td>
+    </tr>
+
+    <tr>
+      <td>{$LANG_PP['cat_image']}:
+        <span id="image" class="tooltip_cfg tooltipstered"></span>
+      </td>
+      <td>
+        <input type="file" class="uk-button" name="imagefile" id="imagefile" value="{$LANG_PP['select_image']}" />
+{!if img_url}
+        <img src="{img_url}" border="0" />
+        <a href="{action_url}/index.php?deletecatimage=x&cat_id={cat_id}">
             {$LANG_PP['delete_image']}
-          </a>
-        {!endif}
+        </a>
+{!endif}
       </td>
     </tr>
 
     <tr>
-      <td>{$LANG_PP['enabled']}?</td>
+      </td>{$LANG_PP['enabled']}?
+        <span id="enabled" class="tooltip_cfg tooltipstered"></span>
+      </td>
       <td>
-        <input type="checkbox" name="enabled" value="1" {ena_chk} />
+        <input type="checkbox" name="enabled" id="enabled" value="1" {ena_chk} />
       </td>
     </tr>
 
     <tr>
-      <td>{$LANG_PP['visible_to']}:</td>
-      <td>{group_sel}</td>
+      <td>{$LANG_PP['visible_to']}:
+        <span id="grp_access" class="tooltip_cfg tooltipstered"></span>
+      </td>
+      <td>
+        {group_sel}
+      </td>
     </tr>
 
-    <!--<tr>
-      <td>{$LANG_PP['buttons']}:</td>
-      <td>
-        <!-- BEGIN BtnRow -->
-        <input type="checkbox" name="buttons[]" value="{btn_type}" 
-            {btn_chk} />{btn_name}&nbsp;
-        <!-- END BtnRow -->
-      </td>
-    </tr>-->
-
     <tr>
-      <td></td>
+      <td>&nbsp;</td>
       <td>
-        <input type="submit" name="savecat" value="{$LANG_PP['savecat']}" />
-        <input type="reset" name="reset" value="{$LANG_PP['clearform']}" />
-        {!if can_delete}
-        <input type="submit" name="deletecat" value="{$LANG_PP['deletecat']}"
+        <input type="submit" class="lgButton green" name="savecat" value="{$LANG_PP['savecat']}" />
+        <input class="lgButton" type="reset" name="reset" value="{$LANG_PP['clearform']}" />
+{!if can_delete}
+        <input type="submit" class="lgButton red" name="deletecat" value="{$LANG_PP['deletecat']}"
             onclick="return confirm('{$LANG_PP['q_del_item']}');" />
-        {!endif}
-        <input type="submit" name="catlist" value="{$LANG_ADMIN['cancel']}" />
+{!endif}
+        <input type="submit" class="lgButton grey" name="catlist" value="{$LANG_ADMIN['cancel']}" />
       </td>
     </tr>
 
     <tr>
-      <td>
+      <td colspan="2">
         <font color="red">*</font>&nbsp;{$LANG_PP['ind_req_fld']}<br />
         {$LANG_PP['del_cat_instr']}
       </td>
     </tr>
   </table>
-
 </form>
+<script type="text/javascript">
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
+});
+function PP_resetDiscount()
+{
+    document.getElementById('discount_beg').value = '';
+    document.getElementById('discount_end').value = '';
+    document.getElementById('discount_pct').value = '';
+}
+
+</script>
 {# end {templatelocation} #}

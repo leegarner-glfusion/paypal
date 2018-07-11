@@ -19,6 +19,8 @@ namespace Paypal;
 */
 class Category
 {
+    const DEF_DATE = '1900-01-01';
+
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
     var $properties = array();
@@ -61,6 +63,9 @@ class Category
         $this->disp_name = '';
         $this->lft = 0;
         $this->rgt = 0;
+        $this->discount_pct = 0;
+        $this->discount_beg = self::DEF_DATE;
+        $this->discount_end = self::DEF_DATE;
         if (is_array($id)) {
             $this->SetVars($id);
         } elseif ($id > 0) {
@@ -92,6 +97,9 @@ class Category
             $this->properties[$var] = (int)$value;
             break;
 
+        case 'discount_beg':
+        case 'discount_end':
+            if (empty($value)) $value = self::DEF_DATE;
         case 'cat_name':
         case 'description':
         case 'image':
@@ -103,6 +111,10 @@ class Category
         case 'enabled':
             // Boolean values
             $this->properties[$var] = $value == 1 ? 1 : 0;
+            break;
+
+        case 'discount_pct':
+            $this->properties[$var] = (float)$value;
             break;
 
         default:
@@ -147,6 +159,9 @@ class Category
         $this->disp_name = isset($row['disp_name']) ? $row['disp_name'] : $row['description'];
         $this->lft = isset($row['lft']) ? $row['lft'] : 0;
         $this->rgt = isset($row['rgt']) ? $row['rgt'] : 0;
+        $this->discount_pct = $row['discount_pct'];
+        $this->discount_beg = $row['discount_beg'];
+        $this->discount_end = $row['discount_end'];
         if ($fromDB) {
             $this->image = $row['image'];
         }
@@ -267,9 +282,12 @@ class Category
                 description='" . DB_escapeString($this->description) . "',
                 enabled='{$this->enabled}',
                 grp_access ='{$this->grp_access}',
-                image='" . DB_escapeString($this->image) . "'";
+                image='" . DB_escapeString($this->image) . "',
+                discount_pct = '$this->discount_pct',
+                discount_beg = '" . DB_escapeString($this->discount_beg) . "',
+                discount_end = '" . DB_escapeString($this->discount_end) . "'";
             $sql = $sql1 . $sql2 . $sql3;
-
+            //echo $sql;die;
             DB_query($sql);
             if (!DB_error()) {
                 if ($this->isNew) {
@@ -425,12 +443,16 @@ class Category
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'old_parent'    => $this->parent_id,
             'old_grp'       => $this->grp_access,
+            'discount_beg'  => $this->discount_beg > self::DEF_DATE ? $this->discount_beg : '',
+            'discount_end'  => $this->discount_end > self::DEF_DATE ? $this->discount_end : '',
+            'discount_pct'  => $this->discount_pct > 0 ? $this->discount_pct : '',
             /*'parent_sel'    => PAYPAL_recurseCats(
                                     __NAMESPACE__ . '\callbackCatOptionList',
                                     $this->parent_id, 0, '',
                                     $not, $items),*/
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
             'doc_url'       => PAYPAL_getDocURL('category_form'),
+            'iconset'   => $_PP_CONF['_iconset'],
         ) );
 
         if ($this->image != '') {
@@ -759,7 +781,7 @@ class Category
             } else {
                 $path[$Cat->cat_id] = $Cat;
             }
-            Cache::set($key, $path);
+            Cache::set($key, $path, 'categories');
         }
         return $path;
     }
@@ -847,6 +869,36 @@ class Category
 
         // return the right value of this node + 1
         return $right + 1;
+    }
+
+
+    /**
+    *   Get the current discount for a category.
+    *   Traverses the category tree up to the root category
+    *   looking for an active discount. The first one found
+    *   is returned as a floating-point number, e.g. "5" for "5%"
+    *   Saves the percentage in a static variable for repeat calls.
+    *
+    *   @return float       Discount percent.
+    */
+    public function getDiscount()
+    {
+        static $pct = array();
+
+        if (!array_key_exists($this->cat_id, $pct)) {
+            $now = PAYPAL_now()->toMySQL();
+            $pct[$this->cat_id] = 0;
+            $all = self::getPath($this->cat_id, false);
+            $all = array_reverse($all);
+            foreach ($all as $cat) {
+                if ($cat->discount_pct > 0 &&
+                    $cat->discount_beg < $now && $cat->discount_end > $now) {
+                    $pct[$this->cat_id] = $cat->discount_pct;
+                    break;
+                }
+            }
+        }
+        return $pct[$this->cat_id];
     }
 
 }   // class Category

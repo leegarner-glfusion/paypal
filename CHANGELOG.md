@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Add percentage-based discounts for categories
 - Select payment method prior to final checkout
   - allows encrypted buttons to be required in the Paypal profile.
 - New config items:

@@ -1023,8 +1023,9 @@ class Product
             $s_desc = COM_highlightQuery($s_desc, $_REQUEST['query']);
         }
 
-        $onsale = $this->isOnSale();
-        $this->_act_price = $onsale ? $this->sale_price : $this->price;
+        //$onsale = $this->isOnSale();
+        //$this->_act_price = $onsale ? $this->sale_price : $this->price;
+        $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
         foreach ($this->qty_discounts as $qty=>$pct) {
@@ -1154,7 +1155,7 @@ class Product
             'init_price'        => $this->currency->FormatValue($this->_act_price),
             'price'             => $this->currency->FormatValue($this->getPrice()),
             'orig_price'        => $this->currency->Format($this->_orig_price),
-            'on_sale'           => $onsale ? 'true' : '',
+            'on_sale'           => $this->isOnSale(),
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => $this->currency->Pre(),
             'price_postfix'     => $this->currency->Post(),
@@ -1498,13 +1499,23 @@ class Product
         if ($this->override_price && isset($override['price'])) {
             // If an override price is specified, just return it.
             return round((float)$override['price'], $this->currency->Decimals());
-        } elseif ($this->isOnSale()) {
+        } else {
+            $price = $this->getSalePrice();
+        }
+
+/*        } elseif ($this->isOnSale()) {
             // Use the sale price if this item is on sale
             $price = $this->sale_price;
         } else {
             // Use the regular price
             $price = $this->price;
+            // Get any category discount
+            $cat_disc = $this->Cat->getDiscount();
+            if ($cat_disc > 0) {
+                $price = $this->price * (100 - $cat_disc) / 100;
+            }
         }
+*/
 
         // future: return sale price if on sale, otherwise base price
         foreach ($options as $key) {
@@ -1814,10 +1825,11 @@ class Product
     */
     public function isOnSale()
     {
-        global $_PP_CONF;
+        $sp = $this->getSalePrice();
+        return $this->price > 0 && $sp != $this->price ? true : false;
 
         // Not on sale if the price isn't different
-        if ($this->sale_price == $this->price)
+        /*if ($this->sale_price == $this->price)
             return false;
 
         $today = PAYPAL_now()->format('Y-m-d', true);
@@ -1825,7 +1837,34 @@ class Product
             return false;
         } else {
             return true;
+        }*/
+    }
+
+
+    /**
+    *   Get the sale price for this item, if any.
+    *   First checks for an item-specific sale price and sale period,
+    *   then traverses up the category tree to find the first parent
+    *   category with an effective sale price.
+    *   Prices are cached for repeated calls.
+    *
+    *   @see    self::isOnSale()
+    *   @return float   Sale price, normal price if not on sale
+    */
+    public function getSalePrice()
+    {
+        static $prices = array();
+        if (!array_key_exists($this->item_id, $prices)) {
+            $today = PAYPAL_now()->format('Y-m-d', true);
+            if ($this->sale_end < $today && $this->sale_beg > $today) {
+                $prices[$this->item_id] = $this->sale_price;
+            } elseif ($this->Cat->getDiscount() > 0) {
+                $prices[$this->item_id] = $this->price * (100 - $this->Cat->getDiscount()) / 100;
+            } else {
+                $prices[$this->item_id] = $this->price;
+            }
         }
+        return $prices[$this->item_id];
     }
 
 
