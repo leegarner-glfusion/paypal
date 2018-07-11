@@ -308,6 +308,7 @@ abstract class Gateway
                 WHERE id='$id'";
         //echo $sql;die;
         DB_query($sql);
+        self::ClearButtonCache();   // delete all buttons for this gateway
         if (DB_error())
             return false;
         else {
