@@ -47,10 +47,12 @@ $expected = array(
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
+    'deldiscount', 'savediscount',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
     'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
+    'discounts', 'editdiscount',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -304,6 +306,25 @@ case 'purgecache':
     COM_refresh(PAYPAL_ADMIN_URL);
     break;
 
+case 'savediscount':
+    $D = new Paypal\Discount($_POST['id']);
+    if (!$D->Save($_POST)) {
+        COM_setMsg($LANG_PP['msg_nochange']);
+        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?editdiscount&id=' . $D->id);
+    } else {
+        COM_setMsg($LANG_PP['msg_updated']);
+        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?discounts');
+    }
+    break;
+
+case 'deldiscount':
+    $id = PP_getVar($_GET, 'id', 'integer', 0);
+    if ($id > 0) {
+        Paypal\Discount::Delete($id);
+    }
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?discounts');
+    break;
+
 default:
     $view = $action;
     break;
@@ -387,6 +408,10 @@ case 'catlist':
     $content .= PAYPAL_adminlist_Category();
     break;
 
+case 'discounts':
+    $content .= PAYPAL_adminlist_Discounts();
+    break;
+
 case 'attributes':
     if (isset($_POST['delbutton_x']) && is_array($_POST['delitem'])) {
         // Delete some checked attributes
@@ -402,6 +427,12 @@ case 'editattr':
     $Attr = new Paypal\Attribute($attr_id);
     $Attr->item_id = PP_getVar($_GET, 'item_id');
     $content .= $Attr->Edit();
+    break;
+
+case 'editdiscount':
+    $id = PP_getVar($_GET, 'id', 'integer', 0);
+    $D = new Paypal\Discount($id);
+    $content .= $D->Edit();
     break;
 
 case 'other':
@@ -762,8 +793,15 @@ function PAYPAL_adminMenu($view='')
                     'text' => $LANG_PP['attr_list']);
     }
 
-    //if ($view == 'itemhist') {
-
+    if ($view == 'discounts') {
+        $menu_arr[] = array(
+                    'url'  => PAYPAL_ADMIN_URL . '/index.php?editdiscount=x',
+                    'text' => '<span class="ppNewAdminItem">' .
+                            $LANG_PP['new_discount'] . '</span>');
+    } else {
+        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?discounts=x',
+                    'text' => $LANG_PP['discounts']);
+    }
 
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?orderhist=x',
                     'text' => $LANG_PP['purchase_history']);
@@ -1430,6 +1468,70 @@ function PAYPAL_adminlist_Workflow()
 
 
 /**
+*   Discount Admin List View.
+*
+*   @return string      HTML for the product list.
+*/
+function PAYPAL_adminlist_Discounts()
+{
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
+
+    $sql = "SELECT * from {$_TABLES['paypal.discounts']}";
+
+    $header_arr = array(
+        array('text' => $LANG_ADMIN['edit'],
+                'field' => 'edit', 'align' => 'center',
+        ),
+        array('text' => $LANG_PP['item_type'],
+                'field' => 'item_type', 'sort' => false),
+        array('text' => $LANG_PP['name'],
+                'field' => 'item_id', 'sort' => false),
+        array('text' => $LANG_PP['amount'] . '/' . $LANG_PP['percent'],
+                'field' => 'amount', 'sort' => false,
+                'align' => 'center'),
+        array('text' => $LANG_PP['start'],
+                'field' => 'start', 'sort' => true,
+        ),
+        array('text' => $LANG_PP['end'],
+                'field' => 'end', 'sort' => true,
+        ),
+        array('text' => $LANG_ADMIN['delete'],
+                'field' => 'delete', 'align' => 'center',
+        ),
+    );
+
+    $defsort_arr = array('field' => 'start',
+            'direction' => 'ASC');
+
+    $display = COM_startBlock('', '',
+                    COM_getBlockTemplate('_admin_block', 'header'));
+
+    $query_arr = array('table' => 'paypal.discounts',
+        'sql' => $sql,
+        'query_fields' => array(),
+        'default_filter' => '',
+    );
+
+    $text_arr = array(
+        'has_extras' => false,
+        'form_url' => PAYPAL_ADMIN_URL . '/index.php',
+    );
+
+    if (!isset($_REQUEST['query_limit']))
+        $_GET['query_limit'] = 20;
+
+    $display .= "<h2>{$LANG_PP['discounts']}</h2>\n";
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_discountlist',
+            __NAMESPACE__ . '\getAdminField_Discount',
+            $header_arr, $text_arr, $query_arr, $defsort_arr,
+            '', '', '', '');
+
+    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+    return $display;
+}
+
+
+/**
 *   Order Status Admin List View.
 *
 *   @return string      HTML for the product list.
@@ -1486,6 +1588,74 @@ function PAYPAL_adminlist_OrderStatus()
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
 }
+
+
+/**
+*   Get an individual field for the Discounts admin list.
+*
+*   @param  string  $fieldname  Name of field (from the array, not the db)
+*   @param  mixed   $fieldvalue Value of the field
+*   @param  array   $A          Array of all fields from the database
+*   @param  array   $icon_arr   System icon array (not used)
+*   @param  object  $EntryList  This entry list object
+*   @return string              HTML for field display in the table
+*/
+function getAdminField_Discount($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
+    static $Cur = NULL;
+    if ($Cur === NULL) $Cur = Paypal\Currency::getInstance();
+    $retval = '';
+
+    switch($fieldname) {
+    case 'edit':
+        $retval = COM_createLink('<i class="' . PP_getIcon('edit') . '"></i>',
+                PAYPAL_ADMIN_URL . '/index.php?editdiscount&id=' . $A['id']
+        );
+        break;
+
+    case 'delete':
+        $retval = COM_createLink('<i class="' . PP_getIcon('trash-o', 'danger') . '"></i>',
+                PAYPAL_ADMIN_URL . '/index.php?deldiscount&id=' . $A['id'],
+                array(
+                    'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
+                )
+        );
+        break;
+    case 'item_id':
+        switch ($A['item_type']) {
+        case 'product':
+            $P = Paypal\Product::getInstance($fieldvalue);
+            $retval = $P->short_description;
+            break;
+        case 'category':
+            $C = Paypal\Category::getInstance($fieldvalue);
+            $retval = $C->cat_name;
+            break;
+        default;
+            $retval = '';
+            break;
+        }
+        break;
+
+    case 'amount':
+        switch ($A['discount_type']) {
+        case 'amount':
+            $retval = $Cur->format($fieldvalue);
+            break;
+        case 'percent':
+            $retval = $fieldvalue . ' %';
+            break;
+        }
+        break;
+
+    default:
+        $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
+        break;
+    }
+    return $retval;
+}
+
 
 
 /**

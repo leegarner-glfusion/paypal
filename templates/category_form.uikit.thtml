@@ -40,6 +40,7 @@
     </div>
   </div>
 
+{!if 0}
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['discount']}:
         <span id="discount" class="tooltip_cfg tooltipstered"></span>
@@ -56,6 +57,7 @@
               value="{discount_end}" maxlength="12" />
       </div>
     </div>
+{!endif}
 
   <div class="uk-form-row">
     <label class="uk-form-label">{$LANG_PP['cat_image']}:
@@ -90,8 +92,32 @@
     </div>
   </div>
 
-  <div class="uk-form-row" uk-margin-large">
-    <label class="uk-form-label" for=""></label>
+{!if have_disc_table}
+  <div class="uk-form-row uk-margin-large">
+    <label class="uk-form-label" for="grp_access">{$LANG_PP['discounts']}:
+      <span id="discount_list" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <table border="0" width="80%">
+      <tr>
+        <th>{$LANG_PP['start']}</th>
+        <th>{$LANG_PP['end']}</th>
+        <th style="text-align:right;">{$LANG_PP['amount']}</th>
+        <th>{$LANG_PP['type']}</th>
+      </tr>
+      <!-- BEGIN DiscountList -->
+        <tr>
+          <td>{disc_start}</td>
+          <td>{disc_end}</td>
+          <td style="text-align:right;">{disc_amt}</td>
+          <td>{disc_type}</td>
+        </tr>
+      <!-- END DiscountList -->
+      </table>
+    </div>
+{!endif}
+  <div class="uk-form-row" uk-margin-large" style="margin-top:10px;">
+    <label class="uk-form-label">&nbsp;</label>
     <div class="uk-form-controls">
       <button class="uk-button uk-button-success" type="submit" name="savecat" value="{$LANG_PP['savecat']}" />{$LANG_PP['savecat']}</button>
       <button class="uk-button uk-button-primary" type="reset" name="reset" value="{$LANG_PP['clearform']}" />{$LANG_PP['clearform']}</button>
@@ -119,7 +145,6 @@ $(document).ready(function() {
         iconDesktop: true,
         iconTouch: true,
         functionBefore: function(origin, continueTooltip) {
-            continueTooltip();
             var attrHref = ConfigDocUrl;
             var ajobj = $(this);
             $.get(attrHref, function(data) {
@@ -131,16 +156,17 @@ $(document).ready(function() {
                     origin.tooltipster('content', 'No Help Text Found');
                     console.log('Unable to find help text for desc_%s',confVar);
                 }
+                continueTooltip();
             });
         }
     });
 });
-function PP_resetDiscount()
+/*function PP_resetDiscount()
 {
     document.getElementById('discount_beg').value = '';
     document.getElementById('discount_end').value = '';
     document.getElementById('discount_pct').value = '';
-}
+}*/
 
 </script>
 {# end {templatelocation} #}

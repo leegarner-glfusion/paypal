@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" class="uk-height-1-1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon-precomposed" href="../../layout/cms/images/apple-touch-icon.png">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.almost-flat.min.css">
+  <meta name="robots" content="noindex,nofollow" />
+  <title>glFusion Paypal Product Discounts</title>
+  <style>
+    html{background:#f9f9f9}.tm-dropdown,.tm-navbar{background:#325482!important}.uk-form label{font-weight:700}.tm-navbar{border-radius:0!important;padding:1px 0 6px!important;border:none!important}.tm-navbar-brand{color:#eee!important}.tm-navbar-brand a{text-shadow:none;color:#fff}.tm-navbar-brand a:hover{color:#ababab;text-decoration:none}.tm-navbar-brand-oc a{text-shadow:none;color:#fff}.tm-navbar-brand-oc a:hover{color:#ababab;text-decoration:none}.tm-navbar-nav>li>a{border:none;border-radius:3px!important;font-size:15px!important;height:40px!important;margin:0!important}.tm-dropdown{color:#000;border-radius:0!important;border:0!important}.tm-nav-navbar>li>a{color:#fff!important}.tm-navbar::after,.tm-navbar::before{margin-top:7px!important}.tm-navbar-nav>li.uk-open>a,.tm-navbar-nav>li:hover>a,.tm-navbar-nav>li>a:focus{color:#fff;outline:0;background:#35B3EE!important}.tm-navbar-nav>li>a{color:#fff!important;text-shadow:none!important}.tm-navbar-toggle{color:#ccc!important;text-shadow:none!important}.tm-navbar-toggle:focus,.tm-navbar-toggle:hover{color:#fff!important}.tm-footer{background:#252525;border-top:1px solid #232425;margin-bottom:0;bottom:0;padding:10px;color:#fff}.tm-wrapper{min-height:100%;margin:0 auto -51px!important}.tm-push,footer{height:51px}.uk-navbar-content > a {color:#fff !important;}
+  </style>
+</head>
+
+<body class="uk-height-1-1">
+  <div class="tm-wrapper">
+    <nav class="uk-navbar uk-navbar-attached tm-navbar uk-margin-bottom">
+      <div class="uk-navbar-brand tm-navbar-brand">
+        Paypal Product Discounts
+      </div>
+      <div class="uk-navbar-flip uk-hidden-small">
+        <div class="uk-navbar-content tm-navbar-content" style="text-shadow:none;">
+          <a href="https://www.glfusion.org/wiki/">glFusion Wiki</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="uk-container uk-container-center uk-margin-bottom">
+      <h1>Paypal Product Discounts</h1>
+
+      <h2>Discount settings</h2>
+
+      <dl id="desc_item_type">
+        <dt>Apply Discount To...</dt>
+        <dd>Select whether to apply this discount to a single product or to an entire category.</dd>
+      </dl>
+
+
+      <dl id="desc_item_id">
+        <dt>Product Name/SKU</dt>
+        <dd>Select the product to which this discount will apply. The product must exist before you can apply discounts to it.</dd>
+      </dl>
+
+      <dl id="desc_cat_id">
+        <dt>Category</dt>
+        <dd>Select the category where the discount should be applied. Category discounts are applied to all sub-categories unless overridden by a lower-level category. Any active product discount will override all category discounts.</dd>
+      </dl>
+
+      <dl id="desc_discount_type">
+        <dt>Discount Type</dt>
+        <dd>Select whether to deduct a fixed amount or a percentage from the base product price. For Category discounts you should normally select &quot;Percent&quot;</dd>
+      </dl>
+
+      <dl id="desc_amount">
+        <dt>Discount Amount or Percent</dt>
+        <dd>Enter the fixed amount or percent that will be deducted from the base item price. Percentages should be entered as normal values, e.g. "2.5" for a discount of 2.5% (.025).</dd>
+      </dl>
+
+      <dl id="desc_start">
+        <dt>Starting Date</dt>
+        <dd>Enter the starting date when this discount takes effect. Discounts are read in ascending order by starting date, so if there are overlapping periods the first matching one will be applied.</dd>
+      </dl>
+
+      <dl id="desc_end">
+        <dt>Ending Date</dt>
+        <dd>Enter the date when this discount expires. If configured, discounts will be removed from the database after this date to improve performance.</dd>
+      </dl>
+
+    </div>
+  </div>
+</body>
+</html>

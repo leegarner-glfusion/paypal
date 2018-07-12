@@ -2,8 +2,8 @@
 
 ## Ver 0.6.0
 Released TBD
-- Add percentage-based discounts for categories
-- Select payment method prior to final checkout
+- Move sale pricing to separate table to serve both categories and products.
+- Select payment method prior to final checkout.
   - allows encrypted buttons to be required in the Paypal profile.
 - New config items:
   - Tax Rate

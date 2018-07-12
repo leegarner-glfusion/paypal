@@ -63,9 +63,9 @@ class Category
         $this->disp_name = '';
         $this->lft = 0;
         $this->rgt = 0;
-        $this->discount_pct = 0;
-        $this->discount_beg = self::DEF_DATE;
-        $this->discount_end = self::DEF_DATE;
+        //$this->discount_pct = 0;
+        //$this->discount_beg = self::DEF_DATE;
+        //$this->discount_end = self::DEF_DATE;
         if (is_array($id)) {
             $this->SetVars($id);
         } elseif ($id > 0) {
@@ -74,7 +74,6 @@ class Category
                 $this->cat_id = 0;
             }
         }
-
         $this->isAdmin = plugin_ismoderator_paypal() ? 1 : 0;
     }
 
@@ -97,9 +96,9 @@ class Category
             $this->properties[$var] = (int)$value;
             break;
 
-        case 'discount_beg':
+        /*case 'discount_beg':
         case 'discount_end':
-            if (empty($value)) $value = self::DEF_DATE;
+            if (empty($value)) $value = self::DEF_DATE;*/
         case 'cat_name':
         case 'description':
         case 'image':
@@ -113,9 +112,9 @@ class Category
             $this->properties[$var] = $value == 1 ? 1 : 0;
             break;
 
-        case 'discount_pct':
+        /*case 'discount_pct':
             $this->properties[$var] = (float)$value;
-            break;
+            break;*/
 
         default:
             // Undefined values (do nothing)
@@ -159,9 +158,9 @@ class Category
         $this->disp_name = isset($row['disp_name']) ? $row['disp_name'] : $row['description'];
         $this->lft = isset($row['lft']) ? $row['lft'] : 0;
         $this->rgt = isset($row['rgt']) ? $row['rgt'] : 0;
-        $this->discount_pct = $row['discount_pct'];
-        $this->discount_beg = $row['discount_beg'];
-        $this->discount_end = $row['discount_end'];
+        //$this->discount_pct = $row['discount_pct'];
+        //$this->discount_beg = $row['discount_beg'];
+        //$this->discount_end = $row['discount_end'];
         if ($fromDB) {
             $this->image = $row['image'];
         }
@@ -282,10 +281,10 @@ class Category
                 description='" . DB_escapeString($this->description) . "',
                 enabled='{$this->enabled}',
                 grp_access ='{$this->grp_access}',
-                image='" . DB_escapeString($this->image) . "',
-                discount_pct = '$this->discount_pct',
+                image='" . DB_escapeString($this->image) . "'";
+/*                discount_pct = '$this->discount_pct',
                 discount_beg = '" . DB_escapeString($this->discount_beg) . "',
-                discount_end = '" . DB_escapeString($this->discount_end) . "'";
+                discount_end = '" . DB_escapeString($this->discount_end) . "'";*/
             $sql = $sql1 . $sql2 . $sql3;
             //echo $sql;die;
             DB_query($sql);
@@ -443,9 +442,9 @@ class Category
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'old_parent'    => $this->parent_id,
             'old_grp'       => $this->grp_access,
-            'discount_beg'  => $this->discount_beg > self::DEF_DATE ? $this->discount_beg : '',
-            'discount_end'  => $this->discount_end > self::DEF_DATE ? $this->discount_end : '',
-            'discount_pct'  => $this->discount_pct > 0 ? $this->discount_pct : '',
+//            'discount_beg'  => $this->discount_beg > self::DEF_DATE ? $this->discount_beg : '',
+//            'discount_end'  => $this->discount_end > self::DEF_DATE ? $this->discount_end : '',
+//            'discount_pct'  => $this->discount_pct > 0 ? $this->discount_pct : '',
             /*'parent_sel'    => PAYPAL_recurseCats(
                                     __NAMESPACE__ . '\callbackCatOptionList',
                                     $this->parent_id, 0, '',
@@ -464,6 +463,25 @@ class Category
             $T->set_var('can_delete', 'true');
         }
 
+        $Disc = Discount::getCategory($this->cat_id);
+        if (!empty($Disc)) {
+            $T->set_var('have_disc_table', true);
+            $T->set_block('form', 'DiscountList', 'DL');
+            foreach ($Disc as $D) {
+                if ($D->discount_type == 'amount') {
+                    $amount = Currency::getInstance()->format($D->amount);
+                } else {
+                    $amount = $D->amount;
+                }
+                $T->set_var(array(
+                    'disc_start' => $D->start,
+                    'disc_end'  => $D->end,
+                    'disc_type' => $D->discount_type,
+                    'disc_amt'  => $amount,
+                ) );
+                $T->parse('DL', 'DiscountList', true);
+            }
+        }
         /*
         // Might want this later to set default buttons per category
         $T->set_block('product', 'BtnRow', 'BRow');
@@ -891,14 +909,13 @@ class Category
             $all = self::getPath($this->cat_id, false);
             $all = array_reverse($all);
             foreach ($all as $cat) {
-                if ($cat->discount_pct > 0 &&
-                    $cat->discount_beg < $now && $cat->discount_end > $now) {
-                    $pct[$this->cat_id] = $cat->discount_pct;
-                    break;
+                $sales = Discount::getCategory($cat->cat_id);
+                foreach ($sales as $obj) {
+                    if ($obj->start < $now && $obj->end > $now) return $obj;
                 }
             }
         }
-        return $pct[$this->cat_id];
+        return NULL;        // no discount found
     }
 
 }   // class Category

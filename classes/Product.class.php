@@ -18,6 +18,9 @@ namespace Paypal;
 */
 class Product
 {
+    const MIN_DATE = '1900-01-01';
+    const MAX_DATE = '9999-12-31';
+
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
     protected $properties;
@@ -50,6 +53,8 @@ class Product
     private $_uid = 0;  // user id, for pricing
 
     private $_view = 'detail';  // type of button to create (list or detail)
+
+    //private $_salePrices = array();
 
     /**
      *  Constructor.
@@ -213,7 +218,7 @@ class Product
         case 'avail_end':
             // available to end of time by default
             if (empty($value) || $value == '0000-00-00')
-                $value = '9999-12-31';
+                $value = self::MAX_DATE;
             $this->properties[$var] = trim($value);
             break;
 
@@ -221,7 +226,7 @@ class Product
         case 'sale_end':
         case 'avail_beg':
             // sale dates and beginning availability default to 0000-00-00
-            if (empty($value)) $value = '1900-01-01';
+            if (empty($value)) $value = self::MIN_DATE;
             $this->properties[$var] = trim($value);
             break;
 
@@ -791,10 +796,10 @@ class Product
             "oversell_sel{$this->oversell}" => 'selected="selected"',
             'custom' => $this->custom,
             'sale_price'    => sprintf('%.2f', $this->sale_price),
-            'sale_beg'      => $this->_InputDtFormat($this->sale_beg),
-            'sale_end'      => $this->_InputDtFormat($this->sale_end),
-            'avail_beg'     => $this->avail_beg,
-            'avail_end'     => $this->avail_end,
+            'sale_beg'      => self::_InputDtFormat($this->sale_beg),
+            'sale_end'      => self::_InputDtFormat($this->sale_end),
+            'avail_beg'     => self::_InputDtFormat($this->avail_beg),
+            'avail_end'     => self::_InputDtFormat($this->avail_end),
             'iconset'       => $_PP_CONF['_iconset'],
             //'limit_availability_chk' => $this->limit_availability ? 'checked="checked"' : '',
         ) );
@@ -1232,6 +1237,7 @@ class Product
             'price'             => $T->get_var('price'),
             'id'                => $T->get_var('id'),
             'cur_decimals'      => $T->get_var('cur_decimals'),
+            'session_id'        => session_id(),
         ) );
         $JT->parse('output', 'js');
         $T->set_var('javascript', $JT->finish ($JT->get_var('output')));
@@ -1827,17 +1833,6 @@ class Product
     {
         $sp = $this->getSalePrice();
         return $this->price > 0 && $sp != $this->price ? true : false;
-
-        // Not on sale if the price isn't different
-        /*if ($this->sale_price == $this->price)
-            return false;
-
-        $today = PAYPAL_now()->format('Y-m-d', true);
-        if ($this->sale_end < $today || $this->sale_beg > $today) {
-            return false;
-        } else {
-            return true;
-        }*/
     }
 
 
@@ -1853,18 +1848,7 @@ class Product
     */
     public function getSalePrice()
     {
-        static $prices = array();
-        if (!array_key_exists($this->item_id, $prices)) {
-            $today = PAYPAL_now()->format('Y-m-d', true);
-            if ($this->sale_end < $today && $this->sale_beg > $today) {
-                $prices[$this->item_id] = $this->sale_price;
-            } elseif ($this->Cat->getDiscount() > 0) {
-                $prices[$this->item_id] = $this->price * (100 - $this->Cat->getDiscount()) / 100;
-            } else {
-                $prices[$this->item_id] = $this->price;
-            }
-        }
-        return $prices[$this->item_id];
+        return Discount::getEffective($this)->calcPrice($this->price);
     }
 
 
@@ -1910,9 +1894,9 @@ class Product
     *   @param  string  $str    Date string, "0000-00-00" indicates empty
     *   @return string      Supplied date string, or "" if zeroes
     */
-    private function _InputDtFormat($str)
+    private static function _InputDtFormat($str)
     {
-        if ($str == '0000-00-00')
+        if ($str == '0000-00-00' || $str == self::MAX_DATE || $str == self::MIN_DATE)
             return '';
         else
             return $str;

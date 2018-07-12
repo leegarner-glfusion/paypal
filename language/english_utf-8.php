@@ -346,6 +346,14 @@ $LANG_PP = array (
 'apply_gc_email' => 'You may apply the gift card to your account by clicking <a href="%s">here</a>, or by visiting <a href="%s">%s</a> and entering the coupon code manually.<br />' . LB . 'NOTE: Do not apply this code to your account if this is a gift or the recipient will not be able to apply it.',
 'subj_email_admin' => $_CONF['site_name'] . ': Order Notification',
 'subj_email_user' => $_CONF['site_name'] . ': Purchase Receipt',
+'discounts' => 'Discounts',
+'new_discount' => 'New Discount',
+'apply_disc_to' => 'Apply Discount To',
+'disc_type' => 'Discount Type',
+'percent' => 'Percent',
+'start' => 'Start',
+'end' => 'End',
+'item_type' => 'Item Type',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

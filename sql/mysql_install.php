@@ -455,7 +455,7 @@ $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   INDEX `order_id` (`order_id`)
 ) ENGINE=MyISAM";
 
-// sicne 0.5.4
+// since 0.5.4
 $_SQL['paypal.currency'] = $PP_UPGRADE['0.5.4'][0];
 
 // since 0.6.0
@@ -486,6 +486,18 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
   KEY `code` (`code`,`ts`)
 ) ENGINE=MyIsam";
 
+// since 0.6.0
+$_SQL['paypal.discounts'] = "CREATE TABLE {$_TABLES['paypal.discounts']} (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `item_id` int(11) unsigned NOT NULL,
+  `start` datetime DEFAULT NULL,
+  `end` datetime DEFAULT NULL,
+  `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `amount` decimal(6,4) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
+) ENGINE-MyIsam";
 
 // Sample data to load up the Paypal gateway configuration
 $_PP_SAMPLEDATA = array(
@@ -889,6 +901,17 @@ $PP_UPGRADE['0.6.0'] = array(
         CHANGE item_id item_id varchar(40),
         DROP PRIMARY KEY,
         ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
+    "CREATE TABLE {$_TABLES['paypal.discounts']} (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+      `item_id` int(11) unsigned NOT NULL,
+      `start` datetime DEFAULT NULL,
+      `end` datetime DEFAULT NULL,
+      `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+      `amount` decimal(6,4) DEFAULT NULL,
+      PRIMARY KEY (`id`),
+      KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
+    ) ENGINE-MyIsam",
 );
 
 ?>
