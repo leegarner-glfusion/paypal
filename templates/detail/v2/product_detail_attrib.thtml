@@ -45,7 +45,7 @@ target="_blank" rel="slimbox[product]">
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div class="paypalDetailAttrib v2 uk-width-1-4">
+<div class="paypalDetailAttrib v2 uk-width-2-5">
   <form class="uk-form" method="post" id="add_cart_{id}" action="javascript:void()">
 {!if 0}
 action="{site_url}/paypal/index.php" method="post">
