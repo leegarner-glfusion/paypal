@@ -566,7 +566,7 @@ form.frm_buy_now {
 
 #ppProductForm table {
     text-align: center;
-    width: 50%;
+    min-width: 50%;
 }
 
 div.ppGatewayRadios {
