@@ -585,6 +585,30 @@ function PAYPAL_do_upgrade()
             $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
                     SET cat_id = cat_id + 1";
         }
+        $sql = "SELECT id, sale_price, sale_beg, sale_end, price FROM {$_TABLES['paypal.products']}";
+        $res = DB_query($sql);
+        if ($res) {
+            $sql = array();
+            while ($A = DB_fetchArray($res, false)) {
+                $s_price = (float)$A['sale_price'];
+                if ($s_price != 0) {
+                    $price = (float)$A['price'];
+                    $discount = $price = $s_price;
+                    if ($A['sale_beg'] < '1970-01-01') $A['sale_beg'] = '1970-01-01';
+                    if ($A['sale_end'] < '1970-01-01') $A['sale_end'] = '1970-01-01';
+                    $st = new Date($A['sale_beg'], $_CONF['timezone']);
+                    $end = new Date($A['sale_end'], $_CONF['timezone']);
+                    $sql[] = "('product', '{$A['id']}', '{$st->toUnix()}', '{$end->toUnix()}', 'amount', '$discount')";
+                }
+            }
+            if (!empty($sql)) {
+                $sql = implode(',', $sql);
+                $_PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.sales']}
+                        (item_type, item_id, start, end, discount_type, amount)
+                        VALUES$sql";
+            }
+        }
+
         // Change orders to use UTC for dates. Logs already do.
         date_default_timezone_set($_CONF['timezone']);
         $offset = date('P');
