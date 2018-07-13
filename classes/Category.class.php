@@ -463,25 +463,30 @@ class Category
             $T->set_var('can_delete', 'true');
         }
 
-        $Disc = Discount::getCategory($this->cat_id);
+        $Disc = Sales::getCategory($this->cat_id);
         if (!empty($Disc)) {
-            $T->set_var('have_disc_table', true);
-            $T->set_block('form', 'DiscountList', 'DL');
+            $DT = PP_getTemplate('sales_table', 'stable');
+            $DT->set_var('edit_sale_url',
+                PAYPAL_ADMIN_URL . '/index.php?sales');
+            $DT->set_block('stable', 'SaleList', 'SL');
             foreach ($Disc as $D) {
                 if ($D->discount_type == 'amount') {
                     $amount = Currency::getInstance()->format($D->amount);
                 } else {
                     $amount = $D->amount;
                 }
-                $T->set_var(array(
-                    'disc_start' => $D->start,
-                    'disc_end'  => $D->end,
-                    'disc_type' => $D->discount_type,
-                    'disc_amt'  => $amount,
+                $DT->set_var(array(
+                    'sale_start' => $D->start,
+                    'sale_end'  => $D->end,
+                    'sale_type' => $D->discount_type,
+                    'sale_amt'  => $amount,
                 ) );
-                $T->parse('DL', 'DiscountList', true);
+                $DT->parse('SL', 'SaleList', true);
             }
+            $DT->parse('output', 'stable');
+            $T->set_var('sale_prices', $DT->finish($DT->get_var('output')));
         }
+
         /*
         // Might want this later to set default buttons per category
         $T->set_block('product', 'BtnRow', 'BRow');
@@ -887,35 +892,6 @@ class Category
 
         // return the right value of this node + 1
         return $right + 1;
-    }
-
-
-    /**
-    *   Get the current discount for a category.
-    *   Traverses the category tree up to the root category
-    *   looking for an active discount. The first one found
-    *   is returned as a floating-point number, e.g. "5" for "5%"
-    *   Saves the percentage in a static variable for repeat calls.
-    *
-    *   @return float       Discount percent.
-    */
-    public function getDiscount()
-    {
-        static $pct = array();
-
-        if (!array_key_exists($this->cat_id, $pct)) {
-            $now = PAYPAL_now()->toMySQL();
-            $pct[$this->cat_id] = 0;
-            $all = self::getPath($this->cat_id, false);
-            $all = array_reverse($all);
-            foreach ($all as $cat) {
-                $sales = Discount::getCategory($cat->cat_id);
-                foreach ($sales as $obj) {
-                    if ($obj->start < $now && $obj->end > $now) return $obj;
-                }
-            }
-        }
-        return NULL;        // no discount found
     }
 
 }   // class Category

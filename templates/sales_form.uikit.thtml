@@ -45,8 +45,8 @@
     </label>
     <div class="uk-form-controls">
       <select name="discount_type" id="discount_type">
-        <option value="percent" {dt_sel_percent}>{$LANG_PP['percent']}</option>
-        <option value="amount" {dt_sel_amount}>{$LANG_PP['amount']}</option>
+        <option value="percent" {start_sel_percent}>{$LANG_PP['percent']}</option>
+        <option value="amount" {start_sel_amount}>{$LANG_PP['amount']}</option>
       </select>
     </div>
   </div>
@@ -92,9 +92,15 @@
       <span id="start" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
-      <input type="text" name="start" value="{start}" size="20 maxlength="20"
+      <input type="text" id="start_dt" name="start" value="{start_date}" size="12" maxlength="12"
             data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
+            placeholder="1900-01-01"
             data-uk-tooltip />
+      <input type="text" id="start_time" name="start_time" value="{start_time}" size="12" maxlength="12"
+            data-uk-timepicker title="{$LANG_PP['timepicker']}" placeholder="00:00:00"
+            data-uk-tooltip />
+      <i class="uk-icon uk-icon-trash-o pp-icon-danger"
+        onclick='PP_resetSaleDates("start");'></i>
     </div>
   </div>
 
@@ -103,9 +109,16 @@
       <span id="end" class="tooltip_cfg tooltipstered"></span>
     </label>
     <div class="uk-form-controls">
-      <input type="text" name="end" value="{end}" size="20 maxlength="20"
+      <input type="text" id="end_dt" name="end" value="{end_date}" size="12" maxlength="12"
             data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
+            placeholder="9999-12-31"
             data-uk-tooltip />
+      <input type="text" id="end_time" name="end_time" value="{end_time}" size="12" maxlength="12"
+            data-uk-timepicker title="{$LANG_PP['timepicker']}"
+            placeholder="23:59:59"
+            data-uk-tooltip />
+      <i class="uk-icon uk-icon-trash-o pp-icon-danger"
+        onclick='PP_resetSaleDates("end");'></i>
     </div>
   </div>
 
@@ -157,6 +170,12 @@ function PP_updateItemType(type)
         document.getElementById("cat_sel").style.display = "none";
     }
 }
+function PP_resetSaleDates(type)
+{
+    document.getElementById(type + '_dt').value = '';
+    document.getElementById(type + '_time').value = '';
+}
+
 $(document).ready(function() {
   PP_updateItemType("{item_type}");
 }); 

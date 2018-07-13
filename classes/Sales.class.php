@@ -14,13 +14,14 @@
 namespace Paypal;
 
 /**
-*   Class for product and category discounts
+*   Class for product and category sales
 *   @package paypal
 */
-class Discount
+class Sales
 {
-    const DEF_DATE = '1900-01-01';
-    static $base_tag = 'discounts';
+    const MIN_DATETIME = '1970-01-01 00:00:00';
+    const MAX_DATETIME = '2037-12-31 23:59:59';
+    static $base_tag = 'sales';
 
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -43,7 +44,7 @@ class Discount
         $this->isNew = true;
 
         if (is_array($A) && !empty($A)) {
-            // DB record passed in, e.g. from _getDiscounts()
+            // DB record passed in, e.g. from _getSales()
             $this->setVars($A);
             $this->isNew = false;
         } elseif (is_numeric($A) && $A > 0) {
@@ -72,8 +73,10 @@ class Discount
     {
         global $_TABLES;
 
-        $sql = "SELECT * FROM {$_TABLES['paypal.discounts']}
+        $sql = "SELECT *
+                FROM {$_TABLES['paypal.sales']}
                 WHERE id = $id";
+        //echo $sql;die;
         $res = DB_query($sql);
         if ($res) {
             $A = DB_fetchArray($res, false);
@@ -88,114 +91,120 @@ class Discount
     *   Set the variables from a DB record into object properties
     *
     *   @param  array   $A      Array of properties
+    *   @param  boolean $fromDB True if reading from DB, False if from a form
     */
-    public function setVars($A)
+    public function setVars($A, $fromDB=true)
     {
         $this->id = $A['id'];
         $this->item_type = $A['item_type'];
         $this->item_id = $A['item_id'];
-        $this->start = $A['start'];
-        $this->end = $A['end'];
         $this->discount_type = $A['discount_type'];
         $this->amount = $A['amount'];
+        if (!$fromDB) {
+            // convert to timestamps
+            $A['start'] = (trim($A['start'] . ' ' . $A['start_time']));
+            $A['end'] = (trim($A['end'] . ' ' . $A['end_time']));
+        }
+        $this->start = $A['start'];
+        $this->end = $A['end'];
     }
 
 
     /**
-    *   Get all discount records for the specified type and item
+    *   Get all sales records for the specified type and item
     *
     *   @param  string  $type       Item type (product or category)
     *   @param  integer $item_id    Product or Category ID
-    *   @return array           Array of Discount objects
+    *   @return array           Array of Sales objects
     */
-    private function _getDiscounts($type, $item_id)
+    private static function _getSales($type, $item_id)
     {
         global $_TABLES;
-        static $discounts = array();
+        static $sales = array();
 
         if ($type != 'product') $type = 'category';
         $item_id = (int)$item_id;
 
-        if (!array_key_exists($type, $discounts)) $discounts[$type] = array();
-        if (!array_key_exists($item_id, $discounts[$type])) {
+        if (!array_key_exists($type, $sales)) $sales[$type] = array();
+        if (!array_key_exists($item_id, $sales[$type])) {
             $cache_key = self::_makeCacheKey($type . '_' . $item_id);
-            $discounts[$type][$item_id] = Cache::get($cache_key);
-            if (!$discounts[$type][$item_id]) {
+            $sales[$type][$item_id] = Cache::get($cache_key);
+            if (!$sales[$type][$item_id]) {
                 // If not found in cache
-                $discounts[$type][$item_id] = array();
-                $sql = "SELECT * FROM {$_TABLES['paypal.discounts']}
+                $sales[$type][$item_id] = array();
+                $sql = "SELECT * FROM {$_TABLES['paypal.sales']}
                         WHERE item_type = '$type' AND item_id = {$item_id}
                         ORDER BY start ASC";
                 //echo $sql;die;
                 $res = DB_query($sql);
                 while ($A = DB_fetchArray($res, false)) {
-                    $discounts[$type][$item_id][] = new self($A);
+                    $sales[$type][$item_id][] = new self($A);
                 }
-                Cache::set($cache_key, $discounts[$type][$item_id], self::$base_tag);
+                Cache::set($cache_key, $sales[$type][$item_id], self::$base_tag);
             }
         }
-        return $discounts[$type][$item_id];
+        return $sales[$type][$item_id];
     }
 
 
     /**
     *   Read all the sale prices for a category
     *
-    *   @uses   self::_getDiscounts()
+    *   @uses   self::_getSales()
     *   @param  integer $cat_id     Category ID
-    *   @return array       Array of Discount objects
+    *   @return array       Array of Sales objects
     */
     public static function getCategory($cat_id)
     {
-        return self::_getDiscounts('category', $cat_id);
+        return self::_getSales('category', $cat_id);
     }
 
 
     /**
     *   Read all the sale prices for a product
     *
-    *   @uses   self::_getDiscounts()
+    *   @uses   self::_getSales()
     *   @param  integer $item_id    Product ID
-    *   @return array       Array of Discount objects
+    *   @return array       Array of Sales objects
     */
     public static function getProduct($item_id)
     {
-        return self::_getDiscounts('product', $item_id);
+        return self::_getSales('product', $item_id);
     }
 
 
     /**
-    *   Get the current active discount object for a product.
-    *   First check product discounts, then categories.
+    *   Get the current active sales object for a product.
+    *   First check product sales, then categories.
     *
     *   @param  object  $P  Product object
-    *   @return object      Discount object, empty object if not found
+    *   @return object      Sales object, empty object if not found
     */
     public static function getEffective($P)
     {
-        $now = PAYPAL_now()->toMySQL();
-        $discounts = self::getProduct($P->id);
-        foreach ($discounts as $obj) {
-            if ($obj->start < $now || $obj->end > $now) {
-                // Found an active product discount, return it.
+        $now = Paypal_now()->toUnix();
+        $sales = self::getProduct($P->id);
+        foreach ($sales as $obj) {
+            if ($obj->start->toUnix() < $now && $obj->end->toUnix() > $now) {
+                // Found an active product sales, return it.
                 return $obj;
             }
         }
 
-        // If no product discount was found, look for a category.
+        // If no product sales was found, look for a category.
         // Traverse the category tree from the current category up to
-        // the root and return the first discount object found, if any.
+        // the root and return the first sales object found, if any.
         $cats = Category::getPath($P->cat_id, false);
         $cats = array_reverse($cats);
         foreach ($cats as $cat) {
-            $discounts = Discount::getCategory($cat->cat_id);
-            foreach ($discounts as $obj) {
-                if ($obj->start < $now && $obj->end > $now) {
+            $sales = Sales::getCategory($cat->cat_id);
+            foreach ($sales as $obj) {
+                if ($obj->start->toUnix() < $now && $obj->end->toUnix() > $now) {
                     return $obj;
                 }
             }
         }
-        // Return an empty object so Discount::getEffective->calcPrice()
+        // Return an empty object so Sales::getEffective->calcPrice()
         // will work.
         return new self;
     }
@@ -209,6 +218,8 @@ class Discount
     */
     public function __set($var, $value='')
     {
+        global $_CONF;
+
         switch ($var) {
         case 'id':
         case 'item_id':
@@ -217,8 +228,19 @@ class Discount
             break;
 
         case 'start':
+            if (empty($value)) {
+                $value = self::MIN_DATETIME;
+            }
+            $this->properties[$var] = new \Date($value, $_CONF['timezone']);
+            break;
+
         case 'end':
-            if (empty($value)) $value = self::DEF_DATE;
+            if (empty($value)) {
+                $value = self::MAX_DATETIME;
+            }
+            $this->properties[$var] = new \Date($value, $_CONF['timezone']);
+            break;
+
         case 'item_type':
         case 'discount_type':
             // String values
@@ -264,22 +286,21 @@ class Discount
         global $_TABLES, $_PP_CONF;
 
         if (is_array($A)) {
-            $this->SetVars($A);
+            $this->setVars($A, false);
         }
 
         // Insert or update the record, as appropriate.
         if ($this->isNew) {
-            $sql1 = "INSERT INTO {$_TABLES['paypal.discounts']}";
+            $sql1 = "INSERT INTO {$_TABLES['paypal.sales']}";
             $sql3 = '';
         } else {
-            $sql1 = "UPDATE {$_TABLES['paypal.discounts']}";
+            $sql1 = "UPDATE {$_TABLES['paypal.sales']}";
             $sql3 = " WHERE id={$this->id}";
         }
-
         $sql2 = " SET item_type = '" . DB_escapeString($this->item_type) . "',
                 item_id = '{$this->item_id}',
-                start = '{$this->start}',
-                end = '{$this->end}',
+                start = '{$this->start->toUnix()}',
+                end = '{$this->end->toUnix()}',
                 discount_type = '" . DB_escapeString($this->discount_type) . "',
                 amount = '{$this->amount}'";
         $sql = $sql1 . $sql2 . $sql3;
@@ -296,7 +317,7 @@ class Discount
 
 
     /**
-    *   Delete a single discount record from the database
+    *   Delete a single sales record from the database
     *
     *   @param  integer $id     Record ID
     *   @return boolean     True on success, False on invalid ID
@@ -308,22 +329,22 @@ class Discount
         if ($id <= 0)
             return false;
 
-        DB_delete($_TABLES['paypal.discounts'], 'id', $id);
+        DB_delete($_TABLES['paypal.sales'], 'id', $id);
         Cache::clear(self::$base_tag);
         return true;
     }
 
 
     /**
-    *   Clean out old discount records.
+    *   Clean out old sales records.
     *   Called from runScheculedTask function
     */
     public static function Clean()
     {
         global $_TABLES;
 
-        $now = PAYPAL_now()->toMySQL();
-        $sql = "DELETE FROM {$_TABLES['paypal.discounts']}
+        $now = PAYPAL_now()->toUnix();
+        $sql = "DELETE FROM {$_TABLES['paypal.sales']}
                 WHERE end < '$now'";
         DB_query($sql);
     }
@@ -345,13 +366,27 @@ class Discount
             return PAYPAL_errMsg($LANG_PP['todo_noproducts']);
         }
 
-        $T = PP_getTemplate('discount_form', 'form');
+        if ($this->end->toMySQL(true) == self::MAX_DATETIME) {
+            $end_dt = '';
+            $end_tm = '';
+        } else {
+            $end_dt = $this->end->format('Y-m-d', true);
+            $end_tm = $this->end->format('H:i', true);
+        }
+        if ($this->start->toMySQL(true) == self::MIN_DATETIME) {
+            $st_dt = '';
+            $st_tm = '';
+        } else {
+            $st_dt = $this->start->format('Y-m-d', true);
+            $st_tm = $this->start->format('H:i', true);
+        }
+        $T = PP_getTemplate('sales_form', 'form');
         $retval = '';
         $T->set_var(array(
             'disc_id'       => $this->id,
             'action_url'    => PAYPAL_ADMIN_URL,
             'pi_url'        => PAYPAL_URL,
-            'doc_url'       => PAYPAL_getDocURL('discount_form',
+            'doc_url'       => PAYPAL_getDocURL('sales_form',
                                             $_CONF['language']),
             'amount'        => $this->amount,
             'product_select' => COM_optionList($_TABLES['paypal.products'],
@@ -360,8 +395,10 @@ class Discount
             'it_sel_' . $this->item_type => 'checked="checked"',
             'dt_sel_' . $this->discount_type => 'selected="selected"',
             'item_type'     => $this->item_type,
-            'start'         => $this->start == self::DEF_DATE ? '' : $this->start,
-            'end'           => $this->end == self::DEF_DATE ? '' : $this->end,
+            'start_date'    => $st_dt,
+            'end_date'      => $end_dt,
+            'start_time'    => $st_tm,
+            'end_time'      => $end_tm,
         ) );
         $retval .= $T->parse('output', 'form');
         $retval .= COM_endBlock();
@@ -382,11 +419,11 @@ class Discount
 
 
     /**
-    *   Calculate the discounted price.
+    *   Calculate the salesed price.
     *   Always returns at least zero.
     *
     *   @param  float   $price      Item base price
-    *   @return float               Discounted price
+    *   @return float               Salesed price
     */
     public function calcPrice($price)
     {
@@ -399,13 +436,13 @@ class Discount
             break;
         case 'none':
         default:
-            // An empty Discount object may be returned if there is no
-            // discount. In that case, there's no discount to apply.
+            // An empty Sales object may be returned if there are no
+            // sales. In that case, there's no sales to apply.
             break;
         }
         return max($price, 0);
     }
 
-}   // class Discount
+}   // class Sales
 
 ?>

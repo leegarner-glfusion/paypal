@@ -92,30 +92,7 @@
     </div>
   </div>
 
-{!if have_disc_table}
-  <div class="uk-form-row uk-margin-large">
-    <label class="uk-form-label" for="grp_access">{$LANG_PP['discounts']}:
-      <span id="discount_list" class="tooltip_cfg tooltipstered"></span>
-    </label>
-    <div class="uk-form-controls">
-      <table border="0" width="80%">
-      <tr>
-        <th>{$LANG_PP['start']}</th>
-        <th>{$LANG_PP['end']}</th>
-        <th style="text-align:right;">{$LANG_PP['amount']}</th>
-        <th>{$LANG_PP['type']}</th>
-      </tr>
-      <!-- BEGIN DiscountList -->
-        <tr>
-          <td>{disc_start}</td>
-          <td>{disc_end}</td>
-          <td style="text-align:right;">{disc_amt}</td>
-          <td>{disc_type}</td>
-        </tr>
-      <!-- END DiscountList -->
-      </table>
-    </div>
-{!endif}
+  {sale_prices}
   <div class="uk-form-row" uk-margin-large" style="margin-top:10px;">
     <label class="uk-form-label">&nbsp;</label>
     <div class="uk-form-controls">

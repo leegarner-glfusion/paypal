@@ -208,7 +208,6 @@ class Product
         case 'rating':
         case 'weight':
         case 'shipping_amt':
-        case 'sale_price':
         case '_act_price':      // actual price, sale or nonsale
         case '_orig_price':     // original price
             // Float values
@@ -222,8 +221,6 @@ class Product
             $this->properties[$var] = trim($value);
             break;
 
-        case 'sale_beg':
-        case 'sale_end':
         case 'avail_beg':
             // sale dates and beginning availability default to 0000-00-00
             if (empty($value)) $value = self::MIN_DATE;
@@ -314,7 +311,6 @@ class Product
         $this->cat_id = $row['cat_id'];
         $this->short_description = $row['short_description'];
         $this->price = $row['price'];
-        $this->sale_price = $row['sale_price'];
         $this->file = $row['file'];
         $this->expiration = $row['expiration'];
         $this->keywords = $row['keywords'];
@@ -329,8 +325,6 @@ class Product
         $this->onhand = $row['onhand'];
         $this->oversell = isset($row['oversell']) ? $row['oversell'] : 0;
         $this->custom = $row['custom'];
-        $this->sale_beg = $row['sale_beg'];
-        $this->sale_end = $row['sale_end'];
         $this->avail_beg = $row['avail_beg'];
         $this->avail_end = $row['avail_end'];
 
@@ -521,9 +515,6 @@ class Product
                 oversell = '{$this->oversell}',
                 qty_discounts = '{$qty_discounts}',
                 custom='" . DB_escapeString($this->custom) . "',
-                sale_price={$this->sale_price},
-                sale_beg='" . DB_escapeString($this->sale_beg) . "',
-                sale_end='" . DB_escapeString($this->sale_end) . "',
                 avail_beg='" . DB_escapeString($this->avail_beg) . "',
                 avail_end='" . DB_escapeString($this->avail_end) . "',
                 buttons= '" . DB_escapeString($this->btn_type) . "'";
@@ -795,9 +786,6 @@ class Product
             'onhand'        => $this->onhand,
             "oversell_sel{$this->oversell}" => 'selected="selected"',
             'custom' => $this->custom,
-            'sale_price'    => sprintf('%.2f', $this->sale_price),
-            'sale_beg'      => self::_InputDtFormat($this->sale_beg),
-            'sale_end'      => self::_InputDtFormat($this->sale_end),
             'avail_beg'     => self::_InputDtFormat($this->avail_beg),
             'avail_end'     => self::_InputDtFormat($this->avail_end),
             'iconset'       => $_PP_CONF['_iconset'],
@@ -902,6 +890,30 @@ class Product
                 'disc_amt' . $i => $amt,
             ) );
             $i++;
+        }
+
+        $Disc = Sales::getProduct($this->id);
+        if (!empty($Disc)) {
+            $DT = PP_getTemplate('sales_table', 'stable');
+            $DT->set_var('edit_sale_url',
+                PAYPAL_ADMIN_URL . '/index.php?sales');
+            $DT->set_block('stable', 'SaleList', 'SL');
+            foreach ($Disc as $D) {
+                if ($D->discount_type == 'amount') {
+                    $amount = Currency::getInstance()->format($D->amount);
+                } else {
+                    $amount = $D->amount;
+                }
+                $DT->set_var(array(
+                    'sale_start' => $D->start,
+                    'sale_end'  => $D->end,
+                    'sale_type' => $D->discount_type,
+                    'sale_amt'  => $amount,
+                ) );
+                $DT->parse('SL', 'SaleList', true);
+            }
+            $DT->parse('output', 'stable');
+            $T->set_var('sale_prices', $DT->finish($DT->get_var('output')));
         }
 
         $retval .= $T->parse('output', 'product');
@@ -1029,7 +1041,6 @@ class Product
         }
 
         //$onsale = $this->isOnSale();
-        //$this->_act_price = $onsale ? $this->sale_price : $this->price;
         $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
@@ -1509,20 +1520,6 @@ class Product
             $price = $this->getSalePrice();
         }
 
-/*        } elseif ($this->isOnSale()) {
-            // Use the sale price if this item is on sale
-            $price = $this->sale_price;
-        } else {
-            // Use the regular price
-            $price = $this->price;
-            // Get any category discount
-            $cat_disc = $this->Cat->getDiscount();
-            if ($cat_disc > 0) {
-                $price = $this->price * (100 - $cat_disc) / 100;
-            }
-        }
-*/
-
         // future: return sale price if on sale, otherwise base price
         foreach ($options as $key) {
             if (isset($this->options[$key])) {
@@ -1848,7 +1845,7 @@ class Product
     */
     public function getSalePrice()
     {
-        return Discount::getEffective($this)->calcPrice($this->price);
+        return Sales::getEffective($this)->calcPrice($this->price);
     }
 
 

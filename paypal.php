@@ -51,7 +51,7 @@ $_TABLES['paypal.order_log']    = $_PP_table_prefix . 'order_log';
 $_TABLES['paypal.currency']     = $_PP_table_prefix . 'currency';
 $_TABLES['paypal.coupons']      = $_PP_table_prefix . 'coupons';
 $_TABLES['paypal.coupon_log']   = $_PP_table_prefix . 'coupon_log';
-$_TABLES['paypal.discounts']    = $_PP_table_prefix . 'discounts';
+$_TABLES['paypal.sales']        = $_PP_table_prefix . 'sales';
 
 // Other relatively static values;
 $_PP_CONF['image_dir']  = $_CONF['path_html'] . $_PP_CONF['pi_name'] .

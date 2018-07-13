@@ -79,24 +79,6 @@
         maxlength="20" />&nbsp;{currency}
     </p>
 
-    <p>
-      <label for="sale_price">{$LANG_PP['sale_price']}:
-        <a href="#" onclick="popupWindow('{doc_url}#desc_sale_price', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
-            alt="{$LANG_PP['clk_help']}" /></a>
-      </label>
-      <i class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['reset']}" onclick="PP_resetSale();" ></i>
-      <input type="text" id="f_sale_price" name="sale_price" value="{sale_price}" size="12" 
-        maxlength="20" />&nbsp;{currency}&nbsp;&nbsp;
-      {$LANG_PP['from']}: <input type="text" id="sale_beg" name="sale_beg" size="12"
-              value="{sale_beg}" maxlength="12" />
-        <i class="{iconset}-calendar tooltip" id="sale_beg_trigger"
-              title="{$LANG_PP['datepicker']}"></i>&nbsp;&nbsp;
-        {$LANG_PP['to']}: <input type="text" id="sale_end" name="sale_end" size="12"
-              value="{sale_end}" maxlength="12" />
-        <i class="{iconset}-calendar tooltip" id="sale_end_trigger"
-              title="{$LANG_PP['datepicker']}"></i>
-    </p>
-
     <div>
       <label>{$LANG_PP['images']}:
         <a href="#" onclick="popupWindow('{doc_url}#desc_images', 'Help', 640, 480, 1);return false;" class="toolbar"><img src="{layout_url}/images/button_help.png" 
@@ -402,12 +384,6 @@ function PP_resetAvailDates()
 {
     document.getElementById('avail_beg').value = '0000-00-00';
     document.getElementById('avail_end').value = '9999-12-31';
-}
-function PP_resetSale()
-{
-    document.getElementById('sale_beg').value = '';
-    document.getElementById('sale_end').value = '';
-    document.getElementById('f_sale_price').value = '';
 }
 
 Calendar.setup({

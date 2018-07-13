@@ -487,12 +487,12 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
 ) ENGINE=MyIsam";
 
 // since 0.6.0
-$_SQL['paypal.discounts'] = "CREATE TABLE {$_TABLES['paypal.discounts']} (
+$_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
   `item_id` int(11) unsigned NOT NULL,
-  `start` datetime DEFAULT NULL,
-  `end` datetime DEFAULT NULL,
+  `start` int(11) unsigned,
+  `end` int(11) unsigned,
   `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
   `amount` decimal(6,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -849,7 +849,6 @@ $PP_UPGRADE['0.5.11'] = array(
         CHANGE `shipto_zip` `shipto_zip` varchar(40) DEFAULT NULL",
 );
 $PP_UPGRADE['0.6.0'] = array(
-    "ALTER TABLE {$_TABLES['paypal.products']} DROP comments",
     "ALTER TABLE {$_TABLES['paypal.categories']}
         ADD `discount_pct` decimal(5,3) DEFAULT NULL,
         ADD `discount_beg` date NOT NULL DEFAULT '1900-01-01',
@@ -901,17 +900,22 @@ $PP_UPGRADE['0.6.0'] = array(
         CHANGE item_id item_id varchar(40),
         DROP PRIMARY KEY,
         ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
-    "CREATE TABLE {$_TABLES['paypal.discounts']} (
+    "CREATE TABLE {$_TABLES['paypal.sales']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
       `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
       `item_id` int(11) unsigned NOT NULL,
-      `start` datetime DEFAULT NULL,
-      `end` datetime DEFAULT NULL,
+      `start` int(11) unsigned,
+      `end` int(11) unsigned,
       `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
       `amount` decimal(6,4) DEFAULT NULL,
       PRIMARY KEY (`id`),
       KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
     ) ENGINE-MyIsam",
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        DROP comments,
+        DROP sale_price,
+        DROP sale_beg,
+        DROP sale_end",
 );
 
 ?>

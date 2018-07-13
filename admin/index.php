@@ -52,7 +52,7 @@ $expected = array(
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
     'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
-    'discounts', 'editdiscount',
+    'sales', 'editdiscount',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -307,22 +307,22 @@ case 'purgecache':
     break;
 
 case 'savediscount':
-    $D = new Paypal\Discount($_POST['id']);
+    $D = new Paypal\Sales($_POST['id']);
     if (!$D->Save($_POST)) {
         COM_setMsg($LANG_PP['msg_nochange']);
         COM_refresh(PAYPAL_ADMIN_URL . '/index.php?editdiscount&id=' . $D->id);
     } else {
         COM_setMsg($LANG_PP['msg_updated']);
-        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?discounts');
+        COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sales');
     }
     break;
 
 case 'deldiscount':
     $id = PP_getVar($_GET, 'id', 'integer', 0);
     if ($id > 0) {
-        Paypal\Discount::Delete($id);
+        Paypal\Sales::Delete($id);
     }
-    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?discounts');
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sales');
     break;
 
 default:
@@ -408,8 +408,8 @@ case 'catlist':
     $content .= PAYPAL_adminlist_Category();
     break;
 
-case 'discounts':
-    $content .= PAYPAL_adminlist_Discounts();
+case 'sales':
+    $content .= PAYPAL_adminlist_Sales();
     break;
 
 case 'attributes':
@@ -431,7 +431,7 @@ case 'editattr':
 
 case 'editdiscount':
     $id = PP_getVar($_GET, 'id', 'integer', 0);
-    $D = new Paypal\Discount($id);
+    $D = new Paypal\Sales($id);
     $content .= $D->Edit();
     break;
 
@@ -793,14 +793,14 @@ function PAYPAL_adminMenu($view='')
                     'text' => $LANG_PP['attr_list']);
     }
 
-    if ($view == 'discounts') {
+    if ($view == 'sales') {
         $menu_arr[] = array(
                     'url'  => PAYPAL_ADMIN_URL . '/index.php?editdiscount=x',
                     'text' => '<span class="ppNewAdminItem">' .
-                            $LANG_PP['new_discount'] . '</span>');
+                            $LANG_PP['new_sale'] . '</span>');
     } else {
-        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?discounts=x',
-                    'text' => $LANG_PP['discounts']);
+        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?sales=x',
+                    'text' => $LANG_PP['sale_prices']);
     }
 
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?orderhist=x',
@@ -1468,15 +1468,16 @@ function PAYPAL_adminlist_Workflow()
 
 
 /**
-*   Discount Admin List View.
+*   Sale Pricing Admin List View.
 *
 *   @return string      HTML for the product list.
 */
-function PAYPAL_adminlist_Discounts()
+function PAYPAL_adminlist_Sales()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
-    $sql = "SELECT * from {$_TABLES['paypal.discounts']}";
+    $sql = "SELECT *
+            FROM {$_TABLES['paypal.sales']}";
 
     $header_arr = array(
         array('text' => $LANG_ADMIN['edit'],
@@ -1506,7 +1507,7 @@ function PAYPAL_adminlist_Discounts()
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
 
-    $query_arr = array('table' => 'paypal.discounts',
+    $query_arr = array('table' => 'paypal.sales',
         'sql' => $sql,
         'query_fields' => array(),
         'default_filter' => '',
@@ -1520,9 +1521,9 @@ function PAYPAL_adminlist_Discounts()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= "<h2>{$LANG_PP['discounts']}</h2>\n";
+    $display .= "<h2>{$LANG_PP['sale_prices']}</h2>\n";
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_discountlist',
-            __NAMESPACE__ . '\getAdminField_Discount',
+            __NAMESPACE__ . '\getAdminField_Sales',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             '', '', '', '');
 
@@ -1591,7 +1592,7 @@ function PAYPAL_adminlist_OrderStatus()
 
 
 /**
-*   Get an individual field for the Discounts admin list.
+*   Get an individual field for the Sales admin list.
 *
 *   @param  string  $fieldname  Name of field (from the array, not the db)
 *   @param  mixed   $fieldvalue Value of the field
@@ -1600,11 +1601,13 @@ function PAYPAL_adminlist_OrderStatus()
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function getAdminField_Discount($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
     static $Cur = NULL;
+    static $Dt = NULL;
     if ($Cur === NULL) $Cur = Paypal\Currency::getInstance();
+    if ($Dt === NULL) $Dt = new Date('now', $_CONF['timezone']);
     $retval = '';
 
     switch($fieldname) {
@@ -1622,11 +1625,23 @@ function getAdminField_Discount($fieldname, $fieldvalue, $A, $icon_arr)
                 )
         );
         break;
+
+    case 'start':
+    case 'end':
+        $Dt->setTimestamp((int)$fieldvalue);
+        $retval = '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
+            . $Dt->toMySQL(true) . '</span>';
+        break;
+
     case 'item_id':
         switch ($A['item_type']) {
         case 'product':
             $P = Paypal\Product::getInstance($fieldvalue);
-            $retval = $P->short_description;
+            if ($P) {
+                $retval = $P->short_description;
+            } else {
+                $retval = 'Unknown';
+            }
             break;
         case 'category':
             $C = Paypal\Category::getInstance($fieldvalue);
