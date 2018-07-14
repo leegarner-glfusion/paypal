@@ -176,6 +176,8 @@ class Sales
     /**
     *   Get the current active sales object for a product.
     *   First check product sales, then categories.
+    *   Scans for the sale with the most recent start date. For example,
+    *   a long-term sale could have a short "flash sale" within it.
     *
     *   @param  object  $P  Product object
     *   @return object      Sales object, empty object if not found
@@ -184,12 +186,14 @@ class Sales
     {
         $now = Paypal_now()->toUnix();
         $sales = self::getProduct($P->id);
+        $SaleObj = NULL;
         foreach ($sales as $obj) {
             if ($obj->start->toUnix() < $now && $obj->end->toUnix() > $now) {
                 // Found an active product sales, return it.
-                return $obj;
+                $SaleObj = $obj;
             }
         }
+        if ($SaleObj !== NULL) return $SaleObj;
 
         // If no product sales was found, look for a category.
         // Traverse the category tree from the current category up to
@@ -200,9 +204,10 @@ class Sales
             $sales = Sales::getCategory($cat->cat_id);
             foreach ($sales as $obj) {
                 if ($obj->start->toUnix() < $now && $obj->end->toUnix() > $now) {
-                    return $obj;
+                    $SaleObj = $obj;
                 }
             }
+            if ($SaleObj !== NULL) return $SaleObj;
         }
         // Return an empty object so Sales::getEffective->calcPrice()
         // will work.
