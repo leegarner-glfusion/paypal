@@ -580,8 +580,11 @@ class Cart
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
-            //$item_price = $P->getPrice($attr_keys, $item['quantity']);
-            $item_price = $item['price'];
+            if ($checkout) {
+                $item_price = $item['price'];
+            } else {
+                $item_price = $P->getPrice($attr_keys, $item['quantity']);
+            }
             $item_name = $item['descrip'];
             // Get shipping amount and weight
             if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
