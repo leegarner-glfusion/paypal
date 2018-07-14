@@ -168,7 +168,7 @@ $_PP_DEFAULTS['gc_mask'] = 'XXXX-XXXX-XXXX-XXXX';
 $_PP_DEFAULTS['gc_letters'] = 1;
 $_PP_DEFAULTS['gc_numbers'] = 0;
 $_PP_DEFAULTS['gc_symbols'] = 0;
-$_PP_DEFAULTS['gc_length'] = 0;
+$_PP_DEFAULTS['gc_length'] = 10;
 $_PP_DEFAULTS['gc_prefix'] = '';
 $_PP_DEFAULTS['gc_suffix'] = '';
 
