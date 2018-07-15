@@ -1145,7 +1145,7 @@ class Cart
         if ($cart_id) {
             // Remove the cookie
             unset($_COOKIE[self::$session_var]);
-            setcookie(self::$session_var, '', time()-3600);
+            setcookie(self::$session_var, '', time()-3600, '/');
             // And delete the cart record
             DB_delete($_TABLES['paypal.cart'],
                 array('cart_id', 'cart_uid'),
@@ -1190,6 +1190,8 @@ class Cart
         DB_query($sql);
         if ($status == 1) {
             unset($_COOKIE[self::$session_var]);
+            // Make sure the cookie gets deleted also
+            setcookie(self::$session_var, '', time()-3600, '/');
         } else {
             // restoring the cart, put back the cookie
             self::setAnonCartID($cart_id);
