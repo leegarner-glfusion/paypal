@@ -216,8 +216,9 @@ case 'thanks':
 
 case 'redeem':
     if (COM_isAnonUser()) {
-        $content .= 'Must be a valid user';
-        break;
+        COM_setMsg($LANG_PP['gc_need_acct']);
+        COM_refresh($_CONF['site_url'] . '/users.php?mode=login');
+        exit;
     }
     // Using REQUEST here since this could be from a link in an email of from
     // the apply_gc form
