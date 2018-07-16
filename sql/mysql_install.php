@@ -489,11 +489,11 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
 // since 0.6.0
 $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `item_type` varchar(10),
   `item_id` int(11) unsigned NOT NULL,
   `start` int(11) unsigned,
   `end` int(11) unsigned,
-  `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `discount_type` varchar(10),
   `amount` decimal(6,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
@@ -902,11 +902,11 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
     "CREATE TABLE {$_TABLES['paypal.sales']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `item_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+      `item_type` varchar(10),
       `item_id` int(11) unsigned NOT NULL,
       `start` int(11) unsigned,
       `end` int(11) unsigned,
-      `discount_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+      `discount_type` varchar(10),
       `amount` decimal(6,4) DEFAULT NULL,
       PRIMARY KEY (`id`),
       KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
