@@ -1829,7 +1829,7 @@ class Product
     public function isOnSale()
     {
         $sp = $this->getSalePrice();
-        return $this->price > 0 && $sp != $this->price ? true : false;
+        return $this->price > 0 && $sp < $this->price ? true : false;
     }
 
 
