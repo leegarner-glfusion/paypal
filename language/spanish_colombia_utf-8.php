@@ -351,6 +351,8 @@ $LANG_PP = array (
 'item_type' => 'Item Type',
 'timepicker' => 'Click for Time Selector',
 'gc_need_acct' => 'Before you can apply gift cards to your account, you need to have an account. You may still use the coupon code when placing an order.',
+'msg_itemcat_req' => 'A product or category ID is required',
+'msg_amount_req' => 'An amount is required',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

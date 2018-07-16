@@ -1,5 +1,6 @@
 {# begin {templatelocation} #}
-<form class="uk-form uk-form-horizontal" action="{site_admin_url}/plugins/paypal/index.php" method="post">
+<form class="uk-form uk-form-horizontal" action="{site_admin_url}/plugins/paypal/index.php" method="post"
+    onsubmit="return PP_validateSalesForm(this)">
   <input type="hidden" name="id" value="{disc_id}" />
   <fieldset>
 
@@ -24,6 +25,7 @@
         <option value="0">--{$LANG_PP['none']}--</option>
         {product_select}
       </select>
+      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -36,6 +38,7 @@
         <option value="0">--{$LANG_PP['none']}--</option>
         {category_select}
       </select>
+      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -57,6 +60,7 @@
     </label>
     <div class="uk-form-controls">
       <input type="text" name="amount" value="{amount}" size="10" maxlength="10" />
+      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -94,10 +98,10 @@
     <div class="uk-form-controls">
       <input type="text" id="start_dt" name="start" value="{start_date}" size="12" maxlength="12"
             data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
-            placeholder="1900-01-01"
+            placeholder="1970-01-01"
             data-uk-tooltip />
       <input type="text" id="start_time" name="start_time" value="{start_time}" size="12" maxlength="12"
-            data-uk-timepicker title="{$LANG_PP['timepicker']}" placeholder="00:00:00"
+            data-uk-timepicker title="{$LANG_PP['timepicker']}" placeholder="00:00"
             data-uk-tooltip />
       <i class="uk-icon uk-icon-trash-o pp-icon-danger"
         onclick='PP_resetSaleDates("start");'></i>
@@ -111,11 +115,11 @@
     <div class="uk-form-controls">
       <input type="text" id="end_dt" name="end" value="{end_date}" size="12" maxlength="12"
             data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
-            placeholder="9999-12-31"
+            placeholder="2037-12-31"
             data-uk-tooltip />
       <input type="text" id="end_time" name="end_time" value="{end_time}" size="12" maxlength="12"
             data-uk-timepicker title="{$LANG_PP['timepicker']}"
-            placeholder="23:59:59"
+            placeholder="23:59"
             data-uk-tooltip />
       <i class="uk-icon uk-icon-trash-o pp-icon-danger"
         onclick='PP_resetSaleDates("end");'></i>
@@ -179,5 +183,22 @@ function PP_resetSaleDates(type)
 $(document).ready(function() {
   PP_updateItemType("{item_type}");
 }); 
+
+function PP_validateSalesForm(form)
+{
+    if (form.item_type.value == 'product' && form.item_id.value == 0) {
+        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
+        return false;
+    }
+    if (form.item_type.value == 'category' && form.cat_id.value == 0) {
+        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
+        return false;
+    }
+    if (form.amount.value == 0) {
+        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_amount_req']}", {timeout: 3000,pos:'top-center'});
+        return false;
+    }
+    return true;
+}
 </script>
 {# end {templatelocation} #}
