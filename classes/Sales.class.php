@@ -97,13 +97,19 @@ class Sales
     {
         $this->id = $A['id'];
         $this->item_type = $A['item_type'];
-        $this->item_id = $A['item_id'];
         $this->discount_type = $A['discount_type'];
         $this->amount = $A['amount'];
         if (!$fromDB) {
             // convert to timestamps
             $A['start'] = (trim($A['start'] . ' ' . $A['start_time']));
             $A['end'] = (trim($A['end'] . ' ' . $A['end_time']));
+            if ($this->item_type == 'product') {
+                $this->item_id = $A['item_id'];
+            } else {
+                $this->item_id = $A['cat_id'];
+            }
+        } else {
+            $this->item_id = $A['item_id'];
         }
         $this->start = $A['start'];
         $this->end = $A['end'];
