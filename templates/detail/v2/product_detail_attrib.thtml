@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 {javascript}
-<div class="paypalProductDetail" id="paypalShortDesc">
+<div class="paypalProductDetail uk-width-2-4" id="paypalShortDesc">
   <h1>{short_description}
 {!if can_edit}
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
