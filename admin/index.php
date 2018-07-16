@@ -969,8 +969,7 @@ function PAYPAL_adminlist_Category()
     $display = '';
     $sql = "SELECT
                 cat.cat_id, cat.cat_name, cat.description, cat.enabled,
-                cat.grp_access, parent.cat_name as pcat,
-                cat.discount_pct, cat.discount_beg, cat.discount_end
+                cat.grp_access, parent.cat_name as pcat
             FROM {$_TABLES['paypal.categories']} cat
             LEFT JOIN {$_TABLES['paypal.categories']} parent
             ON cat.parent_id = parent.cat_id";
@@ -990,8 +989,6 @@ function PAYPAL_adminlist_Category()
                 'field' => 'description', 'sort' => false),
         array('text' => $LANG_PP['parent_cat'],
                 'field' => 'pcat', 'sort' => true),
-        array('text' => $LANG_PP['discount'],
-                'field' => 'discount_pct', 'sort' => 'false', 'align'=>'right'),
         array('text' => $LANG_PP['visible_to'],
                 'field' => 'grp_access', 'sort' => false),
         array('text' => $LANG_ADMIN['delete'] .
@@ -1098,14 +1095,6 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = strip_tags($fieldvalue);
         if (utf8_strlen($retval) > 80) {
             $retval = substr($retval, 0, 80 ) . '...';
-        }
-        break;
-
-    case 'discount_pct':
-        if ($A['discount_end'] < $now || $A['discount_beg'] > $now) {
-            $retval = '';
-        } else {
-            $retval = sprintf('%.03f%%', $fieldvalue);
         }
         break;
 
@@ -1644,8 +1633,12 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
             }
             break;
         case 'category':
-            $C = Paypal\Category::getInstance($fieldvalue);
-            $retval = $C->cat_name;
+            if ($fieldvalue == 0) {     // root category
+                $retval = $LANG_PP['home'];
+            } else {
+                $C = Paypal\Category::getInstance($fieldvalue);
+                $retval = $C->cat_name;
+            }
             break;
         default;
             $retval = '';

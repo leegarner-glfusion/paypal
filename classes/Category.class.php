@@ -63,9 +63,6 @@ class Category
         $this->disp_name = '';
         $this->lft = 0;
         $this->rgt = 0;
-        //$this->discount_pct = 0;
-        //$this->discount_beg = self::DEF_DATE;
-        //$this->discount_end = self::DEF_DATE;
         if (is_array($id)) {
             $this->SetVars($id);
         } elseif ($id > 0) {
@@ -96,9 +93,6 @@ class Category
             $this->properties[$var] = (int)$value;
             break;
 
-        /*case 'discount_beg':
-        case 'discount_end':
-            if (empty($value)) $value = self::DEF_DATE;*/
         case 'cat_name':
         case 'description':
         case 'image':
@@ -111,10 +105,6 @@ class Category
             // Boolean values
             $this->properties[$var] = $value == 1 ? 1 : 0;
             break;
-
-        /*case 'discount_pct':
-            $this->properties[$var] = (float)$value;
-            break;*/
 
         default:
             // Undefined values (do nothing)
@@ -158,9 +148,6 @@ class Category
         $this->disp_name = isset($row['disp_name']) ? $row['disp_name'] : $row['description'];
         $this->lft = isset($row['lft']) ? $row['lft'] : 0;
         $this->rgt = isset($row['rgt']) ? $row['rgt'] : 0;
-        //$this->discount_pct = $row['discount_pct'];
-        //$this->discount_beg = $row['discount_beg'];
-        //$this->discount_end = $row['discount_end'];
         if ($fromDB) {
             $this->image = $row['image'];
         }
@@ -282,9 +269,6 @@ class Category
                 enabled='{$this->enabled}',
                 grp_access ='{$this->grp_access}',
                 image='" . DB_escapeString($this->image) . "'";
-/*                discount_pct = '$this->discount_pct',
-                discount_beg = '" . DB_escapeString($this->discount_beg) . "',
-                discount_end = '" . DB_escapeString($this->discount_end) . "'";*/
             $sql = $sql1 . $sql2 . $sql3;
             //echo $sql;die;
             DB_query($sql);
@@ -442,9 +426,6 @@ class Category
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'old_parent'    => $this->parent_id,
             'old_grp'       => $this->grp_access,
-//            'discount_beg'  => $this->discount_beg > self::DEF_DATE ? $this->discount_beg : '',
-//            'discount_end'  => $this->discount_end > self::DEF_DATE ? $this->discount_end : '',
-//            'discount_pct'  => $this->discount_pct > 0 ? $this->discount_pct : '',
             /*'parent_sel'    => PAYPAL_recurseCats(
                                     __NAMESPACE__ . '\callbackCatOptionList',
                                     $this->parent_id, 0, '',
