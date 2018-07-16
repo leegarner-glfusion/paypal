@@ -172,6 +172,9 @@ $_PP_DEFAULTS['gc_length'] = 10;
 $_PP_DEFAULTS['gc_prefix'] = '';
 $_PP_DEFAULTS['gc_suffix'] = '';
 
+$_PP_DEFAULTS['purge_sale_prices'] = 1; // purge expired sale prices?
+
+
 /**
  *  Initialize Paypal plugin configuration
  *
@@ -328,6 +331,8 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 10, 100, 0, 40, true, $_PP_CONF['pi_name']);
         $c->add('tax_rate', $_PP_DEFAULTS['tax_rate'],
                 'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
+        $c->add('purge_sale_prices', $_PP_DEFAULTS['purge_sale_prices'],
+                'select', 10, 100, 2, 50, true, $_PP_CONF['pi_name']);
 
         $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);

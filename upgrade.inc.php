@@ -540,6 +540,8 @@ function PAYPAL_do_upgrade()
                 'text', 20, 0, 0, 20, true, $_PP_CONF['pi_name']);
         $c->add('tax_rate', $_PP_DEFAULTS['tax_rate'],
                 'text', 10, 100, 0, 50, true, $_PP_CONF['pi_name']);
+        $c->add('purge_sale_prices', $_PP_DEFAULTS['purge_sale_prices'],
+                'select', 10, 100, 2, 50, true, $_PP_CONF['pi_name']);
         $c->add('fs_gc_format', NULL, 'fieldset', 20, 10, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('gc_letters', $_PP_DEFAULTS['gc_letters'],
