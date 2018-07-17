@@ -663,7 +663,7 @@ class Order
                     $_PP_CONF['purch_email_anon'] == 0) ) {
             return;
         }
-        PAYPAL_debug("Sending email to " . $this->uid);
+        PAYPAL_debug("Sending email to " . $this->uid . ' at ' . $this->buyer_email);
 
         // setup templates
         $T = PP_getTemplate(array(
@@ -772,13 +772,13 @@ class Order
             'buyer_uid'         => $this->uid,
             'user_name'         => $user_name,
             'gateway_name'      => $this->pmt_method,
-            'pending'       => $this->status == 'pending' ? 'true' : '',
-            'gw_msg'        => $gw_msg,
+            'pending'           => $this->status == 'pending' ? 'true' : '',
+            'gw_msg'            => $gw_msg,
             'status'            => $this->status,
-            'order_instr'   => $this->instructions,
-            'order_id'      => $this->order_id,
-            'token'         => $this->token,
-            'email_extras'  => implode('<br />' . LB, $email_extras),
+            'order_instr'       => $this->instructions,
+            'order_id'          => $this->order_id,
+            'token'             => $this->token,
+            'email_extras'      => implode('<br />' . LB, $email_extras),
         ) );
         if ($this->by_gc > 0) {
             $T->set_var(array(

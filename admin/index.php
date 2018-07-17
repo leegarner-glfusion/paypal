@@ -315,6 +315,7 @@ case 'savediscount':
         COM_setMsg($LANG_PP['msg_updated']);
         COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sales');
     }
+    exit;
     break;
 
 case 'deldiscount':

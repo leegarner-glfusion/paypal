@@ -97,6 +97,9 @@ case 'checkout':
     if (isset($_POST['apply_gc'])) {
         $ppGCart->setGC($_POST['apply_gc']);
     }
+    if (isset($_POST['payer_email'])) {
+        $ppGCart->setEmail($_POST['payer_email']);
+    }
     $ppGCart->Save();
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
