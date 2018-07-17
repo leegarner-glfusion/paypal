@@ -358,6 +358,7 @@ $LANG_PP = array (
 'gc_need_acct' => 'Before you can apply gift cards to your account, you need to have an account. You may still use the coupon code when placing an order.',
 'msg_itemcat_req' => 'A product or category ID is required',
 'msg_amount_req' => 'An amount is required',
+'enter_email' => 'Your E-Mail Address',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -370,6 +371,7 @@ $LANG_PP_EMAIL = array(
 );
 
 $LANG_PP_HELP = array(
+'enter_email' => 'Enter an e-mail address where your order receipt should be sent',
 'notify_email' => 'Enter an optional email address to receive the notification of this order. Your own email address will be used if this is empty.',
 'hlp_cat_delete' => 'Only unused categories may be deleted',
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',

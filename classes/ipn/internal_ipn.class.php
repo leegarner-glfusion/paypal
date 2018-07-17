@@ -20,12 +20,13 @@ if (!defined ('GVERSION')) {
 }
 
 /**
-*   Class to deal with IPN transactions from Paypal.
-*
-*   @since 0.5.12
-*   @package paypal
-*/
-class dummy_ipn extends IPN
+ *  Class to provide IPN for internal-only transactions,
+ *  such as zero-balance orders.
+ *
+ *  @since 0.6.0 
+ *  @package paypal
+ */
+class internal_ipn extends IPN
 {
 
     /**
@@ -36,7 +37,7 @@ class dummy_ipn extends IPN
     */
     function __construct($A=array())
     {
-        $this->gw_id = 'dummy';
+        $this->gw_id = 'internal';
         parent::__construct($A);
 
         $cart_id = PP_getVar($A, 'cart_id');
@@ -55,8 +56,8 @@ class dummy_ipn extends IPN
         $this->pp_data['pmt_date'] = PP_getVar($A, 'payment_date');
         $this->pp_data['pmt_gross'] = PP_getVar($A, 'mc_gross', 'float');
         $this->pp_data['pmt_tax'] = PP_getVar($A, 'tax', 'float');
-        $this->pp_data['gw_desc'] = 'Null IPN';
-        $this->pp_data['gw_name'] = 'Null IPN';
+        $this->pp_data['gw_desc'] = 'Internal IPN';
+        $this->pp_data['gw_name'] = 'Internal IPN';
         $this->pp_data['pmt_status'] = PP_getVar($A, 'payment_status');
         $this->pp_data['currency'] = PP_getVar($A, 'mc_currency');
         $this->pp_data['discount'] = PP_getVar($A, 'discount', 'float');
@@ -85,7 +86,7 @@ class dummy_ipn extends IPN
                 $this->pp_data['custom'] = array('uid' => $A['custom']);
             }
         }
-        $this->pp_data['custom']['transtype'] = 'dummy_ipn';
+        $this->pp_data['custom']['transtype'] = 'internal_ipn';
 
         switch ($this->pp_data['pmt_status']) {
         case 'Pending':
@@ -111,7 +112,7 @@ class dummy_ipn extends IPN
     private function Verify()
     {
         if ($this->Cart === NULL) return false;
-        // Order total must be zero to use the dummy gateway
+        // Order total must be zero to use the internal gateway
         $info = $this->Cart->getInfo();
         $total = PP_getVar($this->Cart->getInfo(), 'final_total', 'float');
         if ($total > .001) return false;
@@ -183,7 +184,7 @@ class dummy_ipn extends IPN
         $Cart = $this->Cart->Cart();
 
         if (empty($Cart)) {
-            COM_errorLog("Paypal\\dummy_ipn::Process() - Empty Cart for id {$this->Cart->CartID()}");
+            COM_errorLog("Paypal\\internal_ipn::Process() - Empty Cart for id {$this->Cart->CartID()}");
             return false;
         }
         $items = array();

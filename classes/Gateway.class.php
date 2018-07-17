@@ -1124,7 +1124,7 @@ abstract class Gateway
                     $gw = __NAMESPACE__ . '\\' . $gw_name;
                     $gateways[$gw_name] = new $gw($A);
                 } else {
-                    $gateways[$gw_name] = new dummy($A);
+                    $gateways[$gw_name] = new internal($A);
                 }
 //                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
 //            }
@@ -1243,7 +1243,10 @@ abstract class Gateway
 }   // class Gateway
 
 
-class dummy extends Gateway
+/**
+ *  Internal gateway class, just to support zero-balance orders
+ */
+class internal extends Gateway
 {
     /**
     *   Constructor.
@@ -1252,10 +1255,11 @@ class dummy extends Gateway
     public function __construct()
     {
         // These are used by the parent constructor, set them first.
-        $this->gw_name = 'dummy';
-        $this->gw_desc = 'Dummy Payment Gateway';
+        $this->gw_name = 'internal';
+        $this->gw_desc = 'Internal Payment Gateway';
         parent::__construct();
     }
+
 }
 
 ?>

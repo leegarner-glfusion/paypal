@@ -445,12 +445,35 @@ class Cart
     }
 
 
+    /**
+     * Set the payer email address. Needs to be input by anonymous buyers.
+     *
+     * @param   string  $email  Email address
+     */
+    public function setEmail($email)
+    {
+        $this->m_info['payer_email'] = $email;
+        $this->Save();
+    }
+
+
+    /**
+     * Set the instructions field
+     *
+     * @param   string  $text   Instructions text
+     */
     public function setInstructions($text)
     {
         $this->m_info['order_instr'] = $text;
         $this->Save();
     }
 
+
+    /**
+     * Get the instructions text
+     *
+     * @return  string  Instructions text, if set
+     */
     public function getInstructions()
     {
         if (isset($this->m_info['order_instr'])) {
@@ -460,6 +483,13 @@ class Cart
         }
     }
 
+
+    /**
+     * Get the cart info from the private m_info array
+     *
+     * @param   string  $item   Specific item to return
+     * @return  mixed       Value of item, or entire info array
+     */
     public function getInfo($item = '')
     {
         if ($item != '') {
@@ -692,6 +722,9 @@ class Cart
             ) );
         } else {
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
+            if (COM_isAnonUser()) {
+                $T->set_var('need_email', true);
+            }
         }
         $T->parse('output', 'cart');
         $form = $T->finish($T->get_var('output'));
@@ -701,7 +734,7 @@ class Cart
 
     /**
     *   Create a fake checkout button to be used when the order value is zero
-    *   due to coupons. This takes the user directly to the dummy IPN processor.
+    *   due to coupons. This takes the user directly to the internal IPN processor.
     *
     *   @param  object  $gw Selected Payment Gateway
     *   @return string      HTML for final checkout button
@@ -718,16 +751,21 @@ class Cart
         // or gift cards
         if ($this->custom_info['final_total'] < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
-            $this->custom_info['transtype'] = 'dummy';
+            $this->custom_info['transtype'] = 'internal';
             $this->custom_info['cart_id'] = $this->CartID();
             $gateway_vars = array(
                 '<input type="hidden" name="processorder" value="by_gc" />',
                 '<input type="hidden" name="cart_id" value="' . $this->CartID() . '" />',
                 '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
             );
+            if (COM_isAnonUser()) {
+                $T->set_var('need_email', true);
+            } else {
+                $gateway_vars[] = '<input type="hidden" name="payer_email" value="' . $_USER['email'] . '" />';
+            }
             $T->set_var(array(
-                'action' => PAYPAL_URL . '/ipn/dummy_ipn.php',
-                'gateway_vars' => implode("\n", $gateway_vars),
+                'action'        => PAYPAL_URL . '/ipn/internal_ipn.php',
+                'gateway_vars'  => implode("\n", $gateway_vars),
                 'cart_id'       => $this->m_cart_id,
                 'uid'           => $_USER['uid'],
             ) );
@@ -736,14 +774,6 @@ class Cart
         }
         // Else, if amount > 0, regular checkout button
         if ($gw->Supports('checkout')) {
-            /*$T->set_var(array(
-                'is_uikit' => $_PP_CONF['_is_uikit'],
-                'gateway_vars' => $gw->gatewayVars($this),
-                'action' => $gw->getActionUrl(),
-                'cart_id' => $this->m_cart_id,
-                'uid' => $_USER['uid'],
-            ) );*/
-            //$T->parse('checkout_btn', 'checkout');
             return $gw->checkoutButton($this);
         } else {
             return 'Gateway does not support checkout';
@@ -806,6 +836,7 @@ class Cart
                 $gw_sel = '';
                 $sel = count($gateways) == 1 ? true : false;
             }
+
             foreach ($gateways as $gw) {
                 if ($gw->Supports('checkout')) {
                     $T->set_var('radio', $gw->checkoutRadio($sel || $gw_sel == $gw->Name()));

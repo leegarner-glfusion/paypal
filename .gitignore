@@ -1,6 +1,6 @@
 collect.sh
 distrib.sh
-config.php
+config*.php
 .gitignore
 *.sav
 t.php
