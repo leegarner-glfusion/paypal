@@ -399,7 +399,6 @@ $_SQL['paypal.userinfo'] = "CREATE TABLE `{$_TABLES['paypal.userinfo']}` (
 $_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
   `cart_id` varchar(40) NOT NULL,
   `cart_uid` int(11) unsigned NOT NULL,
-  `cart_order_id` varchar(20) DEFAULT NULL,
   `cart_info` text,
   `cart_contents` text,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -865,6 +864,7 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD token varchar(20),
         ADD tax_rate decimal(6,5) NOT NULL DEFAULT '0.00000'",
     "ALTER TABLE {$_TABLES['paypal.cart']}
+        DROP `cart_order_id`,
         ADD `apply_gc` float(8,2) NOT NULL default '0',
         ADD `total` float(8,2) NOT NULL default '0',
         ADD `tax` float(5,2) NOT NULL default '0',
