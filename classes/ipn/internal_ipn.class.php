@@ -23,7 +23,7 @@ if (!defined ('GVERSION')) {
  *  Class to provide IPN for internal-only transactions,
  *  such as zero-balance orders.
  *
- *  @since 0.6.0 
+ *  @since 0.6.0
  *  @package paypal
  */
 class internal_ipn extends IPN
@@ -37,6 +37,8 @@ class internal_ipn extends IPN
     */
     function __construct($A=array())
     {
+        global $_USER;
+
         $this->gw_id = 'internal';
         parent::__construct($A);
 
@@ -51,16 +53,19 @@ class internal_ipn extends IPN
         $shipto = $this->Cart->getAddress('shipto');
         if (empty($shipto)) $shipto = $billto;
 
-        $this->pp_data['payer_email'] = PP_getVar($A, 'payer_email');
-        $this->pp_data['payer_name'] = PP_getVar($A, 'name') .' '. PP_getVar($A, 'last_name');
-        $this->pp_data['pmt_date'] = PP_getVar($A, 'payment_date');
-        $this->pp_data['pmt_gross'] = PP_getVar($A, 'mc_gross', 'float');
-        $this->pp_data['pmt_tax'] = PP_getVar($A, 'tax', 'float');
+        $this->pp_data['payer_email'] = PP_getVar($A, 'payer_email', 'string', $_USER['email']);
+        $this->pp_data['payer_name'] = trim(PP_getVar($A, 'name') .' '. PP_getVar($A, 'last_name'));
+        if ($this->pp_data['payer_name'] == '') {
+            $this->pp_data['payer_name'] = $_USER['fullname'];
+        }
+        $this->pp_data['pmt_date'] = PAYPAL_now()->toMySQL(true);
+        $this->pp_data['pmt_gross'] = $this->Cart->getInfo('total');
+        $this->pp_data['pmt_tax'] = $this->Cart->getInfo('tax');
         $this->pp_data['gw_desc'] = 'Internal IPN';
         $this->pp_data['gw_name'] = 'Internal IPN';
         $this->pp_data['pmt_status'] = PP_getVar($A, 'payment_status');
-        $this->pp_data['currency'] = PP_getVar($A, 'mc_currency');
-        $this->pp_data['discount'] = PP_getVar($A, 'discount', 'float');
+        $this->pp_data['currency'] = Currency::getInstance()->code;
+        $this->pp_data['discount'] = 0;
 
         if (isset($A['invoice']))
             $this->pp_data['invoice'] = $A['invoice'];
@@ -111,11 +116,19 @@ class internal_ipn extends IPN
     */
     private function Verify()
     {
-        if ($this->Cart === NULL) return false;
+        if ($this->Cart === NULL) {
+            COM_errorLog("No cart provided");
+            return false;
+        }
+
         // Order total must be zero to use the internal gateway
         $info = $this->Cart->getInfo();
-        $total = PP_getVar($this->Cart->getInfo(), 'final_total', 'float');
-        if ($total > .001) return false;
+        $by_gc = PP_getVar($info, 'apply_gc', 'float');
+        $total = PP_getVar($info, 'final_total', 'float');
+        if ($by_gc < $total) return false;
+        if (!Coupon::verifyBalance($by_gc, $this->pp_data['custom']['uid'])) {
+            return false;
+        }
         return true;
     }
 
@@ -174,7 +187,7 @@ class internal_ipn extends IPN
 
         if (!$this->Verify()) {
             $logId = $this->Log(false);
-            $this->handleFailure(PAYPAL_FAILURE_VERIFY,
+            $this->handleFailure(IPN_FAILURE_VERIFY,
                             "($logId) Verification failed");
             return false;
         } else {

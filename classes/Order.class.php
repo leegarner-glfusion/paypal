@@ -46,7 +46,7 @@ class Order
 
         $this->Currency = Currency::getInstance();
         $this->isNew = true;
-        $this->uid = $_USER['uid'];
+        $this->uid = 1;
         $this->order_date = PAYPAL_now()->toMySql(false);
         $this->instructions = '';
         $this->tax_rate = PP_getTaxRate();
