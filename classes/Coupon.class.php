@@ -191,10 +191,12 @@ class Coupon extends Product
                 WHERE code = '$code'";
         $res = DB_query($sql);
         if (DB_numRows($res) == 0) {
-            return 2;
+            COM_errorLog("Attempting to redeem coupon $code, not found in database");
+            return 3;
         } else {
             $A = DB_fetchArray($res, false);
             if (!is_null($A['redeemed'])) {
+                COM_errorLog("Coupon code $code was already redeemed");
                 return 1;
             }
         }
@@ -205,7 +207,10 @@ class Coupon extends Product
                     redeemed = UTC_TIMESTAMP()
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
-            if (DB_error()) return 2;
+            if (DB_error()) {
+                COM_errorLog("A DB error occurred marking coupon $code as redeemed");
+                return 2;
+            }
         }
         return 0;
     }
