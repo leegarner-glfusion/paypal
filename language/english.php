@@ -331,6 +331,7 @@ $LANG_PP = array (
 'coupon_apply_msg0' => 'The coupon amount has been applied to your account.',
 'coupon_apply_msg1' => 'This coupon has already been applied.',
 'coupon_apply_msg2' => 'There was an error applying this coupon. Contact %s for assistance.',
+'coupon_apply_msg3' => 'An invalid coupon code was supplied. If you believe this is an error, contact %s for assistance.',
 'see_details' => 'See Details',
 'send_giftcards' => 'Send Gift Cards',
 'my_account' => 'My Shopping Account',
@@ -339,7 +340,7 @@ $LANG_PP = array (
 'sendgc_header' => 'Select a group and/or individual users to receive gift cards.',
 'err_gc_amt' => 'Must supply a positive amount for the gift cards.',
 'err_gc_nousers' => 'No users specified, or none are in the specified group.',
-'enter_gc' => 'Enter Coupon Code (click Update to apply)',
+'enter_gc' => 'Enter a Gift Code',
 'update' => 'Update',
 'apply_gc_title' => 'Apply a Gift Card to Your Account',
 'apply_gc_help' => 'Enter the gift card code below and click the &quot;Update&quot; button to apply to your account.',
@@ -359,6 +360,9 @@ $LANG_PP = array (
 'msg_itemcat_req' => 'A product or category ID is required',
 'msg_amount_req' => 'An amount is required',
 'enter_email' => 'Your E-Mail Address',
+'use_gc_part' => 'Use %s of your %s gift card balance',
+'use_gc_full' => 'Use your %s gift card balance',
+'apply' => 'Apply',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -524,6 +528,5 @@ $LANG_configselects['paypal'] = array(
             'Hide from Catalog' => 2),
     17 => array('Upper-case' => 1, 'Lower-case' => 2, 'Mixed-case' => 3, 'None' => 0),
 );
-
 
 ?>

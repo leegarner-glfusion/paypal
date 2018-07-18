@@ -52,7 +52,7 @@ if (!empty($action)) {
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
-        'cart', 'pidetail', 'apply_gc',
+        'cart', 'pidetail', 'apply_gc', 'viewcart',
     );
     $action = 'productlist';    // default view
     foreach($expected as $provided) {
@@ -225,22 +225,20 @@ case 'redeem':
     }
     // Using REQUEST here since this could be from a link in an email of from
     // the apply_gc form
-    $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
+    $code = PP_getVar($_REQUEST, 'gc_code');
     $uid = $_USER['uid'];
     $status = Paypal\Coupon::Apply($code, $uid);
     if ($status > 0) {
         $persist = true;
         $type = 'error';
-        $msg = $LANG_PP['coupon_apply_msg0'];
     } else {
         $persist = false;
         $type = 'info';
-        $msg = sprintf($LANG_PP['coupon_apply_msg2'], $_CONF['site_mail']);
     }
     $msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
-    // Redirect back to the apply_gc form, or to the default page
+    // Redirect back to the provided view, or to the default page
     if (isset($_REQUEST['refresh'])) {
-        COM_setMsg($msg);
+        COM_setMsg($msg, $type, $persist);
         COM_refresh(PAYPAL_URL . '/index.php?' . $_REQUEST['refresh']);
     } else {
         $content .= COM_showMessageText($msg, '', $persist, $type);
@@ -394,7 +392,9 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $ppGCart->Save();   // make sure it's saved to the DB
+    // If there's a gift card amount being applied, set it in the cart info.
+    // Also calls Cart::Save()
+    $ppGCart->setInfo('apply_gc', PP_getVar($_POST, 'by_gc', 'float'));
     $content .= $ppGCart->View(true);
     break;
 

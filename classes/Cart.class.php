@@ -134,7 +134,6 @@ class Cart
         if ($cart_id == '') {
             return;
         }
-
         $data = self::Read($cart_id);
         $this->m_info = $data['info'];
         $this->m_cart = $data['cart'];
@@ -164,7 +163,7 @@ class Cart
                 if (isset($A['cart_info']) && !empty($A['cart_info'])) {
                     $info = @unserialize($A['cart_info']);
                 }
-                $info['apply_gc'] = $_PP_CONF['gc_enabled'] ? $A['apply_gc'] : 0;
+                if (!$_PP_CONF['gc_enabled']) $info['apply_gc'] = 0;
                 if (isset($A['cart_contents']) && !empty($A['cart_contents'])) {
                     $cart = @unserialize($A['cart_contents']);
                 }
@@ -504,6 +503,13 @@ class Cart
     }
 
 
+    public function setInfo($item, $value)
+    {
+        $this->m_info[$item] = $value;
+        $this->Save();
+    }
+
+
     /**
     *   Remove an item from the cart.
     *   Saves the updated cart after removal.
@@ -684,13 +690,15 @@ class Cart
                 } else {
                     $apply_gc = min($total, $gc_bal);
                 }
-            } elseif ($this->m_info['apply_gc'] !== NULL) {
+            } elseif (isset($this->m_info['apply_gc']) && $this->m_info['apply_gc'] !== NULL) {
                 $apply_gc = min((float)$this->m_info['apply_gc'], $total, $gc_bal);
             }
         }
 
         $this->custom_info['by_gc'] = $apply_gc;
         $this->custom_info['final_total'] = $total - $apply_gc;
+        $this->m_info['gc_bal'] = $gc_bal;
+        $this->m_info['order_total'] = $total;
         $this->m_info['apply_gc'] = $apply_gc;
         $this->m_info['final_total'] = $total - $apply_gc;
         $this->m_info['shipping'] = $shipping;
@@ -711,6 +719,7 @@ class Cart
             'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
         ) );
+
         // If this is the final checkout, then show the payment buttons
         if ($checkout) {
             $this->Save();      // Update for tax
@@ -826,22 +835,25 @@ class Cart
         $T->set_block('radios', 'Radios', 'row');
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
+            if ($_PP_CONF['gc_enabled'] && Coupon::getUserBalance() > 0) {
+                $gateways['_coupon_gw'] = Gateway::getInstance('_coupon_gw');
+            }
             if (empty($gateways)) return NULL;  // no available gateways
-            if (isset($this->m_info['gateway'])) {
+            if (isset($this->m_info['gateway']) && array_key_exists($this->m_info['gateway'], $gateways)) {
                 // Select the previously selected gateway
                 $gw_sel = $this->m_info['gateway'];
-                $sel = false;
+            } elseif ($_PP_CONF['gc_enabled'] && $this->m_info['gc_bal'] >= $this->m_info['order_total']) {
+                // Select the coupon gateway as full payment
+                $gw_sel = '_coupon_gw';
             } else {
                 // Select the first if there's one, otherwise select none.
                 $gw_sel = '';
-                $sel = count($gateways) == 1 ? true : false;
             }
-
             foreach ($gateways as $gw) {
                 if ($gw->Supports('checkout')) {
-                    $T->set_var('radio', $gw->checkoutRadio($sel || $gw_sel == $gw->Name()));
+                    if ($gw_sel == '') $gw_sel = $gw->Name();
+                    $T->set_var('radio', $gw->checkoutRadio($this, $gw_sel == $gw->Name()));
                     $T->parse('row', 'Radios', true);
-                    $sel = false;
                 }
             }
         }

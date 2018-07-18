@@ -354,6 +354,9 @@ $LANG_PP = array (
 'msg_itemcat_req' => 'A product or category ID is required',
 'msg_amount_req' => 'An amount is required',
 'enter_email' => 'Your E-Mail Address',
+'use_gc_part' => 'Use %s of your %s gift card balance',
+'use_gc_full' => 'Use your %s gift card balance',
+'apply' => 'Apply',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

@@ -21,7 +21,7 @@
     <label class="uk-form-label">{$LANG_PP['enter_gc']}:
     </label>
     <div class="uk-form-controls">
-      <input type="text" id="code" name="code" value="{code}" size="32" maxlength="32" />
+      <input type="text" id="code" name="gc_code" value="{code}" size="32" maxlength="32" />
     </div>
   </div>
 

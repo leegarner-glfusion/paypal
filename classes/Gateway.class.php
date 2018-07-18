@@ -1124,7 +1124,7 @@ abstract class Gateway
                     $gw = __NAMESPACE__ . '\\' . $gw_name;
                     $gateways[$gw_name] = new $gw($A);
                 } else {
-                    $gateways[$gw_name] = new internal($A);
+                    $gateways[$gw_name] = new internal_gw($A);
                 }
 //                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
 //            }
@@ -1190,7 +1190,7 @@ abstract class Gateway
     *   @param  boolean $selected   True if the button should be selected
     *   @return string      HTML for radio button
     */
-    public function checkoutRadio($selected = false)
+    public function checkoutRadio($cart, $selected = false)
     {
         $sel = $selected ? 'checked="checked" ' : '';
         $radio = '<input required type="radio" name="gateway" value="' .
@@ -1228,6 +1228,7 @@ abstract class Gateway
             foreach ($files as $fullpath) {
                 $parts = explode('/', $fullpath);
                 list($class,$x1,$x2) = explode('.', $parts[count($parts)-1]);
+                if ($class[0] == '_') continue;     // special internal gateway
                 if (!array_key_exists($class, $installed)) {
                     // Add only if not installed
                     $gateways[$class] = array(
@@ -1246,7 +1247,7 @@ abstract class Gateway
 /**
  *  Internal gateway class, just to support zero-balance orders
  */
-class internal extends Gateway
+class internal_gw extends Gateway
 {
     /**
     *   Constructor.
