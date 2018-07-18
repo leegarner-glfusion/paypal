@@ -53,7 +53,7 @@ function blk_setvis_paypal_cart(newvis)
 function finalizeCart(cart_id, uid)
 {
     // First check that there is a payer email filled out.
-    if (document.frm_checkout..payer_email.value == "") {
+    if (document.frm_checkout.payer_email.value == "") {
         return false;
     }
 
