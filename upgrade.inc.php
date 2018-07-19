@@ -695,7 +695,7 @@ function PAYPAL_do_set_version($ver)
         COM_errorLog("Error updating the {$_PP_CONF['pi_display_name']} Plugin version",1);
         return false;
     } else {
-        COM_errorLog($_PP_CONF['pi_display-name'] " version set to $ver");
+        COM_errorLog("{$_PP_CONF['pi_display-name']} version set to $ver");
         return true;
     }
 }
