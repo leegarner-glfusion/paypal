@@ -363,6 +363,7 @@ $LANG_PP = array (
 'use_gc_part' => 'Use %s of your %s gift card balance',
 'use_gc_full' => 'Use your %s gift card balance',
 'apply' => 'Apply',
+'some_gc_disallowed' => 'Some items cannot be paid with a gift card.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

@@ -593,3 +593,12 @@ div #orderPmtMethod {
 form.ppViewCart div.enterGC {
     margin-left: 50px;
 }
+div.enterGC {
+    clear:both;
+}
+div.ppNoGCMsg {
+    font-size: small;
+    font-style:italic;
+    float:right;
+    clear:both;
+}

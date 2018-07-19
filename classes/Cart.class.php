@@ -611,11 +611,15 @@ class Cart
         $handling = 0;
         $tax_items = 0;
         $tax_amt = 0;
+        $this->m_info['total_by_type'] = array();
         foreach ($this->m_cart as $id=>$item) {
             $counter++;
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
+            if (!isset($this->m_info['total_by_type'][$P->prod_type])) {
+                $this->m_info['total_by_type'][$P->prod_type] = 0;
+            }
             if ($checkout) {
                 $item_price = $item['price'];
             } else {
@@ -658,6 +662,7 @@ class Cart
             ) );
             $T->parse('iRow', 'ItemRow', true);
             $subtotal += $item_total;
+            $this->m_info['total_by_type'][$P->prod_type] += $item_total;
         }
 
         $custom_info = array(
@@ -683,18 +688,22 @@ class Cart
         $apply_gc = 0;
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Coupon::getUserBalance();
+            $gc_can_apply = 0;
+            foreach ($this->m_info['total_by_type'] as $type=>$value) {
+                if ($type != PP_PROD_COUPON)
+                    $gc_can_apply += $value;
+            }
             if (!$checkout) {
                 if (isset($this->m_info['apply_gc'])) {
                     $apply_gc = $this->m_info['apply_gc'];
-                    $apply_gc = min($total, $apply_gc, $gc_bal);
+                    $apply_gc = min($gc_can_apply, $apply_gc, $gc_bal);
                 } else {
-                    $apply_gc = min($total, $gc_bal);
+                    $apply_gc = min($gc_can_apply, $gc_bal);
                 }
             } elseif (isset($this->m_info['apply_gc']) && $this->m_info['apply_gc'] !== NULL) {
-                $apply_gc = min((float)$this->m_info['apply_gc'], $total, $gc_bal);
+                $apply_gc = min((float)$this->m_info['apply_gc'], $gc_can_apply, $gc_bal);
             }
         }
-
         $this->custom_info['by_gc'] = $apply_gc;
         $this->custom_info['final_total'] = $total - $apply_gc;
         $this->m_info['gc_bal'] = $gc_bal;

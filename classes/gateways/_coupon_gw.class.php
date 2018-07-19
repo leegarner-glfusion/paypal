@@ -51,29 +51,43 @@ class _coupon_gw extends Gateway
         // Get the order total from the cart, and the user's balance
         // to decide what kind of button to show.
         $gc_bal = Coupon::getUserBalance();
-        $total = Cart::getInstance()->getInfo('order_total');
-
+        $total = Cart::getInstance()-> getInfo('order_total');
+        $by_type = Cart::getInstance()->getInfo('total_by_type');
+        $gc_can_apply = 0;
+        foreach ($by_type as $type=>$value) {
+            if ($type != PP_PROD_COUPON)
+                $gc_can_apply += $value;
+        }
         if ($gc_bal == 0) {
-            // No gift card balance, shouldn't even be here.
+            // No gift card balance.
             $radio = '';
-        } elseif ($gc_bal >= $total) {
+        } elseif ($gc_bal < $gc_can_apply) {
+            // GC balance is not enough, apply the whole thing.
+            $radio = '<input type="checkbox" name="by_gc" value="' . $by_gc .
+                '" checked="checked" />&nbsp;';
+            $radio .= sprintf($LANG_PP['use_gc_full'],
+                    Currency::getInstance()->Format($gc_can_apply));
+        } elseif ($gc_bal >= $gc_can_apply && $gc_can_apply == $total) {
             // GC balance is enough to pay for the order. Show a regular
             // radio button.
             $sel = $selected ? 'checked="checked" ' : '';
             $radio = '<input required type="radio" name="gateway" value="' .
                 $this->gw_name . '" ' . $sel . '/>&nbsp;';
             $radio .= sprintf($LANG_PP['use_gc_part'],
-                    Currency::getInstance()->Format($total),
+                    Currency::getInstance()->Format($gc_can_apply),
                     Currency::getInstance()->Format($gc_bal));
             // Make sure any apply_gc amount is hidden, it will be created
             // from the gateway radio
             $radio .= '<input type="hidden" name="by_gc" value="0" />';
         } else {
             // Have a GC balance, but not enough to pay the entire order.
-            $radio = '<input type="checkbox" name="by_gc" value="' . $gc_bal .
+            $by_gc = min($gc_bal, $gc_can_apply);
+            $radio = '<input type="checkbox" name="by_gc" value="' . $by_gc .
                 '" checked="checked" />&nbsp;';
-            $radio .= sprintf($LANG_PP['use_gc_full'],
+            $radio .= sprintf($LANG_PP['use_gc_part'],
+                    Currency::getInstance()->Format($gc_can_apply),
                     Currency::getInstance()->Format($gc_bal));
+            $radio .= '<br /><div class="ppNoGCMsg">' . $LANG_PP['some_gc_disallowed'] . '</div>';
         }
         return $radio;
     }
