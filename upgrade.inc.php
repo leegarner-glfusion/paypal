@@ -661,6 +661,7 @@ function PAYPAL_do_upgrade_sql($version, $ignore_error=false)
         if (DB_error()) {
             COM_errorLog("SQL Error during Paypal Plugin update", 1);
             if (!$ignore_error){
+                COM_errorLog("Aborting....");
                 return false;
             }
         }
@@ -682,9 +683,10 @@ function PAYPAL_do_set_version($ver)
 {
     global $_TABLES, $_PP_CONF;
 
+    COM_errorLog("Setting version to $ver");
     // now update the current version number.
     $sql = "UPDATE {$_TABLES['plugins']} SET
-            pi_version = '{$_PP_CONF['pi_version']}',
+            pi_version = '$ver',
             pi_gl_version = '{$_PP_CONF['gl_version']}',
             pi_homepage = '{$_PP_CONF['pi_url']}'
         WHERE pi_name = '{$_PP_CONF['pi_name']}'";
