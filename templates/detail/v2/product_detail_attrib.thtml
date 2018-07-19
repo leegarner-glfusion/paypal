@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 {javascript}
-<div class="paypalProductDetail uk-width-2-4" id="paypalShortDesc">
+<div class="paypalProductDetail v2" style="width: 50%;" id="paypalShortDesc">
   <h1>{short_description}
 {!if can_edit}
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
@@ -17,7 +17,7 @@
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
-<div class="paypalProductDetail uk-width-1-2" id="product-image">
+<div class="paypalProductDetail v2" style="width:40%" id="product-image">
   <div class="uk-hidden-small uk-responsive-height">
     <img id="disp_img" class="uk-responsive-width uk-responsive-height"
         src="{site_url}/lglib/img.php?src={main_imgfile}&plugin=paypal&sess={session_id}&width=460&height=460" />
@@ -45,7 +45,7 @@ target="_blank" rel="slimbox[product]">
 <div class="paypalProductDetail" id="product-image">{description}</div>
 {!endif}
 
-<div class="paypalDetailAttrib v2 uk-width-2-5">
+<div class="paypalDetailAttrib v2" style="width:30%;float:right">
   <form class="uk-form" method="post" id="add_cart_{id}" action="javascript:void()">
 {!if 0}
 action="{site_url}/paypal/index.php" method="post">
@@ -102,12 +102,12 @@ action="{site_url}/paypal/index.php" method="post">
     </div>
   </form>
 <!-- BEGIN BtnBlock -->
-  {buy_now_button}<br />
+  <div style="margin-left:30px;">{buy_now_button}</div>
 <!-- END BtnBlock -->
 </div>
 
 {!if rating_bar}
-  <div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
+<div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
 {!endif}
 {!if main_img}
 {# with a main image the description goes below the image and price #}
@@ -119,5 +119,4 @@ action="{site_url}/paypal/index.php" method="post">
 <div class="paypalComments">
   {usercomments}
 </div>
-
 {# end {templatelocation} #}
