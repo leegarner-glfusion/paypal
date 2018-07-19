@@ -496,7 +496,7 @@ $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `amount` decimal(6,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
-) ENGINE-MyIsam";
+) ENGINE=MyIsam";
 
 // Sample data to load up the Paypal gateway configuration
 $_PP_SAMPLEDATA = array(
@@ -910,7 +910,7 @@ $PP_UPGRADE['0.6.0'] = array(
       `amount` decimal(6,4) DEFAULT NULL,
       PRIMARY KEY (`id`),
       KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
-    ) ENGINE-MyIsam",
+    ) ENGINE=MyIsam",
     "ALTER TABLE {$_TABLES['paypal.products']}
         DROP comments,
         DROP sale_price,
