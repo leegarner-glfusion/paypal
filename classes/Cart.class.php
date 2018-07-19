@@ -999,7 +999,8 @@ class Cart
     */
     public static function getCart($uid = 0)
     {
-        global $_USER, $_TABLES;
+        global $_USER, $_TABLES, $_PP_CONF, $_PLUGIN_INFO;
+        if ($_PP_CONF['pi_version'] != $_PLUGIN_INFO['paypal']['pi_verson']) return NULL;
 
         $cart_id = NULL;
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
