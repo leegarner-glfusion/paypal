@@ -90,7 +90,6 @@
 }
 
 div.paypalProductDetail {
-/*    width: 100%;*/
     clear: right;
     /*margin: 0px 40px 0px 40px;*/
     margin: 0px 10px;
@@ -99,7 +98,7 @@ div.paypalProductDetail {
     margin-left: 10px;
 }
 
-div.paypalProductDetail v1 {
+div.paypalProductDetail.v1 {
     width: 100%;
 }
 .paypalProductDetail #paypalShortDesc,
