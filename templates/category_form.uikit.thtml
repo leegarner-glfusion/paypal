@@ -40,25 +40,6 @@
     </div>
   </div>
 
-{!if 0}
-    <div class="uk-form-row">
-      <label class="uk-form-label">{$LANG_PP['discount']}:
-        <span id="discount" class="tooltip_cfg tooltipstered"></span>
-      </label>
-      <div class="uk-form-controls">
-      <i class="{iconset}-trash pp-icon-danger" title="{$LANG_PP['reset']}" data-uk-tooltip onclick="PP_resetDiscount();" ></i>
-      <input type="text" id="discount_pct" name="discount_pct" value="{discount_pct}" size="5"
-        maxlength="10" />&nbsp;%&nbsp;&nbsp;
-        {$LANG_PP['from']}: <input type="text" id="discount_beg" name="discount_beg" size="12"
-            data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}" data-uk-tooltip
-            value="{discount_beg}" maxlength="12" />&nbsp;&nbsp;
-        {$LANG_PP['to']}: <input type="text" id="discount_end" name="discount_end" size="12"
-            data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}" data-uk-tooltip
-              value="{discount_end}" maxlength="12" />
-      </div>
-    </div>
-{!endif}
-
   <div class="uk-form-row">
     <label class="uk-form-label">{$LANG_PP['cat_image']}:
       <span id="image" class="tooltip_cfg tooltipstered"></span>
@@ -138,12 +119,5 @@ $(document).ready(function() {
         }
     });
 });
-/*function PP_resetDiscount()
-{
-    document.getElementById('discount_beg').value = '';
-    document.getElementById('discount_end').value = '';
-    document.getElementById('discount_pct').value = '';
-}*/
-
 </script>
 {# end {templatelocation} #}
