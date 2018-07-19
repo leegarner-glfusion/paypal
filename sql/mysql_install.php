@@ -846,9 +846,9 @@ $PP_UPGRADE['0.5.11'] = array(
 );
 $PP_UPGRADE['0.6.0'] = array(
     // Drop new tables in case of a failed previous attempt.
-    "DROP TABLE {$_TABLES['paypal.sales']}",
-    "DROP TABLE {$_TABLES['paypal.coupons']}",
-    "DROP TABLE {$_TABLES['paypal.coupon_log']}",
+    "DROP TABLE IF EXISTS {$_TABLES['paypal.sales']}",
+    "DROP TABLE IF EXISTS {$_TABLES['paypal.coupons']}",
+    "DROP TABLE IF EXISTS {$_TABLES['paypal.coupon_log']}",
     "ALTER TABLE {$_TABLES['paypal.categories']}
         ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0',
         ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0',
