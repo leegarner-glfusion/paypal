@@ -530,6 +530,8 @@ function PAYPAL_do_upgrade()
     if (!COM_checkVersion($current_ver, '0.6.0')) {
         $current_ver = '0.6.0';
         $c->del('download_path', $pi_name);
+        $c->del('purchase_email_anon_attach', $pi_name);
+        $c->del('purchase_email_anon', $pi_name);
         $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('fs_gc', NULL, 'fieldset', 20, 0, NULL, 0, true,

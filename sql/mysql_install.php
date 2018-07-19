@@ -914,6 +914,9 @@ $PP_UPGRADE['0.6.0'] = array(
         DROP sale_price,
         DROP sale_beg,
         DROP sale_end",
+    "UPDATE {$_TABLES['conf_values']}
+        SET fieldset = 0, sort_order = 240
+        WHERE name = 'tc_link' AND group_name = 'paypal'",
 );
 
 ?>

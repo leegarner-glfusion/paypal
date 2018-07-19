@@ -51,8 +51,6 @@ $_PP_DEFAULTS['anonymous_buy'] = true;
  */
 $_PP_DEFAULTS['purchase_email_user']        = 1;
 $_PP_DEFAULTS['purchase_email_user_attach'] = 0;
-$_PP_DEFAULTS['purchase_email_anon']        = 1;
-$_PP_DEFAULTS['purchase_email_anon_attach'] = 0;
 
 /** Email administrator upon purchase?
 *   0 = Never
@@ -217,11 +215,6 @@ function plugin_initconfig_paypal($group_id = 0)
         $c->add('purch_email_user_attach',
                 $_PP_DEFAULTS['purchase_email_user_attach'],
                 'select', 0, 0, 2, 80, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_anon', $_PP_DEFAULTS['purchase_email_anon'],
-                'select', 0, 0, 2, 90, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_anon_attach',
-                $_PP_DEFAULTS['purchase_email_anon_attach'],
-                'select', 0, 0, 2, 100, true, $_PP_CONF['pi_name']);
         $c->add('purch_email_admin', $_PP_DEFAULTS['purch_email_admin'],
                 'select', 0, 0, 6, 110, true, $_PP_CONF['pi_name']);
         $c->add('menuitem', $_PP_DEFAULTS['menuitem'],
@@ -248,6 +241,9 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 0, 2, 220, true, $_PP_CONF['pi_name']);
         $c->add('weight_unit', $_PP_DEFAULTS['weight_unit'],
                 'select', 0, 0, 15, 230, true, $_PP_CONF['pi_name']);
+        $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
+                'text', 0, 0, 2, 240, true, $_PP_CONF['pi_name']);
+
 
         // Path and image handling
         $c->add('fs_paths', NULL, 'fieldset', 0, 10, NULL, 0, true,
@@ -294,9 +290,6 @@ function plugin_initconfig_paypal($group_id = 0)
                 'text', 0, 40, 2, 30, true, $_PP_CONF['pi_name']);
         $c->add('cache_max_age', $_PP_DEFAULTS['cache_max_age'],
                 'text', 0, 40, 2, 40, true, $_PP_CONF['pi_name']);
-        $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
-                'text', 0, 40, 2, 50, true, $_PP_CONF['pi_name']);
-
         $c->add('fs_debug', NULL, 'fieldset', 0, 50, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('debug', $_PP_DEFAULTS['debug'],
