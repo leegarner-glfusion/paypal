@@ -2,7 +2,8 @@
 <a href="{pi_url}">{$LANG_PP['back_to_catalog']}</a>
 <div style="text-align:center; margin-left:auto;">
   <h1>{$LANG_PP['cart_blocktitle']}</h1>
-  <form action="{pi_url}/index.php" method="post" class="ppViewCart">
+  <form action="{pi_url}/index.php" method="post" class="ppViewCart"
+    id="ppCartForm">
     <input type="hidden" name="cmd" value="_cart" />
     <input type="hidden" name="upload" value="1" />
     <input type="hidden" name="business" value="{receiver_email}" />
@@ -106,7 +107,8 @@
 {!if use_gc}
     <div class="enterGC">{$LANG_PP['enter_gc']}:<br />
     <input type="text" name="gc_code" />
-    <input type="submit" class="lgButton green" name="redeem" value="{$LANG_PP['apply']}" />
+    <input type="reset" class="lgButton green" name="redeem" value="{$LANG_PP['apply']}"
+        onclick="ppApplyGC('ppCartForm');" />
     <input type="hidden" name="refresh" value="viewcart" />
     </div>
 {!endif}

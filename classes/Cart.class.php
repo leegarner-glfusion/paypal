@@ -835,7 +835,7 @@ class Cart
         $T->set_block('radios', 'Radios', 'row');
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
-            if ($_PP_CONF['gc_enabled'] && Coupon::getUserBalance() > 0) {
+            if ($_PP_CONF['gc_enabled']) {
                 $gateways['_coupon_gw'] = Gateway::getInstance('_coupon_gw');
             }
             if (empty($gateways)) return NULL;  // no available gateways
@@ -852,7 +852,10 @@ class Cart
             foreach ($gateways as $gw) {
                 if ($gw->Supports('checkout')) {
                     if ($gw_sel == '') $gw_sel = $gw->Name();
-                    $T->set_var('radio', $gw->checkoutRadio($this, $gw_sel == $gw->Name()));
+                    $T->set_var(array(
+                        'gw_id' => $gw->Name(),
+                        'radio' => $gw->checkoutRadio($gw_sel == $gw->Name()),
+                    ) );
                     $T->parse('row', 'Radios', true);
                 }
             }

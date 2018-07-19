@@ -41,16 +41,17 @@ class _coupon_gw extends Gateway
      * If the GC balance is less than the order amount, use a checkbox
      * to give the buyer the option of applying it as partial payment.
      *
-     * @param   object  $cart   Cart Object
      * @param   boolean $selected   Indicate if this should be the selected option
      * @return  string      HTML for the radio button or checkbox
      */
-    public function checkoutRadio($cart, $selected = false)
+    public function checkoutRadio($selected = false)
     {
         global $LANG_PP;
 
-        $gc_bal = $cart->getInfo('gc_bal');
-        $total = $cart->getInfo('order_total');
+        // Get the order total from the cart, and the user's balance
+        // to decide what kind of button to show.
+        $gc_bal = Coupon::getUserBalance();
+        $total = Cart::getInstance()->getInfo('order_total');
 
         if ($gc_bal == 0) {
             // No gift card balance, shouldn't even be here.

@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 <!-- BEGIN Radios -->
-<div class="ppGatewayRadios">
+<div class="ppGatewayRadios" id="gwrad_{gw_id}">
 {radio}
 </div>
 <!-- END Radios -->

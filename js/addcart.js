@@ -27,7 +27,7 @@ var ppAddToCart = function(frm_id)
                     if (result.ret_url != '') {
                         window.location.href = result.ret_url;
                     }
-                } 
+                }
             } catch(err) {
             }
             blk_setvis_paypal_cart(result.content == "" ? "none" : "block");
@@ -53,10 +53,10 @@ function blk_setvis_paypal_cart(newvis)
 function finalizeCart(cart_id, uid)
 {
     // First check that there is a payer email filled out.
-    if (document.frm_checkout.payer_email.value == "") {
+/*    if (document.frm_checkout.payer_email.value == "") {
         return false;
     }
-
+*/
      var dataS = {
         "cart_id": cart_id,
         "uid": uid,
@@ -80,3 +80,35 @@ function finalizeCart(cart_id, uid)
     });
     return status;
 }
+
+/**
+*   Add an item to the shopping cart.
+*/
+var ppApplyGC = function(frm_id)
+{
+    data = $("#"+frm_id).serialize();
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: glfusionSiteUrl + "/paypal/ajax.php?action=redeem_gc",
+        data: data,
+        success: function(result) {
+            try {
+                if (result.status == 0) {
+                    if (result.html != '') {
+                        // Update the gateway selection
+                        divid = document.getElementById("gwrad__coupon_gw");
+                        if (divid != undefined) {
+                            divid.innerHTML = result.html;
+                        }
+                    }
+                }
+                if (result.msg != '') {
+                    $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 2000,pos:'top-center'});
+                }
+            } catch(err) {
+            }
+        }
+    });
+    return false;
+};

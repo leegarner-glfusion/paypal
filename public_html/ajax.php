@@ -75,6 +75,25 @@ case 'finalizecart':
     echo json_encode($A);
     exit;
     break;
+
+case 'redeem_gc':
+    if (COM_isAnonUser()) {
+        $msg = $LANG_PP['gc_need_acct'];
+    } else {
+        $code = PP_getVar($_POST, 'gc_code');
+        $uid = $_USER['uid'];
+        $status = Paypal\Coupon::Apply($code, $uid);
+        $gw = Paypal\Gateway::getInstance('_coupon_gw');
+        $gw_radio = $gw->checkoutRadio($status == 0 ? true : false);
+        $status_msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
+        $A = array (
+            'statusMessage' => $status_msg,
+            'html' => $gw_radio,
+            'status' => $status,
+        );
+        echo json_encode($A);
+        exit;
+    }
 }
 
 ?>
