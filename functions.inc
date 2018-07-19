@@ -2167,7 +2167,14 @@ function PP_isMinVersion($required = '')
             $installed = $_PLUGIN_INFO[$pi_name];
         }
     }
-    return COM_checkVersion($installed, $required);
+    if (!COM_checkVersion($installed, $required)) {
+        if (plugin_ismoderator_paypal()) {
+            COM_setMsg("Paypal Plugin has not been updated from $installed to $required", 'error');
+        }
+        return false;
+    } else {
+        return true;
+    }
 }
 
 ?>
