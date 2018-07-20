@@ -611,20 +611,17 @@ class Cart
         $handling = 0;
         $tax_items = 0;
         $tax_amt = 0;
-        $this->m_info['total_by_type'] = array();
         foreach ($this->m_cart as $id=>$item) {
             $counter++;
             $attr_desc = '';
             list($item_id, $attr_keys) = PAYPAL_explode_opts($item['item_id']);
             $P = Product::getInstance($item_id);
-            if (!isset($this->m_info['total_by_type'][$P->prod_type])) {
-                $this->m_info['total_by_type'][$P->prod_type] = 0;
-            }
             if ($checkout) {
                 $item_price = $item['price'];
             } else {
-                $item_price = $P->getPrice($attr_keys, $item['quantity']);
+                $item_price = $P->getPrice($attr_keys, $item['quantity']) / $item['quantity'];
             }
+            $this->m_cart[$id]['price'] = $item_price;  // update from catalog
             $item_name = $item['descrip'];
             // Get shipping amount and weight
             if ($P->shipping_type == 2 && $P->shipping_amt > 0) {
@@ -730,8 +727,8 @@ class Cart
         ) );
 
         // If this is the final checkout, then show the payment buttons
+        $this->Save();      // Update for tax
         if ($checkout) {
-            $this->Save();      // Update for tax
             $gw = Gateway::getInstance($this->m_info['gateway']);
             $T->set_var(array(
                 'gateway_vars'  => $this->checkoutButton($gw),
@@ -863,7 +860,7 @@ class Cart
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
                         'gw_id' => $gw->Name(),
-                        'radio' => $gw->checkoutRadio($gw_sel == $gw->Name()),
+                        'radio' => $gw->checkoutRadio($this, $gw_sel == $gw->Name()),
                     ) );
                     $T->parse('row', 'Radios', true);
                 }
