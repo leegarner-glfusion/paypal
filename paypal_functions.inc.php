@@ -983,6 +983,8 @@ function X_PAYPAL_ipnlogList()
 *   This is a verbatim copy of COM_mail(), but with the $attachments
 *   paramater added and 3 extra lines of code near the end.
 *
+*   @deprecated 0.6.0
+*
 *   @param  string  $to         Receiver's email address
 *   @param  string  $from       Sender's email address
 *   @param  string  $subject    Message Subject
