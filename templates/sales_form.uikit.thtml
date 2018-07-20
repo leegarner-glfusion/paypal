@@ -194,10 +194,6 @@ function PP_validateSalesForm(form)
         $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
         return false;
     }
-    if (form.amount.value == 0) {
-        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_amount_req']}", {timeout: 3000,pos:'top-center'});
-        return false;
-    }
     return true;
 }
 </script>
