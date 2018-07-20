@@ -126,7 +126,7 @@ function PAYPAL_do_upgrade()
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
 
         if ($c->group_exists($pi_name)) {
-             $c->add('blk_random_limit', $_PP_DEFAULTS['blk_random_limit'],
+            $c->add('blk_random_limit', $_PP_DEFAULTS['blk_random_limit'],
                     'text', 0, 30, 2, 40, true, $pi_name);
             $c->add('blk_featured_limit', $_PP_DEFAULTS['blk_featured_limit'],
                     'text', 0, 30, 2, 50, true, $pi_name);
@@ -529,9 +529,11 @@ function PAYPAL_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.6.0')) {
         $current_ver = '0.6.0';
-        $c->del('download_path', $pi_name);
-        $c->del('purchase_email_anon_attach', $pi_name);
-        $c->del('purchase_email_anon', $pi_name);
+        $c->del('download_path', $_PP_CONF['pi_name']);
+        $c->del('purchase_email_anon_attach', $_PP_CONF['pi_name']);
+        $c->del('purchase_email_anon', $_PP_CONF['pi_name']);
+        $c->del('purchase_email_user', $_PP_CONF['pi_name']);
+        $c->del('purchase_email_user_attach', $_PP_CONF['pi_name']);
         $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('fs_gc', NULL, 'fieldset', 20, 0, NULL, 0, true,

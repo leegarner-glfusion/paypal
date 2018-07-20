@@ -33,25 +33,6 @@ $_PP_DEFAULTS['currency'] = 'USD';
 */
 $_PP_DEFAULTS['anonymous_buy'] = true;
 
-/**
- *  Specify whether "on purchase" emails will be sent.
- *  Be sure to edit the files templates/purchase_email_subject.txt and
- *  templates/purchase_email_message.txt to customize the email message.
- *  You should disable the *_attach options below if you are distributing
- *  large files or it is likely that a purchaser will be buying many medium
- *  files otherwise the email will become too large and will likely never be
- *  received.
- *
- * purch_email_user true if logged in users should get a purchase email
- * purch_email_user_attach true if logged in users should get purchases
- *                            emailed as attachments
- * purchase_email_anon true if anonymous users should get a purchase email
- * purchase_email_anon_attach true if anonymous users should get purchases
- *                            emailed as attachments
- */
-$_PP_DEFAULTS['purchase_email_user']        = 1;
-$_PP_DEFAULTS['purchase_email_user_attach'] = 0;
-
 /** Email administrator upon purchase?
 *   0 = Never
 *   1 = Only when physical items are purchased

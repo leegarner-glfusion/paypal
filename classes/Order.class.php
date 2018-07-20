@@ -657,12 +657,12 @@ class Order
         global $_CONF, $_PP_CONF, $LANG_PP;
 
         // Check if we're supposed to send a notification
-        if ( ($this->uid > 1 &&
+        /*if ( ($this->uid > 1 &&
                     $_PP_CONF['purch_email_user'] == 0) ||
             ($this->uid == 1  &&
                     $_PP_CONF['purch_email_anon'] == 0) ) {
             return;
-        }
+        }*/
         PAYPAL_debug("Sending email to " . $this->uid . ' at ' . $this->buyer_email);
 
         // setup templates
@@ -743,6 +743,7 @@ class Order
         } else {
             $do_send_attachments = false;
         }
+        $do_send_attachments = false;   // override to disable attachments
 
         $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
