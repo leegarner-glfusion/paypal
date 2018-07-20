@@ -44,19 +44,21 @@ class _coupon_gw extends Gateway
      * @param   boolean $selected   Indicate if this should be the selected option
      * @return  string      HTML for the radio button or checkbox
      */
-    public function checkoutRadio($selected = false)
+    public function checkoutRadio($cart, $selected = false)
     {
         global $LANG_PP;
 
         // Get the order total from the cart, and the user's balance
         // to decide what kind of button to show.
         $gc_bal = Coupon::getUserBalance();
-        $total = Cart::getInstance()-> getInfo('order_total');
-        $by_type = Cart::getInstance()->getInfo('total_by_type');
+        $total = Cart::getInstance()->getInfo('order_total');
+        $items = $cart->Cart();
         $gc_can_apply = 0;
-        foreach ($by_type as $type=>$value) {
-            if ($type != PP_PROD_COUPON)
-                $gc_can_apply += $value;
+        foreach ($items as $item) {
+            $P = Product::getInstance($item['item_id']);
+            if (!$P->isNew && $P->prod_type != PP_PROD_COUPON) {
+                $gc_can_apply += $P->getPrice($item['options'], $item['quantity']);
+            }
         }
         if ($gc_bal == 0) {
             // No gift card balance.

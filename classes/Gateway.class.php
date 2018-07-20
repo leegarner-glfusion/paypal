@@ -1190,7 +1190,7 @@ abstract class Gateway
     *   @param  boolean $selected   True if the button should be selected
     *   @return string      HTML for radio button
     */
-    public function checkoutRadio($selected = false)
+    public function checkoutRadio($cart, $selected = false)
     {
         $sel = $selected ? 'checked="checked" ' : '';
         $radio = '<input required type="radio" name="gateway" value="' .

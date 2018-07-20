@@ -1538,6 +1538,7 @@ class Product
                 }
             }
         }
+        $price *= $quantity;
         $price *= $discount_factor;
         $price = round($price, $this->currency->Decimals());
         return $price;
