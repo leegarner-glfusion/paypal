@@ -1522,6 +1522,8 @@ class Product
 
         // future: return sale price if on sale, otherwise base price
         foreach ($options as $key) {
+            $parts = explode('|', $key); // in case of "7|Black|1.50" option
+            $key = $parts[0];
             if (isset($this->options[$key])) {
                 $price += (float)$this->options[$key]['attr_price'];
             }
