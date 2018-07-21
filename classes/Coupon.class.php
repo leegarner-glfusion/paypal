@@ -106,6 +106,8 @@ class Coupon extends Product
                 }
             }
         } else {
+            // if neither mask nor length given use a default length
+            if ($length == 0) $length = 16;
             for ($i = 0; $i < $length; $i++) {
                 $coupon .= $characters[mt_rand(0, $charcount - 1)];
             }
@@ -178,7 +180,7 @@ class Coupon extends Product
     *   @param  integer $uid    Optional user ID, current user by default
     *   @return integer     Status code (0=success, 1=already done, 2=error)
     */
-    public static function Apply($code, $uid = 0)
+    public static function Redeem($code, $uid = 0)
     {
         global $_TABLES, $_USER;
 
@@ -186,6 +188,8 @@ class Coupon extends Product
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
+        if ($uid < 2) return 2;
+
         $code = DB_escapeString($code);
         $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
                 WHERE code = '$code'";
@@ -217,18 +221,19 @@ class Coupon extends Product
 
 
     /**
-    *   Redeem a coupon value against an order.
+    *   Apply a coupon value against an order.
     *   Does not update the coupon table, but deducts the maximum of the
     *   coupon balance or the order value from the userinfo table.
     *
     *   @param  float   $amount     Amount to redeem (order value)
     *   @return float               Remaining order value, if any
     */
-    public static function Redeem($amount, $uid = 0, $Order = NULL)
+    public static function Apply($amount, $uid = 0, $Order = NULL)
     {
         global $_TABLES, $_USER;
 
         if ($uid == 0) $uid = $_USER['uid'];
+        if ($uid < 2) return 0;
         $coupons = self::getUserCoupons($uid);
         $remain = (float)$amount;
         foreach ($coupons as $coupon) {
@@ -379,6 +384,7 @@ class Coupon extends Product
 
         if ($uid == 0) $uid = $_USER['uid'];
         $uid = (int)$uid;
+        if ($uid < 2) return array();   // Can't get anonymous coupons here
 
         if (!isset($coupons[$uid])) {
             $cache_key = 'coupons_' . $uid;
@@ -418,7 +424,12 @@ class Coupon extends Product
         if ($uid == 0) $uid = $_USER['uid'];
         if (!isset($bals[$uid])) {
             $bals[$uid] = (float)0;
-            $coupons = self::getUserCoupons($uid);
+            // Coupon balances are not supported for anonymous users
+            if ($uid > 1) {
+                $coupons = self::getUserCoupons($uid);
+            } else {
+                $coupons = array();
+            }
             foreach ($coupons as $coupon) {
                 $bals[$uid] += $coupon['balance'];
             }

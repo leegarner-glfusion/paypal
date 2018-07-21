@@ -1695,7 +1695,7 @@ function plugin_profilesave_paypal($uid=0)
 
     $apply_gc = PP_getVar($_POST, 'pp_apply_gc', 'string');
     if (!empty($apply_gc)) {
-        Paypal\Coupon::Apply($apply_gc, $uid);
+        Paypal\Coupon::Redeem($apply_gc, $uid);
     }
 }
 

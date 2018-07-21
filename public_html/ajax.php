@@ -82,7 +82,7 @@ case 'redeem_gc':
     } else {
         $code = PP_getVar($_POST, 'gc_code');
         $uid = $_USER['uid'];
-        $status = Paypal\Coupon::Apply($code, $uid);
+        $status = Paypal\Coupon::Redeem($code, $uid);
         $gw = Paypal\Gateway::getInstance('_coupon_gw');
         $gw_radio = $gw->checkoutRadio($status == 0 ? true : false);
         $status_msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);

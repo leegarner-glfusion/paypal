@@ -227,7 +227,7 @@ case 'redeem':
     // the apply_gc form
     $code = PP_getVar($_REQUEST, 'gc_code');
     $uid = $_USER['uid'];
-    $status = Paypal\Coupon::Apply($code, $uid);
+    $status = Paypal\Coupon::Redeem($code, $uid);
     if ($status > 0) {
         $persist = true;
         $type = 'error';

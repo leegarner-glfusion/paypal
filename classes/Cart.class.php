@@ -405,11 +405,11 @@ class Cart
             $value = (float)$value;
             $this->UpdateQty($id, $value, false);
         }
-        // Now look for a coupon code to apply.
+        // Now look for a coupon code to redeem against the user's account.
         if ($_PP_CONF['gc_enabled']) {
             $gc = PP_getVar($A, 'gc_code');
             if (!empty($gc)) {
-                if (Coupon::Apply($gc) == 0) {
+                if (Coupon::Redeem($gc) == 0) {
                     unset($this->m_info['apply_gc']);
                 }
             }
@@ -659,7 +659,6 @@ class Cart
             ) );
             $T->parse('iRow', 'ItemRow', true);
             $subtotal += $item_total;
-            $this->m_info['total_by_type'][$P->prod_type] += $item_total;
         }
 
         $custom_info = array(
@@ -686,10 +685,6 @@ class Cart
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Coupon::getUserBalance();
             $gc_can_apply = 0;
-            foreach ($this->m_info['total_by_type'] as $type=>$value) {
-                if ($type != PP_PROD_COUPON)
-                    $gc_can_apply += $value;
-            }
             if (!$checkout) {
                 if (isset($this->m_info['apply_gc'])) {
                     $apply_gc = $this->m_info['apply_gc'];
@@ -720,7 +715,7 @@ class Cart
             'tc_link'  => $tc_link,
             'apply_gc'  => $apply_gc ? $currency->FormatValue($apply_gc) : 0,
             'gc_bal_disp' => $gc_bal > 0 ? $currency->FormatValue($gc_bal) : 0,
-            'use_gc'    => $_PP_CONF['gc_enabled'] ? true : false,
+            'use_gc'    => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'net_total' => $currency->Format(max($total - $apply_gc, 0)),
             'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),

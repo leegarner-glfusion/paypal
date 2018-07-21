@@ -345,7 +345,7 @@ class IPN
             $this->Order->by_gc = $by_gc;
             if ($by_gc > 0) {
                 $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $by_gc, 'Gift Card'));
-                Coupon::Redeem($by_gc, $this->Order->uid, $this->Order);
+                Coupon::Apply($by_gc, $this->Order->uid, $this->Order);
             }
             $this->Order->Notify();
             // If this was a user's cart, then clear that also
