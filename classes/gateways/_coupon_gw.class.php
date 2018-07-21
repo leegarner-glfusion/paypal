@@ -44,34 +44,38 @@ class _coupon_gw extends Gateway
      * @param   boolean $selected   Indicate if this should be the selected option
      * @return  string      HTML for the radio button or checkbox
      */
-    public function checkoutRadio($cart, $selected = false)
+    public function checkoutRadio($selected = false)
     {
         global $LANG_PP;
 
         // Get the order total from the cart, and the user's balance
         // to decide what kind of button to show.
+        $cart = Cart::getInstance();
+        $total = $cart->getInfo('order_total');
         $gc_bal = Coupon::getUserBalance();
-        $total = Cart::getInstance()->getInfo('order_total');
-        $items = $cart->Cart();
-        $gc_can_apply = 0;
-        foreach ($items as $item) {
-            $P = Product::getInstance($item['item_id']);
-            if (!$P->isNew && $P->prod_type != PP_PROD_COUPON) {
-                $gc_can_apply += $P->getPrice($item['options'], $item['quantity']);
-            }
-        }
         if ($gc_bal == 0) {
-            // No gift card balance.
-            $radio = '';
-        } elseif ($gc_bal < $gc_can_apply) {
-            // GC balance is not enough, apply the whole thing.
-            $radio = '<input type="checkbox" name="by_gc" value="' . $by_gc .
+            // No gift card balance to apply, no selection to show
+            return '';
+        }
+
+        // Get the items from the cart that can be paid by gift card,
+        // since coupon products cannot.
+        $gc_can_apply = self::_gcCanPay($cart);
+        $gc_can_apply += $cart->getInfo('tax');
+        $gc_can_apply += $cart->getInfo('shipping');
+        $gc_can_apply += $cart->getInfo('handling');
+
+        // Create the radio button or checkbox as appropriate based
+        // on the card balance vs. the amount that can be paid by card.
+        if ($gc_bal < $gc_can_apply) {
+            // GC balance is not enough, option to apply the whole thing.
+            $radio = '<input type="checkbox" name="by_gc" value="' . $gc_bal .
                 '" checked="checked" />&nbsp;';
             $radio .= sprintf($LANG_PP['use_gc_full'],
                     Currency::getInstance()->Format($gc_can_apply));
         } elseif ($gc_bal >= $gc_can_apply && $gc_can_apply == $total) {
             // GC balance is enough to pay for the order. Show a regular
-            // radio button.
+            // radio button to pay the entire order.
             $sel = $selected ? 'checked="checked" ' : '';
             $radio = '<input required type="radio" name="gateway" value="' .
                 $this->gw_name . '" ' . $sel . '/>&nbsp;';
@@ -82,14 +86,18 @@ class _coupon_gw extends Gateway
             // from the gateway radio
             $radio .= '<input type="hidden" name="by_gc" value="0" />';
         } else {
-            // Have a GC balance, but not enough to pay the entire order.
+            // Have a GC balance, but not enough to pay the entire order because
+            // some items can't be paid by GC. Same checkbox as above but with
+            // a different text message.
             $by_gc = min($gc_bal, $gc_can_apply);
             $radio = '<input type="checkbox" name="by_gc" value="' . $by_gc .
                 '" checked="checked" />&nbsp;';
             $radio .= sprintf($LANG_PP['use_gc_part'],
                     Currency::getInstance()->Format($gc_can_apply),
                     Currency::getInstance()->Format($gc_bal));
-            $radio .= '<br /><div class="ppNoGCMsg">' . $LANG_PP['some_gc_disallowed'] . '</div>';
+            if ($gc_can_apply < $total) {
+                $radio .= '<br /><div class="ppNoGCMsg">' . $LANG_PP['some_gc_disallowed'] . '</div>';
+            }
         }
         return $radio;
     }
@@ -124,6 +132,26 @@ class _coupon_gw extends Gateway
             $gateway_vars[] = '<input type="hidden" name="payer_email" value="' . $_USER['email'] . '" />';
         }
         return implode("\n", $gatewayVars);
+    }
+
+
+    /**
+     * From a cart, get the total items that can be paid by gift card.
+     *
+     * @param   object  $cart   Shopping Cart
+     * @return  float           Total payable by gift card
+     */
+    private static function _gcCanPay($cart)
+    {
+        $items = $cart->Cart();
+        $gc_can_apply = 0;
+        foreach ($items as $item) {
+            $P = Product::getInstance($item['item_id']);
+            if (!$P->isNew && $P->prod_type != PP_PROD_COUPON) {
+                $gc_can_apply += $P->getPrice($item['options'], $item['quantity']);
+            }
+        }
+        return $gc_can_apply;
     }
 
 }

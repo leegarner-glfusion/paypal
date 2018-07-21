@@ -855,7 +855,7 @@ class Cart
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
                         'gw_id' => $gw->Name(),
-                        'radio' => $gw->checkoutRadio($this, $gw_sel == $gw->Name()),
+                        'radio' => $gw->checkoutRadio($gw_sel == $gw->Name()),
                     ) );
                     $T->parse('row', 'Radios', true);
                 }
