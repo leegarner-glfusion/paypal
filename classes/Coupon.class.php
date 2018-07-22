@@ -211,6 +211,7 @@ class Coupon extends Product
                     redeemed = UTC_TIMESTAMP()
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
+            self::writeLog($code, $uid, $amount, 'gc_redeemed');
             if (DB_error()) {
                 COM_errorLog("A DB error occurred marking coupon $code as redeemed");
                 return 2;
@@ -250,13 +251,12 @@ class Coupon extends Product
             if ($Order !== NULL) {
                 $order_id = DB_escapeString($Order->order_id);
             }
+            $msg = sprintf($LANG_PP['msg_gc_applied'], $order_id);
+            $uid = $Order->uid;
             $sql = "UPDATE {$_TABLES['paypal.coupons']}
                     SET balance = $bal
                     WHERE code = '$code';";
-            $sql .= "INSERT INTO {$_TABLES['paypal.coupon_log']}
-                    (code, order_id, amount, msg)
-                    VALUES
-                    ('{$code}', '{$order_id}', '$amount', 'Applied to order');";
+            self::writeLog($code, $uid, $amount, 'gc_applied', $order_id);
             DB_query($sql);
             if ($remain == 0) break;
         }
@@ -454,6 +454,84 @@ class Coupon extends Product
         return $amount <= $balance ? true : false;
     }
 
+
+    /**
+     * Write a log entry
+     *
+     * @param   string  $code       Gift card code
+     * @param   integer $uid        User ID
+     * @param   float   $amount     Gift card amount or amount applied
+     * @param   string  $msg        Message to log
+     * @param   string  $order_id   Order ID (when applying)
+     */
+    public static function writeLog($code, $uid, $amount, $msg, $order_id = '')
+    {
+        global $_TABLES;
+
+        $msg = DB_escapeString($msg);
+        $order_id = DB_escapeString($order_id);
+        $code = DB_escapeString($code);
+        $amount = (float)$amount;
+        $uid = (int)$uid;
+
+        $sql = "INSERT INTO {$_TABLES['paypal.coupon_log']}
+                (code, uid, order_id, ts, amount, msg)
+                VALUES
+                ('{$code}', '{$uid}', '{$order_id}', UNIX_TIMESTAMP(), '$amount', '{$msg}');";
+        DB_query($sql);
+    }
+
+
+    /**
+     * Get the log entries for a user ID to show in their account.
+     * Optionally specify a gift card code to get only entries
+     * pertaining to that gift card.
+     *
+     * @param   integer $uid    User ID
+     * @param   string  $code   Optional gift card code
+     * @return  array           Array of log messages
+     */
+    public static function getLog($uid, $code = '')
+    {
+        global $_TABLES, $LANG_PP;
+
+        $log = array();
+        $uid = (int)$uid;
+        $sql = "SELECT * FROM {$_TABLES['paypal.coupon_log']}
+                WHERE uid = $uid";
+        if ($code != '') {
+            $sql .= " AND code = '" . DB_escapeString($code) . "'";
+        }
+        $sql .= ' ORDER BY ts DESC';
+        $res = DB_query($sql);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $log[] = $A;
+            }
+        }
+        return $log;
+    }
+
+
+    /**
+     * Mask a gift card code for display in the log.
+     * Replaces characters, except hyphens, with "X"
+     *
+     * @param   string  $code   Original gift card code
+     * @return  string          Masked code
+     */
+    public static function maskForDisplay($code)
+    {
+        $len = strlen($code);
+        // If the code length is > 10 characters, leave the last 4 alone.
+        if ($len > 10) {
+            $len -= 4;
+        }
+        for ($i = 0; $i < $len; $i++) {
+            if ($code[$i] != '-') $code[$i] = 'X';
+        }
+        return $code;
+    }
 }
 
 ?>

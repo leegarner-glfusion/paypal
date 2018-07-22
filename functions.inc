@@ -1636,7 +1636,7 @@ function plugin_configmanager_select_currency_paypal()
 */
 function plugin_profileedit_paypal($uid, $panel, $fieldset)
 {
-    global $_PP_CONF, $_USER, $_TABLES;
+    global $_PP_CONF, $_USER, $_TABLES, $LANG_PP;
 
     $retval = '';
     // Make sure that a valid UID was passed in.
@@ -1652,10 +1652,38 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         ));
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
         $U = Paypal\UserInfo::getInstance($uid);
-        $gc_bal = Paypal\Coupon::getUserBalance($uid);
         $Cur = Paypal\Currency::getInstance();
-        if ($gc_bal > 0) {
+        if ($_PP_CONF['gc_enabled']) {
+            $gc_bal = Paypal\Coupon::getUserBalance($uid);
             $LT->set_var('gc_bal', $Cur->Format($gc_bal));
+            $LT->set_block('block', 'gcRow', 'gclog');
+            $log = Paypal\Coupon::getLog($uid);
+            $dt = new Date('now', $_USER['tzid']);
+            foreach ($log as $line) {
+                $dt->setTimestamp($line['ts']);
+                switch ($line['msg']) {
+                case 'gc_redeemed':
+                    // Redeemed and added to account
+                    $msg = sprintf($LANG_PP['msg_gc_redeemed'], Paypal\Coupon::maskForDisplay($line['code']));
+                    break;
+                case 'gc_applied':
+                    // Applied as payment against an order
+                    $order = COM_createLink($line['order_id'],
+                        PAYPAL_URL . '/index.php?order=' . $line['order_id']);
+                    $msg = sprintf($LANG_PP['msg_gc_applied'], $order);
+                    $line['amount'] *= -1;
+                    break;
+                default:
+                    $msg = $line['msg'];
+                    break;
+                }
+                $LT->set_var(array(
+                    'gc_date'   => $dt->toMySQL(true),
+                    'gc_amount' => Paypal\Currency::getInstance()->format($line['amount']),
+                    'gc_msg'    => $msg,
+                ) );
+                $LT->parse('gclog', 'gcRow', true);
+            }
         }
         if (!empty($U->cart)) {
             $cart = true;
