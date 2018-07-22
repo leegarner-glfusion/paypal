@@ -190,7 +190,6 @@ class Product
     public function __set($var, $value)
     {
         switch ($var) {
-        case 'id':
         case 'views':
         case 'votes':
         case 'prod_type':
@@ -268,6 +267,12 @@ class Product
             $this->properties[$var] = $value;
             break;
 
+        case 'id':
+            // Item ID may be a string if this is a plugin,
+            // otherwise sanitize as an integer.
+            if (!self::isPluginItem($value)) {
+                $value = (int)$value;
+            }
         default:
             // Other value types (array?). Save it as-is.
             $this->properties[$var] = $value;
