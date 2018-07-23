@@ -252,7 +252,6 @@ class Coupon extends Product
             if ($Order !== NULL) {
                 $order_id = DB_escapeString($Order->order_id);
             }
-            $msg = sprintf($LANG_PP['msg_gc_applied'], $order_id);
             $uid = $Order->uid;
             $sql = "UPDATE {$_TABLES['paypal.coupons']}
                     SET balance = $bal
