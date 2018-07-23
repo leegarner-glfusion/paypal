@@ -18,7 +18,7 @@ Released TBD
 - Add privacy_export function
 - Additional refactoring to support multiple product types
 - Support for selling gift cards
-- Implement glFusion 1.8.0 caching
+- Implement glFusion 2.0.0 caching
 - Implement class autoloader, refactor gateway classes
 - Change post to get for redirect from Paypal
 - Removed unused comment counter field

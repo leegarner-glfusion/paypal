@@ -19,7 +19,8 @@ namespace Paypal;
 */
 class Cache
 {
-    private static $tag = 'paypal'; // fallback tag
+    const TAG = 'paypal';
+    const MIN_GVERSION = '2.0.0';
 
     /**
     *   Update the cache.
@@ -32,8 +33,8 @@ class Cache
     */
     public static function set($key, $data, $tag='', $cache_mins=0)
     {
-        if (version_compare(GVERSION, '1.8.0', '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+        if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
+            return;     // glFusion version doesn't support caching
         }
 
         $cache_mins = (int)$cache_mins;
@@ -41,7 +42,7 @@ class Cache
             $cache_mins = 30;       // 30-minute default
         }
         // Always make sure the base tag is included
-        $tags = array(self::$tag);
+        $tags = array(self::TAG);
         if (!empty($tag)) {
             if (!is_array($tag)) $tag = array($tag);
             $tags = array_merge($tags, $tag);
@@ -59,8 +60,8 @@ class Cache
     */
     public static function delete($key)
     {
-        if (version_compare(GVERSION, '1.8.0', '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+        if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
+            return;     // glFusion version doesn't support caching
         }
         $key = self::makeKey($key);
         \glFusion\Cache::getInstance()->delete($key);
@@ -75,10 +76,10 @@ class Cache
     */
     public static function clear($tag = array())
     {
-        if (version_compare(GVERSION, '1.8.0', '<')) {
-            return;     // caching requires glFusion 1.8.0 or higher
+        if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
+            return;     // glFusion version doesn't support caching
         }
-        $tags = array(self::$tag);
+        $tags = array(self::TAG);
         if (!empty($tag)) {
             if (!is_array($tag)) $tag = array($tag);
             $tags = array_merge($tags, $tag);
@@ -96,8 +97,8 @@ class Cache
     */
     public static function makeKey($key)
     {
-        //$key = \glFusion\Cache::getInstance()->createKey(self::$tag . '_' . $key);
-        $key = self::$tag . '_' . $key;
+        //$key = \glFusion\Cache::getInstance()->createKey(self::TAG . '_' . $key);
+        $key = self::TAG . '_' . $key;
         return $key;
     }
 
@@ -110,8 +111,8 @@ class Cache
     */
     public static function get($key)
     {
-        if (version_compare(GVERSION, '1.8.0', '<')) {
-            return NULL;     // caching requires glFusion 1.8.0 or higher
+        if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
+            return;     // glFusion version doesn't support caching
         }
         $key = self::makeKey($key);
         if (\glFusion\Cache::getInstance()->has($key)) {

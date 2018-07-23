@@ -12,6 +12,10 @@
 */
 namespace Paypal;
 
+/**
+ * @class   Currency
+ * @package paypal
+ */
 class Currency
 {
     private $properties = array();
@@ -42,7 +46,7 @@ class Currency
     /**
     *   Get an instance of a currency.
     *   Caches in a static variable for quick repeated retrivals,
-    *   and also caches using glFusion 1.8.0 caching if available.
+    *   and also caches using glFusion caching if available.
     *
     *   @param  string  $code   Currency Code
     *   @return array           Array of information
