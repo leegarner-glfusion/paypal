@@ -229,21 +229,20 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     // If the "unique" flag is present, then only update specific elements
     // included in the "updates" array. If there are no specific updates, then
     // do nothing.
-    if (isset($args['unique']) && $args['unique']) {
+    if (PP_getVar($args, 'unique', 'boolean', false) &&
+        $ppGCart->Contains($item_number) !== false) {
         // If the item exists, don't add it, but check if there's an update
-        if ($ppGCart->Contains($item_number) !== false) {
-            if (isset($args['update']) && is_array($args['update'])) {
-                // Collect the updated field=>value pairs to send to updateItem()
-                $updates = array();
-                foreach ($args['update'] as $fld) {
-                    $updates[$fld] = $args[$fld];
-                }
-                $ppGCart->updateItem($item_number, $updates);
+        if (isset($args['update']) && is_array($args['update'])) {
+            // Collect the updated field=>value pairs to send to updateItem()
+            $updates = array();
+            foreach ($args['update'] as $fld) {
+                $updates[$fld] = $args[$fld];
             }
-            return PLG_RET_OK;
+            $ppGCart->updateItem($item_number, $updates);
         }
+    } else {
+        $ppGCart->addItem($cart_args);
     }
-    $ppGCart->addItem($cart_args);
     return PLG_RET_OK;
 }
 
