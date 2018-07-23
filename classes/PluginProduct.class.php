@@ -14,13 +14,14 @@
 namespace Paypal;
 
 /**
-*   Class for product
+*   Class for a plugin-supplied product
 *   @package paypal
 */
 class PluginProduct extends Product
 {
     public $url;        // URL to product detail page, if any
     public $pi_info;    // plugin info with item_id and other vars
+    private $_have_detail_svc;  // Plugin has a detail page service function
 
     /**
     *   Constructor.
@@ -51,7 +52,7 @@ class PluginProduct extends Product
 
         // Try to call the plugin's function to get product info.
         $status = LGLIB_invokeService($this->pi_name, 'productinfo',
-                    $this->pi_info, $A, $svc_msg);
+            $this->pi_info, $A, $svc_msg);
         if ($status == PLG_RET_OK) {
             $this->price = PP_getVar($A, 'price', 'float', 0);
             $this->item_name = PP_getVar($A, 'name');
@@ -62,6 +63,7 @@ class PluginProduct extends Product
             $this->override_price = PP_getVar($A, 'override_price', 'integer', 0);
             $this->btn_type = PP_getVar($A, 'btn_type', 'string', 'buy_now');
             $this->btn_text = PP_getVar($A, 'btn_text');
+            $this->_have_detail_svc = PP_getVar($A, 'have_detail_svc', 'boolean', false);
          } else {
             // probably an invalid product ID
             $price = 0;
@@ -71,6 +73,7 @@ class PluginProduct extends Product
             $this->isNew = true;
             $this->url = '';
             $this->taxable = 0;
+            $this->_have_detail_svc = false;
         }
     }
 
@@ -197,7 +200,11 @@ class PluginProduct extends Product
     */
     public function getLink()
     {
-        return $this->url;
+        if ($this->_have_detail_svc) {
+            return PAYPAL_URL . '/index.php?pidetail=' . $this->item_id;
+        } else {
+            return $this->url;
+        }
     }
 
 
