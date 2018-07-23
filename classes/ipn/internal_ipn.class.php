@@ -129,6 +129,7 @@ class internal_ipn extends IPN
         if (!Coupon::verifyBalance($by_gc, $this->pp_data['custom']['uid'])) {
             return false;
         }
+        $this->pp_data['status'] = 'paid';
         return true;
     }
 
@@ -224,7 +225,7 @@ class internal_ipn extends IPN
             $total_shipping += $shipping;
             $total_handling += $handling;
         }
-        $by_gc = $this->Cart->getInfo()['apply_gc'];
+        $by_gc = $this->Cart->getInfo('apply_gc');
         PAYPAL_debug("Received $by_gc gift card payment");
         $this->pp_data['pmt_gross'] = 0;    // This only handles fully-paid items
         $this->pp_data['custom']['by_gc'] = $by_gc;
