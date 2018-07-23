@@ -33,6 +33,8 @@ class PluginProduct extends Product
     */
     public function __construct($item, $mods=array())
     {
+        global $_USER;
+
         $this->pi_info = array();
         $item = explode('|', $item);
         $item_id = $item[0];
@@ -47,6 +49,9 @@ class PluginProduct extends Product
         $this->product_id = $item_parts[0];
 
         // Get the user ID to pass to the plugin in case it's needed.
+        if (!isset($mods['uid'])) {
+            $mods['uid'] = $_USER['uid'];
+        }
         $this->pi_info['mods'] = $mods;
         $this->prod_type = PP_PROD_PLUGIN;
 

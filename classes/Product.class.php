@@ -126,10 +126,10 @@ class Product
     *   $A can be a single item id or an array (DB record) of values.
     *
     *   @param  mixed   $A      Single item ID or array of values
-    *   @param  array   $B      Optional array of product modifiers
+    *   @param  array   $mods   Optional array of product modifiers
     *   @return object          Product Object
     */
-    public static function getInstance($A, $B=array())
+    public static function getInstance($A, $mods=array())
     {
         global $_TABLES;
         static $P = array();    // cache for internal products
@@ -149,7 +149,7 @@ class Product
         $item = explode('|', $id);
         if (self::isPluginItem($item[0])) {
             // Product provided by another plugin
-            return new PluginProduct($item[0], $B);
+            return new PluginProduct($item[0], $mods);
         } else {
             if (!array_key_exists($id, $P)) {
                 // Product internal to this plugin
