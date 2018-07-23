@@ -921,6 +921,7 @@ class Order
         global $LANG_PP;
 
         $this->subtotal = 0;
+        $items = array();
         foreach ($this->items as $key => $item) {
             $item_options = '';
             $P = $item->getProduct();
