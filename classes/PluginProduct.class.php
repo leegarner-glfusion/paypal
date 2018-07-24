@@ -21,7 +21,8 @@ class PluginProduct extends Product
 {
     public $url;        // URL to product detail page, if any
     public $pi_info;    // plugin info with item_id and other vars
-    private $_have_detail_svc;  // Plugin has a detail page service function
+    private $_have_detail_svc = false;  // Plugin has a detail page service function
+    private $_buynow_qty = 0;   // Quantity to use for buy-now buttons
 
     /**
     *   Constructor.
@@ -69,9 +70,10 @@ class PluginProduct extends Product
             $this->btn_type = PP_getVar($A, 'btn_type', 'string', 'buy_now');
             $this->btn_text = PP_getVar($A, 'btn_text');
             $this->_have_detail_svc = PP_getVar($A, 'have_detail_svc', 'boolean', false);
+            $this->_buynow_qty = PP_getVar($A, 'buynow_qty', 'integer', 0);
          } else {
             // probably an invalid product ID
-            $price = 0;
+            $this->price = 0;
             $this->item_name = '';
             $this->short_description = '';
             $this->item_id = NULL;
@@ -223,9 +225,23 @@ class PluginProduct extends Product
     {
         $text = '';
         // status from the service function isn't used.
-        LGLIB_invokeService($this->pi_name, 'emailReciptInfo',
+        LGLIB_invokeService($this->pi_name, 'emailReceiptInfo',
                     $this->pi_info, $text, $svc_msg);
         return $text;
+    }
+
+
+    /**
+     * Get the quantity for a buy-now button.
+     * This is used to either set a fixed quantity, or if zero then
+     * the buyer can enter a quantity.
+     * Plugin products like subscriptions may set a specific quantity.
+     *
+     * @return  integer     Fixed quantity
+     */
+    public function buynowQty()
+    {
+        return $this->_buynow_qty;
     }
 
 }   // class PluginProduct

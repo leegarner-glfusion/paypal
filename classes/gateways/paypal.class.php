@@ -505,7 +505,16 @@ class paypal extends Gateway
             $vars['return'] = PAYPAL_URL . '/index.php?thanks=paypal';
             $vars['cancel_return'] = PAYPAL_URL;
             $vars['amount'] = $P->getPrice();
-            $vars['undefined_quantity'] = '1';
+
+            // Get the allowed buy-now quantity. If not defined, set
+            // undefined_quantity.
+            $qty = $P->buynowQty();
+            if ($qty < 1) {
+                $vars['undefined_quantity'] = '1';
+            } else {
+                $vars['quantity'] = $qty;
+            }
+
             $vars['notify_url'] = $this->ipn_url;
 
             if ($P->weight > 0) {

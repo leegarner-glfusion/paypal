@@ -2026,6 +2026,20 @@ class Product
         return '';
     }
 
+
+    /**
+     * Get the quantity for a buy-now button.
+     * This is used to either set a fixed quantity, or if zero then
+     * the buyer can enter a quantity.
+     * Catalog products allow any quantity to be purchased.
+     *
+     * @return  integer     Allowed quantity
+     */
+    public function buynowQty()
+    {
+        return 0;
+    }
+
 }   // class Product
 
 ?>
