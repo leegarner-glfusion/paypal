@@ -37,10 +37,7 @@ class Cache
             return;     // glFusion version doesn't support caching
         }
 
-        $cache_mins = (int)$cache_mins;
-        if ($cache_mins < 10) {     // 10-minute minimum
-            $cache_mins = 30;       // 30-minute default
-        }
+        $ttl = (int)$cache_mins * 60;   // convert to seconds
         // Always make sure the base tag is included
         $tags = array(self::TAG);
         if (!empty($tag)) {
@@ -49,7 +46,7 @@ class Cache
         }
         $key = self::makeKey($key);
         \glFusion\Cache::getInstance()
-            ->set($key, $data, $tags, $cache_mins * 60);
+            ->set($key, $data, $tags, $ttl);
     }
 
 
