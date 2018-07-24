@@ -21,6 +21,7 @@ class Order
     public $items = array();        // Array of OrderItem objects
     private $properties = array();
     private $isNew = true;
+    private $isAdmin = false;       // True if viewing via admin interface
     var $no_shipping = 1;
     private $_addr_fields = array('billto_name',
             'billto_company', 'billto_address1', 'billto_address2',
@@ -416,7 +417,6 @@ class Order
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
-        $isAdmin = plugin_ismoderator_paypal() ? true : false;
 
         $tplname = 'order';
         if (!empty($tpl)) $tplname .= '.' . $tpl;
@@ -447,7 +447,7 @@ class Order
                 'item_price'    => $item['price'],
                 'item_quantity' => $item['quantity'],
                 'item_total'    => $item['total'],
-                'is_admin'      => $isAdmin ? 'true' : '',
+                'is_admin'      => $this->isAdmin,
                 'is_file'       => $item['is_file'],
                 'taxable'       => $item['taxable'],
                 'tax_icon'      => $item['tax_icon'],
@@ -490,7 +490,7 @@ class Order
             'token'         => $this->token,
         ) );
 
-        if ($isAdmin) {
+        if ($this->isAdmin) {
             $T->set_var(array(
                 'is_admin'  => true,
                 'purch_name' => COM_getDisplayName($this->uid),
@@ -501,7 +501,7 @@ class Order
         $log = $this->getLog();
         $T->set_block('order', 'LogMessages', 'Log');
         foreach ($log as $L) {
-            $dt->setTimestamp($L['ux_ts']);
+            $dt->setTimestamp($L['ts']);
             $T->set_var(array(
                 'log_username'  => $L['username'],
                 'log_msg'       => $L['message'],
@@ -608,7 +608,7 @@ class Order
             username = '" . DB_escapeString($log_user) . "',
             order_id = '$order_id',
             message = '" . DB_escapeString($msg) . "',
-            ts = UTC_TIMESTAMP()";
+            ts = UNIX_TIMESTAMP()";
         DB_query($sql);
         $cache_key = 'orderlog_' . $order_id;
         Cache::delete($cache_key);
@@ -627,10 +627,7 @@ class Order
     {
         global $_TABLES, $_PP_CONF, $_CONF;
 
-        $sql = "SELECT *,
-                UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone))
-                    as ux_ts
-                FROM {$_TABLES['paypal.order_log']}
+        $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
                 WHERE order_id = '" . DB_escapeString($this->order_id) . "'
                 ORDER BY ts DESC
                 LIMIT 1";
@@ -638,7 +635,7 @@ class Order
         if (!DB_error()) {
             $L = DB_fetchArray(DB_query($sql), false);
             if (!empty($L)) {
-                $dt = new \Date($L['ux_ts'], $_CONF['timezone']);
+                $dt = new \Date($L['ts'], $_CONF['timezone']);
                 $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
             }
         }
@@ -859,7 +856,7 @@ class Order
     *
     *   @return boolean     True if allowed to view, False if denied.
     */
-    public function canView($token = '')
+    public function canView()
     {
         global $_USER;
 
@@ -894,9 +891,7 @@ class Order
         $log = Cache::get($cache_key);
         if ($log === NULL) {
             $log = array();
-            $sql = "SELECT *,
-                    UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone)) as ux_ts
-                    FROM {$_TABLES['paypal.order_log']}
+            $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
                     WHERE order_id = '$order_id'";
             $res = DB_query($sql);
             while ($L = DB_fetchArray($res, false)) {
@@ -1010,6 +1005,17 @@ class Order
         // the order is saved.
         $total += $this->calcTax() + $this->shipping + $this->handling;
         return round($total, $this->Currency->Decimals());
+    }
+
+
+    /**
+     * Set the isAdmin field to indicate whether admin access is being requested.
+     *
+     * @param   boolean $isAdmin    True to get admin view, False for user view
+     */
+    public function setAdmin($isAdmin = false)
+    {
+        $this->isAdmin = $isAdmin == false ? false : true;
     }
 
 }

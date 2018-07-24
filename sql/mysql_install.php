@@ -443,12 +443,12 @@ $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
 // since 0.5.2
 $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ts` datetime NOT NULL,
+  `ts` INT(11) UNSIGNED,
   `order_id` VARCHAR(40) NULL DEFAULT NULL,
   `username` VARCHAR(60) NOT NULL DEFAULT '',
   `message` TEXT NULL,
   PRIMARY KEY (`id`),
-  INDEX `order_id` (`order_id`)
+  INDEX `order_id` (`order_id`, `ts`)
 ) ENGINE=MyISAM";
 
 // since 0.5.4
@@ -917,6 +917,25 @@ $PP_UPGRADE['0.6.0'] = array(
     "UPDATE {$_TABLES['conf_values']}
         SET fieldset = 0, sort_order = 240
         WHERE name = 'tc_link' AND group_name = 'paypal'",
+    // Change the log table to use Unix timestamps.
+    // 1. Change to datetime so timestamp doesn't get updated by these changes
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        CHANGE ts ts datetime",
+    // 2. Add an integer field to get the timestamp value
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        ADD ts1 int(11) unsigned after ts",
+    // 3. Set the int field to the Unix timestamp
+    "UPDATE {$_TABLES['paypal.order_log']}
+        SET ts1=UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone))",
+    // 4. Drop the old timestamp field
+    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts",
+    // 5. Rename the new int field to "ts"
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        CHANGE ts1 ts int(11) unsigned",
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        DROP KEY `order_id`",
+    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        ADD KEY `order_id` (`order_id`, `ts`)",
 );
 
 ?>
