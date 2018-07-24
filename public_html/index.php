@@ -52,6 +52,7 @@ if (!empty($action)) {
         'redeem',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
+        'couponlog',
         'cart', 'pidetail', 'apply_gc', 'viewcart',
     );
     $action = 'productlist';    // default view
@@ -291,9 +292,18 @@ default:
 }
 
 switch ($view) {
+case 'couponlog':
+    if (COM_isAnonUser()) COM_404();
+    $content .= \Paypal\PAYPAL_userMenu($view);
+    $content .= \Paypal\CouponLog();
+    $menu_opt = $LANG_PP['gc_activity'];
+    $page_title = $LANG_PP['gc_activity'];
+    break;
+
 case 'orderhist':
 case 'history':
     if (COM_isAnonUser()) COM_404();
+    $content .= \Paypal\PAYPAL_userMenu($view);
     $content .= \Paypal\listOrders();
     $menu_opt = $LANG_PP['purchase_history'];
     $page_title = $LANG_PP['purchase_history'];

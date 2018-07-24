@@ -414,12 +414,13 @@ function plugin_getuseroption_paypal()
     global $LANG_PP, $_TABLES, $_USER;
 
     $retval = array();
-    if (!COM_isAnonUser() &&
-        DB_count($_TABLES['paypal.orders'], 'uid', $_USER['uid']) > 0) {
-        $retval[] = array($LANG_PP['my_orders'],
-                PAYPAL_URL . '/index.php?orderhist=x');
+    if (!COM_isAnonUser()) {
+        $retval[] = array(
+            $LANG_PP['my_account'],
+            PAYPAL_URL . '/index.php?orderhist=x',
+        );
     }
-    //PAYPAL_setCart();
+    // View cart option is available to anonymous users
     if (Paypal\Cart::getInstance()->hasItems()) {
         $retval[] = array($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
@@ -1656,34 +1657,6 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Paypal\Coupon::getUserBalance($uid);
             $LT->set_var('gc_bal', $Cur->Format($gc_bal));
-            $LT->set_block('block', 'gcRow', 'gclog');
-            $log = Paypal\Coupon::getLog($uid);
-            $dt = new Date('now', $_USER['tzid']);
-            foreach ($log as $line) {
-                $dt->setTimestamp($line['ts']);
-                switch ($line['msg']) {
-                case 'gc_redeemed':
-                    // Redeemed and added to account
-                    $msg = sprintf($LANG_PP['msg_gc_redeemed'], Paypal\Coupon::maskForDisplay($line['code']));
-                    break;
-                case 'gc_applied':
-                    // Applied as payment against an order
-                    $order = COM_createLink($line['order_id'],
-                        PAYPAL_URL . '/index.php?order=' . $line['order_id']);
-                    $msg = sprintf($LANG_PP['msg_gc_applied'], $order);
-                    $line['amount'] *= -1;
-                    break;
-                default:
-                    $msg = $line['msg'];
-                    break;
-                }
-                $LT->set_var(array(
-                    'gc_date'   => $dt->toMySQL(true),
-                    'gc_amount' => Paypal\Currency::getInstance()->format($line['amount']),
-                    'gc_msg'    => $msg,
-                ) );
-                $LT->parse('gclog', 'gcRow', true);
-            }
         }
         if (!empty($U->cart)) {
             $cart = true;
@@ -1695,12 +1668,12 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         $LT->set_var('orders', $ord_count);
 
         // Only display the template if there's something to show
-        if ($ord_count > 0 || $cart || $gc_bal > 0) {
+        /*if ($ord_count > 0 || $cart || $gc_bal > 0) {
             USES_paypal_functions();
             //$LT->set_var('order_hist', Paypal\listOrders());
-            $LT->parse('output', 'block');
-            $retval .= $LT->finish($LT->get_var('output'));
-        }
+        }*/
+        $LT->parse('output', 'block');
+        $retval .= $LT->finish($LT->get_var('output'));
     }
     return $retval;
 }

@@ -112,16 +112,142 @@ function listOrders($admin = false, $uid = 0)
         'has_extras' => $admin ? true : false,
         'form_url' => $base_url . '/index.php?orderhist=x',
         'has_limit' => true,
+        'has_paging' => true,
     );
 
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list('paypal_orders', __NAMESPACE__ . '\getPurchaseHistoryField',
+    $display .= \ADMIN_list('paypal_orderlog', __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
+}
+
+
+/**
+ * Gift Card activity list
+ * Allow users to view gift card redemption and application
+ *
+ * @return  string      HTML for activity listing
+ */
+function CouponLog($uid = 0)
+{
+    global $_TABLES, $_USER, $LANG_PP;
+
+    if ($uid == 0) $uid = $_USER['uid'];
+    $uid = (int)$uid;
+
+    USES_lib_admin();
+
+    $sql = "SELECT * FROM {$_TABLES['paypal.coupon_log']}";
+    $header_arr = array(
+        array(
+            'text' => $LANG_PP['datetime'],
+            'field' => 'ts',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['description'],
+            'field' => 'msg',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['amount'],
+            'field' => 'amount',
+            'sort' => false,
+            'align' => 'right',
+        ),
+    );
+
+    $defsort_arr = array(
+        'field' => 'ts',
+        'direction' => 'DESC',
+    );
+
+    $display = COM_startBlock('', '',
+                COM_getBlockTemplate('_admin_block', 'header'));
+
+    $query_arr = array(
+        'table' => 'paypal.coupon_log',
+        'sql' => $sql,
+        'query_fields' => array(),
+        'default_filter' => '',
+    );
+
+    $text_arr = array(
+        'has_extras' => false,
+        'form_url' => PAYPAL_URL . '/index.php?couponlog=x',
+        'has_limit' => true,
+        'has_paging' => true,
+    );
+
+    if (!isset($_REQUEST['query_limit']))
+        $_GET['query_limit'] = 20;
+
+    $display .= \ADMIN_list('paypal_couponlog', __NAMESPACE__ . '\getCouponLogField',
+            $header_arr, $text_arr, $query_arr, $defsort_arr);
+
+    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+    return $display;
+}
+
+
+/**
+*   Get an individual field for the gift cart activity screen.
+*
+*   @param  string  $fieldname  Name of field (from the array, not the db)
+*   @param  mixed   $fieldvalue Value of the field
+*   @param  array   $A          Array of all fields from the database
+*   @param  array   $icon_arr   System icon array (not used)
+*   @param  object  $EntryList  This entry list object
+*   @return string              HTML for field display in the table
+*/
+function getCouponLogField($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
+
+    static $dt = NULL;
+    $retval = '';
+
+    if ($dt === NULL) {
+        // Instantiate a date object once
+        $dt = new \Date('now', $_USER['tzid']);
+    }
+
+    switch($fieldname) {
+    case 'ts':
+        $dt->setTimestamp($fieldvalue);
+        $retval = '<span class="tooltip" title="' .
+                $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
+                $dt->format($_PP_CONF['datetime_fmt'], true) . '</span>';
+        break;
+
+    case 'msg':
+        switch ($fieldvalue) {
+        case 'gc_redeemed':
+            // Redeemed and added to account
+            $retval = sprintf($LANG_PP['msg_gc_redeemed'], Coupon::maskForDisplay($A['code']));
+            break;
+        case 'gc_applied':
+            // Applied as payment against an order
+            $order = COM_createLink($A['order_id'],
+                    PAYPAL_URL . '/index.php?order=' . $A['order_id']);
+            $retval = sprintf($LANG_PP['msg_gc_applied'], $order);
+            //$line['amount'] *= -1;
+            break;
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+        break;
+    case 'amount':
+        if ($A['msg'] == 'gc_applied') $fieldvalue *= -1;
+        $retval = Currency::getInstance()->format($fieldvalue);
+        break;
+    }
+    return $retval;
 }
 
 
@@ -206,7 +332,7 @@ function history($admin = false, $uid = '')
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_history',
+    $display .= \ADMIN_list($_PP_CONF['pi_name'] . '_history',
             __NAMESPACE__ . '\getPurchaseHistoryField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
 
@@ -1248,6 +1374,46 @@ function callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
     $str .= $txt;
     $str .= "</option>\n";
     return $str;
+}
+
+
+/**
+*   Create the user menu
+*
+*   @param  string  $view   View being shown, so set the help text
+*   @return string      Administrator menu
+*/
+function PAYPAL_userMenu($view='')
+{
+    global $_CONF, $LANG_PP, $_PP_CONF;
+
+    USES_lib_admin();
+
+    $hdr_txt = PP_getVar($LANG_PP, 'user_hdr_' . $view);
+    $menu_arr = array(
+        array(
+            'url'  => PAYPAL_URL,
+            'text' => $LANG_PP['back_to_catalog'],
+        ),
+    );
+
+    $active = $view == 'orderhist' ? true : false;
+    $menu_arr[] = array(
+        'url'  => PAYPAL_URL . '/index.php?orderhist=x',
+        'text' => $LANG_PP['purchase_history'],
+        'active' => $active,
+    );
+
+    if ($_PP_CONF['gc_enabled']) {
+        $active = $view == 'couponlog' ? true : false;
+        $menu_arr[] = array(
+            'url'  => PAYPAL_URL . '/index.php?couponlog=x',
+            'text' => $LANG_PP['gc_activity'],
+            'active' => $active,
+        );
+    }
+
+    return \ADMIN_createMenu($menu_arr, $hdr_txt);
 }
 
 

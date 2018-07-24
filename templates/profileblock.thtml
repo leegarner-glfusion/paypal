@@ -19,24 +19,6 @@
     <input type="text" name="pp_apply_gc" />
   </div>
 </div>
-<div class="uk-form-row">
-  <label class="uk-form-label">Gift Cards:</label>
-  <div class="uk-form-controls">
-    <table style="width:100%;">
-      <tr>
-        <th>{$LANG_PP['datetime']}</th>
-        <th>{$LANG_PP['description']}</th>
-        <th>{$LANG_PP['amount']}</th>
-      </tr>
-    <!-- BEGIN gcRow -->
-      <tr>
-        <td>{gc_date}</td>
-        <td>{gc_msg}</td>
-        <td style="text-align:right;">{gc_amount}</td>
-      </tr>
-    <!-- END gcRow -->
-    </table>
-  </div>
 {!endif}
 {!if orders}
 {$LANG_PP['my_orders']}: <a href="{site_url}/paypal/index.php?orderhist">{orders}</a>

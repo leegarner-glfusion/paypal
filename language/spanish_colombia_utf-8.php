@@ -361,6 +361,9 @@ $LANG_PP = array (
 'gift_cards' => 'Gift Cards',
 'msg_gc_applied' => 'Applied to order %s',
 'msg_gc_redeemed' => 'Claimed gift card %s',
+'gc_activity' => 'Gift Card Activity',
+'user_hdr_orderhist' => 'View all of your previous orders. Click on an order number to view the complete order.',
+'user_hdr_couponlog' => 'This is a list of all transactions related to Gift Cards.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
