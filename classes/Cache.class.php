@@ -31,7 +31,7 @@ class Cache
     *   @param  mixed   $tag    Tag, or array of tags.
     *   @param  integer $cache_mins Cache minutes
     */
-    public static function set($key, $data, $tag='', $cache_mins=0)
+    public static function set($key, $data, $tag='', $cache_mins=1440)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
             return;     // glFusion version doesn't support caching
