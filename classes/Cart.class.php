@@ -669,6 +669,11 @@ class Cart
         $cart_tax = PP_getTax($tax_amt);
         $total = $subtotal + $shipping + $handling + $cart_tax;
 
+        // Save order total values in the info array
+        $this->m_info['order_total'] = $total;
+        $this->m_info['shipping'] = $shipping;
+        $this->m_info['tax'] = $cart_tax;
+
         // A little hack to show only the total if there are no other
         // charges
         //if ($total == $subtotal) $subtotal = 0;
@@ -684,26 +689,19 @@ class Cart
         $apply_gc = 0;
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Coupon::getUserBalance();
-            $gc_can_apply = 0;
-            if (!$checkout) {
-                if (isset($this->m_info['apply_gc'])) {
-                    $apply_gc = $this->m_info['apply_gc'];
-                    $apply_gc = min($gc_can_apply, $apply_gc, $gc_bal);
-                } else {
-                    $apply_gc = min($gc_can_apply, $gc_bal);
-                }
-            } elseif (isset($this->m_info['apply_gc']) && $this->m_info['apply_gc'] !== NULL) {
-                $apply_gc = min((float)$this->m_info['apply_gc'], $gc_can_apply, $gc_bal);
+            $apply_gc = PP_getVar($this->m_info, 'apply_gc', 'float', NULL);
+            $apply_gc = NULL;
+            if ($apply_gc !== NULL) {
+                $apply_gc = min($apply_gc, $gc_bal, Coupon::canPayByGC($this));
+            } else {
+                $apply_gc = min(Coupon::canPayByGC($this), $gc_bal);
             }
         }
         $this->custom_info['by_gc'] = $apply_gc;
         $this->custom_info['final_total'] = $total - $apply_gc;
-        $this->m_info['gc_bal'] = $gc_bal;
-        $this->m_info['order_total'] = $total;
-        $this->m_info['apply_gc'] = $apply_gc;
         $this->m_info['final_total'] = $total - $apply_gc;
-        $this->m_info['shipping'] = $shipping;
-        $this->m_info['tax'] = $cart_tax;
+        $this->m_info['gc_bal'] = $gc_bal;
+        $this->m_info['apply_gc'] = $apply_gc;
         $T->set_var(array(
             //'paypal_url'        => $_PP_CONF['paypal_url'],
             //'receiver_email'    => $_PP_CONF['receiver_email'][0],
