@@ -532,6 +532,28 @@ class Coupon extends Product
         }
         return $code;
     }
+
+
+    /**
+     * From a cart, get the total items that can be paid by gift card.
+     * Start with the order total and deduct any coupon items.
+     *
+     * @param   object  $cart   Shopping Cart
+     * @return  float           Total payable by gift card
+     */
+    public static function canPayByGC($cart)
+    {
+        $gc_can_apply = $cart->getInfo('order_total');
+        $items = $cart->Cart();
+        foreach ($items as $item) {
+            $P = Product::getInstance($item['item_id']);
+            if ($P->isNew || $P->prod_type == PP_PROD_COUPON) {
+                $gc_can_apply -= $P->getPrice($item['options'], $item['quantity']);
+            }
+        }
+        return $gc_can_apply;
+    }
+
 }
 
 ?>
