@@ -1619,7 +1619,7 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
 function plugin_configmanager_select_currency_paypal()
 {
     $A = array();
-    $tmp = Paypal\Currency::GetAll();
+    $tmp = Paypal\Currency::getAll();
     foreach ($tmp as $code => $data) {
         $A["{$code} - {$data->name}"] = $code;
     }

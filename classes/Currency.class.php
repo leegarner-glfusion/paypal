@@ -345,7 +345,7 @@ class Currency
     *
     *   @return array   Array of all DB records
     */
-    public static function GetAll()
+    public static function getAll()
     {
         global $_TABLES;
 
