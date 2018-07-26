@@ -513,6 +513,7 @@ function ProductList($cat_id = 0)
     }
     $RootCat = Category::getRoot();
     if ($cat_id > 0 && $cat_id != $RootCat->cat_id) {
+        // A specific subcategory is being viewed
         $cats = Category::getPath($cat_id);
         foreach ($cats as $cat) {
             // Root category already shown in top header
@@ -710,12 +711,18 @@ function ProductList($cat_id = 0)
 
     // If applicable, order by
     $sql .= " ORDER BY $sql_sortby $sql_sortdir";
+    $sql_key = md5($sql);
     //echo $sql;die;
 
     // Count products from database
-    $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
-    $x = DB_fetchArray($res, false);
-    $count = isset($x['cnt']) ? (int)$x['cnt'] : 0;
+    $cache_key = Cache::makeKey('prod_cnt_' . $sql_key);
+    $count = Cache::get($cache_key);
+    if ($count === NULL) {
+        $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
+        $x = DB_fetchArray($res, false);
+        $count = isset($x['cnt']) ? (int)$x['cnt'] : 0;
+        Cache::set($cache_key, $count, array('product', 'categories'));
+    }
 
     // If applicable, handle pagination of query
     if (isset($_PP_CONF['prod_per_page']) && $_PP_CONF['prod_per_page'] > 0) {
@@ -736,8 +743,18 @@ function ProductList($cat_id = 0)
 
     // Re-execute query with the limit clause in place
     //$res = DB_query('SELECT DISTINCT p.id ' . $sql);
-    $res = DB_query('SELECT p.* ' . $sql);
-
+    $sql_key = md5($sql);
+    $cache_key = Cache::makeKey('prod_list_' . $sql_key);
+    $Products = Cache::get($cache_key);
+    if ($Products === NULL) {
+        $res = DB_query('SELECT p.* ' . $sql);
+        $Products = array();
+        while ($A = DB_fetchArray($res, false)) {
+            $Products[] = Product::getInstance($A);
+        }
+        Cache::set($cache_key, $Products, array('product', 'categories'));
+    }
+ 
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
     $product = PP_getTemplate(array(
@@ -780,10 +797,11 @@ function ProductList($cat_id = 0)
 
     // Display each product
     $prodrows = 0;
-    while ($A = DB_fetchArray($res, false)) {
+    //while ($A = DB_fetchArray($res, false)) {
+    foreach ($Products as $P) {
         $prodrows++;
 
-        $P = Product::getInstance($A);
+        //$P = Product::getInstance($A);
         if ( @in_array($P->id, $ratedIds)) {
             $static = true;
             $voted = 1;
@@ -816,17 +834,17 @@ function ProductList($cat_id = 0)
         }
 
         $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
-                "product_id = '{$A['id']}'");
+                "product_id = '{$P->id}'");
 
         $product->set_var(array(
-            'id'            => $A['id'],
+            'id'            => $P->id,
             'name'          => htmlspecialchars($P->name),
             //'name'      => $A['name'],
             //'short_description' => PLG_replacetags($A['short_description']),
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'encrypted'     => '',
-            'item_url'      => PAYPAL_URL . '/detail.php?id='. $A['id'],
+            'item_url'      => PAYPAL_URL . '/detail.php?id='. $P->id,
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'track_onhand'  => $P->track_onhand ? 'true' : '',
             'qty_onhand'    => $P->onhand,
