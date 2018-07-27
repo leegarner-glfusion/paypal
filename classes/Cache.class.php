@@ -90,12 +90,18 @@ class Cache
     *   Intended for internal use, but public in case it is needed.
     *
     *   @param  string  $key    Base key, e.g. Item ID
+    *   @param  boolean $incl_sechash   True to include the security hash
     *   @return string          Encoded key string to use as a cache ID
     */
-    public static function makeKey($key)
+    public static function makeKey($key, $incl_sechash = false)
     {
-        //$key = \glFusion\Cache::getInstance()->createKey(self::TAG . '_' . $key);
-        $key = self::TAG . '_' . $key;
+        if ($incl_sechash) {
+            // Call the parent class function to use the security hash
+            $key = \glFusion\Cache::getInstance()->createKey(self::TAG . '_' . $key);
+        } else {
+            // Just generate a simple string key
+            $key = self::TAG . '_' . $key;
+        }
         return $key;
     }
 
@@ -109,7 +115,7 @@ class Cache
     public static function get($key)
     {
         if (version_compare(GVERSION, self::MIN_GVERSION, '<')) {
-            return;     // glFusion version doesn't support caching
+            return NULL;     // glFusion version doesn't support caching
         }
         $key = self::makeKey($key);
         if (\glFusion\Cache::getInstance()->has($key)) {
