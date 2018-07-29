@@ -3,6 +3,7 @@
 ## Ver 0.6.0
 Released TBD
 - Removed separate configurations for email to buyers. Email is always sent if possible.
+- Removed attachment email for downloadable files, use order links instead.
 - Move sale pricing to separate table to serve both categories and products.
 - Select payment method prior to final checkout.
   - allows encrypted buttons to be required in the Paypal profile.

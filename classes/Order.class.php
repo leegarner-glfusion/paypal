@@ -725,23 +725,6 @@ class Order
             if ($x != '') $email_extras[] = $x;
         }
 
-        // Determine if files will be attached to this message based on
-        // global config and whether there are actually any files to
-        // attach. Affects the 'files' flag in the email template and
-        // which email function is used.
-        if ( (( is_numeric($this->uid) &&
-                    $this->uid != 1 &&
-                    $_PP_CONF['purch_email_user_attach'] ) ||
-            ( (!is_numeric($this->uid) ||
-                    $this->uid == 1) &&
-                    $_PP_CONF['purch_email_anon_attach'] )) &&
-                count($files) > 0  ) {
-            $do_send_attachments = true;
-        } else {
-            $do_send_attachments = false;
-        }
-        $do_send_attachments = false;   // override to disable attachments
-
         $total_amount = $item_total + $this->tax + $this->shipping +
                         $this->handling;
         $user_name = COM_getDisplayName($this->uid);
@@ -799,26 +782,12 @@ class Order
         $admin_text = $T->parse('admin_out', 'msg_admin');
 
         if ($this->buyer_email != '') {
-            // if specified to mail attachment, do so, otherwise skip
-            // attachment
-            if ($do_send_attachments) {
-                // Make sure plugin functions are available
-                USES_paypal_functions();
-                PAYPAL_mailAttachment($this->buyer_email,
-                                    $LANG_PP['subj_email_user'],
-                                    $user_text,
-                                    $_CONF['site_mail'],
-                                    true,
-                                    0, '', '', $files);
-            } else {
-                // Otherwise send a standard notification
-                COM_emailNotification(array(
+            COM_emailNotification(array(
                         'to' => array($this->buyer_email),
                         'from' => $_CONF['site_mail'],
                         'htmlmessage' => $user_text,
                         'subject' => $LANG_PP['subj_email_user'],
                 ) );
-            }
         }
 
         // Send a notification to the administrator, new purchases only

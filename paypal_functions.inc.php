@@ -797,11 +797,9 @@ function ProductList($cat_id = 0)
 
     // Display each product
     $prodrows = 0;
-    //while ($A = DB_fetchArray($res, false)) {
     foreach ($Products as $P) {
         $prodrows++;
 
-        //$P = Product::getInstance($A);
         if ( @in_array($P->id, $ratedIds)) {
             $static = true;
             $voted = 1;
@@ -839,8 +837,6 @@ function ProductList($cat_id = 0)
         $product->set_var(array(
             'id'            => $P->id,
             'name'          => htmlspecialchars($P->name),
-            //'name'      => $A['name'],
-            //'short_description' => PLG_replacetags($A['short_description']),
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
             'img_cell_width' => ($_PP_CONF['max_thumb_size'] + 20),
             'encrypted'     => '',
@@ -1119,133 +1115,6 @@ function X_PAYPAL_ipnlogList()
     $display .= $ipnlog->parse('output', 'end');
     $display .= COM_endBlock();
     return $display;
-}
-
-
-/**
-*   Send an email with attachments.
-*   This is a verbatim copy of COM_mail(), but with the $attachments
-*   paramater added and 3 extra lines of code near the end.
-*
-*   @deprecated 0.6.0
-*
-*   @param  string  $to         Receiver's email address
-*   @param  string  $from       Sender's email address
-*   @param  string  $subject    Message Subject
-*   @param  string  $message    Message Body
-*   @param  boolean $html       True for HTML message, False for Text
-*   @param  integer $priority   Message priority value
-*   @param  string  $cc         Other recipients
-*   @param  string  $altBody    Alt. body (text)
-*   @param  array   $attachments    Array of attachments
-*   @return boolean             True on success, False on Failure
-*/
-function PAYPAL_mailAttachment(
-    $to,
-    $subject,
-    $message,
-    $from = '',
-    $html = false,
-    $priority = 0,
-    $cc = '',
-    $altBody = '',
-    $attachments = array()
-) {
-    global $_CONF;
-
-    $subject = substr( $subject, 0, strcspn( $subject, "\r\n" ));
-    $subject = COM_emailEscape( $subject );
-
-    require_once $_CONF['path'] . 'lib/phpmailer/class.phpmailer.php';
-
-    $mail = new PHPMailer();
-    $mail->SetLanguage('en',$_CONF['path'].'lib/phpmailer/language/');
-    $mail->CharSet = COM_getCharset();
-    if ($_CONF['mail_backend'] == 'smtp' ) {
-        $mail->IsSMTP();
-        $mail->Host     = $_CONF['mail_smtp_host'];
-        $mail->Port     = $_CONF['mail_smtp_port'];
-        if ( $_CONF['mail_smtp_secure'] != 'none' ) {
-            $mail->SMTPSecure = $_CONF['mail_smtp_secure'];
-        }
-        if ( $_CONF['mail_smtp_auth'] ) {
-            $mail->SMTPAuth   = true;
-            $mail->Username = $_CONF['mail_smtp_username'];
-            $mail->Password = $_CONF['mail_smtp_password'];
-        }
-        $mail->Mailer = "smtp";
-
-    } elseif ($_CONF['mail_backend'] == 'sendmail') {
-        $mail->Mailer = "sendmail";
-        $mail->Sendmail = $_CONF['mail_sendmail_path'];
-    } else {
-        $mail->Mailer = "mail";
-    }
-    $mail->WordWrap = 76;
-    $mail->IsHTML($html);
-    $mail->Body = ($message);
-
-    if ( $altBody != '' ) {
-        $mail->AltBody = $altBody;
-    }
-
-    $mail->Subject = $subject;
-
-    if (is_array($from) && isset($from[0]) && $from[0] != '' ) {
-        if ( $_CONF['use_from_site_mail'] == 1 ) {
-            $mail->From = $_CONF['site_mail'];
-            $mail->AddReplyTo($from[0]);
-        } else {
-            $mail->From = $from[0];
-        }
-    } else {
-        $mail->From = $_CONF['site_mail'];
-    }
-
-    if ( is_array($from) && isset($from[1]) && $from[1] != '' ) {
-        $mail->FromName = $from[1];
-    } else {
-        $mail->FromName = $_CONF['site_name'];
-    }
-    if ( is_array($to) && isset($to[0]) && $to[0] != '' ) {
-        if ( isset($to[1]) && $to[1] != '' ) {
-            $mail->AddAddress($to[0],$to[1]);
-        } else {
-            $mail->AddAddress($to[0]);
-        }
-    } else {
-        // assume old style....
-        $mail->AddAddress($to);
-    }
-
-    if ( isset($cc[0]) && $cc[0] != '' ) {
-        if ( isset($cc[1]) && $cc[1] != '' ) {
-            $mail->AddCC($cc[0],$cc[1]);
-        } else {
-            $mail->AddCC($cc[0]);
-        }
-    } else {
-        // assume old style....
-        if ( isset($cc) && $cc != '' ) {
-            $mail->AddCC($cc);
-        }
-    }
-
-    if ( $priority ) {
-        $mail->Priority = 1;
-    }
-
-    PAYPAL_debug('Attachments: ' . print_r($attachments, true));
-    // Add attachments
-    foreach($attachments as $key => $value) {
-        $mail->AddAttachment($value);
-    }
-
-    if(!$mail->Send()) {
-        COM_errorLog("Email Error: " . $mail->ErrorInfo, 1);
-        return false;
-    }
-    return true;
 }
 
 
