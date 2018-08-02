@@ -282,19 +282,17 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
 {
     global $_PP_CONF;
 
-    if (!is_array($args)) $args = array('amount' => $args);
-    $amount = isset($args['amount']) ? (float)$args['amount'] : 0;
-    $Cur = Paypal\Currency::getInstance();
-    $output = $Cur->Format($amount);
+    if (is_array($args)) {
+        $amount = PP_getVar($args, 'amount', 'float');
+    } else {
+        $amount = (float)$args;
+    }
+    $output = Paypal\Currency::getInstance()->Format($amount);
     return PLG_RET_OK;
 }
 function plugin_formatAmount_paypal($amount)
 {
-    global $_PP_CONF;
-
-    $amount = (float)$amount;
-    $Cur = Paypal\Currency::getInstance();
-    return $Cur->Format($amount);
+    return Paypal\Currency::getInstance()->Format((float)$amount);
 }
 
 ?>
