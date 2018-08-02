@@ -13,6 +13,7 @@
 
 class sitemap_paypal extends sitemap_base
 {
+    protected $name = 'paypal';
 
     public function getEntryPoint()
     {
@@ -20,13 +21,6 @@ class sitemap_paypal extends sitemap_base
     }
 
  
-    public function getName()
-    {
-        global $_PP_CONF;
-        return $_PP_CONF['pi_name'];
-    }
-
-
     public function getDisplayName()
     {
         global $LANG_PP;
