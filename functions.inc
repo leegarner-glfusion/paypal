@@ -1653,10 +1653,9 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         ));
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
         $U = Paypal\UserInfo::getInstance($uid);
-        $Cur = Paypal\Currency::getInstance();
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Paypal\Coupon::getUserBalance($uid);
-            $LT->set_var('gc_bal', $Cur->Format($gc_bal));
+            $LT->set_var('gc_bal', Paypal\Currency::getInstance()->Format($gc_bal));
         }
         if (!empty($U->cart)) {
             $cart = true;
@@ -1880,18 +1879,15 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
              FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON c.cat_id = p.cat_id ";
+    $today = PAYPAL_now()->format('Y-m-d');
     if ($id == '*') {
-        if ( $buildingSearchIndex ) {
-            $today = date('Y-m-d');
-            $where = " WHERE enabled = 1 AND avail_beg <= '$today' AND avail_end >= '$today' ";
-        } else {
-            $where = ' WHERE 1=1 ';
-        }
+        $where = ' WHERE 1 = 1 ';
     } else {
         $where = " WHERE (p.id = '" . DB_escapeString($id) . "')";
     }
+    $where .= " AND p.enabled = 1 AND c.enabled = 1 AND avail_beg <= '$today' AND avail_end >= '$today' ";
     if ($uid > 0) {
-        $where .= SEC_buildAccessSql($clause = 'AND', $field = 'c.grp_access');
+        $where .= SEC_buildAccessSql('AND', 'c.grp_access');
     }
     if (isset($options['cat_id'])) {
         $where .= ' AND p.cat_id = ' . (int)$options['cat_id'];
