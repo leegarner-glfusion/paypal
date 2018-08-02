@@ -444,6 +444,7 @@ class Category
             $T->set_var('can_delete', 'true');
         }
 
+        // Display any time-based sales pricing for this category
         $Disc = Sales::getCategory($this->cat_id);
         if (!empty($Disc)) {
             $DT = PP_getTemplate('sales_table', 'stable');
