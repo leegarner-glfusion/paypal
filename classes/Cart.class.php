@@ -689,11 +689,13 @@ class Cart
         $apply_gc = 0;
         if ($_PP_CONF['gc_enabled']) {
             $gc_bal = Coupon::getUserBalance();
-            $apply_gc = PP_getVar($this->m_info, 'apply_gc', 'float', NULL);
-            $apply_gc = NULL;
-            if ($apply_gc !== NULL) {
+            $apply_gc = PP_getVar($this->m_info, 'apply_gc', 'float', 0);
+            if ($apply_gc !== 0) {
                 $apply_gc = min($apply_gc, $gc_bal, Coupon::canPayByGC($this));
-            } else {
+            } elseif (!$checkout) {
+                // Only calculate the GC to apply when selecting tye
+                // gateway. If in final checkout the amount has already
+                // been submitted.
                 $apply_gc = min(Coupon::canPayByGC($this), $gc_bal);
             }
         }
@@ -1098,6 +1100,10 @@ class Cart
         global $_TABLES;
 
         $amt = (float)$amt;
+        if ($amt == -1) {
+            $gc_bal = Coupon::getUserBalance();
+            $amt = min($gc_bal, Coupon::canPayByGC($this));
+        }
         $this->m_info['apply_gc'] = $amt;
         $sql = "UPDATE {$_TABLES['paypal.cart']}
                 SET apply_gc = $amt

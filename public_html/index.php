@@ -85,8 +85,16 @@ case 'updatecart':
     break;
 
 case 'checkout':
-    if (isset($_POST['gateway'])) {
-        $ppGCart->setGateway($_POST['gateway']);
+    // Set the gift card amount first as it will be overridden
+    // if the _coupon_gw gateway is selected
+    $gateway = PP_getVar($_POST, 'gateway');
+    if ($gateway !== '') $ppGCart->setGateway($gateway);
+    if (isset($_POST['apply_gc'])) {
+        $ppGCart->setGC($_POST['apply_gc']);
+    } elseif ($gateway == '_coupon_gw') {
+        $ppGCart->setGC(-1);
+    } else {
+        $ppGCart->setGC(0);
     }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
@@ -94,9 +102,6 @@ case 'checkout':
     }
     if (isset($_POST['order_instr'])) {
         $ppGCart->setInstructions($_POST['order_instr']);
-    }
-    if (isset($_POST['apply_gc'])) {
-        $ppGCart->setGC($_POST['apply_gc']);
     }
     if (isset($_POST['payer_email'])) {
         $ppGCart->setEmail($_POST['payer_email']);
@@ -404,7 +409,7 @@ case 'viewcart':
 case 'checkoutcart':
     // If there's a gift card amount being applied, set it in the cart info.
     // Also calls Cart::Save()
-    $ppGCart->setInfo('apply_gc', PP_getVar($_POST, 'by_gc', 'float'));
+    //$ppGCart->setInfo('apply_gc', PP_getVar($_POST, 'by_gc', 'float'));
     $content .= $ppGCart->View(true);
     break;
 
