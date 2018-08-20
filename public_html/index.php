@@ -210,11 +210,10 @@ case 'thanks':
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
                 $T = PP_getTemplate('thanks_for_order', 'msg');
-                $T->set_var(array(
-                    'site_name'     => $_CONF['site_name'],
-                    'gateway_url'   => PP_getVar($tVars, 'gateway_url'),
-                    'gateway_name'  => PP_getVar($tVars, 'gateway_name'),
-                ) );
+                $T->set_var('site_name', $_CONF['site_name']);
+                foreach ($tVars as $name=>$val) {
+                    $T->set_var($name, $val);
+                }
                 $message = $T->parse('output', 'msg');
             }
         }
