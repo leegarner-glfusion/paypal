@@ -41,20 +41,11 @@ class Product
 
     //var $buttons = array();
     public $buttons;
-
-    public $currency;
-
     protected $special_fields = array();
-
     public $Cat;        // Category object
-
     public $override_price = false;
-
     private $_uid = 0;  // user id, for pricing
-
     private $_view = 'detail';  // type of button to create (list or detail)
-
-    //private $_salePrices = array();
 
     /**
      *  Constructor.
@@ -69,7 +60,6 @@ class Product
 
         $this->properties = array();
         $this->isNew = true;
-        $this->currency = Currency::getInstance();
         $this->pi_name = $_PP_CONF['pi_name'];
         $this->btn_text = '';
 
@@ -1172,14 +1162,14 @@ class Product
             'name'              => $name,
             'short_description' => $s_desc,
             'description'       => $l_desc,
-            'cur_decimals'      => $this->currency->Decimals(),
-            'init_price'        => $this->currency->FormatValue($this->_act_price),
-            'price'             => $this->currency->FormatValue($this->getPrice()),
-            'orig_price'        => $this->currency->Format($this->_orig_price),
+            'cur_decimals'      => Currency::getInstance()->Decimals(),
+            'init_price'        => Currency::getInstance()->FormatValue($this->_act_price),
+            'price'             => Currency::getInstance()->FormatValue($this->getPrice()),
+            'orig_price'        => Currency::getInstance()->Format($this->_orig_price),
             'on_sale'           => $this->isOnSale(),
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
-            'price_prefix'      => $this->currency->Pre(),
-            'price_postfix'     => $this->currency->Post(),
+            'price_prefix'      => Currency::getInstance()->Pre(),
+            'price_postfix'     => Currency::getInstance()->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
             'session_id'        => session_id(),
@@ -1520,7 +1510,7 @@ class Product
         if (!is_array($options)) $options = array($options);
         if ($this->override_price && isset($override['price'])) {
             // If an override price is specified, just return it.
-            return round((float)$override['price'], $this->currency->Decimals());
+            return round((float)$override['price'], Currency::getInstance()->Decimals());
         } else {
             $price = $this->getSalePrice();
         }
@@ -1547,7 +1537,7 @@ class Product
         }
         $price *= $quantity;
         $price *= $discount_factor;
-        $price = round($price, $this->currency->Decimals());
+        $price = round($price, Currency::getInstance()->Decimals());
         return $price;
     }
 
@@ -1562,7 +1552,7 @@ class Product
     public function getDisplayPrice($price = NULL)
     {
         if ($price === NULL) $price = $this->getPrice();
-        return $this->currency->Format($price);
+        return Currency::getInstance()->Format($price);
     }
 
 
@@ -1665,6 +1655,9 @@ class Product
     {
         $opts = array();
         foreach ($options as $key) {
+            if (strpos($key, '|') !== false) {  // complete option strings
+                list($key, $junk) = explode('|', $key);
+            }
             if (isset($this->options[$key])) {
                 $opts[] = $this->options[$key]['attr_value'];
             }
