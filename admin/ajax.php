@@ -27,7 +27,7 @@ case 'updatestatus':
         $newstatus = $_POST['newstatus'];
         $order_id = $_POST['order_id'];
         $showlog = $_POST['showlog'] == 1 ? 1 : 0;
-        $ord = Paypal\Order::getInstance($order_id);
+        $ord = \Paypal\Order::getInstance($order_id);
         if ($ord->isNew)  {     // non-existant order
             $L = array(
                 'showlog' => 0,
@@ -54,11 +54,11 @@ case 'toggle':
     case 'product':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Product::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Product::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
         case 'featured':
-            $newval = Paypal\Product::toggleFeatured($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Product::toggleFeatured($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -69,7 +69,7 @@ case 'toggle':
     case 'category':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Category::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Category::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -80,7 +80,7 @@ case 'toggle':
     case 'attribute':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Attribute::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Attribute::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
          default:
@@ -92,15 +92,15 @@ case 'toggle':
     case 'gateway':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = Paypal\Gateway::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Gateway::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
         case 'buy_now':
-            $newval = Paypal\Gateway::toggleBuyNow($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Gateway::toggleBuyNow($_POST['oldval'], $_POST['id']);
             break;
 
         case 'donation':
-            $newval = Paypal\Gateway::toggleDonation($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Gateway::toggleDonation($_POST['oldval'], $_POST['id']);
             break;
 
         default:
@@ -112,7 +112,7 @@ case 'toggle':
         $field = $_POST['type'];
         switch ($field) {
         case 'enabled':
-            $newval = Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
+            $newval = \Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
             break;
 
         default:
@@ -125,7 +125,7 @@ case 'toggle':
         switch ($field) {
         case 'enabled':
         case 'notify_buyer':
-            $newval = Paypal\OrderStatus::Toggle($_POST['id'], $field, $_POST['oldval']);
+            $newval = \Paypal\OrderStatus::Toggle($_POST['id'], $field, $_POST['oldval']);
             break;
 
         default:

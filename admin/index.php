@@ -71,14 +71,14 @@ $view = 'productlist';
 
 switch ($action) {
 case 'dup_product':
-    $P = new Paypal\Product($_REQUEST['id']);
+    $P = new \Paypal\Product($_REQUEST['id']);
     $P->Duplicate();
     echo COM_refresh(PAYPAL_ADMIN_URL.'/index.php');
     break;
 
 case 'deleteproduct':
-    $P = Paypal\Product::getInstance($_REQUEST['id']);
-    if (!Paypal\Product::isUsed($_REQUEST['id'])) {
+    $P = \Paypal\Product::getInstance($_REQUEST['id']);
+    if (!\Paypal\Product::isUsed($_REQUEST['id'])) {
         $P->Delete();
     } else {
         COM_setMsg(sprintf($LANG_PP['no_del_item'], $P->name), 'error');
@@ -89,7 +89,7 @@ case 'deleteproduct':
 case 'deletecatimage':
     $id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
     if ($id > 0) {
-        $C = new Paypal\Category($id);
+        $C = new \Paypal\Category($id);
         $C->deleteImage();
         $view = 'editcat';
         $_REQUEST['id'] = $id;
@@ -99,10 +99,10 @@ case 'deletecatimage':
     break;
 
 case 'deletecat':
-    $C = Paypal\Category::getInstance($_REQUEST['cat_id']);
+    $C = \Paypal\Category::getInstance($_REQUEST['cat_id']);
     if ($C->parent_id == 0) {
         COM_setMsg($LANG_PP['dscp_root_cat'], 'error');
-    } elseif (Paypal\Category::isUsed($_REQUEST['cat_id'])) {
+    } elseif (\Paypal\Category::isUsed($_REQUEST['cat_id'])) {
         COM_setMsg(sprintf($LANG_PP['no_del_cat'], $C->cat_name), 'error');
     } else {
         $C->Delete();
@@ -112,20 +112,20 @@ case 'deletecat':
 
 case 'delete_img':
     $img_id = (int)$_REQUEST['img_id'];
-    Paypal\Product::deleteImage($img_id);
+    \Paypal\Product::deleteImage($img_id);
     $view = 'editproduct';
     break;
 
 case 'saveproduct':
-    $P = new Paypal\Product($_POST['id']);
+    $P = new \Paypal\Product($_POST['id']);
     if (!$P->Save($_POST)) {
-        $content .= Paypal\PAYPAL_errMsg($P->PrintErrors());
+        $content .= \Paypal\PAYPAL_errMsg($P->PrintErrors());
         $view = 'editproduct';
     }
     break;
 
 case 'savecat':
-    $C = new Paypal\Category($_POST['cat_id']);
+    $C = new \Paypal\Category($_POST['cat_id']);
     if (!$C->Save($_POST)) {
         $content .= PAYPAL_popupMsg($C->PrintErrors());
         $view = 'editcat';
@@ -135,7 +135,7 @@ case 'savecat':
     break;
 
 case 'saveopt':
-    $Attr = new Paypal\Attribute($_POST['attr_id']);
+    $Attr = new \Paypal\Attribute($_POST['attr_id']);
     if (!$Attr->Save($_POST)) {
         $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
     }
@@ -149,7 +149,7 @@ case 'saveopt':
 
 case 'deleteopt':
     // attr_id could be via $_GET or $_POST
-    $Attr = new Paypal\Attribute($_REQUEST['attr_id']);
+    $Attr = new \Paypal\Attribute($_REQUEST['attr_id']);
     $Attr->Delete();
     $view = 'attributes';
     break;
@@ -161,7 +161,7 @@ case 'resetbuttons':
 
 case 'gwinstall':
     $gwname = $_GET['gwname'];
-    $gw = Paypal\Gateway::getInstance($gwname);
+    $gw = \Paypal\Gateway::getInstance($gwname);
     if ($gw !== NULL) {
         if ($gw->Install()) {
             $msg[] = "Gateway \"$gwname\" installed successfully";
@@ -173,7 +173,7 @@ case 'gwinstall':
     break;
 
 case 'gwdelete':
-    $gw = Paypal\Gateway::getInstance($_GET['id']);
+    $gw = \Paypal\Gateway::getInstance($_GET['id']);
     if ($gw !== NULL) {
         $status = $gw->Remove();
     }
@@ -182,7 +182,7 @@ case 'gwdelete':
 
 case 'gwsave':
     // Save a payment gateway configuration
-    $gw = Paypal\Gateway::getInstance($_POST['gw_id']);
+    $gw = \Paypal\Gateway::getInstance($_POST['gw_id']);
     if ($gw !== NULL) {
         $status = $gw->SaveConfig($_POST);
     }
@@ -190,17 +190,17 @@ case 'gwsave':
     break;
 
 case 'gwmove':
-    Paypal\Gateway::moveRow($_GET['id'], $actionval);
+    \Paypal\Gateway::moveRow($_GET['id'], $actionval);
     $view = 'gwadmin';
     break;
 
 case 'wfmove':
     switch ($_GET['type']) {
     case 'workflow':
-        Paypal\Workflow::moveRow($_GET['id'], $actionval);
+        \Paypal\Workflow::moveRow($_GET['id'], $actionval);
         break;
     case 'orderstatus':
-        Paypal\OrderStatus::moveRow($_GET['id'], $actionval);
+        \Paypal\OrderStatus::moveRow($_GET['id'], $actionval);
         break;
     }
     $view = 'wfadmin';
@@ -287,10 +287,10 @@ case 'sendcards':
     if (empty($uids)) $errs[] = $LANG_PP['err_gc_nousers'];
     if (empty($errs)) {
         foreach ($uids as $uid) {
-            $code = Paypal\Coupon::Purchase($amt, $uid, $exp);
+            $code = \Paypal\Coupon::Purchase($amt, $uid, $exp);
             $email = DB_getItem($_TABLES['users'], 'email', "uid = $uid");
             if (!empty($email)) {
-                Paypal\Coupon::Notify($code, $email, $amt);
+                \Paypal\Coupon::Notify($code, $email, $amt);
             }
         }
         COM_setMsg(count($uids) . ' coupons sent');
@@ -302,12 +302,12 @@ case 'sendcards':
     break;
 
 case 'purgecache':
-    Paypal\Cache::clear();
+    \Paypal\Cache::clear();
     COM_refresh(PAYPAL_ADMIN_URL);
     break;
 
 case 'savediscount':
-    $D = new Paypal\Sales($_POST['id']);
+    $D = new \Paypal\Sales($_POST['id']);
     if (!$D->Save($_POST)) {
         COM_setMsg($LANG_PP['msg_nochange']);
         COM_refresh(PAYPAL_ADMIN_URL . '/index.php?editdiscount&id=' . $D->id);
@@ -321,7 +321,7 @@ case 'savediscount':
 case 'deldiscount':
     $id = PP_getVar($_GET, 'id', 'integer', 0);
     if ($id > 0) {
-        Paypal\Sales::Delete($id);
+        \Paypal\Sales::Delete($id);
     }
     COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sales');
     break;
@@ -334,7 +334,7 @@ default:
 //PAYPAL_debug('Admin view: ' . $action);
 switch ($view) {
 case 'history':
-    $content .= Paypal\history(true);
+    $content .= \Paypal\history(true);
     break;
 
 case 'orderhist':
@@ -347,14 +347,14 @@ case 'orderhist':
                 $_POST['newstatus'][$order_id] == $_POST['oldstatus'][$order_id]) {
                 continue;
             }
-            $ord = new Paypal\Order($order_id);
+            $ord = new \Paypal\Order($order_id);
             $ord->updateStatus($_POST['newstatus'][$order_id]);
             $i++;
         }
         $msg[] = sprintf($LANG_PP['updated_x_orders'], $i);
     }
     $uid = isset($_REQUEST['uid']) ? $_REQUEST['uid'] : 0;
-    $content .= Paypal\listOrders(true, $uid);
+    $content .= \Paypal\listOrders(true, $uid);
     break;
 
 case 'coupons':
@@ -366,7 +366,7 @@ case 'itemhist':
     break;
 
 case 'order':
-    $order = new Paypal\Order($actionval);
+    $order = new \Paypal\Order($actionval);
     $order->setAdmin(true);
     $content .= $order->View(true);
     break;
@@ -378,7 +378,7 @@ case 'ipnlog':
                     COM_applyFilter($_REQUEST['txn_id']) : '';
     switch ($op) {
     case 'single':
-        $content .= Paypal\ipnlogSingle($log_id, $txn_id);
+        $content .= \Paypal\ipnlogSingle($log_id, $txn_id);
         break;
     default:
         $content .= PAYPAL_adminlist_IPNLog();
@@ -388,7 +388,7 @@ case 'ipnlog':
 
 case 'editproduct':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    $P = new Paypal\Product($id);
+    $P = new \Paypal\Product($id);
     if ($id == 0 && isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
@@ -398,7 +398,7 @@ case 'editproduct':
 
 case 'editcat':
     $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    $C = new Paypal\Category($id);
+    $C = new \Paypal\Category($id);
     if ($id == 0 && isset($_POST['description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $C->SetVars($_POST);
@@ -418,7 +418,7 @@ case 'attributes':
     if (isset($_POST['delbutton_x']) && is_array($_POST['delitem'])) {
         // Delete some checked attributes
         foreach ($_POST['delitem'] as $attr_id) {
-            Paypal\Attribute::Delete($attr_id);
+            \Paypal\Attribute::Delete($attr_id);
         }
     }
     $content .= PAYPAL_adminlist_Attributes();
@@ -426,14 +426,14 @@ case 'attributes':
 
 case 'editattr':
     $attr_id = PP_getVar($_GET, 'attr_id');
-    $Attr = new Paypal\Attribute($attr_id);
+    $Attr = new \Paypal\Attribute($attr_id);
     $Attr->item_id = PP_getVar($_GET, 'item_id');
     $content .= $Attr->Edit();
     break;
 
 case 'editdiscount':
     $id = PP_getVar($_GET, 'id', 'integer', 0);
-    $D = new Paypal\Sales($id);
+    $D = new \Paypal\Sales($id);
     $content .= $D->Edit();
     break;
 
@@ -479,7 +479,7 @@ case 'gwadmin':
     break;
 
 case 'gwedit':
-    $gw = Paypal\Gateway::getInstance($_GET['gw_id']);
+    $gw = \Paypal\Gateway::getInstance($_GET['gw_id']);
     if ($gw !== NULL) {
         $content .= $gw->Configure();
     }
@@ -654,7 +654,7 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Paypal\Product::isUsed($A['id'])) {
+        if (!\Paypal\Product::isUsed($A['id'])) {
             $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
                     '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
@@ -1080,7 +1080,7 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Paypal\Category::isUsed($A['cat_id'])) {
+        if (!\Paypal\Category::isUsed($A['cat_id'])) {
             $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
                     '-trash-o pp-icon-danger tooltip"></i>',
                 PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
@@ -1276,7 +1276,7 @@ function PAYPAL_adminList_Gateway()
             $LANG32;
 
     $sql = "SELECT * FROM {$_TABLES['paypal.gateways']}";
-    $to_install = Paypal\Gateway::getUninstalled();
+    $to_install = \Paypal\Gateway::getUninstalled();
 
     $header_arr = array(
         array('text' => $LANG_ADMIN['edit'],
@@ -1597,7 +1597,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
     static $Cur = NULL;
     static $Dt = NULL;
-    if ($Cur === NULL) $Cur = Paypal\Currency::getInstance();
+    if ($Cur === NULL) $Cur = \Paypal\Currency::getInstance();
     if ($Dt === NULL) $Dt = new Date('now', $_CONF['timezone']);
     $retval = '';
 
@@ -1627,7 +1627,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
     case 'item_id':
         switch ($A['item_type']) {
         case 'product':
-            $P = Paypal\Product::getInstance($fieldvalue);
+            $P = \Paypal\Product::getInstance($fieldvalue);
             if ($P) {
                 $retval = $P->short_description;
             } else {
@@ -1638,7 +1638,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
             if ($fieldvalue == 0) {     // root category
                 $retval = $LANG_PP['home'];
             } else {
-                $C = Paypal\Category::getInstance($fieldvalue);
+                $C = \Paypal\Category::getInstance($fieldvalue);
                 $retval = $C->cat_name;
             }
             break;
@@ -1804,7 +1804,7 @@ function PAYPAL_itemhist($item_id = '')
     global $_TABLES, $LANG_PP, $_PP_CONF;
 
     if (is_numeric($item_id)) {
-        $Item = new Paypal\Product($item_id);
+        $Item = new \Paypal\Product($item_id);
         $item_desc = $Item->short_description;
     } else {
         $item_desc = $item_id;

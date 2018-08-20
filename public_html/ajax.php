@@ -22,7 +22,7 @@ switch ($_GET['action']) {
 case 'delAddress':          // Remove a shipping address
     if ($uid < 2) break;    // Not available to anonymous
     $id = (int)$_GET['id']; // Sanitize address ID
-    Paypal\UserInfo::deleteAddress($id);
+    \Paypal\UserInfo::deleteAddress($id);
     //DB_delete($_TABLES['paypal.address'], array('id','uid'), array($id,$uid));
     break;
 
@@ -39,7 +39,7 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
         exit;
     }
-    $ppGCart = Paypal\Cart::getInstance();
+    $ppGCart = \Paypal\Cart::getInstance();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
             $ppGCart->Contains($_POST['item_number']) !== false) {
         break;
@@ -68,7 +68,7 @@ case 'addcartitem':
 
 case 'finalizecart':
     $cart_id = PP_getVar($_POST, 'cart_id');
-    $status = Paypal\Cart::setFinal($cart_id);
+    $status = \Paypal\Cart::setFinal($cart_id);
     $A = array(
         'status' => $status,
     );
@@ -82,8 +82,8 @@ case 'redeem_gc':
     } else {
         $code = PP_getVar($_POST, 'gc_code');
         $uid = $_USER['uid'];
-        $status = Paypal\Coupon::Redeem($code, $uid);
-        $gw = Paypal\Gateway::getInstance('_coupon_gw');
+        $status = \Paypal\Coupon::Redeem($code, $uid);
+        $gw = \Paypal\Gateway::getInstance('_coupon_gw');
         $gw_radio = $gw->checkoutRadio($status == 0 ? true : false);
         $status_msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
         $A = array (

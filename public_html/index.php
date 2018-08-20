@@ -33,7 +33,7 @@ USES_paypal_functions();
 // Create a global shopping cart for our use.  This allows the cart to be
 // manipulated in an action and then displayed in a view, without necessarily
 // having to revisit the database or create a new cart.
-$ppGCart = Paypal\Cart::getInstance();
+$ppGCart = \Paypal\Cart::getInstance();
 
 $action = '';
 $actionval = '';
@@ -117,7 +117,7 @@ case 'checkout':
             switch ($wf_name) {
             case 'billto':
             case 'shipto':
-                if (!(Paypal\UserInfo::isValidAddress($ppGCart->getAddress($wf_name)) == '')) {
+                if (!(\Paypal\UserInfo::isValidAddress($ppGCart->getAddress($wf_name)) == '')) {
                     //$view = Workflow::getNextView($wf_name);
                     $view = $wf_name;
                     break 2;    // exit switch and foreach
@@ -134,13 +134,13 @@ case 'checkout':
 case 'savebillto':
 case 'saveshipto':
     $addr_type = substr($action, 4);   // get 'billto' or 'shipto'
-    $status = Paypal\UserInfo::isValidAddress($_POST);
+    $status = \Paypal\UserInfo::isValidAddress($_POST);
     if ($status != '') {
         $content .= PAYPAL_errMsg($status, $LANG_PP['invalid_form']);
         $view = $addr_type;
         break;
     }
-    $U = new Paypal\UserInfo();
+    $U = new \Paypal\UserInfo();
     if ($U->uid > 1) {      // only save addresses for logged-in users
         $addr_id = $U->SaveAddress($_POST, $addr_type);
         if ($addr_id[0] < 0) {
@@ -153,7 +153,7 @@ case 'saveshipto':
             $_POST['useaddress'] = $addr_id[0];
         }
     }
-    $view = Paypal\Workflow::getNextView($addr_type);
+    $view = \Paypal\Workflow::getNextView($addr_type);
     $ppGCart->setAddress($_POST, $addr_type);
     break;
 
@@ -205,7 +205,7 @@ case 'thanks':
     // Allow for no thanksVars function
     $message = $LANG_PP['thanks_title'];
     if (!empty($actionval)) {
-        $gw = Paypal\Gateway::getInstance($actionval);
+        $gw = \Paypal\Gateway::getInstance($actionval);
         if ($gw !== NULL) {
             $tVars = $gw->thanksVars();
             if (!empty($tVars)) {
@@ -232,7 +232,7 @@ case 'redeem':
     // the apply_gc form
     $code = PP_getVar($_REQUEST, 'gc_code');
     $uid = $_USER['uid'];
-    $status = Paypal\Coupon::Redeem($code, $uid);
+    $status = \Paypal\Coupon::Redeem($code, $uid);
     if ($status > 0) {
         $persist = true;
         $type = 'error';
@@ -276,7 +276,7 @@ case 'processorder':
     // Process the order, similar to what an IPN would normally do.
     // This is for internal, manual processes like C.O.D. or Prepayment orders
     $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : 'check';
-    $gw = Paypal\Gateway::getInstance($gw_name);
+    $gw = \Paypal\Gateway::getInstance($gw_name);
     if ($gw !== NULL) {
         $output = $gw->handlePurchase($_POST);
         if (!empty($output)) {
@@ -318,7 +318,7 @@ case 'shipto':
     /*if (COM_isAnonUser()) {
         $content .= SEC_loginRequiredForm();
     } else {*/
-        $U = new Paypal\UserInfo();
+        $U = new \Paypal\UserInfo();
         $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
         $content .= $U->AddressForm($view, $A);
 //   }
@@ -327,7 +327,7 @@ case 'shipto':
 case 'order':
     // View a completed order record
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        $order = new Paypal\Order($actionval);
+        $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
             $content .= $order->View(true);
         } else {
@@ -340,7 +340,7 @@ case 'order':
 
 case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        $order = new Paypal\Order($actionval);
+        $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
             echo $order->View(true, 'print');
             exit;
@@ -352,7 +352,7 @@ case 'printorder':
 
 case 'vieworder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        Paypal\Cart::setSession('prevpage', $view);
+        \Paypal\Cart::setSession('prevpage', $view);
         $content .= $ppGCart->View(true);
         $page_title = $LANG_PP['vieworder'];
     } else {
@@ -379,7 +379,7 @@ case 'detail':
     // deprecated, should be displayed via detail.php
     COM_errorLog("Called detail from index.php, deprecated");
     COM_404();
-    $P = new Paypal\Product($id);
+    $P = new \Paypal\Product($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['product_detail'];
@@ -391,7 +391,7 @@ case 'viewcart':
     // Restore cart since the payment was not processed.
     $cid = PP_getVar($_REQUEST, 'cid');
     if (!empty($cid)) {
-        Paypal\Cart::setFinal($cid, false);
+        \Paypal\Cart::setFinal($cid, false);
         COM_refresh(PAYPAL_URL. '/index.php?view=cart');
     }
     $menu_opt = $LANG_PP['viewcart'];
@@ -415,17 +415,17 @@ case 'checkoutcart':
 case 'productlist':
 default:
     $cat_id = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
-    $content .= Paypal\ProductList($cat_id);
+    $content .= \Paypal\ProductList($cat_id);
     $menu_opt = $LANG_PP['product_list'];
     $page_title = $LANG_PP['main_title'];
     break;
 
 case 'apply_gc':
-    $C = Paypal\Currency::getInstance();
+    $C = \Paypal\Currency::getInstance();
     $code = PP_getVar($_GET, 'code');
     $T = PP_getTemplate('apply_gc', 'tpl');
     $T->set_var(array(
-        'gc_bal' => $C->format(Paypal\Coupon::getUserBalance($_USER['uid'])),
+        'gc_bal' => $C->format(\Paypal\Coupon::getUserBalance($_USER['uid'])),
         'code' => $code,
     ) );
     $content .= $T->finish($T->parse('output', 'tpl'));
@@ -436,7 +436,7 @@ case 'none':
     break;
 }
 
-$display = Paypal\siteHeader();
+$display = \Paypal\siteHeader();
 $T = PP_getTemplate('paypal_title', 'title');
 $T->set_var(array(
     'title' => isset($page_title) ? $page_title : '',
@@ -444,7 +444,7 @@ $T->set_var(array(
 ) );
 $display .= $T->parse('', 'title');
 $display .= $content;
-$display .= Paypal\siteFooter();
+$display .= \Paypal\siteFooter();
 echo $display;
 
 ?>

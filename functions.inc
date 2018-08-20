@@ -86,12 +86,30 @@ if (empty($_USER['uid']) || $_USER['uid'] < 2) {
 
 spl_autoload_register(function ($class)
 {
-    if (strpos($class, 'Paypal\\') === 0) {
-        $class = str_replace('Paypal\\', '', $class);
-        $path = __DIR__ . '/classes/' . $class . '.class.php';
-        if (file_exists($path)) {
-            include $path;
-        }
+    // project-specific namespace prefix
+    $prefix = 'Paypal\\';
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . '/classes/';
+
+    // does the class use the namespace prefix?
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // no, move to the next registered autoloader
+        return;
+    }
+
+    // get the relative class name
+    $relative_class = substr($class, $len);
+
+    // replace the namespace prefix with the base directory, replace namespace
+    // separators with directory separators in the relative class name, append
+    // with .php
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.class.php';
+
+    // if the file exists, require it
+    if (file_exists($file)) {
+        require $file;
     }
 });
 
@@ -118,7 +136,7 @@ $ppGCart = NULL;
 function PAYPAL_setCart()
 {
     global $ppGCart;
-    $ppGCart = Paypal\Cart::getInstance();
+    $ppGCart = \Paypal\Cart::getInstance();
     return $ppGCart;
 }
 
@@ -273,7 +291,7 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
     if (!plugin_commentsupport_paypal())
         return $retval;
 
-    $P = new Paypal\Product($id);
+    $P = new \Paypal\Product($id);
     if ($P->isNew)
         return $retval;
 
@@ -421,7 +439,7 @@ function plugin_getuseroption_paypal()
         );
     }
     // View cart option is available to anonymous users
-    if (Paypal\Cart::getInstance()->hasItems()) {
+    if (\Paypal\Cart::getInstance()->hasItems()) {
         $retval[] = array($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
     }
@@ -458,8 +476,8 @@ function plugin_user_delete_paypal($uid)
             SET uid = 1
             WHERE uid = '$uid'";
 
-    Paypal\UserInfo::deleteUser($uid);
-    Paypal\Cart::deleteUser($uid);
+    \Paypal\UserInfo::deleteUser($uid);
+    \Paypal\Cart::deleteUser($uid);
 }
 
 
@@ -612,7 +630,7 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
             $retval = $T->parse('', 'cart');
         }
     } else {
-        foreach (Paypal\Gateway::getAll() as $gw) {
+        foreach (\Paypal\Gateway::getAll() as $gw) {
             $retval = $gw->ExternalButton($vars, $btn_type);
             break;
         }
@@ -839,7 +857,7 @@ function plugin_autouninstall_paypal ()
         // List all vars by name
         'vars'=> array('paypal_gid'),
     );
-    Paypal\Cache::clear();  // clear everything from cache
+    \Paypal\Cache::clear();  // clear everything from cache
     return $out;
 }
 
@@ -955,7 +973,7 @@ function phpblock_paypal_cart_contents()
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
     //$cart = PAYPAL_setCart();
-    $cart = Paypal\Cart::getInstance();
+    $cart = \Paypal\Cart::getInstance();
 
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return '';
@@ -965,7 +983,7 @@ function phpblock_paypal_cart_contents()
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
-        $P = Paypal\Product::getInstance($item['item_id']);
+        $P = \Paypal\Product::getInstance($item['item_id']);
 
         if (strpos($item['item_id'], '|')) {
             list($item_id, $options) = explode('|', $item['item_id']);
@@ -1318,7 +1336,7 @@ function PAYPAL_phpblock_product($sql)
             'btn_details' => 'buttons/btn_details.thtml',
         ));
 
-        $P = new Paypal\Product();
+        $P = new \Paypal\Product();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
             $P->Read($A['id']);
             $T->set_var(array(
@@ -1435,9 +1453,9 @@ function plugin_user_login_paypal($uid)
 
     if ($uid < 2 || $_PP_CONF['ena_cart'] == 0) return;
 
-    $anon_cart = Paypal\Cart::getAnonCartID();  // get the anonymous cart ID
+    $anon_cart = \Paypal\Cart::getAnonCartID();  // get the anonymous cart ID
     if (empty($anon_cart)) return;             // save a step if there's no anon cart
-    $user_cart = Paypal\Cart::getInstance($uid);    // get the logged-in user's cart
+    $user_cart = \Paypal\Cart::getInstance($uid);    // get the logged-in user's cart
     $user_cart->Merge($anon_cart);
 }
 
@@ -1452,6 +1470,11 @@ function plugin_runScheduledTask_paypal()
     global $_PP_CONF, $_TABLES, $_CONF;
 
     if ($_PP_CONF['ena_cart'] == 1) {
+        // New method: Delete old orders that haven't been finalized
+        $sql = "DELETE FROM {$_TABLES['paypal.orders']}
+            WHERE is_cart = 1 AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        DB_query($sql);
+
         // Delete old shopping carts, if the cart is enabled
         $sql = "DELETE FROM {$_TABLES['paypal.cart']}
             WHERE cart_uid = 1
@@ -1493,7 +1516,7 @@ function plugin_runScheduledTask_paypal()
 
     // Clean up the sale price table if so configured.
     if ($_PP_CONF['purge_sale_prices']) {
-        Paypal\Sales::Clean();
+        \Paypal\Sales::Clean();
     }
 }
 
@@ -1619,7 +1642,7 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
 function plugin_configmanager_select_currency_paypal()
 {
     $A = array();
-    $tmp = Paypal\Currency::getAll();
+    $tmp = \Paypal\Currency::getAll();
     foreach ($tmp as $code => $data) {
         $A["{$code} - {$data->name}"] = $code;
     }
@@ -1652,10 +1675,10 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
             'block' => 'profileblock.thtml',
         ));
         $LT->set_var('is_uikit', $_PP_CONF['_is_uikit']);
-        $U = Paypal\UserInfo::getInstance($uid);
+        $U = \Paypal\UserInfo::getInstance($uid);
         if ($_PP_CONF['gc_enabled']) {
-            $gc_bal = Paypal\Coupon::getUserBalance($uid);
-            $LT->set_var('gc_bal', Paypal\Currency::getInstance()->Format($gc_bal));
+            $gc_bal = \Paypal\Coupon::getUserBalance($uid);
+            $LT->set_var('gc_bal', \Paypal\Currency::getInstance()->Format($gc_bal));
         }
         if (!empty($U->cart)) {
             $cart = true;
@@ -1669,7 +1692,7 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
         // Only display the template if there's something to show
         /*if ($ord_count > 0 || $cart || $gc_bal > 0) {
             USES_paypal_functions();
-            //$LT->set_var('order_hist', Paypal\listOrders());
+            //$LT->set_var('order_hist', \Paypal\listOrders());
         }*/
         $LT->parse('output', 'block');
         $retval .= $LT->finish($LT->get_var('output'));
@@ -1695,7 +1718,7 @@ function plugin_profilesave_paypal($uid=0)
 
     $apply_gc = PP_getVar($_POST, 'pp_apply_gc', 'string');
     if (!empty($apply_gc)) {
-        Paypal\Coupon::Redeem($apply_gc, $uid);
+        \Paypal\Coupon::Redeem($apply_gc, $uid);
     }
 }
 
@@ -1984,12 +2007,12 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
 */
 function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 {
-    $U = Paypal\UserInfo::getInstance($uid);
+    $U = \Paypal\UserInfo::getInstance($uid);
 
     $retval = "<paypal>\n";
 
     foreach ($U->addresses as $addr) {
-        foreach (Paypal\UserInfo::Fields() as $fld) {
+        foreach (\Paypal\UserInfo::Fields() as $fld) {
             if ($addr[$fld] != '') {
                 $d = addSlashes(htmlentities($addr[$fld]));
                 $retval .= '<'.$fld.'>'.$d.'</'.$fld.">\n";

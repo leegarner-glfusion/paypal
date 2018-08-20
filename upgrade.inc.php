@@ -624,14 +624,14 @@ function PAYPAL_do_upgrade()
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
-        Paypal\Category::rebuildTree();
+        \Paypal\Category::rebuildTree();
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, $installed_ver)) {
         if (!PAYPAL_do_set_version($installed_ver)) return false;
     }
-    Paypal\Cache::clear();
+    \Paypal\Cache::clear();
     PAYPAL_remove_old_files();
     CTL_clearCache();   // clear cache to ensure CSS updates come through
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);

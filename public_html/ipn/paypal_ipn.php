@@ -21,7 +21,7 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 }
 
 // Process IPN request
-$ipn = Paypal\IPN::getInstance('paypal', $_POST);
+$ipn = \Paypal\IPN::getInstance('paypal', $_POST);
 $ipn->Process();
 
 // Finished (this isn't necessary...but heck...why not?)
