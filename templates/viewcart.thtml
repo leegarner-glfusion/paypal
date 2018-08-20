@@ -116,15 +116,11 @@
         <div class="uk-alert uk-alert-danger">{$LANG_PP['todo_nogateways']}</div>
 {!endif}
       </div>
-{!if need_email}
       <div class="gwRadiosOuter">
         {$LANG_PP['enter_email']}:
         <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['enter_email']}"></i>
-        <br /><input required type="text" name="payer_email" size="40"/><br />
+        <br /><input required type="text" name="payer_email" size="40" value="{payer_email}"/><br />
       </div>
-{!else}
-        <input type="hidden" name="payer_email" value="" />
-{!endif}
       <div style="float:right;">
 {!if gateway_radios}
 {!if is_uikit}

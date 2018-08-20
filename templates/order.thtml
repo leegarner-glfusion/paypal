@@ -1,7 +1,10 @@
 {# begin {templatelocation} #}
 <div class="paypalOrderContainer">
+  <p>
+    <div style="display:inline-block;"><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></div>
+    <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/?orderhist=x">{$LANG_PP['my_account']}</a></div>
+  </p>
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
-  <p><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></p>
 {!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_blank"
@@ -207,7 +210,9 @@
       {gateway_vars}
     </div>
   {!if pmt_method}
-    <p id="orderPaymentMethod">{$LANG_PP['pmt_method']}: {pmt_method}
+    <p id="orderPaymentMethod">
+        {$LANG_PP['pmt_method']}: {pmt_method}<br />
+        {$LANG_PP['notify_email']}: {payer_email}
 {!endif} 
   {!else}
 {!if is_admin}

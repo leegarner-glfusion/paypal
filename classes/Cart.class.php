@@ -719,6 +719,7 @@ class Cart
             'net_total' => $currency->Format(max($total - $apply_gc, 0)),
             'cart_tax'  => $cart_tax > 0 ? $currency->FormatValue($cart_tax) : '',
             'tax_on_items' => sprintf($LANG_PP['tax_on_x_items'], PP_getTaxRate() * 100, $tax_items),
+            'payer_email' => $this->getInfo('payer_email'),
         ) );
 
         // If this is the final checkout, then show the payment buttons
@@ -732,9 +733,7 @@ class Cart
             ) );
         } else {
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
-            if (COM_isAnonUser()) {
-                $T->set_var('need_email', true);
-            }
+            $T->set_var('payer_email', COM_isAnonUser() ? '' : $_USER['email']);
         }
         $T->parse('output', 'cart');
         $form = $T->finish($T->get_var('output'));
@@ -768,11 +767,6 @@ class Cart
                 '<input type="hidden" name="cart_id" value="' . $this->CartID() . '" />',
                 '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
             );
-            if (COM_isAnonUser()) {
-                $T->set_var('need_email', true);
-            } else {
-                $gateway_vars[] = '<input type="hidden" name="payer_email" value="' . $_USER['email'] . '" />';
-            }
             $T->set_var(array(
                 'action'        => PAYPAL_URL . '/ipn/internal_ipn.php',
                 'gateway_vars'  => implode("\n", $gateway_vars),
@@ -917,9 +911,11 @@ class Cart
     */
     private static function _makeCartID()
     {
-        global $_CONF;
-
-        return md5(time() . session_id() . $_CONF['site_name']);
+        global $_TABLES;
+        do {
+            $id = COM_makeSid();
+        } while (DB_getItem($_TABLES['paypal.cart'], 'cart_id', "cart_id = '$id'") !== NULL);
+        return $id;
     }
 
 
