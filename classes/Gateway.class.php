@@ -310,9 +310,10 @@ abstract class Gateway
         //echo $sql;die;
         DB_query($sql);
         self::ClearButtonCache();   // delete all buttons for this gateway
-        if (DB_error())
+        if (DB_error()) {
             return false;
-        else {
+        } else {
+            $this->_postConfigSave();   // Run function for further setup
             Cache::clear('gateways');
             self::Reorder();
             return true;
@@ -883,6 +884,7 @@ abstract class Gateway
         $T = PP_getTemplate('btn_checkout', 'btn', 'templates/buttons');
         $T->set_var(array(
             'action'    => $this->getActionUrl(),
+            'method'    => $this->getMethod(),
             'gateway_vars' => $gateway_vars,
             'is_uikit'  => $_PP_CONF['_is_uikit'],
             'button_url' => $this->getCheckoutButton(),
@@ -1239,6 +1241,27 @@ abstract class Gateway
             }
         }
         return $gateways;
+    }
+
+
+    /**
+     * Get the form method to use with the final checkout button.
+     * Return POST by default
+     *
+     * @return  string  Form method
+     */
+    public function getMethod()
+    {
+        return 'post';
+    }
+
+
+    /**
+     * Run additional functions after saving the configuration
+     */
+    protected function _postConfigSave()
+    {
+        return;
     }
 
 }   // class Gateway
