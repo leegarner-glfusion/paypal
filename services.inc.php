@@ -46,17 +46,17 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
 {
     global $_CONF, $_PP_CONF;
 
-    $ppGCart = Paypal\Cart::getInstance();
+    $ppGCart = \Paypal\Cart::getInstance();
     $btn_type = isset($args['btn_type']) ? $args['btn_type'] : '';
     $output = array();
 
     // Create the immediate purchase button, if requested.  As soon as a
     // gateway supplies the requested button type, break from the loop.
     if (!empty($btn_type)) {
-        foreach (Paypal\Gateway::getall() as $gw) {
+        foreach (\Paypal\Gateway::getall() as $gw) {
             if ($gw->Supports('external') && $gw->Supports($btn_type)) {
                 //$output[] = $gw->ExternalButton($args, $btn_type);
-                $P = Paypal\Product::getInstance($args['item_number']);
+                $P = \Paypal\Product::getInstance($args['item_number']);
                 $output[] = $gw->ProductButton($P);
             }
         }
@@ -181,7 +181,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
 
-    $ppGCart = Paypal\Cart::getInstance();
+    $ppGCart = \Paypal\Cart::getInstance();
     $price = 0;
     foreach (array('amount', 'price') as $s) {
         if (isset($args[$s])) {
@@ -287,12 +287,12 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
     } else {
         $amount = (float)$args;
     }
-    $output = Paypal\Currency::getInstance()->Format($amount);
+    $output = \Paypal\Currency::getInstance()->Format($amount);
     return PLG_RET_OK;
 }
 function plugin_formatAmount_paypal($amount)
 {
-    return Paypal\Currency::getInstance()->Format((float)$amount);
+    return \Paypal\Currency::getInstance()->Format((float)$amount);
 }
 
 ?>
