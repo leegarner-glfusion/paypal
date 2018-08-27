@@ -161,9 +161,6 @@ function CouponLog($uid = 0)
         'direction' => 'DESC',
     );
 
-    $display = COM_startBlock('', '',
-                COM_getBlockTemplate('_admin_block', 'header'));
-
     $query_arr = array(
         'table' => 'paypal.coupon_log',
         'sql' => $sql,
@@ -181,9 +178,12 @@ function CouponLog($uid = 0)
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
+    $display = COM_startBlock('', '',
+        COM_getBlockTemplate('_admin_block', 'header'));
+    $gc_bal = Coupon::getUserBalance();
+    $display .= $LANG_PP['gc_bal'] . ': ' . Currency::getInstance()->Format($gc_bal);
     $display .= \ADMIN_list('paypal_couponlog', __NAMESPACE__ . '\getCouponLogField',
             $header_arr, $text_arr, $query_arr, $defsort_arr);
-
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
 }
