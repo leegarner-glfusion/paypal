@@ -665,14 +665,16 @@ class Order
             'msg_body' => 'purchase_email_body',
         ) );
 
+
         // Add all the items to the message
         $total = (float)0;      // Track total purchase value
         $files = array();       // Array of filenames, for attachments
-        $num_format = "%5.2f";
         $item_total = 0;
         $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
         $email_extras = array();
+
+        $Cur = Currency::getInstance();     // get currency for formatting
 
         foreach ($this->items as $id=>$item) {
             $P = $item->getProduct();
@@ -710,8 +712,8 @@ class Order
             $T->set_block('msg_body', 'ItemList', 'List');
             $T->set_var(array(
                 'qty'   => $item->quantity,
-                'price' => sprintf($num_format, $item->price),
-                'ext'   => sprintf($num_format, $ext),
+                'price' => $Cur->FormatValue($item->price),
+                'ext'   => $Cur->FormatValue($ext),
                 'name'  => $item_descr,
                 'options_text' => $options_text,
             ) );
@@ -728,13 +730,13 @@ class Order
         }
 
         $T->set_var(array(
-            'payment_gross'     => sprintf($num_format, $total_amount),
-            'payment_items'     => sprintf($num_format, $item_total),
-            'tax'               => sprintf($num_format, $this->tax),
+            'payment_gross'     => $Cur->Format($total_amount),
+            'payment_items'     => $Cur->Format($item_total),
+            'tax'               => $Cur->FormatValue($this->tax),
             'tax_num'           => $this->tax,
-            'shipping'          => sprintf($num_format, $this->shipping),
+            'shipping'          => $Cur->FormatValue($this->shipping),
             'shipping_num'      => $this->shipping,
-            'handling'          => sprintf($num_format, $this->handling),
+            'handling'          => $Cur->FormatValue($this->handling),
             'handling_num'      => $this->handling,
             'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
@@ -757,14 +759,14 @@ class Order
         ) );
         if ($this->by_gc > 0) {
             $T->set_var(array(
-                'by_gc'     => sprintf($num_format, $this->by_gc),
-                'net_total' => sprintf($num_format, $total_amount - $this->by_gc),
+                'by_gc'     => $Cur->FormatValue($this->by_gc),
+                'net_total' => $Cur->Format($total_amount - $this->by_gc),
             ) );
         }
         $gc_bal = Coupon::getUserBalance($this->uid);
         if ($gc_bal > 0) {
             $T->set_var(array(
-                'gc_bal_fmt' => sprintf($num_format, $gc_bal),
+                'gc_bal_fmt' => $Cur->Format($gc_bal),
                 'gc_bal_num' => $gc_bal,
             ) );
         }
