@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -15,7 +15,7 @@ namespace Paypal;
 
 /**
 *   Class for order processing workflow items
-*   Order statuses are defined in the database and can be re-ordered and 
+*   Order statuses are defined in the database and can be re-ordered and
 *   individually enabled or disabled.
 *   @package paypal
 */
@@ -23,52 +23,60 @@ class OrderStatus extends Workflow
 {
     static $table = 'paypal.orderstatus';
 
+    private $name;
+    private $notify_buyer;
+
     /**
     *   Constructor.
     *   Initializes the array of orderstatus.
     *
-    *   @uses   Load()
+    *   @see    self::getAll()
+    *   @param  array   $A  Array of data from the DB
     */
-    function __construct()
+    public function __construct($A)
     {
-        self::Init();
+        $this->notify_buyer = $A['notify_buyer'];
+        $this->name = $A['name'];
     }
 
 
     /**
-    *   Load the orderstatus into the global workflow array.
+    *   Get all order status objects into an array
     */
-    public static function Load()
+    public static function getAll()
     {
-        global $_PP_CONF, $_TABLES;
+        global $_TABLES;
+        static $statuses = NULL;
 
-        $_PP_CONF['orderstatus'] = array();
-        $sql = "SELECT name, notify_buyer
-                FROM {$_TABLES[self::$table]}
-                WHERE enabled = 1
-                ORDER BY orderby ASC";
-        //echo $sql;die;
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $_PP_CONF['orderstatus'][$A['name']] = array(
-                'notify_buyer' => $A['notify_buyer'],
-            );
+        if ($statuses === NULL) {
+            $statuses = array();
+            $sql = "SELECT name, notify_buyer
+                    FROM {$_TABLES[self::$table]}
+                    WHERE enabled = 1
+                    ORDER BY orderby ASC";
+            //echo $sql;die;
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $statuses[$A['name']] = new self($A);
+            }
         }
+        return $statuses;
     }
 
 
     /**
-    *   Initilize the workflow array, if not already done.
-    *
-    *   @uses   Load()
-    */
-    public static function Init($force=false)
+     * Get a single status instance
+     *
+     * @param   string  Name of status to get
+     * @return  array   Array of status info
+     */
+    public static function getInstance($name)
     {
-        global $_PP_CONF;
-
-        if ($force || !isset($_PP_CONF['orderstatus']) || 
-            !is_array($_PP_CONF['orderstatus'])) {
-            self::Load();
+        $statuses = self::getAll();
+        if (isset($statuses[$name])) {
+            return $statuses[$name];
+        } else {
+            return NULL;
         }
     }
 
@@ -83,9 +91,7 @@ class OrderStatus extends Workflow
     */
     public static function Selection($order_id, $showlog=0, $selected = '')
     {
-        global $LANG_PP, $_PP_CONF;
-
-        self::Init();
+        global $LANG_PP;
 
         $T = PP_getTemplate('orderstatus', 'ordstat');
         $T->set_var(array(
@@ -94,7 +100,7 @@ class OrderStatus extends Workflow
             'showlog'   => $showlog == 1 ? 1 : 0,
         ) );
         $T->set_block('ordstat', 'StatusSelect', 'Sel');
-        foreach ($_PP_CONF['orderstatus'] as $key => $data) {
+        foreach (self::getAll() as $key => $data) {
             $T->set_var(array(
                 'selected' => $key == $selected ?
                                 'selected="selected"' : '',
@@ -106,6 +112,17 @@ class OrderStatus extends Workflow
         }
         $T->parse('output', 'ordstat');
         return $T->finish ($T->get_var('output'));
+    }
+
+
+    /**
+     * Find out whether this status requires notification to the buyer.
+     *
+     * @return  boolean     True or False
+     */
+    public function notifyBuyer()
+    {
+        return $this->notify_buyer == 1 ? true : false;
     }
 
 
@@ -181,8 +198,9 @@ class OrderStatus extends Workflow
 
 
     /**
-    *   Reorder all workflow items.
-    */
+     *   Reorder all workflow items.
+     *   Called after moveRow()
+     */
     public static function ReOrder()
     {
         global $_TABLES;
