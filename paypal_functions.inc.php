@@ -35,10 +35,9 @@ function listOrders($admin = false, $uid = 0)
 
     USES_lib_admin();
 
+    $where = ' WHERE is_cart = 0 ';
     if ($uid > 0) {
-        $where = " WHERE ord.uid = '" . (int)$uid . "'";
-    } else {
-        $where = 'WHERE 1=1';
+        $where .= " AND ord.uid = '" . (int)$uid . "'";
     }
 
     $isAdmin = $admin == true ? 1 : 0;
@@ -52,9 +51,6 @@ function listOrders($admin = false, $uid = 0)
             ON ord.uid = u.uid
         LEFT JOIN {$_TABLES['paypal.purchases']} AS itm
             ON ord.order_id = itm.order_id";
-    /*if (!$admin) {
-        $sql .= " $where GROUP BY ord.order_id";
-    }*/
 
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
@@ -90,9 +86,6 @@ function listOrders($admin = false, $uid = 0)
         $options = '';
     }
 
-    $display = COM_startBlock('', '',
-                COM_getBlockTemplate('_admin_block', 'header'));
-
     $query_arr = array('table' => 'paypal.orders',
             'sql' => $sql,
             'query_fields' => array(
@@ -118,9 +111,11 @@ function listOrders($admin = false, $uid = 0)
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= \ADMIN_list('paypal_orderlog', __NAMESPACE__ . '\getPurchaseHistoryField',
-            $header_arr, $text_arr, $query_arr, $defsort_arr);
-
+    $display = COM_startBlock('', '',
+        COM_getBlockTemplate('_admin_block', 'header'));
+    $display .= \ADMIN_list('paypal_orderlog',
+        __NAMESPACE__ . '\getPurchaseHistoryField',
+        $header_arr, $text_arr, $query_arr, $defsort_arr);
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
 }
