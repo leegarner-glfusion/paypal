@@ -547,11 +547,7 @@ class Order
     */
     public function updateStatus($newstatus, $log = true)
     {
-        global $_TABLES, $_PP_CONF;
-
-        // Need to get the order statuses to see if we should notify
-        // the buyer
-        $OrdStat = new OrderStatus();
+        global $_TABLES;
 
         $order_id = $this->order_id;
         $oldstatus = $this->status;
@@ -574,8 +570,7 @@ class Order
                     $log_user);
         }
 
-        if (isset($_PP_CONF['orderstatus'][$newstatus]['notify_buyer']) &&
-                $_PP_CONF['orderstatus'][$newstatus]['notify_buyer'] == 1) {
+        if (OrderStatus::getInstance($newstatus)->notifyBuyer()) {
             $this->Notify($newstatus);
         }
         return true;
@@ -749,7 +744,6 @@ class Order
             'pi_url'            => PAYPAL_URL,
             'pi_admin_url'      => PAYPAL_ADMIN_URL,
             'dl_links'          => $dl_links,
-            'files'             => $do_send_attachments ? 'true' : '',
             'buyer_uid'         => $this->uid,
             'user_name'         => $user_name,
             'gateway_name'      => $this->pmt_method,
