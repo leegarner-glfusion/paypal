@@ -35,7 +35,7 @@ if (isset($_GET['id'])) {
     $id = COM_applyFilter(COM_getArgument('id'));
 }
 
-$display = Paypal\siteHeader();
+$display = \Paypal\siteHeader();
 $T = PP_getTemplate('paypal_title', 'title');
 $T->set_var('title', $LANG_PP['main_title']);
 $display .= $T->parse('', 'title');
@@ -49,9 +49,9 @@ if (!empty($msg)) {
 $content = '';
 $breadcrumbs = '';
 if (!empty($id)) {
-    $P = Paypal\Product::getInstance($id);
+    $P = \Paypal\Product::getInstance($id);
     if ($P->id == $id && $P->hasAccess()) {
-        $breadcrumbs = Paypal\Category::Breadcrumbs($P->cat_id);
+        $breadcrumbs = \Paypal\Category::Breadcrumbs($P->cat_id);
         $content .= $P->Detail();
     }
 }
@@ -65,7 +65,7 @@ if (empty($breadcrumbs)) {
 
 $display .= $breadcrumbs;
 $display .= $content;
-$display .= Paypal\siteFooter();
+$display .= \Paypal\siteFooter();
 echo $display;
 
 ?>
