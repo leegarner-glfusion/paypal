@@ -760,7 +760,7 @@ class Cart
         // or gift cards
         if ($this->custom_info['final_total'] < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
-            $this->custom_info['transtype'] = 'internal';
+            $this->custom_info['transtype'] = '_internal';
             $this->custom_info['cart_id'] = $this->CartID();
             $gateway_vars = array(
                 '<input type="hidden" name="processorder" value="by_gc" />',
@@ -768,10 +768,11 @@ class Cart
                 '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
             );
             $T->set_var(array(
-                'action'        => PAYPAL_URL . '/ipn/internal_ipn.php',
+                'action'        => PAYPAL_URL . '/ipn/internal.php',
                 'gateway_vars'  => implode("\n", $gateway_vars),
                 'cart_id'       => $this->m_cart_id,
                 'uid'           => $_USER['uid'],
+                'method'        => 'post',
             ) );
             $T->parse('checkout_btn', 'checkout');
             return $T->finish($T->get_var('checkout_btn'));
@@ -831,7 +832,7 @@ class Cart
         if ($_PP_CONF['anon_buy'] || !COM_isAnonUser()) {
             $gateways = Gateway::getAll();
             if ($_PP_CONF['gc_enabled']) {
-                $gateways['_coupon_gw'] = Gateway::getInstance('_coupon_gw');
+                $gateways['_coupon'] = Gateway::getInstance('_coupon');
             }
             if (empty($gateways)) return NULL;  // no available gateways
             if (isset($this->m_info['gateway']) && array_key_exists($this->m_info['gateway'], $gateways)) {
@@ -839,13 +840,13 @@ class Cart
                 $gw_sel = $this->m_info['gateway'];
             } elseif ($_PP_CONF['gc_enabled'] && $this->m_info['gc_bal'] >= $this->m_info['order_total']) {
                 // Select the coupon gateway as full payment
-                $gw_sel = '_coupon_gw';
+                $gw_sel = '_coupon';
             } else {
                 // Select the first if there's one, otherwise select none.
                 $gw_sel = '';
             }
             foreach ($gateways as $gw) {
-                if ($gw->Supports('checkout')) {
+                if ($gw && $gw->Supports('checkout')) {
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
                         'gw_id' => $gw->Name(),
@@ -1095,11 +1096,11 @@ class Cart
     {
         global $_TABLES;
 
-        $amt = (float)$amt;
         if ($amt == -1) {
             $gc_bal = Coupon::getUserBalance();
             $amt = min($gc_bal, Coupon::canPayByGC($this));
         }
+        $amt = (float)$amt;
         $this->m_info['apply_gc'] = $amt;
         $sql = "UPDATE {$_TABLES['paypal.cart']}
                 SET apply_gc = $amt

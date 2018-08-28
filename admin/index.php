@@ -941,7 +941,11 @@ function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'pmt_status':
-        $retval = htmlspecialchars($ipn_data['payment_status'], ENT_QUOTES, COM_getEncodingt());
+        if (isset($ipn_data['payment_status'])) {
+            $retval = htmlspecialchars($ipn_data['payment_status'], ENT_QUOTES, COM_getEncodingt());
+        } else {
+            $retval = '';
+        }
         break;
 
     case 'txn_id':
@@ -1324,8 +1328,8 @@ function PAYPAL_adminList_Gateway()
 
     if (!empty($to_install)) {
         $display .= $LANG_PP['gw_notinstalled'] . ':<br />';
-        foreach ($to_install as $name=>$info) {
-            $display .= $name . '&nbsp;&nbsp;<a href="' .
+        foreach ($to_install as $name=>$gw) {
+                $display .= $gw->Description() . '&nbsp;&nbsp;<a href="' .
                     PAYPAL_ADMIN_URL. '/index.php?gwinstall=x&gwname=' .
                     urlencode($name) . '">' . $LANG32[22] . '</a><br />' . LB;
         }

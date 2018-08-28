@@ -86,12 +86,12 @@ case 'updatecart':
 
 case 'checkout':
     // Set the gift card amount first as it will be overridden
-    // if the _coupon_gw gateway is selected
+    // if the _coupon gateway is selected
     $gateway = PP_getVar($_POST, 'gateway');
     if ($gateway !== '') $ppGCart->setGateway($gateway);
     if (isset($_POST['apply_gc'])) {
         $ppGCart->setGC($_POST['apply_gc']);
-    } elseif ($gateway == '_coupon_gw') {
+    } elseif ($gateway == '_coupon') {
         $ppGCart->setGC(-1);
     } else {
         $ppGCart->setGC(0);

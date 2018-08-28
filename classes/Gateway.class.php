@@ -19,7 +19,7 @@ namespace Paypal;
 *   @package paypal
 *   @since  0.5.0
 */
-abstract class Gateway
+class Gateway
 {
     /** Property fields.  Accessed via __set() and __get().
     *   This is for configurable properties of the gateway- URL, testing
@@ -125,7 +125,7 @@ abstract class Gateway
         $this->properties = array();
         $this->items = array();
         $this->custom = array();
-        $this->ipn_url = PAYPAL_URL . '/ipn/' . $this->gw_name . '_ipn.php';
+        $this->ipn_url = PAYPAL_URL . '/ipn/' . $this->gw_name . '.php';
         $this->currency_code = empty($_PP_CONF['currency']) ? 'USD' :
                 $_PP_CONF['currency'];
 
@@ -481,9 +481,8 @@ abstract class Gateway
         global $_TABLES;
 
         // Only install the gateway if it isn't already installed
-        $id = DB_getItem($_TABLES['paypal.gateways'], 'id',
-                "id='{$this->gw_name}'");
-        if (empty($id)) {
+        $installed = self::getAll(false);
+        if (!array_key_exists($this->gw_name, $installed)) {
             if (is_array($this->config)) {
                 $config = @serialize($this->config);
             } else {
@@ -1024,7 +1023,6 @@ abstract class Gateway
     *   Magic setter function.
     *   Must be declared in the child object
     *
-    *   @abstract
     *   @param  string  $key    Name of property to set
     *   @param  mixed   $value  Value to set for property
     */
@@ -1038,7 +1036,6 @@ abstract class Gateway
     *   This gets the variables from the gateway's IPN data into standard
     *   array values to be displayed in the IPN log view.
     *
-    *   @abstract
     *   @param  array   $data       Array of original IPN data
     *   @return array               Name=>Value array of data for display
     */
@@ -1059,7 +1056,6 @@ abstract class Gateway
     *   for button types handled by this gateway.  Refer to the instance in
     *   the paypal gateway for guidance.
     *
-    *   @abstract
     *   @return string      HTML for the configuration form.
     */
     public function Configure()
@@ -1087,7 +1083,7 @@ abstract class Gateway
         $T->set_block('tpl', 'ItemRow', 'IRow');
         foreach ($fields as $name=>$field) {
             $T->set_var(array(
-                'param_name'    => $LANG[$name],
+                'param_name'    => isset($LANG[$name]) ? $LANG[$name] : $name,
                 'field_name'    => $name,
                 'param_field'   => $field['param_field'],
                 'other_label'   => isset($field['other_label']) ? $field['other_label'] : '',
@@ -1114,22 +1110,13 @@ abstract class Gateway
         static $gateways = array();
 
         if (!$gw_name) return NULL;
-
-        //if (!isset(self::$gateways[$gw_name])) {
-        if (!isset($gateways[$gw_name])) {
-//            $cache_key = 'gateway_' . $gw_name;
-//            $gateways[$gw_name] = Cache::get($cache_key);
-//            if (!$gateways[$gw_name]) {
-                $filename = __DIR__ . '/gateways/' . $gw_name . '.class.php';
-                if (file_exists($filename)) {
-                    include_once $filename;
-                    $gw = __NAMESPACE__ . '\\' . $gw_name;
-                    $gateways[$gw_name] = new $gw($A);
-                } else {
-                    $gateways[$gw_name] = new internal_gw($A);
-                }
-//                Cache::set($cache_key, $gateways[$gw_name], 'gateways');
-//            }
+        if (!array_key_exists($gw_name, $gateways)) {
+            $gw = __NAMESPACE__ . '\\Gateway\\' . $gw_name;
+            if (class_exists($gw)) {
+                $gateways[$gw_name] = new $gw($A);
+            } else {
+                $gateways[$gw_name] = NULL;
+            }
         }
         return $gateways[$gw_name];
     }
@@ -1150,9 +1137,9 @@ abstract class Gateway
 
         if (!isset($gateways[$key])) {
             $gateways[$key] = array();
-//            $cache_key = 'gateways_' . $key;
-//            $gateways[$key] = Cache::get($cache_key);
-//            if (!$gateways[$key]) {
+            $cache_key = 'gateways_' . $key;
+            $gateways[$key] = Cache::get($cache_key);
+            if ($gateways[$key] === NULL) {
                 // Load the gateways
                 $sql = "SELECT id, enabled, services
                     FROM {$_TABLES['paypal.gateways']}";
@@ -1162,11 +1149,15 @@ abstract class Gateway
                 $res = DB_query($sql);
                 while ($A = DB_fetchArray($res, false)) {
                     // For each available gateway, load its class file and add it
-                    // to the static array
-                    $gateways[$key][$A['id']] = self::getInstance($A['id'], $A);
+                    // to the static array. Check that a valid object is
+                    // returned from getInstance()
+                    $gw = self::getInstance($A['id'], $A);
+                    if (is_object($gw)) {
+                        $gateways[$key][$A['id']] = $gw;
+                    }
                 }
-//                Cache::set($cache_key, $gateways[$key], 'gateways');
-//            }
+                Cache::set($cache_key, $gateways[$key], 'gateways');
+            }
         }
         return $gateways[$key];
     }
@@ -1201,12 +1192,25 @@ abstract class Gateway
     }
 
 
+    /**
+     * Stub function to get the gateway variables.
+     * The child class should provide this.
+     *
+     * @param   object  $cart   Cart object
+     * @return string      Gateay variable input fields
+     */
     public function gatewayVars($cart)
     {
         return '';
     }
 
 
+    /**
+     * Stub function to get the HTML for a checkout button.
+     * Each child class must supply this
+     *
+     * @return  string  HTML for checkout button
+     */
     public function getCheckoutButton()
     {
         return NULL;
@@ -1223,24 +1227,22 @@ abstract class Gateway
     {
         global $LANG32;
 
-        $installed = self::getAll();
-        $gateways = array();
-        $files = glob(__DIR__ . '/gateways/*.class.php');
+        $installed = self::getAll(false);
+        $available = array();
+        $files = glob(__DIR__ . '/Gateway/*.class.php');
         if (is_array($files)) {
             foreach ($files as $fullpath) {
                 $parts = explode('/', $fullpath);
                 list($class,$x1,$x2) = explode('.', $parts[count($parts)-1]);
                 if ($class[0] == '_') continue;     // special internal gateway
-                if (!array_key_exists($class, $installed)) {
-                    // Add only if not installed
-                    $gateways[$class] = array(
-                        $parts[count($parts)-1],    // complete filename
-                        $fullpath,
-                    );
+                if (array_key_exists($class, $installed)) continue; // already installed
+                $gw = self::getInstance($class);
+                if (is_object($gw)) {
+                    $available[$class] = $gw;
                 }
             }
         }
-        return $gateways;
+        return $available;
     }
 
 
@@ -1265,25 +1267,5 @@ abstract class Gateway
     }
 
 }   // class Gateway
-
-
-/**
- *  Internal gateway class, just to support zero-balance orders
- */
-class internal_gw extends Gateway
-{
-    /**
-    *   Constructor.
-    *   Set gateway-specific items and call the parent constructor.
-    */
-    public function __construct()
-    {
-        // These are used by the parent constructor, set them first.
-        $this->gw_name = 'internal';
-        $this->gw_desc = 'Internal Payment Gateway';
-        parent::__construct();
-    }
-
-}
 
 ?>

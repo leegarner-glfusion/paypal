@@ -630,16 +630,16 @@ class IPN
     */
     public static function getInstance($name, $vars=array())
     {
-        static $ipn = NULL;
-        if ($ipn === NULL) {
-            $file = __DIR__ . '/ipn/' . $name . '_ipn.class.php';
-            if (file_exists($file)) {
-                include_once $file;
-                $cls = __NAMESPACE__ . '\\' . $name . '_ipn';
-                $ipn = new $cls($vars);
+        static $ipns = array();
+        if (!array_key_exists($name, $ipns)) {
+            $cls = __NAMESPACE__ . '\\ipn\\' . $name;
+            if (class_exists($cls)) {
+                $ipns[$name] = new $cls($vars);
+            } else {
+                $ipns[$name] = NULL;
             }
         }
-        return $ipn;
+        return $ipns[$name];
     }
 
 }   // class IPN

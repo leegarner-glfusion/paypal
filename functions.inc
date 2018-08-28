@@ -89,15 +89,15 @@ spl_autoload_register(function ($class)
     // project-specific namespace prefix
     $prefix = 'Paypal\\';
 
-    // base directory for the namespace prefix
-    $base_dir = __DIR__ . '/classes/';
-
     // does the class use the namespace prefix?
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
         // no, move to the next registered autoloader
         return;
     }
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . '/classes/';
 
     // get the relative class name
     $relative_class = substr($class, $len);

@@ -97,7 +97,7 @@ var ppApplyGC = function(frm_id)
                 if (result.status == 0) {
                     if (result.html != '') {
                         // Update the gateway selection
-                        divid = document.getElementById("gwrad__coupon_gw");
+                        divid = document.getElementById("gwrad__coupon");
                         if (divid != undefined) {
                             divid.innerHTML = result.html;
                         }
