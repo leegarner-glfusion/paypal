@@ -20,7 +20,6 @@ if (!defined ('GVERSION')) {
 }
 
 /** Include the system configuration class */
-require_once $_CONF['path_system'] . 'classes/config.class.php';
 $pp_config = config::get_instance();
 $_PP_CONF= $pp_config->get_config('paypal');
 
@@ -125,22 +124,6 @@ function USES_paypal_reports()
 $_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
 $_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon uk-icon' : 'fa fa';
 
-global $ppGCart;
-$ppGCart = NULL;
-
-/**
-*   Set the global cart object.
-*
-*   @return object      Global cart, for use in a local variable
-*/
-function PAYPAL_setCart()
-{
-    global $ppGCart;
-    $ppGCart = \Paypal\Cart::getInstance();
-    return $ppGCart;
-}
-
-
 function USES_paypal_class_report($name='')
 {
     $classfile = __DIR__ . '/classes/reports/' . $name . '.class.php';
@@ -170,7 +153,6 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
     // Only show if no topic is requested
     if ($_PP_CONF['centerblock'] == 1 && $topic == '') {
         USES_paypal_functions();
-        //PAYPAL_setCart();
         $display = \Paypal\siteHeader();
         $T = new Template(__DIR__ . '/templates');
         $T->set_file('title', 'paypal_title.thtml');
@@ -972,7 +954,6 @@ function phpblock_paypal_cart_contents()
 
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
-    //$cart = PAYPAL_setCart();
     $cart = \Paypal\Cart::getInstance();
 
     // If the cart is empty, the block isn't shown

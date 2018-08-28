@@ -46,7 +46,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
 {
     global $_CONF, $_PP_CONF;
 
-    $ppGCart = \Paypal\Cart::getInstance();
+    $Cart = \Paypal\Cart::getInstance();
     $btn_type = isset($args['btn_type']) ? $args['btn_type'] : '';
     $output = array();
 
@@ -70,7 +70,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
         if (isset($args['unique'])) {
             // If items may only be added to the cart once, check that
             // this one isn't already there
-            if ($ppGCart->Contains($args['item_number']) !== false) {
+            if ($Cart->Contains($args['item_number']) !== false) {
                 $btn_cls = 'grey';
                 $btn_disabled = 'disabled="disabled"';
             }
@@ -181,7 +181,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
 
-    $ppGCart = \Paypal\Cart::getInstance();
+    $Cart = \Paypal\Cart::getInstance();
     $price = 0;
     foreach (array('amount', 'price') as $s) {
         if (isset($args[$s])) {
@@ -230,7 +230,7 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
     // included in the "updates" array. If there are no specific updates, then
     // do nothing.
     if (PP_getVar($args, 'unique', 'boolean', false) &&
-        $ppGCart->Contains($item_number) !== false) {
+        $Cart->Contains($item_number) !== false) {
         // If the item exists, don't add it, but check if there's an update
         if (isset($args['update']) && is_array($args['update'])) {
             // Collect the updated field=>value pairs to send to updateItem()
@@ -238,10 +238,10 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
             foreach ($args['update'] as $fld) {
                 $updates[$fld] = $args[$fld];
             }
-            $ppGCart->updateItem($item_number, $updates);
+            $Cart->updateItem($item_number, $updates);
         }
     } else {
-        $ppGCart->addItem($cart_args);
+        $Cart->addItem($cart_args);
     }
     return PLG_RET_OK;
 }

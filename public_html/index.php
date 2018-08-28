@@ -30,11 +30,6 @@ PAYPAL_access_check();
 // Import plugin-specific functions
 USES_paypal_functions();
 
-// Create a global shopping cart for our use.  This allows the cart to be
-// manipulated in an action and then displayed in a view, without necessarily
-// having to revisit the database or create a new cart.
-$ppGCart = \Paypal\Cart::getInstance();
-
 $action = '';
 $actionval = '';
 $view = '';
@@ -80,7 +75,7 @@ $content = '';
 
 switch ($action) {
 case 'updatecart':
-    $ppGCart->Update($_POST);
+    \Paypal\Cart::getInstance()->Update($_POST);
     $view = 'cart';
     break;
 
@@ -88,25 +83,26 @@ case 'checkout':
     // Set the gift card amount first as it will be overridden
     // if the _coupon gateway is selected
     $gateway = PP_getVar($_POST, 'gateway');
-    if ($gateway !== '') $ppGCart->setGateway($gateway);
+    $Cart = \Paypal\Cart::getInstance();
+    if ($gateway !== '') $Cart->setGateway($gateway);
     if (isset($_POST['apply_gc'])) {
-        $ppGCart->setGC($_POST['apply_gc']);
+        $Cart->setGC($_POST['apply_gc']);
     } elseif ($gateway == '_coupon') {
-        $ppGCart->setGC(-1);
+        $Cart->setGC(-1);
     } else {
-        $ppGCart->setGC(0);
+        $Cart->setGC(0);
     }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
-        $ppGCart->Update($_POST);
+        $Cart->Update($_POST);
     }
     if (isset($_POST['order_instr'])) {
-        $ppGCart->setInstructions($_POST['order_instr']);
+        $Cart->setInstructions($_POST['order_instr']);
     }
     if (isset($_POST['payer_email'])) {
-        $ppGCart->setEmail($_POST['payer_email']);
+        $Cart->setEmail($_POST['payer_email']);
     }
-    $ppGCart->Save();
+    $Cart->Save();
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
         //$view = Workflow::getNextView();
@@ -117,7 +113,7 @@ case 'checkout':
             switch ($wf_name) {
             case 'billto':
             case 'shipto':
-                if (!(\Paypal\UserInfo::isValidAddress($ppGCart->getAddress($wf_name)) == '')) {
+                if (!(\Paypal\UserInfo::isValidAddress($Cart->getAddress($wf_name)) == '')) {
                     //$view = Workflow::getNextView($wf_name);
                     $view = $wf_name;
                     break 2;    // exit switch and foreach
@@ -154,17 +150,17 @@ case 'saveshipto':
         }
     }
     $view = \Paypal\Workflow::getNextView($addr_type);
-    $ppGCart->setAddress($_POST, $addr_type);
+    \Paypal\Cart::getInstance()->setAddress($_POST, $addr_type);
     break;
 
 case 'addcartitem':
 case 'addcartitem_x':   // using the image submit button, such as Paypal's
     $view = 'productlist';
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
-            $ppGCart->Contains($_POST['item_number']) !== false) {
+            \Paypal\Cart::getInstance()->Contains($_POST['item_number']) !== false) {
         break;
     }
-    $ppGCart->addItem(array(
+    \Paypal\Cart::getInstance()->addItem(array(
         'item_number' => isset($_POST['item_number']) ? $_POST['item_number'] : '',
         'item_name' => isset($_POST['item_name']) ? $_POST['item_name'] : '',
         'description' => isset($$_POST['item_descr']) ? $_POST['item_descr'] : '',
@@ -186,18 +182,18 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
     break;
 
 case 'delcartitem':
-    $ppGCart->Remove($_GET['id']);
+    \Paypal\Cart::getInstance()->Remove($_GET['id']);
     $view = 'cart';
     break;
 
 case 'updatecart':
     $view = 'cart';
-    $ppGCart->Update($_POST);
+    \Paypal\Cart::getInstance()->Update($_POST);
     break;
 
 case 'emptycart':
     $view = 'productlist';
-    $ppGCart->Clear();
+    \Paypal\Cart::getInstance()->Clear();
     LGLIB_storeMessage($LANG_PP['cart_empty']);
     break;
 
@@ -285,7 +281,7 @@ case 'processorder':
             break;
         }
         $view = 'thanks';
-        $ppGCart->Clear(false);
+        \Paypal\Cart::getInstance()->Clear(false);
     }
     $view = 'productlist';
     break;
@@ -319,7 +315,7 @@ case 'shipto':
         $content .= SEC_loginRequiredForm();
     } else {*/
         $U = new \Paypal\UserInfo();
-        $A = isset($_POST['address1']) ? $_POST : $ppGCart->getAddress($view);
+        $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
         $content .= $U->AddressForm($view, $A);
 //   }
     break;
@@ -353,7 +349,7 @@ case 'printorder':
 case 'vieworder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         \Paypal\Cart::setSession('prevpage', $view);
-        $content .= $ppGCart->View(true);
+        $content .= \Paypal\Cart::getInstance()->View(true);
         $page_title = $LANG_PP['vieworder'];
     } else {
         COM_404();
@@ -395,8 +391,8 @@ case 'viewcart':
         COM_refresh(PAYPAL_URL. '/index.php?view=cart');
     }
     $menu_opt = $LANG_PP['viewcart'];
-    if ($ppGCart->hasItems()) {
-        $content .= $ppGCart->View();
+    if (\Paypal\Cart::getInstance()->hasItems()) {
+        $content .= \Paypal\Cart::getInstance()->View();
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
@@ -406,10 +402,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    // If there's a gift card amount being applied, set it in the cart info.
-    // Also calls Cart::Save()
-    //$ppGCart->setInfo('apply_gc', PP_getVar($_POST, 'by_gc', 'float'));
-    $content .= $ppGCart->View(true);
+    $content .= \Paypal\Cart::getInstance()->View(true);
     break;
 
 case 'productlist':

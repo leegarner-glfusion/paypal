@@ -39,9 +39,9 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
         exit;
     }
-    $ppGCart = \Paypal\Cart::getInstance();
+    $Cart = \Paypal\Cart::getInstance();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
-            $ppGCart->Contains($_POST['item_number']) !== false) {
+            $Cart->Contains($_POST['item_number']) !== false) {
         break;
     }
     $args = array(
@@ -54,7 +54,7 @@ case 'addcartitem':
         'extras'        => PP_getVar($_POST, 'extras', 'array'),
         //'tax'           => PP_getVar($_POST, 'tax', 'float'),
     );
-    $ppGCart->addItem($args);
+    $Cart->addItem($args);
     $A = array(
         'content' => phpblock_paypal_cart_contents(),
         'statusMessage' => $LANG_PP['msg_item_added'],
