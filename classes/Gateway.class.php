@@ -157,7 +157,11 @@ class Gateway
             }
             $props = @unserialize($A['config']);
             if ($props) {
-                $this->config = array_merge($this->config, $props);
+                foreach ($props as $key=>$value) {
+                    if (array_key_exists($key, $this->config)) {
+                        $this->config[$key] = $value;
+                    }
+                }
             }
         }
 
