@@ -1010,12 +1010,12 @@ function ipnlogSingle($id, $txn_id)
     // Allow all serialized data to be available to the template
     $ipn = @unserialize($A['ipn_data']);
 
+    // Create ipnlog template
+    $T = PP_getTemplate('ipnlog_detail', 'ipnlog');
+
     $gw = Gateway::getInstance($A['gateway']);
     if ($gw !== NULL) {
         $vals = $gw->ipnlogVars($ipn);
-
-        // Create ipnlog template
-        $T = PP_getTemplate('ipnlog_detail', 'ipnlog');
 
         // Display the specified ipnlog row
         $T->set_var(array(
