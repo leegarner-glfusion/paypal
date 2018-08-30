@@ -706,8 +706,9 @@ function PAYPAL_do_set_version($ver)
 
 
 /**
-*   Remove deprecated files
-*/
+ *   Remove deprecated files
+ *   Errors in unlink() and rmdir() are ignored.
+ */
 function PAYPAL_remove_old_files()
 {
     global $_CONF;
@@ -721,6 +722,8 @@ function PAYPAL_remove_old_files()
             'templates/detail/v1/product_detail.thtml',
             'templates/order.uikit.thtml',
             'classes/paymentgw.class.php',
+            'classes/ipn/internal_ipn.class.php',
+            'classes/ipn/paypal_ipn.class.php',
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
@@ -744,6 +747,17 @@ function PAYPAL_remove_old_files()
             'classes/workflow.class.php',
         );
         $paths[__DIR__] = array_merge($paths[__DIR__], $files);
+
+        // The gateways class dir has been renamed to Gatways for better namespacing.
+        // Remove the old class dir and files, only if not on Windows
+        $dir = __DIR__ . '/classes/gateways';
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), array('.','..'));
+            foreach ($files as $file) {
+                if (is_file($file)) @unlink("$dir/$file");
+            }
+            @rmdir($dir);
+        }
     }
     foreach ($paths as $path=>$files) {
         foreach ($files as $file) {
@@ -751,6 +765,5 @@ function PAYPAL_remove_old_files()
         }
     }
 }
-
 
 ?>
