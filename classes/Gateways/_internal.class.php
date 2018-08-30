@@ -11,7 +11,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal\Gateway;
+namespace Paypal\Gateways;
 
 /**
  *  Internal gateway class, just to support zero-balance orders

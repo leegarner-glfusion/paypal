@@ -1115,7 +1115,7 @@ class Gateway
 
         if (!$gw_name) return NULL;
         if (!array_key_exists($gw_name, $gateways)) {
-            $gw = __NAMESPACE__ . '\\Gateway\\' . $gw_name;
+            $gw = __NAMESPACE__ . '\\Gateways\\' . $gw_name;
             if (class_exists($gw)) {
                 $gateways[$gw_name] = new $gw($A);
             } else {

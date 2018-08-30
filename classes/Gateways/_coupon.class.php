@@ -11,7 +11,8 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal\Gateway;
+namespace Paypal\Gateways;
+
 use \Paypal\Cart;
 use \Paypal\Coupon;
 use \Paypal\Currency;

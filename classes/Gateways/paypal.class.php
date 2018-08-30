@@ -10,7 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Paypal\Gateway;
+namespace Paypal\Gateways;
 
 /**
 *   Class for Paypal payment gateway
@@ -162,7 +162,7 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the form variables for the purchase button.
+    *   Get the form variables for the cart checkout button.
     *
     *   @uses   Gateway::_Supports()
     *   @uses   _encButton()
@@ -195,6 +195,7 @@ class paypal extends \Paypal\Gateway
             'notify_url' => $this->ipn_url,
             'currency_code'  => $this->currency_code,
             'custom'    => str_replace('"', '\'', serialize($custom_arr)),
+            'invoice'   => $cartID,
         );
 
         $address = $cart->getAddress('shipto');
