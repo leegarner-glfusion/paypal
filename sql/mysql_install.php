@@ -335,7 +335,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `order_id` varchar(40) NOT NULL,
   `uid` int(11) NOT NULL DEFAULT '0',
   `order_date` datetime NOT NULL,
-  `last_mod` datetime NOT NULL,
+  `last_mod` timestamp,
   `billto_name` varchar(255) DEFAULT NULL,
   `billto_company` varchar(255) DEFAULT NULL,
   `billto_address1` varchar(255) DEFAULT NULL,
@@ -936,6 +936,10 @@ $PP_UPGRADE['0.6.0'] = array(
         DROP KEY `order_id`",
     "ALTER TABLE {$_TABLES['paypal.order_log']}
         ADD KEY `order_id` (`order_id`, `ts`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        CHANGE last_mod last_mod timestamp",
+    "UPDATE TABLE {$_TABLES['paypal.orders']}
+        SET last_mod = NOW()",      // have to start somewhere
 );
 
 ?>

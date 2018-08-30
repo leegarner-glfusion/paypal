@@ -43,6 +43,10 @@ class OrderItem
                 $this->id = 0;
             }
         } elseif (is_array($item)) {
+            if (!isset($item['product_id']) && isset($item['item_id'])) {
+                // extract the item_id with options into the product ID
+                list($this->product_id) = explode('|', $item['item_id']);
+            }
             $status = $this->setVars($item);
         }
         if ($status) {

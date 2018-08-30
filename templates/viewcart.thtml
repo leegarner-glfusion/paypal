@@ -21,11 +21,14 @@
       <tr>
         <td class="alignleft">
 {!if item_link}
-          <a href="{item_link}">{item_name}</a>
+          <a href="{item_link}">{item_descrip}</a>
 {!else}
-          {item_name}
+          {item_descrip}
 {!endif}
-          {item_options}
+        {item_options}
+        <!-- BEGIN ItemOptions -->
+            <div class="ItemOptions">{option_dscp}</div>
+        <!-- END ItemOptions -->
         </td>
         <td class="alignright">{item_price}</td>
         <td class="aligncenter">

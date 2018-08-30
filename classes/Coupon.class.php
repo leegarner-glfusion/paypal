@@ -546,7 +546,7 @@ class Coupon extends Product
         $gc_can_apply = $cart->getInfo('order_total');
         $items = $cart->Cart();
         foreach ($items as $item) {
-            $P = Product::getInstance($item['item_id']);
+            $P = Product::getInstance($item->item_id);
             if ($P->isNew || $P->prod_type == PP_PROD_COUPON) {
                 $gc_can_apply -= $P->getPrice($item['options'], $item['quantity']);
             }

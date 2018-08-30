@@ -964,22 +964,18 @@ function phpblock_paypal_cart_contents()
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
-        $P = \Paypal\Product::getInstance($item['item_id']);
+        $item_id = $item->product_id;
+        if ($item->options != '') $item_id .= '|' . $item->options;
+        $P = \Paypal\Product::getInstance($item_id);
 
-        if (strpos($item['item_id'], '|')) {
-            list($item_id, $options) = explode('|', $item['item_id']);
-        } else {
-            $item_id = $item['item_id'];
-            $options = '';
-        }
-        $item_total = (float)$item['price'] * $item['quantity'];
+        $item_total = (float)$item->price * $item->quantity;
         $T->set_var(array(
             'item_id'       => $item_id,
-            'options'       => $P->getOptionDisplay($item),
+//            'options'       => $P->getOptionDisplay($item),
             'item_name'     => $P->short_description,
             'item_dscp'     => $P->descrip,
-            'price'         => COM_numberFormat($item['price'], 2),
-            'quantity'      => $item['quantity'],
+            'price'         => COM_numberFormat($item->price, 2),
+            'quantity'      => $item->quantity,
             'item_total'    => COM_numberFormat($item_total, 2),
             'pi_url'        => PAYPAL_URL,
             'item_link'     => $P->getLink(),
@@ -1453,7 +1449,7 @@ function plugin_runScheduledTask_paypal()
     if ($_PP_CONF['ena_cart'] == 1) {
         // New method: Delete old orders that haven't been finalized
         $sql = "DELETE FROM {$_TABLES['paypal.orders']}
-            WHERE is_cart = 1 AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+            WHERE status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)";
         DB_query($sql);
 
         // Delete old shopping carts, if the cart is enabled

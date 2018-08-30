@@ -1588,23 +1588,26 @@ class Product
         $opts = array();
 
         // Get attributes selected from the available options
-        if (isset($item['options']) && is_array($item['options'])) {
-            $options = $item['options'];
+        //if (isset($item['options']) && is_array($item['options'])) {
+        $options = explode(',', $item->options);
+        /*if (is_array($item->options)) {
+            $options = $item->options;
         } else {
             $options = array();
-        }
+        }*/
         foreach ($options as $option) {
-            $opt = explode('|', $option);
-            if (!isset($this->options[$opt[0]])) continue;   // invalid?
+            //$opt = explode('|', $option);
+            //if (!isset($this->options[$opt[0]])) continue;   // invalid?
             $opts[] = array(
-                'opt_name'  => $this->options[$opt[0]]['attr_name'],
-                'opt_value' => $this->options[$opt[0]]['attr_value'],
+                'opt_name'  => $this->options[$option]['attr_name'],
+                'opt_value' => $this->options[$option]['attr_value'],
             );
         }
         // Get special fields submitted with the purchase
-        if (isset($item['extras']) && is_array($item['extras'])) {
-            if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
-                $sp_flds = $this->getSpecialFields($item['extras']['special']);
+        //if (isset($item['extras']) && is_array($item['extras'])) {
+        if (is_array($item->extras)) {
+            if (isset($item->extras['special']) && is_array($item->extras['special'])) {
+                $sp_flds = $this->getSpecialFields($itemi->extras['special']);
                 foreach ($sp_flds as $txt=>$val) {
                     $opts[] = array(
                         'opt_name'  => $txt,
@@ -1617,9 +1620,9 @@ class Product
         // Get text fields defined with the product
         $text_names = explode('|', $this->custom);
         if (!empty($text_names) &&
-                isset($item['extras']['custom']) &&
-                is_array($item['extras']['custom'])) {
-            foreach ($item['extras']['custom'] as $tid=>$val) {
+                //isset($item['extras']['custom']) &&
+                is_array($item->extras['custom'])) {
+            foreach ($item->extras['custom'] as $tid=>$val) {
                 if (isset($text_names[$tid])) {
                     $opts[] = array(
                         'opt_name'  => htmlspecialchars($text_names[$tid]),

@@ -22,22 +22,22 @@ namespace Paypal;
 *   Shopping cart class
 *   @package paypal
 */
-class Cart
+class Cart extends Order
 {
     /** Shopping cart contents.
         @var array */
-    private $m_cart;
+    //private $m_cart;
 
     /** Shopping cart ID.
         @var string */
-    private $m_cart_id;
+    /*private $m_cart_id;
 
-    private $m_info;
+    private $m_info;*/
 
-    private $_addr_fields = array(
+    /*private $_addr_fields = array(
             'name', 'company', 'address1', 'address2',
             'city', 'state', 'country', 'zip',
-    );
+        );*/
 
     private static $session_var = 'ppGCart';
 
@@ -55,6 +55,19 @@ class Cart
     {
         global $_TABLES, $_PP_CONF, $_USER;
 
+        if (empty($cart_id)) {
+            $cart_id = self::getCart();
+        }
+        parent::__construct($cart_id);
+        if ($this->isNew) {
+            $this->status = 'cart';
+            $this->Save();    // Save to reserve the ID
+        }
+        if (COM_isAnonUser()) {
+            self::setAnonCartID($this->order_id);
+        }
+        return;
+
         // Don't use session-based carts for paypal IPN, for those
         // we just want an empty cart that can be read.
         if ($interactive) {
@@ -68,20 +81,23 @@ class Cart
             }
             // If a cart ID still not found, create a new one
             if (empty($cart_id)) {
-                $cart_id = self::_makeCartID();
+                $cart_id = self::_createID();
             }
             // Set the cart ID in the cookie and the local variable
-            $this->m_cart_id = $cart_id;
+            $this->order_id = $cart_id;
+            $this->Save();
+            /*$this->m_cart_id = $cart_id;
             if (COM_isAnonUser()) {
                 self::setAnonCartID($this->m_cart_id);
-            }
+            }*/
         } else {
             // For non-interactive sessions a cart ID must be provided
-            $this->m_cart_id = $cart_id;
+            $this->order_id = $cart_id;
+            //$this->m_cart_id = $cart_id;
         }
 
-        $this->m_cart = array();
-        $this->m_info = array();
+//        $this->m_cart = array();
+//        $this->m_info = array();
         $this->Load();
     }
 
@@ -93,11 +109,17 @@ class Cart
     */
     public static function getInstance($uid = 0, $cart_id = '')
     {
-        global $_USER;
+        global $_TABLES, $_USER;
         static $carts = array();
 
         if ($uid == 0) $uid = $_USER['uid'];
         $uid = (int)$uid;
+        /*$cart_id = DB_escapeString($cart_id);
+        $sql = "SELECT cart_info, apply_gc, cart_contents
+                   FROM {$_TABLES['paypal.cart']}
+                   WHERE cart_id = '$cart_id'";
+            //echo $sql;die;
+        */
         if ($uid > 1) {
             if (!array_key_exists($uid, $carts)) {
                 $carts[$uid] = new self($cart_id);
@@ -119,7 +141,7 @@ class Cart
     */
     public function Cart()
     {
-        return $this->m_cart;
+        return $this->items;
     }
 
 
@@ -128,7 +150,7 @@ class Cart
     *
     *   @uses   self::Read()
     */
-    public function Load()
+    public function XLoad()
     {
         $cart_id = $this->cartID(true);
         if ($cart_id == '') {
@@ -217,7 +239,7 @@ class Cart
     /**
     *   Save the current cart items to the database
     */
-    public function Save()
+    public function XSave()
     {
         global $_TABLES, $_USER, $_PP_CONF;
 
@@ -288,18 +310,16 @@ class Cart
 
 
     /**
-    *   Add a single item to the cart.
-    *   Some values are straight from the item table, but may be overridden
-    *   to handle special cases or customization.
-    *
-    *   @param  string  $id         Item ID
-    *   @param  string  $descrip    Item Description
-    *   @param  float   $quantity   Quantity
-    *   @param  float   $price      Unit Price
-    *   @param  array   $options    Product options (size, color, etc).
-    *   @param  array   $extras     Extra cart items (shipping, etc.)
-    *   @return integer             Current item quantity
-    */
+     *  Add a single item to the cart.
+     *  Formats the argument array to match the format used by the Order class
+     *  and calls that class's addItem() function to actually add the item.
+     *
+     *  Some values are straight from the item table, but may be overridden
+     *  to handle special cases or customization.
+     *
+     *  @param  array   $args   Array of arguments. item_number is required.
+     *  @return integer             Current item quantity
+     */
     public function addItem($args)
     {
         global $_PP_CONF;
@@ -312,20 +332,24 @@ class Cart
         $extras     = PP_getVar($args, 'extras', 'array');
         $options    = PP_getVar($args, 'options', 'array');
         $item_name  = PP_getVar($args, 'item_name');
-        $item_dscp  = PP_getVar($args, 'short_description');
+        $item_dscp  = PP_getVar($args, 'description');
         $uid        = PP_getVar($args, 'uid', 'int', 1);
-        if (!is_array($this->m_cart))
-            $this->m_cart = array();
+        if (!is_array($this->items))
+            $this->items = array();
 
         // Extract the attribute IDs from the options array to create
-        // the item_id
+        // the item_id.
+        // Options are formatted as "id|dscp|price"
         $opts = array();
+        $opt_str = '';          // CSV option numbers
         if (is_array($options) && !empty($options)) {
             foreach($options as $optname=>$option) {
                 $opt_tmp = explode('|', $option);
                 $opts[] = $opt_tmp[0];
             }
-            $item_id .= '|' . implode(',', $opts);
+            $opt_str = implode(',', $opts);
+            // Add the option numbers to the item ID to create a new ID
+            $item_id .= '|' . $opt_str;
         } else {
             $options = array();
         }
@@ -334,24 +358,26 @@ class Cart
         // attributes).  If found, just update the quantity.
         $have_id = $this->Contains($item_id, $extras);
         if ($have_id !== false) {
-            $this->m_cart[$have_id]['quantity'] += $quantity;
-            $new_quantity = $this->m_cart[$have_id]['quantity'];
+            $this->items[$have_id]->quantity += $quantity;
+            $this->Save();
+            $new_quantity = $this->items[$have_id]->quantity;
         } else {
             $price = $P->getPrice($opts, $quantity, array('uid'=>$uid));
             $tmp = array(
                 'item_id'   => $item_id,
                 'quantity'  => $quantity,
                 'name'      => $P->getName($item_name),
-                'descrip'   => $P->getDscp($item_dscp),
+                'description'   => $P->getDscp($item_dscp),
                 'price'     => sprintf("%.2f", $price),
-                'options'   => $options,
+                'options'   => $opt_str,
                 'extras'    => $extras,
                 'taxable'   => $P->isTaxable() ? 1 : 0,
             );
-            $this->m_cart[] = $tmp;
+            //$this->items[] = $tmp;
+            parent::addItem($tmp);
             $new_quantity = $quantity;
         }
-        $this->Save();
+        //$this->Save();
         return $new_quantity;
     }
 
@@ -578,15 +604,14 @@ class Cart
     *   @param  boolean $checkout   True to indicate this is the final checkout
     *   @return string      HTML for the "view cart" form
     */
-    public function View($checkout = false)
+    public function XView($checkout = false)
     {
         global $_CONF, $_PP_CONF, $_USER, $LANG_PP, $_TABLES, $_SYSTEM;
-        $currency = Currency::getInstance();
 
-        if (!isset($this->m_cart) ||
-                empty($this->m_cart)) {
+        if (!$this->hasItems()) {
             return $LANG_PP['cart_empty'];
         }
+        $currency = Currency::getInstance();
         $tpl = $checkout ? 'order' : 'viewcart';
         $T = PP_getTemplate($tpl, 'cart');
         if ($checkout) {
@@ -760,7 +785,7 @@ class Cart
         // or gift cards
         if ($this->custom_info['final_total'] < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
-            $this->custom_info['transtype'] = '_internal';
+            $this->custom_info['transtype'] = 'internal';
             $this->custom_info['cart_id'] = $this->CartID();
             $gateway_vars = array(
                 '<input type="hidden" name="processorder" value="by_gc" />',
@@ -768,11 +793,10 @@ class Cart
                 '<input type="hidden" name="custom" value=\'' . @serialize($this->custom_info) . '\' />',
             );
             $T->set_var(array(
-                'action'        => PAYPAL_URL . '/ipn/internal.php',
+                'action'        => PAYPAL_URL . '/ipn/internal_ipn.php',
                 'gateway_vars'  => implode("\n", $gateway_vars),
                 'cart_id'       => $this->m_cart_id,
                 'uid'           => $_USER['uid'],
-                'method'        => 'post',
             ) );
             $T->parse('checkout_btn', 'checkout');
             return $T->finish($T->get_var('checkout_btn'));
@@ -846,7 +870,14 @@ class Cart
                 $gw_sel = '';
             }
             foreach ($gateways as $gw) {
-                if ($gw && $gw->Supports('checkout')) {
+                COM_errorLog(print_r($gw,true));
+                if (is_null($gw)) {
+                    var_dump($gateways);die;
+                    echo "bad gw";die;
+                    continue;
+                }
+                COM_errorLog("supports: " . print_r($gw->Supports('checkout'),true));
+                if ($gw->Supports('checkout')) {
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
                         'gw_id' => $gw->Name(),
@@ -872,7 +903,7 @@ class Cart
     *   @param  array   $extras     Option custom values, e.g. text fields
     *   @return mixed       Item cart ID if item exists in cart, False if not
     */
-    public function Contains($item_id, $extras=array())
+    public function XContains($item_id, $extras=array())
     {
         foreach ($this->m_cart as $id=>$info) {
             if ($info['item_id'] == $item_id) {
@@ -897,7 +928,7 @@ class Cart
     */
     public function hasItems()
     {
-        return empty($this->m_cart) ? false : true;
+        return empty($this->items) ? false : true;
     }
 
 
@@ -910,12 +941,12 @@ class Cart
     *
     *   @return string  Cart ID
     */
-    private static function _makeCartID()
+    protected static function X_makeID()
     {
         global $_TABLES;
         do {
             $id = COM_makeSid();
-        } while (DB_getItem($_TABLES['paypal.cart'], 'cart_id', "cart_id = '$id'") !== NULL);
+        } while (DB_getItem($_TABLES['paypal.orders'], 'order_id', "order_id = '$id'") !== NULL);
         return $id;
     }
 
@@ -930,9 +961,9 @@ class Cart
     public function cartID($escape=false)
     {
         if ($escape)
-            return DB_escapeString($this->m_cart_id);
+            return DB_escapeString($this->order_id);
         else
-            return $this->m_cart_id;
+            return $this->order_id;
     }
 
 
@@ -950,30 +981,14 @@ class Cart
 
         $this->m_info[$type] = array();
         $this->m_info[$type]['addr_id'] = isset($A['addr_id']) ?
-                    (int)$A['addr_id'] : '0';
-
-        foreach($this->_addr_fields as $fld) {
-            $this->m_info[$type][$fld] = isset($A[$fld]) ?
-                        htmlspecialchars($A[$fld]) : '';
+            (int)$A['addr_id'] : '0';
+        $var = $type . '_id';
+        $this->$var = PP_getVar($A, 'addr_id', 'integer', 0);
+        foreach($this->_addr_fields2 as $fld) {
+            $var = $type . '_' . $fld;
+            $this->$var = isset($A[$fld]) ? htmlspecialchars($A[$fld]) : '';
         }
-            /*'name'      => isset($A['name']) ? $A['name'] : '',
-            'company'   => isset($A['company']) ? $A['company'] : '',
-            'address1'  => isset($A['address1']) ? $A['address1'] : '',
-            'address2'  => isset($A['address2']) ? $A['address2'] : '',
-            'city'      => isset($A['city']) ? $A['city'] : '',
-            'state'     => isset($A['state']) ? $A['state'] : '',
-            'zip'       => isset($A['zip']) ? $A['zip'] : '',
-            'country'   => isset($A['country']) ? $A['country'] : '',
-        );*/
-
-        // Serialize the address and update the current cart with it
-        $info = @serialize($this->m_info);
-        if ($info) {
-            $info = DB_escapeString($info);
-            DB_query("UPDATE {$_TABLES['paypal.cart']}
-                    SET cart_info = '$info'
-                    WHERE cart_id = '" . $this->cartID(true) . "'");
-        }
+        $this->Save();
     }
 
 
@@ -1006,17 +1021,18 @@ class Cart
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
         if (COM_isAnonUser()) {
             $cart_id = self::getAnonCartID();
-            if ($cart_id === NULL) {
-                $cart_id = self::_makeCartID();
-            }
+            /*if ($cart_id === NULL) {
+                $cart_id = self::_makeID();
+            }*/
         } else {
-            $cart_id = DB_getItem($_TABLES['paypal.cart'], 'cart_id',
-                "cart_uid = $uid AND is_order = 0 ORDER BY last_update DESC limit 1");
+            $cart_id = DB_getItem($_TABLES['paypal.orders'], 'order_id',
+                "uid = $uid AND status = 'cart' ORDER BY last_mod DESC limit 1");
             if (!empty($cart_id)) {
                 // For logged-in usrs, delete superfluous carts
-                DB_query("DELETE FROM {$_TABLES['paypal.cart']}
-                    WHERE cart_uid = $uid
-                    AND cart_id <> '" . DB_escapeString($cart_id) . "'");
+                DB_query("DELETE FROM {$_TABLES['paypal.orders']}
+                    WHERE uid = $uid
+                    AND status = 'cart'
+                    AND order_id <> '" . DB_escapeString($cart_id) . "'");
             }
         }
         return $cart_id;
@@ -1096,15 +1112,15 @@ class Cart
     {
         global $_TABLES;
 
+        $amt = (float)$amt;
         if ($amt == -1) {
             $gc_bal = Coupon::getUserBalance();
             $amt = min($gc_bal, Coupon::canPayByGC($this));
         }
-        $amt = (float)$amt;
         $this->m_info['apply_gc'] = $amt;
         $sql = "UPDATE {$_TABLES['paypal.cart']}
-                SET apply_gc = $amt
-                WHERE cart_id = '{$this->m_cart_id}'";
+                SET by_gc = $amt
+                WHERE order_id = '{$this->m_cart_id}'";
         DB_query($sql);
     }
 
@@ -1158,7 +1174,7 @@ class Cart
     *
     *   @param  string  $cart_id    Cart ID
     */
-    public function delete()
+    public function Xdelete()
     {
         global $_TABLES, $_PP_CONF;
 
@@ -1198,10 +1214,11 @@ class Cart
             unset($_COOKIE[self::$session_var]);
             setcookie(self::$session_var, '', time()-3600, '/');
             // And delete the cart record
-            DB_delete($_TABLES['paypal.cart'],
-                array('cart_id', 'cart_uid'),
-                array($cart_id, 1)
-            );
+            Order::Delete($cart_id);
+            /*DB_delete($_TABLES['paypal.orders'],
+                array('order__id', 'uid', 'is_cart'),
+                array($cart_id, 1, 1)
+            );*/
         }
     }
 
@@ -1233,6 +1250,7 @@ class Cart
     {
         global $_TABLES;
 
+        $status = false;        // DEBUG
         $status = $status ? 1 : 0;
         $cart_id = DB_escapeString($cart_id);
         $sql = "UPDATE {$_TABLES['paypal.cart']}

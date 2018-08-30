@@ -20,20 +20,22 @@ class Order
 {
     public $items = array();        // Array of OrderItem objects
     private $properties = array();
-    private $isNew = true;
+    protected $isNew = true;
     private $isAdmin = false;       // True if viewing via admin interface
     var $no_shipping = 1;
-    private $_addr_fields = array('billto_name',
-            'billto_company', 'billto_address1', 'billto_address2',
-            'billto_city', 'billto_state', 'billto_country', 'billto_zip',
-            'shipto_name',
-            'shipto_company', 'shipto_address1', 'shipto_address2',
-            'shipto_city', 'shipto_state', 'shipto_country',
-            'shipto_zip',
+/*    protected $X_addr_fields = array(
+        'billto_name', 'billto_company', 'billto_address1', 'billto_address2',
+        'billto_city', 'billto_state', 'billto_country', 'billto_zip',
+        'shipto_name', 'shipto_company', 'shipto_address1', 'shipto_address2',
+        'shipto_city', 'shipto_state', 'shipto_country', 'shipto_zip',
+    );*/
+    protected $_addr_fields = array(
+        'name', 'company', 'address1', 'address2',
+        'city', 'state', 'country', 'zip',
     );
-    private $subtotal = 0;
-    private $tax_items = 0;         // count items having sales tax
-    private $Currency;              // Currency object
+    protected $subtotal = 0;
+    protected $tax_items = 0;         // count items having sales tax
+    protected $Currency;              // Currency object
 
     /**
     *   Constructor
@@ -47,7 +49,7 @@ class Order
 
         $this->Currency = Currency::getInstance();
         $this->isNew = true;
-        $this->uid = 1;
+        $this->uid = (int)$_USER['uid'];
         $this->order_date = PAYPAL_now()->toMySql(false);
         $this->instructions = '';
         $this->tax_rate = PP_getTaxRate();
@@ -61,7 +63,7 @@ class Order
             }
         }
         if ($this->isNew) {
-            $this->order_id = COM_makeSid();
+            $this->order_id = self::_createID();
             $this->token = self::_createToken();
         }
     }
@@ -209,7 +211,9 @@ class Order
         $args['order_id'] = $this->order_id;    // make sure it's set
         $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
+        COM_errorLog(print_r($item,true));
         $this->items[] = $item;
+        $this->Save();
         /*$shipping = PP_getVar($args, 'shipping', 'float');
         if ($shipping > 0) {
             $this->shipping = $this->shipping + $shipping;
@@ -266,6 +270,7 @@ class Order
         }
 
         if (!empty($A)) {
+            $this->shipto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
             $this->shipto_name     = PP_getVar($A, 'name');
             $this->shipto_company  = PP_getVar($A, 'company');
             $this->shipto_address1 = PP_getVar($A, 'address1');
@@ -300,8 +305,11 @@ class Order
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
         $this->ux_ts = PP_getVar($A, 'ux_ts', 'int');
-        foreach ($this->_addr_fields as $fld) {
-            $this->$fld = $A[$fld];
+        foreach (array('billto', 'shipto') as $type) {
+            foreach ($this->_addr_fields as $name) {
+                $fld = $type . '_' . $name;
+                $this->$fld = $A[$fld];
+            }
         }
         if (isset($A['uid'])) $this->uid = $A['uid'];
 
@@ -318,7 +326,7 @@ class Order
 
 
     /**
-    *   API function to delete all cart items, if an order has been created.
+    *   API function to delete an entire order record
     *
     *   @param  stirng  $order_id       Order ID, taken from $_SESSION if empty
     */
@@ -332,12 +340,16 @@ class Order
         if (!$order_id) return;
 
         $order_id = DB_escapeString($order_id);
-        $status = (int)DB_getItem($_TABLES['paypal.orders'],
-                'status', "order_id='$order_id'");
-        if ($status == PP_STATUS_OPEN) {
-            DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
-            DB_delete($_TABLES['paypal.orders'], 'order_id', $order_id);
+        // Only orders with certain status values can be deleted.
+        $allowed_statuses = array('cart', 'pending');
+        $status = DB_getItem($_TABLES['paypal.orders'], 'status', "order_id='$order_id'");
+        if (!in_array($status, $allowed_statuses)) {
+            return;
         }
+
+        // Checks passed, delete the order and items
+        DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
+        DB_delete($_TABLES['paypal.orders'], 'order_id', $order_id);
     }
 
 
@@ -355,7 +367,7 @@ class Order
 
         if ($this->isNew) {
             // Shouldn't have an empty order ID, but double-check
-            if ($this->order_id == '') $this->order_id = COM_makeSid();
+            if ($this->order_id == '') $this->order_id = self::_createID();
             if ($this->billto_name == '') {
                 $this->billto_name = COM_getDisplayName($this->uid);
             }
@@ -389,8 +401,11 @@ class Order
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
                 "token = '" . DB_escapeString($this->token) . "'",
         );
-        foreach ($this->_addr_fields as $fld) {
-            $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
+        foreach (array('billto', 'shipto') as $type) {
+            foreach ($this->_addr_fields as $name) {
+                $fld = $type . '_' . $name;
+                $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
+            }
         }
         $sql = $sql1 . implode(', ', $fields) . $sql2;
         //echo $sql;die;
@@ -410,7 +425,7 @@ class Order
     *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($final = false, $tpl = '')
+    public function View($step = 9, $tpl = '')
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -418,11 +433,22 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
 
-        $tplname = 'order';
+        switch($step) {
+        case 0:
+            $tplname = 'viewcart';
+            break;
+        default:
+            $tplname = 'order';
+            break;
+        }
+
         if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
-        foreach ($this->_addr_fields as $fldname) {
-            $T->set_var($fldname, $this->$fldname);
+        foreach (array('billto', 'shipto') as $type) {
+            foreach ($this->_addr_fields as $name) {
+                $fldname = $type . '_' . $name;
+                $T->set_var($fldname, $this->$fldname);
+            }
         }
 
         $T->set_block('order', 'ItemRow', 'iRow');
@@ -453,12 +479,13 @@ class Order
                 'tax_icon'      => $item['tax_icon'],
                 'token'         => $item['token'],
                 'iconset'       => $_PP_CONF['_iconset'],
+                'item_options'  => $item['options'],
             ) );
             $T->set_block('order', 'ItemOptions', 'iOpts');
-            foreach ($item['options'] as $opt_dscp) {
+            /*foreach ($item['options'] as $opt_dscp) {
                 $T->set_var('option_dscp', $opt_dscp);
                 $T->parse('iOpts', 'ItemOptions', true);
-            }
+            }*/
             $T->parse('iRow', 'ItemRow', true);
             $T->clear_var('iOpts');
         }
@@ -468,7 +495,7 @@ class Order
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $this->Currency->Format($total),
-            'not_final'     => $final ? '' : 'true',
+            'not_final'     => $step > 3 ? '' : 'true',
             'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
@@ -511,6 +538,14 @@ class Order
             $T->parse('Log', 'LogMessages', true);
         }
 
+        switch ($step) {
+        case 0:
+            $T->set_var('gateway_radios', $this->getCheckoutRadios());
+            $T->set_var('payer_email', COM_isAnonUser() ? '' : $_USER['email']);
+            break;
+        default:
+            break;
+        } 
         $status = $this->status;
         if ($this->pmt_method != '') {
             $gw = Gateway::getInstance($this->pmt_method);
@@ -565,6 +600,7 @@ class Order
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) return false;
+        $this->status = $newstatus;     // update in-memory object
         if ($log) {
             $this->Log("Status changed from $oldstatus to $newstatus",
                     $log_user);
@@ -890,13 +926,14 @@ class Order
             if ($item->taxable) {
                 $this->tax_items++;       // count the taxable items for display
             }
+            $P = Product::getInstance($item->product_id);
             $items[] = array(
                 'item_id'   => htmlspecialchars($item->product_id),
                 'dscp'      => htmlspecialchars($item->description),
                 'price'     => COM_numberFormat($item->price, 2),
                 'quantity'  => (int)$item->quantity,
                 'total'     => COM_numberFormat($item_total, 2),
-                'options'   => $item->options_text,
+                'options'   => $P->getOptionDisplay($item),
                 'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
                 'is_file'   => $P->file != '' && $item->ux_exp > time() ? true : false,
                 'taxable'   => $P->taxable,
@@ -981,6 +1018,70 @@ class Order
     public function setAdmin($isAdmin = false)
     {
         $this->isAdmin = $isAdmin == false ? false : true;
+    }
+
+
+    /**
+    *   Create the order ID.
+    *   Since it's transmitted in cleartext, it'd be a good idea to
+    *   use something more "encrypted" than just the session ID.
+    *   On the other hand, it can't be too random since it needs to be
+    *   repeatable.
+    *
+    *   @return string  Cart ID
+    */
+    protected static function _createID()
+    {
+        global $_TABLES;
+        do {
+            $id = COM_makeSid();
+        } while (DB_getItem($_TABLES['paypal.orders'], 'order_id', "order_id = '$id'") !== NULL);
+        return $id;
+    }
+
+
+    /**
+    *   Check if an item already exists in the cart.
+    *   This can be used to determine whether to add the item or not.
+    *   Check for "false" return value as the return may be zero for the
+    *   first item in the cart.
+    *
+    *   @param  string  $item_id    Item ID to check, e.g. "1|2,3,4"
+    *   @param  array   $extras     Option custom values, e.g. text fields
+    *   @return mixed       Item cart ID if item exists in cart, False if not
+    */
+    public function Contains($item_id, $extras=array())
+    {
+        foreach ($this->items as $id=>$info) {
+            $id_parts = PAYPAL_explode_opts($item_id, true);
+            if ($info->product_id == $id_parts[0] && $info->options == $id_parts[1]) {
+                // Found a matching item, now check for extra text field values
+                if ($info->extras == $extras) {
+                    return $id;
+                } else {
+                    return false;
+                }
+            }
+        }
+        // No matching item_id found
+        return false;
+    }
+
+
+    /**
+    *   Get the requested address array.
+    *
+    *   @param  string  $type   Type of address, billing or shipping
+    *   @return array           Array of name=>value address elements
+    */
+    public function getAddress($type)
+    {
+        if ($type != 'billto') $type = 'shipto';
+        $fields = array();
+        foreach ($this->_addr_fields as $name) {
+            $fields[$name] = $type . '_' . $name;
+        }
+        return $fields;
     }
 
 }

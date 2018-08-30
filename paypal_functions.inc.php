@@ -35,7 +35,7 @@ function listOrders($admin = false, $uid = 0)
 
     USES_lib_admin();
 
-    $where = ' WHERE is_cart = 0 ';
+    $where = " WHERE status != 'cart'";
     if ($uid > 0) {
         $where .= " AND ord.uid = '" . (int)$uid . "'";
     }
