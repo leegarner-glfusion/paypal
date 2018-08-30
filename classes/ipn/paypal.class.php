@@ -14,6 +14,8 @@
 */
 namespace Paypal\ipn;
 
+use \Paypal\Cart;
+
 // this file can't be used on its own
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
@@ -256,7 +258,7 @@ class paypal extends \Paypal\IPN
         case 'cart':
             // shopping cart
             // Create a cart and read the info from the cart table.
-            $Cart = new Cart($this->pp_data['custom']['cart_id']);
+            $Cart = Cart::getInstance(0, $this->pp_data['invoice']);
             $this->pp_data['pmt_tax'] = (float)$Cart->getInfo('tax');
             $this->pp_data['pmt_shipping'] = (float)$Cart->getInfo('shipping');
             $this->pp_data['pmt_handling'] = (float)$Cart->getInfo('handling');

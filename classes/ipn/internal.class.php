@@ -13,6 +13,7 @@
 *   @filesource
 */
 namespace Paypal\ipn;
+
 use \Paypal\Cart;
 use \Paypal\Currency;
 use \Paypal\Coupon;
