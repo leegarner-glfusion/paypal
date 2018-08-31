@@ -1722,7 +1722,7 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'name':
-        $retval = $LANG_PP['orderstatus'][$fieldvalue];
+        $retval = PP_getVar($LANG_PP['orderstatus'], $fieldvalue, 'string', $fieldvalue);
         break;
 
     default:
