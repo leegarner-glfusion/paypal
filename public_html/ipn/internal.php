@@ -26,6 +26,10 @@ if ($ipn) {
     $ipn->Process();
 }
 
-//COM_refresh(PAYPAL_URL . '?thanks');
-echo "done";
+if (!isset($_GET['debug'])) {
+    COM_refresh(PAYPAL_URL . '/index.php?thanks');
+} else {
+    echo 'Debug Finished';
+}
+
 ?>
