@@ -1451,11 +1451,6 @@ function plugin_runScheduledTask_paypal()
     global $_PP_CONF, $_TABLES, $_CONF;
 
     if ($_PP_CONF['ena_cart'] == 1) {
-        // New method: Delete old orders that haven't been finalized
-        $sql = "DELETE FROM {$_TABLES['paypal.orders']}
-            WHERE is_cart = 1 AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        DB_query($sql);
-
         // Delete old shopping carts, if the cart is enabled
         $sql = "DELETE FROM {$_TABLES['paypal.cart']}
             WHERE cart_uid = 1

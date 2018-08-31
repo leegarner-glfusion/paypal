@@ -35,9 +35,10 @@ function listOrders($admin = false, $uid = 0)
 
     USES_lib_admin();
 
-    $where = ' WHERE is_cart = 0 ';
     if ($uid > 0) {
-        $where .= " AND ord.uid = '" . (int)$uid . "'";
+        $where = " WHERE ord.uid = '" . (int)$uid . "'";
+    } else {
+        $where = 'WHERE 1=1';
     }
 
     $isAdmin = $admin == true ? 1 : 0;
