@@ -936,22 +936,19 @@ class Order
     *   Create a random token string for this order to allow anonymous users
     *   to view the order from an email link.
     *
-    *   @uses   Coupon::generate()
     *   @return string      Token string
     */
     private static function _createToken()
     {
-        $len = rand(5, 20);
-        $options = array(
-            'length'    => $len,
-            'letters'   => true,
-            'numbers'   => true,
-            'symbols'   => false,   // alphanumeric only
-            'mixed_case' => true,
-            'mask'      => '',
-        );
-        $code = Coupon::generate($options);
-        return $code;
+        $len = 13;
+        if (function_exists("random_bytes")) {
+            $bytes = random_bytes(ceil($len / 2));
+        } elseif (function_exists("openssl_random_pseudo_bytes")) {
+            $bytes = openssl_random_pseudo_bytes(ceil($len / 2));
+        } else {
+            $bytes = uniqid();
+        }
+        return substr(bin2hex($bytes), 0, $len);
     }
 
 
