@@ -946,7 +946,14 @@ class Order
         } elseif (function_exists("openssl_random_pseudo_bytes")) {
             $bytes = openssl_random_pseudo_bytes(ceil($len / 2));
         } else {
-            $bytes = uniqid();
+            $options = array(
+                'length'    => $len * 2,
+                'letters'   => 3,       // mixed case
+                'numbers'   => true,    // include numbers
+                'symbols'   => true,    // include symbols
+                'mask'      => '',
+            );
+            $bytes = Coupon::generate($options);
         }
         return substr(bin2hex($bytes), 0, $len);
     }
