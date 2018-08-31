@@ -85,11 +85,13 @@ case 'checkout':
     $gateway = PP_getVar($_POST, 'gateway');
     $Cart = \Paypal\Cart::getInstance();
     if ($gateway !== '') $Cart->setGateway($gateway);
-    if (isset($_POST['apply_gc'])) {
+    if (isset($_POST['apply_gc'])) {        // payment by GC, deprecate?
         $Cart->setGC($_POST['apply_gc']);
-    } elseif ($gateway == '_coupon') {
+    } elseif (isset($_POST['by_gc'])) {     // partial payment by GC
+        $Cart->setGC($_POST['by_gc']);
+    } elseif ($gateway == '_coupon') {      // full payment by GC
         $Cart->setGC(-1);
-    } else {
+    } else {                                // no part paid by GC
         $Cart->setGC(0);
     }
     if (isset($_POST['quantity'])) {
