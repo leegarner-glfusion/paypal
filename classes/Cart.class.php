@@ -24,21 +24,6 @@ namespace Paypal;
 */
 class Cart extends Order
 {
-    /** Shopping cart contents.
-        @var array */
-    //private $m_cart;
-
-    /** Shopping cart ID.
-        @var string */
-    /*private $m_cart_id;
-
-    private $m_info;*/
-
-    /*private $_addr_fields = array(
-            'name', 'company', 'address1', 'address2',
-            'city', 'state', 'country', 'zip',
-        );*/
-
     private static $session_var = 'ppGCart';
 
     /** Holder for custom information
@@ -471,30 +456,6 @@ class Cart extends Order
 
 
     /**
-     * Set the payer email address. Needs to be input by anonymous buyers.
-     *
-     * @param   string  $email  Email address
-     */
-    public function setEmail($email)
-    {
-        $this->m_info['payer_email'] = $email;
-        $this->Save();
-    }
-
-
-    /**
-     * Set the instructions field
-     *
-     * @param   string  $text   Instructions text
-     */
-    public function setInstructions($text)
-    {
-        $this->m_info['order_instr'] = $text;
-        $this->Save();
-    }
-
-
-    /**
      * Get the instructions text
      *
      * @return  string  Instructions text, if set
@@ -506,33 +467,6 @@ class Cart extends Order
         } else {
             return '';
         }
-    }
-
-
-    /**
-     * Get the cart info from the private m_info array
-     *
-     * @param   string  $item   Specific item to return
-     * @return  mixed       Value of item, or entire info array
-     */
-    public function getInfo($item = '')
-    {
-        if ($item != '') {
-            if (isset($this->m_info[$item])) {
-                return $this->m_info[$item];
-            } else {
-                return NULL;
-            }
-        } else {
-            return $this->m_info;
-        }
-    }
-
-
-    public function setInfo($item, $value)
-    {
-        $this->m_info[$item] = $value;
-        $this->Save();
     }
 
 

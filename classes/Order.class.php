@@ -21,14 +21,9 @@ class Order
     public $items = array();        // Array of OrderItem objects
     private $properties = array();
     protected $isNew = true;
+    protected $m_info = array();    // Misc. info used by Cart
     private $isAdmin = false;       // True if viewing via admin interface
     var $no_shipping = 1;
-/*    protected $X_addr_fields = array(
-        'billto_name', 'billto_company', 'billto_address1', 'billto_address2',
-        'billto_city', 'billto_state', 'billto_country', 'billto_zip',
-        'shipto_name', 'shipto_company', 'shipto_address1', 'shipto_address2',
-        'shipto_city', 'shipto_state', 'shipto_country', 'shipto_zip',
-    );*/
     protected $_addr_fields = array(
         'name', 'company', 'address1', 'address2',
         'city', 'state', 'country', 'zip',
@@ -400,6 +395,7 @@ class Order
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
                 "token = '" . DB_escapeString($this->token) . "'",
+                "info = '" . DB_escapeString(@serialize($this->m_info)) . "'",
         );
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
@@ -1083,6 +1079,47 @@ class Order
         }
         return $fields;
     }
+
+
+    /**
+     * Get the cart info from the private m_info array.
+     * If no key is specified, the entire m_info array is returned.
+     * If a key is specified but not found, the NULL is returned.
+     *
+     * @param   string  $key    Specific item to return
+     * @return  mixed       Value of item, or entire info array
+     */
+    public function getInfo($key = '')
+    {
+        if ($key != '') {
+            if (isset($this->m_info[$key])) {
+                return $this->m_info[$key];
+            } else {
+                return NULL;
+            }
+        } else {
+            return $this->m_info;
+        }
+    }
+
+
+    /**
+     * Set an info item into the private info array.
+     * The $save parameter can be set to "false" if this is called
+     * several times in a row.
+     *
+     * @param   string  $key    Name of var to set
+     * @param   mixed   $value  Value to set
+     * @param   boolean $save   True to immediately save the order
+     */
+    public function setInfo($key, $value, $save=true)
+    {
+        $this->m_info[$item] = $value;
+        if ($save) {
+            $this->Save();
+        }
+    }
+
 
 }
 
