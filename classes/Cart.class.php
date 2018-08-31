@@ -414,6 +414,12 @@ class Cart
                 }
             }
         }
+        if (isset($A['gateway'])) {
+            $this->setGateway($A['gateway']);
+        }
+        if (isset($A['by_gc'])) {
+            $this->setGC($A['by_gc']);
+        }
         $this->Save();  // UpdateQty didn't save the cart, so do it here
         return $this->m_cart;
     }
