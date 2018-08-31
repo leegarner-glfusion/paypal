@@ -97,10 +97,10 @@ case 'checkout':
         $Cart->Update($_POST);
     }
     if (isset($_POST['order_instr'])) {
-        $Cart->setInstructions($_POST['order_instr']);
+        $Cart->instructions = $_POST['order_instr'];
     }
     if (isset($_POST['payer_email'])) {
-        $Cart->setEmail($_POST['payer_email']);
+        $Cart->buyer_email = $_POST['payer_email'];
     }
     $Cart->Save();
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
@@ -109,7 +109,7 @@ case 'checkout':
         $view = 'checkoutcart';
 
         // See what workflow elements we already have.
-        foreach ($_PP_CONF['workflows'] as $wf_name) {
+        foreach (\Paypal\Workflow::getAll() as $wf_name) {
             switch ($wf_name) {
             case 'billto':
             case 'shipto':

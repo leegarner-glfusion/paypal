@@ -792,11 +792,12 @@ class Cart extends Order
             if ($_PP_CONF['gc_enabled']) {
                 $gateways['_coupon'] = Gateway::getInstance('_coupon');
             }
+            $gc_bal = $_PP_CONF['gc_enabled'] ? Coupon::getUserBalance() : 0;
             if (empty($gateways)) return NULL;  // no available gateways
             if (isset($this->m_info['gateway']) && array_key_exists($this->m_info['gateway'], $gateways)) {
                 // Select the previously selected gateway
                 $gw_sel = $this->m_info['gateway'];
-            } elseif ($_PP_CONF['gc_enabled'] && $this->m_info['gc_bal'] >= $this->m_info['order_total']) {
+            } elseif ($gc_bal >= $this->total) {
                 // Select the coupon gateway as full payment
                 $gw_sel = '_coupon';
             } else {
@@ -810,7 +811,7 @@ class Cart extends Order
                     echo "bad gw";die;
                     continue;
                 }
-                COM_errorLog("supports: " . print_r($gw->Supports('checkout'),true));
+                //COM_errorLog("supports: " . print_r($gw->Supports('checkout'),true));
                 if ($gw->Supports('checkout')) {
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
@@ -918,7 +919,7 @@ class Cart extends Order
             (int)$A['addr_id'] : '0';
         $var = $type . '_id';
         $this->$var = PP_getVar($A, 'addr_id', 'integer', 0);
-        foreach($this->_addr_fields2 as $fld) {
+        foreach($this->_addr_fields as $fld) {
             $var = $type . '_' . $fld;
             $this->$var = isset($A[$fld]) ? htmlspecialchars($A[$fld]) : '';
         }
@@ -1051,11 +1052,7 @@ class Cart extends Order
             $gc_bal = Coupon::getUserBalance();
             $amt = min($gc_bal, Coupon::canPayByGC($this));
         }
-        $this->m_info['apply_gc'] = $amt;
-        $sql = "UPDATE {$_TABLES['paypal.cart']}
-                SET by_gc = $amt
-                WHERE order_id = '{$this->m_cart_id}'";
-        DB_query($sql);
+        $this->setInfo('apply_gc', $amt);
     }
 
 

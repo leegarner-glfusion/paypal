@@ -543,14 +543,16 @@ class Coupon extends Product
      */
     public static function canPayByGC($cart)
     {
-        $gc_can_apply = $cart->getInfo('order_total');
+        $gc_can_apply = $cart->getTotal();
         $items = $cart->Cart();
         foreach ($items as $item) {
-            $P = Product::getInstance($item->item_id);
+            $P = $item->getProduct();
             if ($P->isNew || $P->prod_type == PP_PROD_COUPON) {
+                echo "here";die;
                 $gc_can_apply -= $P->getPrice($item['options'], $item['quantity']);
             }
         }
+        if ($gc_can_apply < 0) $gc_can_apply = 0;
         return $gc_can_apply;
     }
 

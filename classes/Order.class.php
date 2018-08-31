@@ -28,7 +28,8 @@ class Order
         'name', 'company', 'address1', 'address2',
         'city', 'state', 'country', 'zip',
     );
-    protected $subtotal = 0;
+    protected $subtotal = 0;        // item subtotal
+    protected $total = 0;           // final total
     protected $tax_items = 0;         // count items having sales tax
     protected $Currency;              // Currency object
 
@@ -449,12 +450,7 @@ class Order
 
         $T->set_block('order', 'ItemRow', 'iRow');
 
-        // Get the workflows so we sho the relevant info.
-        if (!isset($_PP_CONF['workflows']) ||
-            !is_array($_PP_CONF['workflows'])) {
-            Workflow::Load();
-        }
-        foreach ($_PP_CONF['workflows'] as $key => $value) {
+        foreach (Workflow::getAll() as $key => $value) {
             $T->set_var('have_' . $value, 'true');
         }
 
@@ -486,11 +482,11 @@ class Order
             $T->clear_var('iOpts');
         }
         $dt = new \Date($this->ux_ts, $_USER['tzid']);
-        $total = $this->getTotal();     // also calls calcTax()
+        $this->total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
-            'total'         => $this->Currency->Format($total),
+            'total'         => $this->Currency->Format($this->total),
             'not_final'     => $step > 3 ? '' : 'true',
             'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
@@ -505,12 +501,13 @@ class Order
             'shop_addr'     => $_PP_CONF['shop_addr'],
             'shop_phone'    => $_PP_CONF['shop_phone'],
             'apply_gc'      => $this->by_gc > 0 ? $this->Currency->FormatValue($this->by_gc) : 0,
-            'net_total'     => $total - $this->by_gc,
+            'net_total'     => $this->total - $this->by_gc,
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
             'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], $this->tax_rate * 100, $this->tax_items),
             'status'        => $this->status,
             'token'         => $this->token,
+            'is_uikit'      => $_PP_CONF['_is_uikit'],
         ) );
 
         if ($this->isAdmin) {
@@ -1114,12 +1111,11 @@ class Order
      */
     public function setInfo($key, $value, $save=true)
     {
-        $this->m_info[$item] = $value;
+        $this->m_info[$key] = $value;
         if ($save) {
             $this->Save();
         }
     }
-
 
 }
 

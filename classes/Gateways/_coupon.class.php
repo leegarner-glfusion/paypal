@@ -55,7 +55,7 @@ class _coupon extends \Paypal\Gateway
         // Get the order total from the cart, and the user's balance
         // to decide what kind of button to show.
         $cart = Cart::getInstance();
-        $total = $cart->getInfo('order_total');
+        $total = $cart->getTotal();
         $gc_bal = Coupon::getUserBalance();
         if ($gc_bal == 0) {
             // No gift card balance to apply, no selection to show
@@ -65,6 +65,9 @@ class _coupon extends \Paypal\Gateway
         // Get the amount that can be paid by gift card,
         // since coupon products cannot.
         $gc_can_apply = Coupon::canPayByGC($cart);
+
+        // If no gift card amount can be applied, don't show this gateway option
+        if ($gc_can_apply == 0) return '';
 
         // Create the radio button or checkbox as appropriate based
         // on the card balance vs. the amount that can be paid by card.

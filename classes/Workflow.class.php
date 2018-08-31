@@ -57,6 +57,11 @@ class Workflow
     }
 
 
+    /**
+     * Get all workflow items, in order of processing
+     *
+     * @return  array   Array of workflow names
+     */
     public static function getAll()
     {
         global $_TABLES;
@@ -253,7 +258,6 @@ class Workflow
         if ($currview == '') {
             $curr_key = -1;
         } else {
-            //$curr_key = array_search($currview, $_PP_CONF['workflows']);
             $curr_key = array_search($currview, $workflows);
             if ($curr_key === false) $curr_key = -1;
         }
