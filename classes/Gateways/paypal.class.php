@@ -230,14 +230,15 @@ class paypal extends \Paypal\Gateway
             $cartItems = $cart->Cart();
             foreach ($cartItems as $cart_item_id=>$item) {
                 $opt_str = '';
-                $item_parts = explode('|', $item['item_id']);
-                $db_item_id = $item_parts[0];
-                $options = isset($item_parts[1]) ? $item_parts[1] : '';
-                $P = \Paypal\Product::getInstance($db_item_id, $custom_arr);
-                $db_item_id = DB_escapeString($db_item_id);
+                //$item_parts = explode('|', $item['item_id']);
+                //$db_item_id = $item_parts[0];
+                //$options = isset($item_parts[1]) ? $item_parts[1] : '';
+                $P = \Paypal\Product::getInstance($item->product_id, $custom_arr);
+                $db_item_id = DB_escapeString($item->product_id);
                 $oc = 0;
-                if (is_array($item['options'])) {
-                    $opts = explode(',', $options);
+                //$options = explode(',', $item->options);
+                //if (is_array($item['options'])) {
+                    $opts = explode(',', $item->options);
                     foreach ($opts as $optval) {
                         $opt_info = $P->getOption($optval);
                         if ($opt_info) {
@@ -247,38 +248,40 @@ class paypal extends \Paypal\Gateway
                             $oc++;
                         }
                     }
-                } else {
+                /*} else {
                     $opts = array();
-                }
+                    }*/
                 $overrides = array(
-                    'price' => $item['price'],
+                    'price' => $item->price,
                     'uid'   => $_USER['uid'],
                 );
-                $item_amount = $P->getPrice($opts, $item['quantity'], $overrides);
+                $item_amount = $P->getPrice($opts, $item->quantity, $overrides);
                 $fields['amount_' . $i] = $item_amount;
                 $fields['item_number_' . $i] = (int)$cart_item_id;
-                $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
-                $total_amount += $item['price'];
-                if (isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
-                    foreach ($item['extras']['custom'] as $id=>$val) {
+                $fields['item_name_' . $i] = htmlspecialchars($item->description);
+                $total_amount += $item->price;
+                if (isset($itemi->extras['custom']) && is_array($itemi->extras['custom'])) {
+                    foreach ($item->extras['custom'] as $id=>$val) {
                         $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
                         $fields['os'.$oc.'_'.$i] = $val;
                         $oc++;
                     }
                 }
-                $fields['quantity_' . $i] = $item['quantity'];
+                $fields['quantity_' . $i] = $item->quantity;
 
-                if (isset($item['shipping'])) {
-                    $fields['shipping_' . $i] = $item['shipping'];
-                    $shipping += $item['shipping'];
+                if (isset($item->shipping)) {
+                    $fields['shipping_' . $i] = $item->shipping;
+                    $shipping += $item->shipping;
                 }
-                if (isset($item['weight']) && $item['weight'] > 0) {
-                    $weight += $item['weight'];
+                if (isset($item->weight) && $item->weight > 0) {
+                    $weight += $item->weight;
                 }
                 $i++;
             }
 
-            $fields['tax_cart'] = (float)$cart->getInfo('tax');
+            //$fields['tax_cart'] = (float)$cart->getInfo('tax');
+            $fields['tax_cart'] = (float)$cart->tax;
+            $total_amount += $cart->tax;
             if ($shipping > 0) $total_amount += $shipping;
             if ($weight > 0) {
                 $fields['weight_cart'] = $weight;
