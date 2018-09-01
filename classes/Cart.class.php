@@ -471,6 +471,18 @@ class Cart extends Order
 
 
     /**
+     * Save the cart. Logging is disabled for cart updates.
+     *
+     * @param   boolean $log    True to log the update, False for silent update
+     * @return  string      Order ID
+     */
+    public function Save($log = true)
+    {
+        return parent::Save(false);
+    }
+
+
+    /**
     *   Remove an item from the cart.
     *   Saves the updated cart after removal.
     *
@@ -717,7 +729,7 @@ class Cart extends Order
         ) );
         // Special handling if there is a zero total due to discounts
         // or gift cards
-        if ($this->custom_info['final_total'] < .001) {
+        if ($this->total < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
             $this->custom_info['transtype'] = 'internal';
             $this->custom_info['cart_id'] = $this->CartID();
@@ -936,7 +948,13 @@ class Cart extends Order
     public function getAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
-        return isset($this->m_info[$type]) ? $this->m_info[$type] : array();
+        $A = array();
+        foreach ($this->_addr_fields as $fld) {
+            $var = $type . '_' . $fld;
+            $A[$fld] = $this->$var;
+        }
+        return $A;
+        //return isset($this->m_info[$type]) ? $this->m_info[$type] : array();
     }
 
 
@@ -1024,65 +1042,6 @@ class Cart extends Order
     public static function clearSession($key)
     {
         unset($_SESSION[self::$session_var][$key]);
-    }
-
-
-    /**
-    *   Get the gift card amount applied to this cart
-    *
-    *   @return float   Gift card amount
-    */
-    public function getGC()
-    {
-        return $this->m_info['apply_gc'];
-    }
-
-
-    /**
-    *   Apply a gift card amount to this cart
-    *
-    *   @param  float   $amt    Amount of credit to apply
-    */
-    public function setGC($amt)
-    {
-        global $_TABLES;
-
-        $amt = (float)$amt;
-        if ($amt == -1) {
-            $gc_bal = Coupon::getUserBalance();
-            $amt = min($gc_bal, Coupon::canPayByGC($this));
-        }
-        $this->setInfo('apply_gc', $amt);
-    }
-
-
-    /**
-    *   Set the chosen payment gateway into the cart information.
-    *   Used so the gateway will be pre-selected if the buyer returns to the
-    *   cart update page.
-    *
-    *   @param  string  $gw_name    Gateway name
-    */
-    public function setGateway($gw_name)
-    {
-        $this->m_info['gateway'] = $gw_name;
-    }
-
-
-    /**
-    *   Check if this cart has any physical items.
-    *   Not currently used, may be used later to adapt workflows based on
-    *   product types
-    *
-    *   @return boolean     True if at least one physical product is present
-    */
-    public function hasPhysical()
-    {
-        foreach ($this->m_cart as $id=>$item) {
-            if ($item['type'] & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
-                return true;
-        }
-        return false;
     }
 
 

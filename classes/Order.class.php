@@ -18,20 +18,20 @@ namespace Paypal;
 */
 class Order
 {
-    public $items = array();        // Array of OrderItem objects
-    private $properties = array();
-    protected $isNew = true;
-    protected $m_info = array();    // Misc. info used by Cart
     private $isAdmin = false;       // True if viewing via admin interface
-    var $no_shipping = 1;
-    protected $_addr_fields = array(
+    private $properties = array();  // Array of properties (DB fields)
+    protected $isNew = true;        // Flag to indicate a new, empty order
+    protected $m_info = array();    // Misc. info used by Cart
+    var $no_shipping = 1;           // Tracker if no_shipping can be set
+    protected $_addr_fields = array(    // Address field names
         'name', 'company', 'address1', 'address2',
         'city', 'state', 'country', 'zip',
     );
+    protected $items = array();       // Array of OrderItem objects
     protected $subtotal = 0;        // item subtotal
     protected $total = 0;           // final total
-    protected $tax_items = 0;         // count items having sales tax
-    protected $Currency;              // Currency object
+    protected $tax_items = 0;       // count items having sales tax
+    protected $Currency;            // Currency object, used for formatting
 
     /**
     *   Constructor
@@ -43,7 +43,6 @@ class Order
     {
         global $_USER, $_PP_CONF;
 
-        $this->Currency = Currency::getInstance();
         $this->isNew = true;
         $this->uid = (int)$_USER['uid'];
         $this->order_date = PAYPAL_now()->toMySql(false);
@@ -301,6 +300,9 @@ class Order
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
         $this->ux_ts = PP_getVar($A, 'ux_ts', 'int');
+        $this->buyer_email = PP_getVar($A, 'buyer_email');
+        $this->m_info = @unserialize(PP_getVar($A, 'info'));
+        if ($this->m_info === false) $this->m_info = array();
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
                 $fld = $type . '_' . $name;
@@ -350,9 +352,12 @@ class Order
 
 
     /**
-    *   Save the current order to the database
-    */
-    public function Save()
+     * Save the current order to the database
+     *
+     * @param   boolean $log    True to log the update, False for silent update
+     * @return  string      Order ID
+     */
+    public function Save($log=true)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -376,13 +381,12 @@ class Order
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
             $log_msg = 'Order Created';
-            $tax = $this->calcTax();
         } else {
             $sql1 = "UPDATE {$_TABLES['paypal.orders']} SET ";
             $sql2 = " WHERE order_id = '{$this->order_id}'";
             $log_msg = 'Order Updated';
-            $tax = $this->tax;
         }
+        $tax = $this->calcTax();
 
         $fields = array(
                 "status = '{$this->status}'",
@@ -407,7 +411,7 @@ class Order
         $sql = $sql1 . implode(', ', $fields) . $sql2;
         //echo $sql;die;
         DB_query($sql);
-        if (!DB_error()) {
+        if ($log && !DB_error()) {
             $this->Log($log_msg);
         }
         $this->isNew = false;
@@ -429,7 +433,6 @@ class Order
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
-
         switch($step) {
         case 0:
             $tplname = 'viewcart';
@@ -454,6 +457,7 @@ class Order
             $T->set_var('have_' . $value, 'true');
         }
 
+        $Currency = Currency::getInstance();
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $items = $this->getItemView();
         $tax_items = 0;
@@ -486,21 +490,21 @@ class Order
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
-            'total'         => $this->Currency->Format($this->total),
+            'total'         => $Currency->Format($this->total),
             'not_final'     => $step > 3 ? '' : 'true',
             'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
-            'shipping'      => $this->shipping > 0 ? $this->Currency->FormatValue($this->shipping) : 0,
-            'handling'      => $this->handling > 0 ? $this->Currency->FormatValue($this->handling) : 0,
-            'subtotal'      => $this->Currency->Format($this->subtotal),
+            'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
+            'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
+            'subtotal'      => $Currency->Format($this->subtotal),
             'have_billto'   => 'true',
             'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
             'shop_phone'    => $_PP_CONF['shop_phone'],
-            'apply_gc'      => $this->by_gc > 0 ? $this->Currency->FormatValue($this->by_gc) : 0,
+            'apply_gc'      => $this->by_gc > 0 ? $Currency->FormatValue($this->by_gc) : 0,
             'net_total'     => $this->total - $this->by_gc,
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
@@ -536,6 +540,16 @@ class Order
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
             $T->set_var('payer_email', COM_isAnonUser() ? '' : $_USER['email']);
             break;
+        case 9:
+            $gw = Gateway::getInstance($this->getInfo('gateway'));
+            if ($gw) {
+                $T->set_var(array(
+                    'gateway_vars'  => $this->checkoutButton($gw),
+                    'checkout'      => 'true',
+                    'pmt_method'    => $gw->getLogo(),
+                    'payer_email'   => $this->buyer_email,
+                ) );
+            }
         default:
             break;
         } 
@@ -752,7 +766,7 @@ class Order
         }
 
         $total_amount = $item_total + $this->tax + $this->shipping +
-                        $this->handling;
+            $this->handling;
         $user_name = COM_getDisplayName($this->uid);
         if ($this->billto_name == '') {
             $this->billto_name = $user_name;
@@ -860,6 +874,9 @@ class Order
         } elseif ($this->uid > 1 && $_USER['uid'] == $this->uid ||
             plugin_ismoderator_paypal()) {
             // Administrator, or logged-in buyer
+            return true;
+        } elseif ($this->uid == 1 && isset($_SESSION['ppGCart']['order_id']) &&
+            $_SESSION['ppGCart']['order_id'] == $this->order_id) {
             return true;
         } elseif (isset($_GET['token']) && $_GET['token'] == $this->token) {
             // Anonymous with the correct token
@@ -999,7 +1016,7 @@ class Order
         // Need to call calcTax() since this function may be called before
         // the order is saved.
         $total += $this->calcTax() + $this->shipping + $this->handling;
-        return round($total, $this->Currency->Decimals());
+        return round($total, Currency::getInstance()->Decimals());
     }
 
 
@@ -1101,6 +1118,17 @@ class Order
 
 
     /**
+     * Get all the items in this order
+     *
+     * @return  array   Array of OrderItem objects
+     */
+    public function getItems()
+    {
+        return $this->items;
+    }
+
+
+    /**
      * Set an info item into the private info array.
      * The $save parameter can be set to "false" if this is called
      * several times in a row.
@@ -1117,6 +1145,90 @@ class Order
         }
     }
 
+
+    /**
+     * Set the special instructions text during checkout
+     *
+     * @param   string  $text   Text to set
+     * @param   boolean $sav    True to immediately save the order
+     */
+    public function setInstructions($text, $save=true)
+    {
+        $this->instructions = $text;
+        if ($save) $this->Save();
+    }
+
+
+    /**
+     * Set the buyer's email address during checkout
+     *
+     * @param   string  $text   Text to set
+     * @param   boolean $sav    True to immediately save the order
+     */
+    public function setEmail($text, $save=true)
+    {
+        $this->buyer_email = $text;
+        if ($save) $this->Save();
+    }
+
+
+    /**
+    *   Get the gift card amount applied to this cart
+    *
+    *   @return float   Gift card amount
+    */
+    public function getGC()
+    {
+        return $this->m_info['apply_gc'];
+    }
+
+
+    /**
+    *   Apply a gift card amount to this cart
+    *
+    *   @param  float   $amt    Amount of credit to apply
+    */
+    public function setGC($amt)
+    {
+        global $_TABLES;
+
+        $amt = (float)$amt;
+        if ($amt == -1) {
+            $gc_bal = Coupon::getUserBalance();
+            $amt = min($gc_bal, Coupon::canPayByGC($this));
+        }
+        $this->setInfo('apply_gc', $amt);
+    }
+
+
+    /**
+    *   Set the chosen payment gateway into the cart information.
+    *   Used so the gateway will be pre-selected if the buyer returns to the
+    *   cart update page.
+    *
+    *   @param  string  $gw_name    Gateway name
+    */
+    public function setGateway($gw_name)
+    {
+        $this->m_info['gateway'] = $gw_name;
+    }
+
+
+    /**
+    *   Check if this cart has any physical items.
+    *   Not currently used, may be used later to adapt workflows based on
+    *   product types
+    *
+    *   @return boolean     True if at least one physical product is present
+    */
+    public function hasPhysical()
+    {
+        foreach ($this->m_cart as $id=>$item) {
+        if ($item['type'] & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+            return true;
+        }
+        return false;
+    }
 }
 
 ?>
