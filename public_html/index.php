@@ -82,8 +82,11 @@ case 'updatecart':
 case 'checkout':
     // Set the gift card amount first as it will be overridden
     // if the _coupon gateway is selected
-    $gateway = PP_getVar($_POST, 'gateway');
     $Cart = \Paypal\Cart::getInstance();
+    $gateway = PP_getVar($_POST, 'gateway');
+    if ($gateway !== '') {
+        $Cart->setGateway($gateway);
+    }
     if ($gateway !== '') $Cart->setGateway($gateway);
     if (isset($_POST['apply_gc'])) {
         $Cart->setGC($_POST['apply_gc']);
@@ -402,7 +405,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $content .= \Paypal\Cart::getInstance()->View(1);
+    $content .= \Paypal\Cart::getInstance()->View(9);
     break;
 
 case 'productlist':
