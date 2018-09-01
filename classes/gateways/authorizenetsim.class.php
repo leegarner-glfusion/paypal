@@ -12,16 +12,14 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
-/** Import base gateway class */
-USES_paypal_gateway_base();
+namespace Paypal;
 
 /**
 *   Class for Authorize.Net payment gateway
 *   @since  0.5.3
 *   @package paypal
 */
-class authorizenetsim extends PaymentGw
+class authorizenetsim extends Gateway
 {
     /** Authorize.net transaction key
     *   @var string */
@@ -65,6 +63,8 @@ class authorizenetsim extends PaymentGw
             'prod_md5_hash'     => '',
             'test_md5_hash'     => '',
             'test_mode'         => 1,
+            'test_hash_key'     => '',
+            'prod_hash_key'     => '',
         );
 
         // The parent constructor reads our config items from the database to
@@ -142,7 +142,7 @@ class authorizenetsim extends PaymentGw
     *   @uses   getActionUrl()
     *   @return string      HTML code for the button
     */
-    public function CheckoutButton($cart)
+    public function XCheckoutButton($cart)
     {
         global $_PP_CONF, $_USER, $LANG_PP_authorizenetsim;
 
@@ -175,7 +175,7 @@ class authorizenetsim extends PaymentGw
         }
 
         $gateway_vars = $this->_getButton('cart');
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                 $this->gw_name);
         $T->set_file(array('btn' => 'btn_checkout.thtml'));
         $T->set_var('action_url', $this->getActionUrl());
@@ -243,7 +243,7 @@ class authorizenetsim extends PaymentGw
                 $P->tax, $P->shipping_amt);*/
         $gateway_vars = $this->_getButton($P->btn_type);
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                 $this->gw_name); 
         $T->set_file(array('btn' => 
                 'btn_' . self::gwButtonType($P->btn_type) . '.thtml'));
@@ -269,7 +269,7 @@ class authorizenetsim extends PaymentGw
     *   @param  string  $btn_type   Button type
     *   @return string              HTML for button
     */
-    public function ExternalButton($attribs, $btn_type)
+    public function ExternalButton($attribs = array(), $btn_type = 'buy_now')
     {
         // Add options, if present.  Only 2 are supported, and the amount must
         // already be included in the $amount above.
@@ -292,7 +292,7 @@ class authorizenetsim extends PaymentGw
         $this->_addItem($item_number, $vars);
         $gateway_vars = $this->_getButton($btn_type);
 
-        $T = new Template(PAYPAL_PI_PATH . '/templates/buttons/' .
+        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
                 $this->gw_name); 
         $T->set_file(array('btn' => 'btn_buy_now.thtml'));
         $T->set_var('action_url', $this->getActionUrl());
@@ -518,40 +518,19 @@ class authorizenetsim extends PaymentGw
 
 
     /**
-    *   Present the configuration form for this gateway.
+    *   Get all the configuration fields specifiec to this gateway
     *
-    *   @uses   PaymentGw::getServiceCheckboxes
-    *   @return string      HTML for the configuration form.
+    *   @return array   Array of fields (name=>field_info)
     */
-    public function Configure()
+    protected function getConfigFields()
     {
-        global $_CONF, $LANG_PP_authorizenetsim;
-
-        $T = new Template(PAYPAL_PI_PATH . '/templates/');
-        $T->set_file('tpl', 'gateway_edit.thtml');
-
-        $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name . '.html',
-                $_CONF['language']);
-
-        $svc_boxes = $this->getServiceCheckboxes();
-
-        $T->set_var(array(
-            'gw_description' => self::Description(),
-            'gw_id'         => $this->gw_name,
-            'enabled_chk'   => $this->enabled == 1 ? ' checked="checked"' : '',
-            'orderby'       => $this->orderby,
-            'pi_admin_url'  => PAYPAL_ADMIN_URL,
-            'doc_url'       => $doc_url,
-            'svc_checkboxes' => $svc_boxes,
-        ) );
-
-        //$this->LoadLanguage();
-
-        $T->set_block('tpl', 'ItemRow', 'IRow');
+        $fields = array();
         foreach($this->config as $name=>$value) {
+            $other_label = '';
             switch ($name) {
             case 'test_mode':
-                $field = '<input type="checkbox" name="' . $name . 
+            case 'encrypt':
+                $field = '<input type="checkbox" name="' . $name .
                     '" value="1" ';
                 if ($value == 1) $field .= 'checked="checked" ';
                 $field .= '/>';
@@ -561,20 +540,15 @@ class authorizenetsim extends PaymentGw
                     $value . '" size="60" />';
                 break;
             }
-
-            $T->set_var(array(
-                'param_name'    => $LANG_PP_authorizenetsim[$name],
+            $fields[$name] = array(
                 'param_field'   => $field,
-                'field_name'    => $name,
-                'doc_url'       => $doc_url,
-            ) );
-            $T->parse('IRow', 'ItemRow', true);
+                'other_label'   => $other_label,
+                'doc_url'       => '',
+            );
         }
-        $T->parse('output', 'tpl');
-        $form = $T->finish($T->get_var('output'));
-
-        return $form;
+        return $fields;
     }
+
 
 
     /**
@@ -619,18 +593,17 @@ class authorizenetsim extends PaymentGw
     //            $price, $qty=0, $shipping=0)
     private function _addItem($item_id, $vars)
     {
+        $qty = PP_getVar($vars, 'quantity', 'float', 1);
         if ($vars['quantity'] == 0) $vars['quantity'] = 1;
-        $qty = (float)$qty;
-        $price = (float)$vars['price'];
         $this->items[] = array(
             'item_id' => $item_id,
-            'item_name' => $vars['name'],
-            'description' => strip_tags($vars['descrip']),
-            'price' => $price,
-            'quantity' => $vars['quantity'],
-            'shipping' => $vars['shipping'],
-            'weight' => $vars['weight'],
-            'taxable' => $vars['taxable'],
+            'item_name' => PP_getVar($vars, 'name'),
+            'description' => strip_tags(PP_getVar($vars, 'descrip')),
+            'price' => PP_getVar($vars, 'price', 'float'),
+            'quantity' => $qty,
+            'shipping' => PP_getVar($vars, 'shipping', 'float'),
+            'weight' => PP_getVar($vars, 'weight', 'float'),
+            'taxable' => PP_getVar($vars, 'taxable', 'integer'),
         );
     }
 
@@ -683,6 +656,20 @@ class authorizenetsim extends PaymentGw
         return $this->api_login;
     }
 
-}   // class amazon
+
+    /**
+    *   Get a logo image to show on the order as the payment method.
+    *
+    *   @since  0.6.0
+    *   @return string      HTML for logo image
+    */
+    public function getLogo()
+    {
+        global $_CONF;
+        //return '<img src="https://www.authorize.net/content/dam/authorize/images/authorizenet_200x50.png" border="0" alt="Authorize.Net Logo" style="width:120px;height:30px;"/>';
+        return '<img src="' . $_CONF['site_url'] . '/paypal/images/creditcard.svg" border="0" alt="Authorize.Net" class="tooltip" title="Authorize.Net" style="height:40px;"/>';
+    }
+
+}   // class authorizenetsim
 
 ?>
