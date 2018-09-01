@@ -1,7 +1,7 @@
 {# begin {templatelocation} #}
 <form style="display:inline;" class="frm_checkout" name="frm_checkout"
     onclick="return finalizeCart('{cart_id}','{uid}');"
-    action="{action}" method="post">
+    action="{action}" method="{method}">
   {gateway_vars}
 {!if button_url}
   {button_url}

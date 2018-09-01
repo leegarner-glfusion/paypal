@@ -11,8 +11,7 @@
 *   @filesource
 */
 
-global $LANG_PP_authorizenetsim;
-$LANG_PP_authorizenetsim = array(
+$LANG_PP_gateway = array(
 'prod_api_login'    => 'Your Production API Login',
 'prod_trans_key'    => 'Your Production Transaction Key',
 'test_api_login'    => 'Your Test (Sandbox) API Login',
@@ -23,5 +22,7 @@ $LANG_PP_authorizenetsim = array(
 'test_md5_hash'     => 'Test MD5 Hash Key',
 'test_mode'         => 'Testing (Sandbox) Mode?',
 'buy_now'           => 'Buy with Authorize.Net',
+'test_hash_key'     => 'Test Hash Key',
+'prod_hash_key'     => 'Production Hash Key',
 );
 ?>
