@@ -364,6 +364,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `instructions` text,
   `token` varchar(20) DEFAULT NULL,
   `tax_rate` decimal(6,5) NOT NULL DEFAULT '0.00000',
+  `info` text,
   PRIMARY KEY (`order_id`)
 ) ENGINE=MyISAM";
 
@@ -937,6 +938,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.order_log']}
         ADD KEY `order_id` (`order_id`, `ts`)",
     "ALTER TABLE {$_TABLES['paypal.orders']}
+        ADD `info` text,
         CHANGE last_mod last_mod timestamp",
     "UPDATE TABLE {$_TABLES['paypal.orders']}
         SET last_mod = NOW()",      // have to start somewhere
