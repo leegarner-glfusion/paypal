@@ -342,12 +342,13 @@ class Order
         $allowed_statuses = array('cart', 'pending');
         $status = DB_getItem($_TABLES['paypal.orders'], 'status', "order_id='$order_id'");
         if (!in_array($status, $allowed_statuses)) {
-            return;
+            return false;
         }
 
         // Checks passed, delete the order and items
         DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
         DB_delete($_TABLES['paypal.orders'], 'order_id', $order_id);
+        return true;
     }
 
 

@@ -99,12 +99,6 @@ class Cart extends Order
 
         if ($uid == 0) $uid = $_USER['uid'];
         $uid = (int)$uid;
-        /*$cart_id = DB_escapeString($cart_id);
-        $sql = "SELECT cart_info, apply_gc, cart_contents
-                   FROM {$_TABLES['paypal.cart']}
-                   WHERE cart_id = '$cart_id'";
-            //echo $sql;die;
-        */
         if ($uid > 1) {
             if (!array_key_exists($uid, $carts)) {
                 $carts[$uid] = new self($cart_id);
@@ -153,7 +147,7 @@ class Cart extends Order
     *   @param  string  $cart_id    Cart ID
     *   @return array       Array of cart contents and other info
     */
-    public static function Read($cart_id)
+    public static function XRead($cart_id)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -509,19 +503,14 @@ class Cart extends Order
     {
         global $_TABLES, $_USER;
 
-        $sql = "DELETE FROM {$_TABLES['paypal.cart']} WHERE
-                cart_id = '" . DB_escapeString($this->cartID()) . "'";
-        if (!COM_isAnonUser()) {
-            $sql .= " OR cart_uid = " . (int)$_USER['uid'];
+        if ($this->status != 'cart') return $this->Cart();
+
+        DB_delete($_TABLES['paypal.purchases'], 'order_id', $this->cartID());
+        if ($del_order) {
+            DB_delete($_TABLES['paypal.orders'], 'order_id', $this->cartID();    
+            self::delAnonCart();
         }
-        DB_query($sql);
-        if ($del_order && isset($_SESSION[self::$session_var]['order_id']) &&
-            !empty($_SESSION[self::$session_var]['order_id'])) {
-            Order::Delete($_SESSION[self::$session_var]['order_id']);
-        }
-        $this->m_cart = array();
-        self::delAnonCart();
-        return $this->m_cart;
+        return array();
     }
 
 
@@ -1053,7 +1042,9 @@ class Cart extends Order
     public static function deleteUser($uid)
     {
         global $_TABLES;
-        DB_delete($_TABLES['paypal.cart'], 'cart_uid', $uid);
+        DB_delete($_TABLES['paypal.orders'], 
+            array('status', 'uid'),
+            array('cart',$uid ));
         PAYPAL_debug("All carts for user {$uid} deleted");
     }
 
@@ -1140,12 +1131,11 @@ class Cart extends Order
     {
         global $_TABLES;
 
-        $status = false;        // DEBUG
-        $status = $status ? 1 : 0;
+        $status = $status ? 'pending' : 'cart';
         $cart_id = DB_escapeString($cart_id);
-        $sql = "UPDATE {$_TABLES['paypal.cart']}
-                SET is_order = $status
-                WHERE cart_id = '{$cart_id}'";
+        $sql = "UPDATE {$_TABLES['paypal.orders']}
+                SET status = '{$status}'
+                WHERE order_id = '{$cart_id}'";
         DB_query($sql);
         if ($status == 1) {
             unset($_COOKIE[self::$session_var]);
