@@ -106,7 +106,7 @@
 {!if is_admin}
             <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" class="tooltip" title="{$LANG_PP['orderhist_item']}">
 {!endif}
-              {item_descrip}
+              {item_dscp}
 {!if is_admin}
             </a>
 {!endif}

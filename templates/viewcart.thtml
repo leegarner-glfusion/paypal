@@ -21,16 +21,16 @@
       <tr>
         <td class="alignleft">
 {!if item_link}
-          <a href="{item_link}">{item_name}</a>
+          <a href="{item_link}">{item_dscp}</a>
 {!else}
-          {item_name}
+          {item_dscp}
 {!endif}
           {item_options}
         </td>
         <td class="alignright">{item_price}</td>
         <td class="alignright">
           <i class="uk-icon uk-icon-minus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', -1);"></i>
-          <input style="text-align:right" type="text" id="f_qty_{cart_item_id}" name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" />
+          <input style="text-align:right;width:32px;" type="text" id="f_qty_{cart_item_id}" name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" maxlength="3" />
           <i class="uk-icon uk-icon-plus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', 1);"></i>
         </td>
         <td class="alignright">{item_total}</td>

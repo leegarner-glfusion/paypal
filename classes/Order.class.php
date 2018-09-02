@@ -466,7 +466,7 @@ class Order
         foreach ($items as $item) {
             $T->set_var(array(
                 'item_id'       => $item['item_id'],
-                'item_descrip'  => $item['dscp'],
+                'item_dscp'     => $item['dscp'],
                 'item_price'    => $item['price'],
                 'item_quantity' => $item['quantity'],
                 'item_total'    => $item['total'],
@@ -477,6 +477,9 @@ class Order
                 'token'         => $item['token'],
                 'iconset'       => $_PP_CONF['_iconset'],
                 'item_options'  => $item['options'],
+                'item_link'     => $item['link'],
+                'cart_item_id'  => $item['cart_item_id'],
+                'pi_url'        => PAYPAL_URL,
             ) );
             $T->set_block('order', 'ItemOptions', 'iOpts');
             /*foreach ($item['options'] as $opt_dscp) {
@@ -486,6 +489,7 @@ class Order
             $T->parse('iRow', 'ItemRow', true);
             $T->clear_var('iOpts');
         }
+
         $dt = new \Date($this->ux_ts, $_USER['tzid']);
         $this->total = $this->getTotal();     // also calls calcTax()
         $T->set_var(array(
@@ -538,7 +542,7 @@ class Order
 
         $payer_email = $this->buyer_email;
         if ($payer_email == '' && !COM_isAnonUser()) {
-            $payer_emali = $_USER['email'];
+            $payer_email = $_USER['email'];
         }
         $T->set_var('payer_email', $payer_email);
 
@@ -943,6 +947,7 @@ class Order
             }
             $P = Product::getInstance($item->product_id);
             $items[] = array(
+                'cart_item_id' => $item->id,
                 'item_id'   => htmlspecialchars($item->product_id),
                 'dscp'      => htmlspecialchars($item->description),
                 'price'     => COM_numberFormat($item->price, 2),
@@ -954,6 +959,7 @@ class Order
                 'taxable'   => $P->taxable,
                 'tax_icon'  => $LANG_PP['tax'][0],
                 'token'     => $item->token,
+                'link'      => $P->getLink(),
             );
             if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;

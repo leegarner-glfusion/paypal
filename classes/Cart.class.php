@@ -194,24 +194,14 @@ class Cart extends Order
         if ($_USER['uid'] < 2) return;
 
         $AnonCart = self::getInstance(1, $cart_id);
-        if (!empty($AnonCart->m_cart)) {
-            foreach ($AnonCart->m_cart as $A) {
-                $item = PAYPAL_explode_opts($A['item_id']);
-                $args = array(
-                    'item_number' => $item[0],
-                    'item_name' => $A['name'],
-                    'descrip' => $A['descrip'],
-                    'quantity' => $A['quantity'],
-                    'price' => $A['price'],
-                    'options' => isset($item[1]) ? $item[1] : '',
-                    'extras' => $A['extras'],
-                );
-                $this->addItem($args);
-            }
-            $this->Save();
+        if (!empty($AnonCart->items)) {
+            $sql = "UPDATE {$_TABLES['paypal.purchases']}
+                    SET order_id = '" . DB_escapeString($this->order_id) . "'
+                    WHERE order_id = '" . DB_escapeString($AnonCart->order_id) . "'";
+            DB_query($sql);
         }
         self::delAnonCart();    // Delete to avoid re-merging
-        return $this->m_cart;
+        return $this->Cart();
     }
 
 
@@ -485,11 +475,14 @@ class Cart extends Order
     */
     public function Remove($id)
     {
-        if (isset($this->m_cart[$id])) {
-            unset($this->m_cart[$id]);
-            $this->Save();
+        global $_TABLES;
+
+        if (isset($this->items[$id])) {
+            DB_delete($_TABLES['paypal.purchases'], 'id', (int)$id);
+            unset($this->items[$id]);
+            $this->Save();  // just to update timestamp
         }
-        return $this->m_cart;
+        return $this->items;
     }
 
 
