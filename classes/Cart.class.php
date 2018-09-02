@@ -427,15 +427,15 @@ class Cart extends Order
     */
     public function UpdateQty($id, $newqty, $save=true)
     {
-        if (isset($this->m_cart[$id])) {
+        if (isset($this->items[$id])) {
             if ($newqty <= 0) {
                 $this->Remove($id);
             } else {
-                $this->m_cart[$id]['quantity'] = (float)$newqty;
+                $this->items[$id]->quantity = (float)$newqty;
             }
             if ($save) $this->Save();
         }
-        return $this->m_cart;
+        return $this->Cart();
     }
 
 

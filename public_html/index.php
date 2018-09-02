@@ -34,9 +34,9 @@ $action = '';
 $actionval = '';
 $view = '';
 
-if (!empty($action)) {
+/*if (!empty($action)) {
     $id = COM_sanitizeID(COM_getArgument('id'));
-} else {
+} else {*/
     $expected = array(
         // Actions
         'updatecart', 'checkout', 'searchcat',
@@ -69,8 +69,7 @@ if (!empty($action)) {
     } else {
         $id = '';
     }
-}
-
+//}
 $content = '';
 
 switch ($action) {
@@ -187,11 +186,6 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
 case 'delcartitem':
     \Paypal\Cart::getInstance()->Remove($_GET['id']);
     $view = 'cart';
-    break;
-
-case 'updatecart':
-    $view = 'cart';
-    \Paypal\Cart::getInstance()->Update($_POST);
     break;
 
 case 'emptycart':
