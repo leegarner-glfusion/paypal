@@ -507,7 +507,7 @@ class Cart extends Order
 
         DB_delete($_TABLES['paypal.purchases'], 'order_id', $this->cartID());
         if ($del_order) {
-            DB_delete($_TABLES['paypal.orders'], 'order_id', $this->cartID();    
+            DB_delete($_TABLES['paypal.orders'], 'order_id', $this->cartID());
             self::delAnonCart();
         }
         return array();
@@ -1042,7 +1042,7 @@ class Cart extends Order
     public static function deleteUser($uid)
     {
         global $_TABLES;
-        DB_delete($_TABLES['paypal.orders'], 
+        DB_delete($_TABLES['paypal.orders'],
             array('status', 'uid'),
             array('cart',$uid ));
         PAYPAL_debug("All carts for user {$uid} deleted");
@@ -1137,7 +1137,7 @@ class Cart extends Order
                 SET status = '{$status}'
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
-        if ($status == 1) {
+        if ($status == 'pending') {
             unset($_COOKIE[self::$session_var]);
             // Make sure the cookie gets deleted also
             setcookie(self::$session_var, '', time()-3600, '/');
