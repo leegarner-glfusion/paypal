@@ -484,8 +484,8 @@ function plugin_user_move_paypal($origUID, $destUID)
             SET uid = $destUID WHERE uid = $origUID", 1);
     DB_query("UPDATE {$_TABLES['paypal.userinfo']}
             SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['paypal.cart']}
-            SET cart_uid = $destUID WHERE cart_uid = $origUID", 1);
+    //DB_query("UPDATE {$_TABLES['paypal.cart']}
+    //        SET cart_uid = $destUID WHERE cart_uid = $origUID", 1);
 }
 
 
@@ -955,7 +955,6 @@ function phpblock_paypal_cart_contents()
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
     $cart = \Paypal\Cart::getInstance();
-
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return '';
 
@@ -1449,7 +1448,11 @@ function plugin_runScheduledTask_paypal()
     if ($_PP_CONF['ena_cart'] == 1) {
         // New method: Delete old orders that haven't been finalized
         $sql = "DELETE FROM {$_TABLES['paypal.orders']}
-            WHERE status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+            WHERE (
+                status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)
+                OR
+                status = 'pending' AND last_mod < DATE_SUB(NOW(), INTERVAL 90 DAY)
+            )";
         DB_query($sql);
 
         // Delete old shopping carts, if the cart is enabled
