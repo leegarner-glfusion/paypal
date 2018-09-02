@@ -536,10 +536,15 @@ class Order
             $T->parse('Log', 'LogMessages', true);
         }
 
+        $payer_email = $this->buyer_email;
+        if ($payer_email == '' && !COM_isAnonUser()) {
+            $payer_emali = $_USER['email'];
+        }
+        $T->set_var('payer_email', $payer_email);
+
         switch ($step) {
         case 0:
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
-            $T->set_var('payer_email', COM_isAnonUser() ? '' : $_USER['email']);
             break;
         case 9:
             $gw = Gateway::getInstance($this->getInfo('gateway'));
@@ -548,7 +553,6 @@ class Order
                     'gateway_vars'  => $this->checkoutButton($gw),
                     'checkout'      => 'true',
                     'pmt_method'    => $gw->getLogo(),
-                    'payer_email'   => $this->buyer_email,
                 ) );
             }
         default:
