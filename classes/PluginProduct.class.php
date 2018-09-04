@@ -117,6 +117,7 @@ class PluginProduct extends Product
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
         PAYPAL_debug('Paypal\\PluginProduct::handlePurchase() pi_info: ' . $this->pi_name);
+        $status = PLG_RET_OK;       // Assume OK in case the plugin does nothing
         $args = array(
             'item'  => array(
                 'item_id' => $Item->product_id,
@@ -131,6 +132,7 @@ class PluginProduct extends Product
         if ($ipn_data['status'] == 'paid') {
             $status = LGLIB_invokeService($this->pi_name, 'handlePurchase', $args, $output, $svc_msg);
         }
+        return $status == PLG_RET_OK ? true : false;
     }
 
 
