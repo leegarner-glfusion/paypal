@@ -277,16 +277,20 @@ class paypal extends \Paypal\IPN
             }
 
             foreach ($Cart as $item) {
+                $item_id = $item->product_id;
+                if ($item->options != '') {
+                    $item_id .= '|' . $item->options;
+                }
                 $args = array(
-                        'item_id' => $item['item_id'],
-                        'quantity' => $item['quantity'],
-                        'price' => $item['price'],
-                        'item_name' => $item['name'],
-                        'shipping' => PP_getVar($item, 'shipping', 'float'),
-                        'handling' => PP_getVar($item, 'handling', 'float'),
-                        'tax' => PP_getVar($item, 'tax', 'float'),
-                        'extras' => $item['extras']
-                );
+                        'item_id'   => $item_id,
+                        'quantity'  => $item->quantity,
+                        'price'     => $item->price,
+                        'item_name' => $item->getShortDscp(),
+                        'shipping'  => $item->shipping,
+                        'handling'  => $item->handling,
+                        'tax'       => $item->tax,
+                        'extras'    => $item->extras,
+                    );
                 $this->AddItem($args);
             }
 
