@@ -267,6 +267,8 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `options` varchar(40) default '',
   `options_text` text,
   `extras` text,
+  `shipping` decimal(5,2) NOT NULL default 0,
+  `handling` decimal(5,2) NOT NULL default 0,
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
@@ -857,6 +859,8 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD KEY `cat_rgt` (`rgt`)",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD extras text,
+        ADD `shipping` decimal(5,2) NOT NULL default 0,
+        ADD `handling` decimal(5,2) NOT NULL default 0,
         ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD by_gc decimal(8,2) unsigned AFTER handling,

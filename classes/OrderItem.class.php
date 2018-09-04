@@ -27,6 +27,7 @@ class OrderItem
             'description', 'quantity', 'user_id', 'txn_id', 'txn_type',
             'purchase_date', 'status', 'expiration', 'price', 'token',
             'options', 'options_text', 'extras', 'taxable', 'paid',
+            'shipping', 'handling',
     );
 
     /**
@@ -117,6 +118,8 @@ class OrderItem
             break;
         case 'price':
         case 'paid':
+        case 'shipping':
+        case 'handling':
             $this->properties[$key] = (float)$value;
             break;
         case 'taxable':
