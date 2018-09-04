@@ -110,10 +110,9 @@ function PAYPAL_do_upgrade()
 
         // Finally, rename any existing config.php file since we now use
         // the online configuration.
-        $pi_path = $_CONF['path'] . '/plugins/' . $pi_name;
-        if (is_file($pi_path . '/config.php')) {
-            COM_errorLog("Renaming old config.php file to $pi_path/config.old.php", 1);
-            if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
+        if (is_file(__DIR__ . '/config.php')) {
+            COM_errorLog('Renaming old config.php file to ' . __DIR . '/config.old.php', 1);
+            if (!rename(__DIR__ . '/config.php', $pi_path . '/config.old.php')) {
                 COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
             }
         }

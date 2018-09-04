@@ -29,7 +29,7 @@ require_once __DIR__ . '/paypal.php';
 $_PP_CONF['datetime_fmt'] = 'Y-m-d H:i:s T';
 
 /** Define base path to plugin */
-define('PAYPAL_PI_PATH', "{$_CONF['path']}plugins/{$_PP_CONF['pi_name']}");
+define('PAYPAL_PI_PATH', __DIR__);
 /** Define base URL to plugin */
 define('PAYPAL_URL', "{$_CONF['site_url']}/{$_PP_CONF['pi_name']}");
 /** Define URL to plugin admin interface */
