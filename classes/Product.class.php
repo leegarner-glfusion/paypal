@@ -2036,6 +2036,12 @@ class Product
     }
 
 
+    /**
+     * Get the total shipping amount for this item based on quantity purchased
+     *
+     * @param   integer $qty    Quantity purchased
+     * @return  float           Total item shipping charge
+     */
     public function getShipping($qty = 1)
     {
         if ($this->shipping_type == 2) {
@@ -2048,6 +2054,12 @@ class Product
     }
 
 
+    /**
+     * Get the total handling fee for this item based on quantity purchased
+     *
+     * @param   integer $qty    Quantity purchased
+     * @return  float           Total handling charge
+     */
     public function getHandling($qty = 1)
     {
         return (float)$this->handling * $qty;
