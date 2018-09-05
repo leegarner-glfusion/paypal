@@ -1233,7 +1233,7 @@ class Gateway
 
         $installed = self::getAll(false);
         $available = array();
-        $files = glob(__DIR__ . '/Gateway/*.class.php');
+        $files = glob(__DIR__ . '/Gateways/*.class.php');
         if (is_array($files)) {
             foreach ($files as $fullpath) {
                 $parts = explode('/', $fullpath);
