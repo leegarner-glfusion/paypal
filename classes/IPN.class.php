@@ -277,8 +277,6 @@ class IPN
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
 
-        $prod_types = 0;
-
         // For each item purchased, create an order item
         foreach ($this->items as $id=>$item) {
             $P = Product::getInstance($item['item_number']);
@@ -291,9 +289,6 @@ class IPN
             $this->items[$id]['prod_type'] = $P->prod_type;
 
             PAYPAL_debug("Paypal item " . $item['item_number']);
-
-            // Mark what type of product this is
-            $prod_types |= $P->prod_type;
 
             // If it's a downloadable item, then get the full path to the file.
             if ($P->file != '') {
@@ -323,7 +318,7 @@ class IPN
             }
         }   // foreach item
 
-        $status = $this->createOrder();
+        $status = $this->Order == NULL ? $this->createOrder() : 0;
         if ($status == 0) {
             // Now all of the items are in the order object, check for sufficient
             // funds. If OK, then save the order and call each handlePurchase()
@@ -336,8 +331,7 @@ class IPN
             }
 
             // Save the order record now that funds have been checked.
-            $this->Order->Save();
-            foreach ($this->Order->items as $item) {
+            foreach ($this->Order->getItems() as $item) {
                 $item->getProduct()->handlePurchase($item, $this->Order, $this->pp_data);
             }
             $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $this->pp_data['pmt_gross'], $this->gw->DisplayName()));
@@ -349,11 +343,6 @@ class IPN
             }
             $this->Order->Notify();
             // If this was a user's cart, then clear that also
-            if ($this->Cart) {
-                $this->Cart->delete();
-            } else {
-                PAYPAL_debug('no cart to delete');
-            }
         } else {
             COM_errorLog('Error creating order: ' . print_r($status,true));
         }
@@ -503,6 +492,7 @@ class IPN
             );
             $this->Order->addItem($args);
         }   // foreach item
+        $this->Order->Save();
         return 0;
     }
 
