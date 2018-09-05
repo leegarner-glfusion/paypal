@@ -227,41 +227,48 @@ class paypal extends \Paypal\IPN
         case 'web_accept':  //usually buy now
         case 'send_money':  //usually donation/send money
             // Process Buy Now & Send Money
-            $fees_paid = $this->ipn_data['tax'] +
-                        $this->pp_data['pmt_shipping'] +
-                        $this->pp_data['pmt_handling'];
 
-            if (!empty($this->ipn_data['item_number'])) {
+            $item_number = PP_getVar($this->ipn_data, 'item_number');
+            $quantity = PP_getVar($this->ipn_data, 'quantity', 'float');
+            $fees_paid = PP_getVar($this->ipn_data, 'tax', 'float') +
+                        PP_getVar($this->pp_data, 'pmt_shipping', 'float') +
+                        PP_getVar($this->pp_data, 'pmt_handling', 'float');
 
-                if (!isset($this->ipn_data['quantity']) ||
-                    (float)$this->ipn_data['quantity'] == 0) {
-                    $this->ipn_data['quantity'] = 1;
-                }
-
-                $payment_gross = $this->pp_data['pmt_gross'] - $fees_paid;
-                $unit_price = $payment_gross / $this->ipn_data['quantity'];
-                $this->AddItem(array(
-                        'item_id' => $this->ipn_data['item_number'],
-                        'quantity' => $this->ipn_data['quantity'],
-                        'price' => $unit_price,
-                        'item_name' => $this->ipn_data['item_name'],
-                        'shipping' => $this->pp_data['pmt_shipping'],
-                        'handling' => $this->pp_data['pmt_handling'],
-                ) );
-
-                $currency = $this->pp_data['currency'];
-                PAYPAL_debug("Net Settled: $payment_gross $currency");
-                $this->handlePurchase();
+            if (empty($item_number)) {
+                $this->handleFailure(NULL, 'Missing Item Number in Buy-now process');
+                return false;
             }
+            if (empty($quantity)) {
+                $quantity = 1;
+            }
+
+            $payment_gross = PP_getVar($this->pp_data, 'pmt_gross', 'float') - $fees_paid;
+            $unit_price = $payment_gross / $quantity;
+            $this->AddItem(array(
+                'item_id'   => $item_number,
+                'quantity'  => $quantity,
+                'price'     => $unit_price,
+                'item_name' => PP_getVar($this->ipn_data, 'item_name', 'string', 'Undefined'),
+                'shipping'  => PP_getVar($this->pp_data, 'pmt_shipping', 'float'),
+                'handling'  => PP_getVar($this->pp_data, 'pmt_handling', 'float'),
+            ) );
+
+            $currency = PP_getVar($this->pp_data, 'currency', 'string', 'Unk');
+            PAYPAL_debug("Net Settled: $payment_gross $currency");
+            $this->handlePurchase();
             break;
 
         case 'cart':
             // shopping cart
             // Create a cart and read the info from the cart table.
-            $Cart = Cart::getInstance(0, $this->pp_data['invoice']);
-            $this->pp_data['pmt_tax'] = (float)$Cart->getInfo('tax');
-            $this->pp_data['pmt_shipping'] = (float)$Cart->getInfo('shipping');
-            $this->pp_data['pmt_handling'] = (float)$Cart->getInfo('handling');
+            $this->Order = Cart::getInstance(0, $this->pp_data['invoice']);
+            if ($this->Order->isNew) {
+                $this->handleFailure(NULL, "Order ID {$this->pp_data['invlice']} not found for cart purchases");
+                return false;
+            }
+            $this->pp_data['pmt_tax'] = (float)$this->Order->getInfo('tax');
+            $this->pp_data['pmt_shipping'] = (float)$this->Order->getInfo('shipping');
+            $this->pp_data['pmt_handling'] = (float)$this->Order->getInfo('handling');
             /*$fees_paid = $this->pp_data['pmt_tax'] +
                         $this->pp_data['pmt_shipping'] +
                         $this->pp_data['pmt_handling'];*/
@@ -270,23 +277,27 @@ class paypal extends \Paypal\IPN
                 $this->handleFailure(NULL, 'Missing Cart ID');
                 return false;
             }
-            $Cart = $Cart->Cart();
+            $Cart = $this->Order->Cart();
             if (empty($Cart)) {
                 COM_errorLog("Paypal\\paypal_ipn::Process() - Empty Cart for id {$this->pp_data['custom']['cart_id']}");
                 return false;
             }
 
             foreach ($Cart as $item) {
+                $item_id = $item->product_id;
+                if ($item->options != '') {
+                    $item_id .= '|' . $item->options;
+                }
                 $args = array(
-                        'item_id' => $item['item_id'],
-                        'quantity' => $item['quantity'],
-                        'price' => $item['price'],
-                        'item_name' => $item['name'],
-                        'shipping' => PP_getVar($item, 'shipping', 'float'),
-                        'handling' => PP_getVar($item, 'handling', 'float'),
-                        'tax' => PP_getVar($item, 'tax', 'float'),
-                        'extras' => $item['extras']
-                );
+                        'item_id'   => $item_id,
+                        'quantity'  => $item->quantity,
+                        'price'     => $item->price,
+                        'item_name' => $item->getShortDscp(),
+                        'shipping'  => $item->shipping,
+                        'handling'  => $item->handling,
+                        'tax'       => $item->tax,
+                        'extras'    => $item->extras,
+                    );
                 $this->AddItem($args);
             }
 

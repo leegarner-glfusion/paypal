@@ -27,6 +27,7 @@ class OrderItem
             'description', 'quantity', 'user_id', 'txn_id', 'txn_type',
             'purchase_date', 'status', 'expiration', 'price', 'token',
             'options', 'options_text', 'extras', 'taxable', 'paid',
+            'shipping', 'handling',
     );
 
     /**
@@ -43,6 +44,10 @@ class OrderItem
                 $this->id = 0;
             }
         } elseif (is_array($item)) {
+            if (!isset($item['product_id']) && isset($item['item_id'])) {
+                // extract the item_id with options into the product ID
+                list($this->product_id) = explode('|', $item['item_id']);
+            }
             $status = $this->setVars($item);
         }
         if ($status) {
@@ -113,6 +118,8 @@ class OrderItem
             break;
         case 'price':
         case 'paid':
+        case 'shipping':
+        case 'handling':
             $this->properties[$key] = (float)$value;
             break;
         case 'taxable':
@@ -211,7 +218,9 @@ class OrderItem
         if (is_array($A)) {
             $this->setVars($A);
         }
-        $purchase_date = DB_escapeString(PAYPAL_now()->toMySQL());
+        $purchase_ts = PAYPAL_now()->toUnix();
+        $shipping = $this->product->getShipping($this->quantity);
+        $handling = $this->product->getHandling($this->quantity);
 
         if ($this->id > 0) {
             $sql1 = "UPDATE {$_TABLES['paypal.purchases']} ";
@@ -227,17 +236,19 @@ class OrderItem
                 user_id = '{$this->user_id}',
                 txn_id = '" . DB_escapeString($this->txn_id) . "',
                 txn_type = '" . DB_escapeString($this->txn_type) . "',
-                purchase_date = '$purchase_date',
+                purchase_date = '$purchase_ts',
                 status = '" . DB_escapeString($this->status) . "',
                 price = '$this->price',
                 taxable = '{$this->taxable}',
                 token = '" . DB_escapeString($this->token) . "',
                 options = '" . DB_escapeString($this->options) . "',
                 options_text = '" . DB_escapeString(@json_encode($this->options_text)) . "',
-                extras = '" . DB_escapeString(json_encode($this->extras)) . "'";
+                extras = '" . DB_escapeString(json_encode($this->extras)) . "',
+                shipping = {$shipping},
+                handling = {$handling}";
             // add an expiration date if appropriate
         if ($this->product->expiration > 0) {
-            $sql2 .= ", expiration = DATE_ADD('$purchase_date', INTERVAL {$this->product->expiration} DAY)";
+            $sql2 .= ", expiration = " . (string)($purchase_ts + ($this->product->expiration * 86400));
         }
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;

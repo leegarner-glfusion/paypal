@@ -12,16 +12,16 @@
 *               Apache License 2.0
 *   @filesource
 */
+namespace Paypal\ipn
 
-
-require_once 'BaseIPN.class.php';
+use \Paypal\Cart
 
 /**
 *   Authorize.Net SIM IPN Processor
 *   @since  0.5.3
 *   @package paypal
 */
-class AuthorizeNetIPN extends BaseIPN
+class authorizenet extends \Paypal\IPN
 {
     /**
     *   Constructor.

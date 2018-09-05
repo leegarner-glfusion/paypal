@@ -34,9 +34,9 @@ $action = '';
 $actionval = '';
 $view = '';
 
-if (!empty($action)) {
+/*if (!empty($action)) {
     $id = COM_sanitizeID(COM_getArgument('id'));
-} else {
+} else {*/
     $expected = array(
         // Actions
         'updatecart', 'checkout', 'searchcat',
@@ -69,8 +69,7 @@ if (!empty($action)) {
     } else {
         $id = '';
     }
-}
-
+//}
 $content = '';
 
 switch ($action) {
@@ -82,36 +81,37 @@ case 'updatecart':
 case 'checkout':
     // Set the gift card amount first as it will be overridden
     // if the _coupon gateway is selected
-    $gateway = PP_getVar($_POST, 'gateway');
     $Cart = \Paypal\Cart::getInstance();
+    $gateway = PP_getVar($_POST, 'gateway');
+    if ($gateway !== '') {
+        $Cart->setGateway($gateway);
+    }
     if ($gateway !== '') $Cart->setGateway($gateway);
-    if (isset($_POST['apply_gc'])) {        // payment by GC, deprecate?
-        $Cart->setGC($_POST['apply_gc']);
-    } elseif (isset($_POST['by_gc'])) {     // partial payment by GC
-        $Cart->setGC($_POST['by_gc']);
-    } elseif ($gateway == '_coupon') {      // full payment by GC
-        $Cart->setGC(-1);
-    } else {                                // no part paid by GC
-        $Cart->setGC(0);
+    if (isset($_POST['by_gc'])) {
+        $Cart->setGC($_POST['by_gc'], false);
+    } elseif ($gateway == '_coupon') {
+        $Cart->setGC(-1, false);
+    } else {
+        $Cart->setGC(0, false);
+    }
+    if (isset($_POST['order_instr'])) {
+        $Cart->instructions = $_POST['order_instr'];
+    }
+    if (isset($_POST['payer_email'])) {
+        $Cart->buyer_email = $_POST['payer_email'];
     }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
+        // This also calls Save() on the cart
         $Cart->Update($_POST);
     }
-    if (isset($_POST['order_instr'])) {
-        $Cart->setInstructions($_POST['order_instr']);
-    }
-    if (isset($_POST['payer_email'])) {
-        $Cart->setEmail($_POST['payer_email']);
-    }
-    $Cart->Save();
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
         //$view = Workflow::getNextView();
         $view = 'checkoutcart';
 
         // See what workflow elements we already have.
-        foreach ($_PP_CONF['workflows'] as $wf_name) {
+        foreach (\Paypal\Workflow::getAll() as $wf_name) {
             switch ($wf_name) {
             case 'billto':
             case 'shipto':
@@ -186,11 +186,6 @@ case 'addcartitem_x':   // using the image submit button, such as Paypal's
 case 'delcartitem':
     \Paypal\Cart::getInstance()->Remove($_GET['id']);
     $view = 'cart';
-    break;
-
-case 'updatecart':
-    $view = 'cart';
-    \Paypal\Cart::getInstance()->Update($_POST);
     break;
 
 case 'emptycart':
@@ -327,7 +322,7 @@ case 'order':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            $content .= $order->View(true);
+            $content .= $order->View('vieworder');
         } else {
             COM_404();
         }
@@ -340,7 +335,7 @@ case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            echo $order->View(true, 'print');
+            echo $order->View('vieworder', 'print');
             exit;
         }
     }
@@ -351,7 +346,7 @@ case 'printorder':
 case 'vieworder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         \Paypal\Cart::setSession('prevpage', $view);
-        $content .= \Paypal\Cart::getInstance()->View(true);
+        $content .= \Paypal\Cart::getInstance()->View($view);
         $page_title = $LANG_PP['vieworder'];
     } else {
         COM_404();
@@ -394,7 +389,7 @@ case 'viewcart':
     }
     $menu_opt = $LANG_PP['viewcart'];
     if (\Paypal\Cart::getInstance()->hasItems()) {
-        $content .= \Paypal\Cart::getInstance()->View();
+        $content .= \Paypal\Cart::getInstance()->View('viewcart');
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
@@ -404,7 +399,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $content .= \Paypal\Cart::getInstance()->View(true);
+    $content .= \Paypal\Cart::getInstance()->View($view);
     break;
 
 case 'productlist':

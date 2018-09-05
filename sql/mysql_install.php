@@ -9,7 +9,7 @@
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -42,7 +42,7 @@ $PP_UPGRADE['0.5.4'] = array(
         `conversion_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (`code`)
     ) ENGINE=MyISAM",
-    "INSERT INTO `{$_TABLES['paypal.currency']}` VALUES 
+    "INSERT INTO `{$_TABLES['paypal.currency']}` VALUES
     ('AED','?.?','United Arab Emirates Dirham',784,'hidden',' ','before',2,0.00,',','.','Dirham','Fils',1.00000,'2014-01-03 20:51:17'),
     ('AFN','Af','Afghan Afghani',971,'hidden',' ','after',0,0.00,',','.','Afghani','Pul',1.00000,'2014-01-03 20:54:44'),
 	('ANG','NAf.','Netherlands Antillean Guilder',532,'hidden',' ','after',2,0.00,',','.','Guilder','Cent',1.00000,'2014-01-03 20:54:44'),
@@ -258,22 +258,23 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `user_id` int(11) NOT NULL,
   `txn_id` varchar(128) default '',
   `txn_type` varchar(255) default '',
-  `purchase_date` datetime default NULL,
+  `purchase_date` int(11) unsigned not null default 0,
   `status` varchar(255) default NULL,
-  `expiration` datetime default NULL,
+  `expiration` int(11) unsigned not null default 0,
   `price` float(10,2) NOT NULL default '0.00',
   `taxable` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `token` varchar(40) NOT NULL default '',
   `options` varchar(40) default '',
   `options_text` text,
   `extras` text,
+  `shipping` decimal(5,2) NOT NULL default 0,
+  `handling` decimal(5,2) NOT NULL default 0,
   PRIMARY KEY  (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
   KEY `purchases_userid` (`user_id`),
   KEY `purchases_txnid` (`txn_id`),
-  KEY `purchases_expiration` (`expiration`),
-  KEY `purchases_date` (`purchase_date`)
+  KEY `purchases_expiration` (`expiration`)
 ) ENGINE=MyISAM";
 
 $_SQL['paypal.images'] = "CREATE TABLE {$_TABLES['paypal.images']} (
@@ -334,8 +335,8 @@ $_SQL['paypal.buttons'] = "CREATE TABLE `{$_TABLES['paypal.buttons']}` (
 $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `order_id` varchar(40) NOT NULL,
   `uid` int(11) NOT NULL DEFAULT '0',
-  `order_date` datetime NOT NULL,
-  `last_mod` datetime NOT NULL,
+  `order_date` int(11) unsigned NOT NULL DEFAULT '0',
+  `last_mod` timestamp,
   `billto_name` varchar(255) DEFAULT NULL,
   `billto_company` varchar(255) DEFAULT NULL,
   `billto_address1` varchar(255) DEFAULT NULL,
@@ -353,7 +354,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `shipto_country` varchar(255) DEFAULT NULL,
   `shipto_zip` varchar(40) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
-  `buyer_email` varchar(255) DEFAULT NULL, 
+  `buyer_email` varchar(255) DEFAULT NULL,
   `tax` decimal(5,2) unsigned DEFAULT NULL,
   `shipping` decimal(5,2) unsigned DEFAULT NULL,
   `handling` decimal(5,2) unsigned DEFAULT NULL,
@@ -364,7 +365,9 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `instructions` text,
   `token` varchar(20) DEFAULT NULL,
   `tax_rate` decimal(6,5) NOT NULL DEFAULT '0.00000',
-  PRIMARY KEY (`order_id`)
+  `info` text,
+  PRIMARY KEY (`order_id`),
+  KEY (`order_date`)
 ) ENGINE=MyISAM";
 
 // since 0.5.0
@@ -436,8 +439,9 @@ $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
   `enabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
   `name` VARCHAR(20) NOT NULL,
   `notify_buyer` TINYINT(1) NOT NULL DEFAULT '1',
+  `notify_admin` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  INDEX `orderby` (`orderby`)
+  KEY `orderby` (`orderby`)
 ) ENGINE=MyISAM";
 
 // since 0.5.2
@@ -448,7 +452,7 @@ $_SQL['paypal.order_log'] = "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
   `username` VARCHAR(60) NOT NULL DEFAULT '',
   `message` TEXT NULL,
   PRIMARY KEY (`id`),
-  INDEX `order_id` (`order_id`, `ts`)
+  KEY `order_id` (`order_id`, `ts`)
 ) ENGINE=MyISAM";
 
 // since 0.5.4
@@ -504,7 +508,7 @@ $_PP_SAMPLEDATA = array(
 /*    "INSERT INTO {$_TABLES['paypal.gateways']}
             (id, orderby, enabled, description, config, services)
         VALUES
-            ('paypal', 10, 0, 'Paypal Website Payments Standard', '', 
+            ('paypal', 10, 0, 'Paypal Website Payments Standard', '',
              'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",*/
     "INSERT INTO {$_TABLES['paypal.workflows']}
             (id, wf_name, orderby, enabled)
@@ -513,26 +517,25 @@ $_PP_SAMPLEDATA = array(
             (2, 'billto', 20, 0),
             (3, 'shipto', 30, 0)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
-            (id, orderby, enabled, name, notify_buyer)
+            (id, orderby, enabled, name, notify_buyer, notify_admin)
         VALUES
-            (1, 10, 1, 'pending', 0),
-            (2, 20, 1, 'processing', 0),
-            (3, 30, 1, 'paid', 0),
-            (4, 40, 1, 'shipped', 0),
-            (5, 50, 1, 'closed', 0),
-            (6, 60, 1, 'refunded', 0)",
+            (1, 10, 1, 'pending', 0, 0),
+            (2, 20, 1, 'paid', 1, 1),
+            (3, 30, 1, 'processing', 1, 0),
+            (4, 40, 1, 'shipped', 1, 0),
+            (5, 50, 1, 'closed', 0, 0),
+            (6, 60, 1, 'refunded', 0, 0)",
     $PP_UPGRADE['0.5.4'][1],
 );
 
 
 // Upgrade information for version 0.1.1 to version 0.2
 $PP_UPGRADE['0.2'] = array(
-    "ALTER TABLE {$_TABLES['paypal.purchases']} 
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD COLUMN quantity int NOT NULL DEFAULT 1 AFTER product_id",
-    "ALTER TABLE {$_TABLES['paypal.products']} 
-        ADD COLUMN category varchar(80) AFTER name",
-    "CREATE INDEX products_category 
-        ON {$_TABLES['paypal.products']} (category)",
+    "ALTER TABLE {$_TABLES['paypal.products']}
+        ADD COLUMN category varchar(80) AFTER name,
+        ADD KEY `products_category` (category)",
 );
 
 $PP_UPGRADE['0.4.0'] = array(
@@ -565,14 +568,14 @@ $PP_UPGRADE['0.4.0'] = array(
         ADD `price` float(10,2) NOT NULL DEFAULT 0",
     "INSERT INTO {$_TABLES['blocks']}
         (type, name, title, tid, phpblockfn, is_enabled,
-        owner_id, group_id, 
+        owner_id, group_id,
         perm_owner, perm_group, perm_members, perm_anon)
-    VALUES 
-        ('phpblock', 'paypal_featured', 'Featured Product', 'all', 
+    VALUES
+        ('phpblock', 'paypal_featured', 'Featured Product', 'all',
             'phpblock_paypal_featured', 0, 2, 13, 3, 2, 2, 2),
-        ('phpblock', 'paypal_random', 'Random Product', 'all', 
+        ('phpblock', 'paypal_random', 'Random Product', 'all',
             'phpblock_paypal_random', 0, 2, 13, 3, 2, 2, 2),
-        ('phpblock', 'paypal_categories', 'Product Categories', 'all', 
+        ('phpblock', 'paypal_categories', 'Product Categories', 'all',
             'phpblock_paypal_categories', 0, 2, 13, 3, 2, 2, 2)",
 );
 
@@ -744,15 +747,15 @@ $PP_UPGRADE['0.5.2'] = array(
         `orderby` INT(3) UNSIGNED NOT NULL DEFAULT '0',
         `enabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
         `name` VARCHAR(20) NOT NULL,
-        `notify_buyer` TINYINT(1) NOT NULL DEFAULT '1',
+        `notify_buyer` TINYINT(1) NOT NULL DEFAULT '0',
         PRIMARY KEY (`id`),
-        INDEX `orderby` (`orderby`) ) ENGINE=MyISAM",
+        KEY `orderby` (`orderby`) ) ENGINE=MyISAM",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
             (id, orderby, enabled, name, notify_buyer)
         VALUES
             (1, 10, 1, 'pending', 0),
-            (2, 20, 1, 'processing', 0),
-            (3, 30, 1, 'paid', 0),
+            (2, 20, 1, 'paid', 1),
+            (3, 30, 1, 'processing', 0),
             (4, 40, 1, 'shipped', 0),
             (5, 50, 1, 'closed', 0)",
     "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
@@ -762,7 +765,7 @@ $PP_UPGRADE['0.5.2'] = array(
         `username` VARCHAR(60) NOT NULL DEFAULT '',
         `message` TEXT NULL,
         PRIMARY KEY (`id`),
-        INDEX `order_id` (`order_id`) ) ENGINE=MyISAM",
+        KEY `order_id` (`order_id`) ) ENGINE=MyISAM",
     "ALTER TABLE `{$_TABLES['paypal.products']}`
         ADD track_onhand TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
         ADD onhand INT(10) NOT NULL DEFAULT '0'",
@@ -776,10 +779,10 @@ $PP_UPGRADE['0.5.6'] = array(
 $PP_UPGRADE['0.5.7'] = array(
     "INSERT INTO {$_TABLES['blocks']}
         (type, name, title, tid, phpblockfn, is_enabled,
-        owner_id, group_id, 
+        owner_id, group_id,
         perm_owner, perm_group, perm_members, perm_anon)
-    VALUES 
-        ('phpblock', 'paypal_recent', 'Newest Items', 'all', 
+    VALUES
+        ('phpblock', 'paypal_recent', 'Newest Items', 'all',
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
     "ALTER TABLE {$_TABLES['paypal.products']}
         CHANGE dt_add dt_add datetime not null,
@@ -856,11 +859,21 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD KEY `cat_rgt` (`rgt`)",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD extras text,
-        ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`",
+        ADD `shipping` decimal(5,2) NOT NULL default 0,
+        ADD `handling` decimal(5,2) NOT NULL default 0,
+        ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`,
+        DROP key purchases_date,
+        CHANGE purchase_date p_dt_old datetime,
+        ADD purchase_date int(11) unsigned not null default 0 after txn_type,
+        DROP key purchases_expiration,
+        CHANGE expiration exp_old datetime,
+        ADD expiration int(11) unsigned not null default 0 after status",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD by_gc decimal(8,2) unsigned AFTER handling,
         ADD token varchar(20),
-        ADD tax_rate decimal(6,5) NOT NULL DEFAULT '0.00000'",
+        ADD tax_rate decimal(6,5) NOT NULL DEFAULT '0.00000',
+        CHANGE order_date order_date_old datetime,
+        ADD order_date int(11) unsigned NOT NULL DEFAULT 0 AFTER uid",
     "ALTER TABLE {$_TABLES['paypal.cart']}
         DROP `cart_order_id`,
         ADD `apply_gc` float(8,2) NOT NULL default '0',
@@ -874,9 +887,9 @@ $PP_UPGRADE['0.6.0'] = array(
       `balance` float(8,2) DEFAULT NULL,
       `buyer` int(11) unsigned NOT NULL DEFAULT '0',
       `redeemer` int(11) unsigned NOT NULL DEFAULT '0',
-      `purchased` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      `redeemed` datetime DEFAULT NULL,
-      `expires` date DEFAULT '9999-12-31',
+      `purchased` int(11) unsigned NOT NULL DEFAULT '0',
+      `redeemed` int(11) unsigned NOT NULL DEFAULT '0',
+      `expires` int(11) unsigned NOT NULL DEFAULT '0',
       PRIMARY KEY (`code`),
       KEY `purchased` (`purchased`),
       KEY `owner` (`redeemer`,`balance`,`expires`)
@@ -919,23 +932,38 @@ $PP_UPGRADE['0.6.0'] = array(
         WHERE name = 'tc_link' AND group_name = 'paypal'",
     // Change the log table to use Unix timestamps.
     // 1. Change to datetime so timestamp doesn't get updated by these changes
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
-        CHANGE ts ts datetime",
     // 2. Add an integer field to get the timestamp value
     "ALTER TABLE {$_TABLES['paypal.order_log']}
-        ADD ts1 int(11) unsigned after ts",
+        CHANGE ts ts_old datetime,
+        ADD ts int(11) unsigned after id",
     // 3. Set the int field to the Unix timestamp
     "UPDATE {$_TABLES['paypal.order_log']}
-        SET ts1=UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone))",
+        SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`ts_old`, '+00:00', @@session.time_zone))",
     // 4. Drop the old timestamp field
-    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts",
-    // 5. Rename the new int field to "ts"
     "ALTER TABLE {$_TABLES['paypal.order_log']}
-        CHANGE ts1 ts int(11) unsigned",
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
-        DROP KEY `order_id`",
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        DROP ts_old,
+        DROP KEY `order_id`,
         ADD KEY `order_id` (`order_id`, `ts`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        ADD `info` text,
+        CHANGE last_mod last_mod timestamp",
+    "UPDATE {$_TABLES['paypal.orders']} SET
+        last_mod = NOW(),
+        order_date = UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))",
+    "ALTER TABLE {$_TABLES['paypal.orders']}
+        DROP order_date_old,
+        ADD KEY (`order_date`)",
+    "UPDATE {$_TABLES['paypal.purchases']} SET
+        purchase_date = UNIX_TIMESTAMP(CONVERT_TZ(`p_dt_old`, '+00:00', @@session.time_zone));
+        expiration = UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
+        DROP p_dt_old,
+        DROP exp_old",
+    "ALTER TABLE {$_TABLES['paypal.orderstatus']}
+        ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
+    "UPDATE {$_TABLES['paypal.orderstatus']}
+        SET notify_admin = 1 WHERE name = 'paid'",
+    "DROP TABLE {$_TABLES['paypal.cart']}",
 );
 
 ?>

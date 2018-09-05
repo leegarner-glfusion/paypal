@@ -3,9 +3,9 @@
 *   Common user-facing AJAX functions
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2010-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.4.6
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -17,8 +17,8 @@
 require_once '../lib-common.php';
 
 $uid = (int)$_USER['uid'];
-
-switch ($_GET['action']) {
+$action = PP_getVar($_GET, 'action');
+switch ($action) {
 case 'delAddress':          // Remove a shipping address
     if ($uid < 2) break;    // Not available to anonymous
     $id = (int)$_GET['id']; // Sanitize address ID
@@ -39,9 +39,16 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
         exit;
     }
+    $P = \Paypal\Product::getInstance($_POST['item_number']);
+    if ($P->isNew) {
+        // Invalid product ID passed
+        echo json_encode(array('content' => '', 'statusMessage' => ''));;
+        exit;
+    }
     $Cart = \Paypal\Cart::getInstance();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
-            $Cart->Contains($_POST['item_number']) !== false) {
+        $Cart->Contains($_POST['item_number']) !== false) {
+        // Do nothing if only one item instance may be added
         break;
     }
     $args = array(
@@ -49,7 +56,8 @@ case 'addcartitem':
         'item_name'     => PP_getVar($_POST, 'item_name'),
         'description'   => PP_getVar($_POST, 'item_descr'),
         'quantity'      => PP_getVar($_POST, 'quantity', 'int'),
-        'price'         => PP_getVar($_POST, 'base_price', 'float'),
+        //'price'         => PP_getVar($_POST, 'base_price', 'float'),
+        'price'         => $P->getPrice(),
         'options'       => PP_getVar($_POST, 'options', 'array'),
         'extras'        => PP_getVar($_POST, 'extras', 'array'),
         //'tax'           => PP_getVar($_POST, 'tax', 'float'),
@@ -94,6 +102,9 @@ case 'redeem_gc':
         echo json_encode($A);
         exit;
     }
+default:
+    // Missing action, nothing to do
+    break;
 }
 
 ?>

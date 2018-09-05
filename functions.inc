@@ -29,7 +29,7 @@ require_once __DIR__ . '/paypal.php';
 $_PP_CONF['datetime_fmt'] = 'Y-m-d H:i:s T';
 
 /** Define base path to plugin */
-define('PAYPAL_PI_PATH', "{$_CONF['path']}plugins/{$_PP_CONF['pi_name']}");
+define('PAYPAL_PI_PATH', __DIR__);
 /** Define base URL to plugin */
 define('PAYPAL_URL', "{$_CONF['site_url']}/{$_PP_CONF['pi_name']}");
 /** Define URL to plugin admin interface */
@@ -484,8 +484,8 @@ function plugin_user_move_paypal($origUID, $destUID)
             SET uid = $destUID WHERE uid = $origUID", 1);
     DB_query("UPDATE {$_TABLES['paypal.userinfo']}
             SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['paypal.cart']}
-            SET cart_uid = $destUID WHERE cart_uid = $origUID", 1);
+    //DB_query("UPDATE {$_TABLES['paypal.cart']}
+    //        SET cart_uid = $destUID WHERE cart_uid = $origUID", 1);
 }
 
 
@@ -925,6 +925,8 @@ function plugin_getcommenturlid_paypal()
 */
 function phpblock_paypal_cart()
 {
+    if (!PP_isMinVersion('0.6.0')) return '';
+
     $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
     $contents = phpblock_paypal_cart_contents();
@@ -955,7 +957,6 @@ function phpblock_paypal_cart_contents()
     if ($_PP_CONF['ena_cart'] == 0) return '';
 
     $cart = \Paypal\Cart::getInstance();
-
     // If the cart is empty, the block isn't shown
     if (!$cart->hasItems()) return '';
 
@@ -964,22 +965,18 @@ function phpblock_paypal_cart_contents()
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
     foreach ($cart->Cart() as $id=>$item) {
-        $P = \Paypal\Product::getInstance($item['item_id']);
+        $item_id = $item->product_id;
+        if ($item->options != '') $item_id .= '|' . $item->options;
+        $P = \Paypal\Product::getInstance($item_id);
 
-        if (strpos($item['item_id'], '|')) {
-            list($item_id, $options) = explode('|', $item['item_id']);
-        } else {
-            $item_id = $item['item_id'];
-            $options = '';
-        }
-        $item_total = (float)$item['price'] * $item['quantity'];
+        $item_total = (float)$item->price * $item->quantity;
         $T->set_var(array(
             'item_id'       => $item_id,
-            'options'       => $P->getOptionDisplay($item),
+//            'options'       => $P->getOptionDisplay($item),
             'item_name'     => $P->short_description,
             'item_dscp'     => $P->descrip,
-            'price'         => COM_numberFormat($item['price'], 2),
-            'quantity'      => $item['quantity'],
+            'price'         => COM_numberFormat($item->price, 2),
+            'quantity'      => $item->quantity,
             'item_total'    => COM_numberFormat($item_total, 2),
             'pi_url'        => PAYPAL_URL,
             'item_link'     => $P->getLink(),
@@ -1451,11 +1448,13 @@ function plugin_runScheduledTask_paypal()
     global $_PP_CONF, $_TABLES, $_CONF;
 
     if ($_PP_CONF['ena_cart'] == 1) {
-        // Delete old shopping carts, if the cart is enabled
-        $sql = "DELETE FROM {$_TABLES['paypal.cart']}
-            WHERE cart_uid = 1
-            AND last_update < DATE_SUB(NOW(), INTERVAL 7 DAY)";
-        //COM_errorLog($sql);
+        // New method: Delete old orders that haven't been finalized
+        $sql = "DELETE FROM {$_TABLES['paypal.orders']}
+            WHERE (
+                status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)
+                OR
+                status = 'pending' AND last_mod < DATE_SUB(NOW(), INTERVAL 90 DAY)
+            )";
         DB_query($sql);
     }
 

@@ -110,10 +110,9 @@ function PAYPAL_do_upgrade()
 
         // Finally, rename any existing config.php file since we now use
         // the online configuration.
-        $pi_path = $_CONF['path'] . '/plugins/' . $pi_name;
-        if (is_file($pi_path . '/config.php')) {
-            COM_errorLog("Renaming old config.php file to $pi_path/config.old.php", 1);
-            if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
+        if (is_file(__DIR__ . '/config.php')) {
+            COM_errorLog('Renaming old config.php file to ' . __DIR . '/config.old.php', 1);
+            if (!rename(__DIR__ . '/config.php', $pi_path . '/config.old.php')) {
                 COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
             }
         }
@@ -530,10 +529,11 @@ function PAYPAL_do_upgrade()
     if (!COM_checkVersion($current_ver, '0.6.0')) {
         $current_ver = '0.6.0';
         $c->del('download_path', $_PP_CONF['pi_name']);
-        $c->del('purchase_email_anon_attach', $_PP_CONF['pi_name']);
-        $c->del('purchase_email_anon', $_PP_CONF['pi_name']);
-        $c->del('purchase_email_user', $_PP_CONF['pi_name']);
-        $c->del('purchase_email_user_attach', $_PP_CONF['pi_name']);
+        $c->del('purch_email_anon_attach', $_PP_CONF['pi_name']);
+        $c->del('purch_email_anon', $_PP_CONF['pi_name']);
+        $c->del('purch_email_user', $_PP_CONF['pi_name']);
+        $c->del('purch_email_user_attach', $_PP_CONF['pi_name']);
+        $c->del('purch_email_admin', $_PP_CONF['pi_name']);
         $c->add('sg_gc', NULL, 'subgroup', 20, 0, NULL, 0, true,
                 $_PP_CONF['pi_name']);
         $c->add('fs_gc', NULL, 'fieldset', 20, 0, NULL, 0, true,
@@ -585,12 +585,17 @@ function PAYPAL_do_upgrade()
                     (cat_id, cat_name, description, grp_access, lft, rgt)
                 VALUES
                     (1, 'Home', 'Root Category', 2, 1, 2)";
-            $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
-                    (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
-                VALUES $sql_cats";
+            if (!empty($sql_cats)) {
+                $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
+                        (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
+                    VALUES $sql_cats";
+            }
             $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
                     SET cat_id = cat_id + 1";
         }
+
+        // Sales and discounts have been moved to another table. Collect any active sales
+        // and move them over.
         $sql = "SELECT id, sale_price, sale_beg, sale_end, price FROM {$_TABLES['paypal.products']}";
         $res = DB_query($sql);
         if ($res) {
@@ -600,8 +605,14 @@ function PAYPAL_do_upgrade()
                 if ($s_price != 0) {
                     $price = (float)$A['price'];
                     $discount = $price = $s_price;
-                    if ($A['sale_beg'] < '1970-01-01') $A['sale_beg'] = '1970-01-01';
-                    if ($A['sale_end'] < '1970-01-01') $A['sale_end'] = '1970-01-01';
+                    // Fix dates to fit in an Unix timestamp
+                    foreach (array('sale_beg', 'sale_end') as $key) {
+                        if ($A[$key] < '1970-01-01') {
+                            $A[$key] = '1970-01-01';
+                        } elseif ($A[$key] > '2037-12-31') {
+                            $A[$key] = '2017-12-31';
+                        }
+                    }
                     $st = new Date($A['sale_beg'], $_CONF['timezone']);
                     $end = new Date($A['sale_end'], $_CONF['timezone']);
                     $sql[] = "('product', '{$A['id']}', '{$st->toUnix()}', '{$end->toUnix()}', 'amount', '$discount')";
@@ -611,16 +622,16 @@ function PAYPAL_do_upgrade()
                 $sql = implode(',', $sql);
                 $_PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.sales']}
                         (item_type, item_id, start, end, discount_type, amount)
-                        VALUES$sql";
+                        VALUES $sql";
             }
         }
 
         // Change orders to use UTC for dates. Logs already do.
-        date_default_timezone_set($_CONF['timezone']);
+        /*date_default_timezone_set($_CONF['timezone']);
         $offset = date('P');
         $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET order_date = convert_tz(order_date, '$offset', '+00:00')";
-        $PP_UPGRADE['0.6.0'][] = $sql;
+        $PP_UPGRADE['0.6.0'][] = $sql;*/
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
@@ -635,6 +646,7 @@ function PAYPAL_do_upgrade()
     PAYPAL_remove_old_files();
     CTL_clearCache();   // clear cache to ensure CSS updates come through
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
+    COM_setMsg("Paypal Plugin has been updated to $current_ver", 'error');
     return true;
 }
 
@@ -700,6 +712,9 @@ function PAYPAL_do_set_version($ver)
         return false;
     } else {
         COM_errorLog("{$_PP_CONF['pi_display-name']} version set to $ver");
+        // Set in-memory config vars to avoid tripping PP_isMinVersion();
+        $_PP_CONF['pi_version'] = $ver;
+        $_PLUGIN_INFO[$_PP_CONF['pi_name']]['pi_version'] = $ver;
         return true;
     }
 }

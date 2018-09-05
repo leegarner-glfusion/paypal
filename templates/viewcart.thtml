@@ -21,16 +21,18 @@
       <tr>
         <td class="alignleft">
 {!if item_link}
-          <a href="{item_link}">{item_name}</a>
+          <a href="{item_link}">{item_dscp}</a>
 {!else}
-          {item_name}
+          {item_dscp}
 {!endif}
           {item_options}
         </td>
         <td class="alignright">{item_price}</td>
         <td class="alignright">
           <i class="uk-icon uk-icon-minus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', -1);"></i>
-          <input style="text-align:right" type="text" id="f_qty_{cart_item_id}" name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" />
+          <input style="text-align:right;width:32px;" type="text" id="f_qty_{cart_item_id}"
+                onchange="mustUpdateCart();return false;"
+                name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" maxlength="3" />
           <i class="uk-icon uk-icon-plus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', 1);"></i>
         </td>
         <td class="alignright">{item_total}</td>
@@ -144,13 +146,19 @@
 </div>
 <script>
 // Update an item's quantity field.
-// Disables the checkout button to force recalculating the form after any changes.
-function updateQty(fld_id, qty)
+function updateQty(fld_id, qty, orig_qty)
 {
     fld = document.getElementById(fld_id);
     val = Number(fld.value) + Number(qty);
     if (val < 1) val = 1;
     fld.value = val;
+    // Disable checkout buttons to force cart update after changing qty
+    mustUpdateCart();
+    return false;
+}
+// Disables the checkout button to force recalculating the form after any changes.
+function mustUpdateCart()
+{
     // Require the "update cart" selecttion to recalculate before displaying checkout
     document.getElementById("checkoutButtons").style.visibility="hidden";
     document.getElementById("updatebtn").classList.remove("uk-button-primary");

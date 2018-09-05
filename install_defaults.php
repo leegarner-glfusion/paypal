@@ -33,13 +33,6 @@ $_PP_DEFAULTS['currency'] = 'USD';
 */
 $_PP_DEFAULTS['anonymous_buy'] = true;
 
-/** Email administrator upon purchase?
-*   0 = Never
-*   1 = Only when physical items are purchased
-*   2 = Always
-*/
-$_PP_DEFAULTS['purch_email_admin']      = 2;
-
 /** Admin email override.
 *   If this is not empty, notification email will be sent to this
 *   address instead of $_CONF['site_mail']
@@ -191,13 +184,6 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 0, 4, 50, true, $_PP_CONF['pi_name']);
         $c->add('anon_buy', $_PP_DEFAULTS['anonymous_buy'],
                 'select', 0, 0, 2, 60, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_user', $_PP_DEFAULTS['purchase_email_user'],
-                'select', 0, 0, 2, 70, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_user_attach',
-                $_PP_DEFAULTS['purchase_email_user_attach'],
-                'select', 0, 0, 2, 80, true, $_PP_CONF['pi_name']);
-        $c->add('purch_email_admin', $_PP_DEFAULTS['purch_email_admin'],
-                'select', 0, 0, 6, 110, true, $_PP_CONF['pi_name']);
         $c->add('menuitem', $_PP_DEFAULTS['menuitem'],
                 'select', 0, 0, 2, 120, true, $_PP_CONF['pi_name']);
         $c->add('order', $_PP_DEFAULTS['order'],

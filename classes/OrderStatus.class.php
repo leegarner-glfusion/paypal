@@ -24,7 +24,10 @@ class OrderStatus extends Workflow
     static $table = 'paypal.orderstatus';
 
     private $name;
+    private $enabled;
+    private $orderby;
     private $notify_buyer;
+    private $notify_admin;
 
     /**
     *   Constructor.
@@ -33,10 +36,21 @@ class OrderStatus extends Workflow
     *   @see    self::getAll()
     *   @param  array   $A  Array of data from the DB
     */
-    public function __construct($A)
+    public function __construct($A=array())
     {
-        $this->notify_buyer = $A['notify_buyer'];
-        $this->name = $A['name'];
+        if (is_array($A)) {
+            $this->notify_buyer = (int)$A['notify_buyer'];
+            $this->notify_admin = (int)$A['notify_buyer'];
+            $this->name = $A['name'];
+            $this->enabled = (int)$A['enabled'];
+            $this->orderby = (int)$A['orderby'];
+        } else {
+            $this->name = 'undefined';
+            $this->enabled = 0;
+            $this->orderby = 0;
+            $this->notify_buyer = 0;
+            $this->notify_admin = 0;
+        }
     }
 
 
@@ -50,9 +64,8 @@ class OrderStatus extends Workflow
 
         if ($statuses === NULL) {
             $statuses = array();
-            $sql = "SELECT name, notify_buyer
+            $sql = "SELECT *
                     FROM {$_TABLES[self::$table]}
-                    WHERE enabled = 1
                     ORDER BY orderby ASC";
             //echo $sql;die;
             $res = DB_query($sql);
@@ -76,7 +89,7 @@ class OrderStatus extends Workflow
         if (isset($statuses[$name])) {
             return $statuses[$name];
         } else {
-            return NULL;
+            return new self();
         }
     }
 
@@ -101,6 +114,7 @@ class OrderStatus extends Workflow
         ) );
         $T->set_block('ordstat', 'StatusSelect', 'Sel');
         foreach (self::getAll() as $key => $data) {
+            if (!$data->enabled) continue;
             $T->set_var(array(
                 'selected' => $key == $selected ?
                                 'selected="selected"' : '',
@@ -129,6 +143,17 @@ class OrderStatus extends Workflow
     public function notifyBuyer()
     {
         return $this->notify_buyer == 1 ? true : false;
+    }
+
+
+    /**
+     * Find out whether this status requires notification to the administrator
+     *
+     * @return  boolean     True or False
+     */
+    public function notifyAdmin()
+    {
+        return $this->notify_admin == 1 ? true : false;
     }
 
 

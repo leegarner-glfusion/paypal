@@ -253,13 +253,6 @@ function plugin_postinstall_paypal()
         COM_errorLog("Can't write to {$_PP_CONF['logfile']}", 1);
     }
 
-    $pi_path = $_CONF['path'] . '/plugins/' . $_PP_CONF['pi_name'];
-    if (is_file($pi_path . '/config.php')) {
-        if (!rename($pi_path . '/config.php', $pi_path . '/config.old.php')) {
-            COM_errorLog("Failed to rename old config.php file.  Manual intervention needed", 1);
-        }
-    }
-
     if (is_array($_PP_SAMPLEDATA)) {
         foreach ($_PP_SAMPLEDATA as $sql) {
             DB_query($sql, 1);

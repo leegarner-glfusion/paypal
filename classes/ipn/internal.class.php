@@ -33,6 +33,8 @@ if (!defined ('GVERSION')) {
 class internal extends \Paypal\IPN
 {
 
+    private $custom;    // holder for custom data
+
     /**
     *   Constructor.
     *   Fake payment gateway variables.
@@ -48,13 +50,13 @@ class internal extends \Paypal\IPN
 
         $cart_id = PP_getVar($A, 'cart_id');
         if (!empty($cart_id)) {
-            $this->Cart = new Cart($cart_id, false);
+            $this->Order = Cart::getInstance(0, $cart_id);
         }
-        if (!$this->Cart) return NULL;
+        if (!$this->Order) return NULL;
 
         $this->pp_data['txn_id'] = $cart_id;
-        $billto = $this->Cart->getAddress('billto');
-        $shipto = $this->Cart->getAddress('shipto');
+        $billto = $this->Order->getAddress('billto');
+        $shipto = $this->Order->getAddress('shipto');
         if (empty($shipto)) $shipto = $billto;
 
         $this->pp_data['payer_email'] = PP_getVar($A, 'payer_email', 'string', $_USER['email']);
@@ -63,16 +65,20 @@ class internal extends \Paypal\IPN
             $this->pp_data['payer_name'] = $_USER['fullname'];
         }
         $this->pp_data['pmt_date'] = PAYPAL_now()->toMySQL(true);
-        $this->pp_data['pmt_gross'] = $this->Cart->getInfo('total');
-        $this->pp_data['pmt_tax'] = $this->Cart->getInfo('tax');
+        $this->pp_data['pmt_gross'] = $this->Order->getInfo('total');
+        $this->pp_data['pmt_tax'] = $this->Order->getInfo('tax');
         $this->pp_data['gw_desc'] = 'Internal IPN';
         $this->pp_data['gw_name'] = 'Internal IPN';
         $this->pp_data['pmt_status'] = PP_getVar($A, 'payment_status');
         $this->pp_data['currency'] = Currency::getInstance()->code;
         $this->pp_data['discount'] = 0;
 
-        if (isset($A['invoice']))
+        if (isset($A['invoice'])) {
             $this->pp_data['invoice'] = $A['invoice'];
+        } else {
+            $this->pp_data['invoice'] = $this->Order->order_id;
+        }
+
         if (isset($A['parent_txn_id']))
             $this->pp_data['parent_txn_id'] = $A['parent_txn_id'];
 
@@ -96,18 +102,7 @@ class internal extends \Paypal\IPN
             }
         }
         $this->pp_data['custom']['transtype'] = 'internal_ipn';
-
-        switch ($this->pp_data['pmt_status']) {
-        case 'Pending':
-            $this->pp_data['status'] = 'pending';
-            break;
-        case 'Completed':
-            $this->pp_data['status'] = 'paid';
-            break;
-        case 'Refunded':
-            $this->pp_data['status'] = 'refunded';
-            break;
-        }
+        $this->pp_data['pmt_status'] = 'paid';
     }
 
 
@@ -120,18 +115,24 @@ class internal extends \Paypal\IPN
     */
     private function Verify()
     {
-        if ($this->Cart === NULL) {
+        if ($this->Order === NULL) {
             COM_errorLog("No cart provided");
             return false;
         }
 
-        // Order total must be zero to use the internal gateway
-        $info = $this->Cart->getInfo();
-        $by_gc = PP_getVar($info, 'apply_gc', 'float');
-        $total = PP_getVar($info, 'final_total', 'float');
-        if ($by_gc < $total) return false;
-        if (!Coupon::verifyBalance($by_gc, $this->pp_data['custom']['uid'])) {
-            return false;
+        $info = $this->Order->getInfo();
+        $uid = $this->Order->uid;
+        $gateway = PP_getVar($info, 'gateway');
+        $total = $this->Order->getTotal();
+        switch ($gateway) {
+        case '_coupon':
+            // Order total must be zero to use the coupon gateway in full
+            $by_gc = PP_getVar($info, 'apply_gc', 'float');
+            if (is_null($by_gc)) {
+                $by_gc = Coupon::getUserBalance($uid);
+            }
+            if ($by_gc < $total) return false;
+            break;
         }
         $this->pp_data['status'] = 'paid';
         return true;
@@ -190,6 +191,9 @@ class internal extends \Paypal\IPN
         if (empty($this->ipn_data))
             return false;
 
+        $custom = PP_getVar($this->ipn_data, 'custom');
+        $this->custom = @unserialize($custom);
+
         if (!$this->Verify()) {
             $logId = $this->Log(false);
             $this->handleFailure(IPN_FAILURE_VERIFY,
@@ -199,9 +203,9 @@ class internal extends \Paypal\IPN
             $logId = $this->Log(true);
         }
 
-        $Cart = $this->Cart->Cart();
+        $Cart = $this->Order->Cart();
         if (empty($Cart)) {
-            COM_errorLog("Paypal\\internal_ipn::Process() - Empty Cart for id {$this->Cart->CartID()}");
+            COM_errorLog("Paypal\\internal_ipn::Process() - Empty Cart for id {$this->Order->cartID()}");
             return false;
         }
         $items = array();
@@ -212,29 +216,22 @@ class internal extends \Paypal\IPN
         // IPN item numbers are indexes into the cart, so get the
         // actual product ID from the cart
         foreach ($Cart as $idx=>$item) {
-            $shipping = PP_getVar($item, 'shipping', 'float');
-            $handling = PP_getVar($item, 'handling', 'float');
             $args = array(
-                'item_id' => $item['item_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-                'item_name' => $item['name'],
-                'shipping' => $shipping,
-                'handling' => $handling,
-                'tax' => PP_getVar($item, 'tax', 'float'),
-                'extras' => $item['extras']
+                'item_id'   => $item->item_id,
+                'quantity'  => $item->quantity,
+                'price'     => $item->price,
+                'item_name' => $item->name,
+                'shipping'  => $item->shipping,
+                'handling'  => $item->handling,
+                'extras'    => $item->extras,
             );
             $this->AddItem($args);
-            $total_shipping += $shipping;
-            $total_handling += $handling;
+            $total_shipping += $item->shipping;
+            $total_handling += $item->handling;
         }
-        $by_gc = $this->Cart->getInfo('apply_gc');
-        PAYPAL_debug("Received $by_gc gift card payment");
         $this->pp_data['pmt_gross'] = 0;    // This only handles fully-paid items
-        $this->pp_data['custom']['by_gc'] = $by_gc;
         $this->pp_data['pmt_shipping'] = $total_shipping;
         $this->pp_data['pmt_handling'] = $total_handling;
-
         return $this->handlePurchase();
     }   // function Process
 

@@ -1,9 +1,12 @@
 {# begin {templatelocation} #}
 <div class="paypalOrderContainer">
+{!if is_admin}
+{!else}
   <p>
     <div style="display:inline-block;"><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></div>
     <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/?orderhist=x">{$LANG_PP['my_account']}</a></div>
   </p>
+{!endif}
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
 {!if order_number}
   <div class="floatright">
@@ -106,7 +109,7 @@
 {!if is_admin}
             <a href="{site_admin_url}/plugins/paypal/index.php?itemhist={item_id}" class="tooltip" title="{$LANG_PP['orderhist_item']}">
 {!endif}
-              {item_descrip}
+              {item_dscp}
 {!if is_admin}
             </a>
 {!endif}
@@ -171,7 +174,7 @@
           <td></td>
         </tr>
         <tr>
-          <td colspan="3" class="alignright"><b>{$LANG_PP['net_total']}</b></td>
+          <td colspan="3" class="alignright"><b>{$LANG_PP['pmt_total']}</b></td>
           <td class="alignright"><b>{net_total}</b></td>
           <td></td>
         </tr>

@@ -1154,6 +1154,11 @@ class Product
             }
         }
 
+        if ($this->getShipping()) {
+            $shipping_txt = sprintf($LANG_PP['plus_shipping'], Currency::getInstance()->formatValue($this->shipping_amt));
+        } else {
+            $shipping_txt = '';
+        }
         $T->set_var(array(
             'is_uikit' => $_PP_CONF['_is_uikit'],
             'have_attributes'   => $this->hasAttributes(),
@@ -1173,6 +1178,7 @@ class Product
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
             'session_id'        => session_id(),
+            'shipping_txt'      => $shipping_txt,
         ) );
         $T->set_block('product', 'SpecialFields', 'SF');
         foreach ($this->special_fields as $fld) {
@@ -1535,7 +1541,6 @@ class Product
                 }
             }
         }
-        $price *= $quantity;
         $price *= $discount_factor;
         $price = round($price, Currency::getInstance()->Decimals());
         return $price;
@@ -1579,7 +1584,7 @@ class Product
     *       -- option1: option1_value
     *       -- option2: optoin2_value
     *
-    *   @param  array   $item   Item information from the cart
+    *   @param  object  $item   Specific OrderItem object from the cart
     *   @return string      Option display
     */
     public function getOptionDisplay($item)
@@ -1588,23 +1593,20 @@ class Product
         $opts = array();
 
         // Get attributes selected from the available options
-        if (isset($item['options']) && is_array($item['options'])) {
-            $options = $item['options'];
-        } else {
-            $options = array();
+        if (!empty($item->options)) {
+            $options = explode(',', $item->options);
+            foreach ($options as $option) {
+                $opts[] = array(
+                    'opt_name'  => $this->options[$option]['attr_name'],
+                    'opt_value' => $this->options[$option]['attr_value'],
+                );
+            }
         }
-        foreach ($options as $option) {
-            $opt = explode('|', $option);
-            if (!isset($this->options[$opt[0]])) continue;   // invalid?
-            $opts[] = array(
-                'opt_name'  => $this->options[$opt[0]]['attr_name'],
-                'opt_value' => $this->options[$opt[0]]['attr_value'],
-            );
-        }
+
         // Get special fields submitted with the purchase
-        if (isset($item['extras']) && is_array($item['extras'])) {
-            if (isset($item['extras']['special']) && is_array($item['extras']['special'])) {
-                $sp_flds = $this->getSpecialFields($item['extras']['special']);
+        if (is_array($item->extras)) {
+            if (isset($item->extras['special']) && is_array($item->extras['special'])) {
+                $sp_flds = $this->getSpecialFields($itemi->extras['special']);
                 foreach ($sp_flds as $txt=>$val) {
                     $opts[] = array(
                         'opt_name'  => $txt,
@@ -1617,9 +1619,9 @@ class Product
         // Get text fields defined with the product
         $text_names = explode('|', $this->custom);
         if (!empty($text_names) &&
-                isset($item['extras']['custom']) &&
-                is_array($item['extras']['custom'])) {
-            foreach ($item['extras']['custom'] as $tid=>$val) {
+                isset($item->extras['custom']) &&
+                is_array($item->extras['custom'])) {
+            foreach ($item->extras['custom'] as $tid=>$val) {
                 if (isset($text_names[$tid])) {
                     $opts[] = array(
                         'opt_name'  => htmlspecialchars($text_names[$tid]),
@@ -2031,6 +2033,36 @@ class Product
     public function buynowQty()
     {
         return 0;
+    }
+
+
+    /**
+     * Get the total shipping amount for this item based on quantity purchased
+     *
+     * @param   integer $qty    Quantity purchased
+     * @return  float           Total item shipping charge
+     */
+    public function getShipping($qty = 1)
+    {
+        if ($this->shipping_type == 2) {
+            // fixed per-item shipping
+            return (float)$this->shipping_amt * $qty;
+        } else {
+            // no shipping, or calculated by gateway
+            return 0;
+        }
+    }
+
+
+    /**
+     * Get the total handling fee for this item based on quantity purchased
+     *
+     * @param   integer $qty    Quantity purchased
+     * @return  float           Total handling charge
+     */
+    public function getHandling($qty = 1)
+    {
+        return (float)$this->handling * $qty;
     }
 
 }   // class Product

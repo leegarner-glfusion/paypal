@@ -721,6 +721,8 @@ class Category
     {
         global $_TABLES;
 
+        if (!PP_isMinVersion('0.6.0')) return array();
+
         $between = '';
         $root = (int)$root;
         $p = $prefix == '&nbsp;' ? 'x_' : $prefix . '_';

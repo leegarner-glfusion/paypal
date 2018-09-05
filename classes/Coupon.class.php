@@ -165,7 +165,7 @@ class Coupon extends Product
                 buyer = $uid,
                 amount = $amount,
                 balance = $amount,
-                purchased = UTC_TIMESTAMP(),
+                purchased = UNIX_TIMESTAMP(),
                 expires = '$exp'";
         DB_query($sql);
         return DB_error() ? false : $code;
@@ -209,7 +209,7 @@ class Coupon extends Product
         if ($amount > 0) {
             DB_query("UPDATE {$_TABLES['paypal.coupons']} SET
                     redeemer = $uid,
-                    redeemed = UTC_TIMESTAMP()
+                    redeemed = UNIX_TIMESTAMP(),
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
             self::writeLog($code, $uid, $amount, 'gc_redeemed');
@@ -543,14 +543,16 @@ class Coupon extends Product
      */
     public static function canPayByGC($cart)
     {
-        $gc_can_apply = $cart->getInfo('order_total');
+        $gc_can_apply = $cart->getTotal();
         $items = $cart->Cart();
         foreach ($items as $item) {
-            $P = Product::getInstance($item['item_id']);
+            $P = $item->getProduct();
             if ($P->isNew || $P->prod_type == PP_PROD_COUPON) {
+                echo "here";die;
                 $gc_can_apply -= $P->getPrice($item['options'], $item['quantity']);
             }
         }
+        if ($gc_can_apply < 0) $gc_can_apply = 0;
         return $gc_can_apply;
     }
 

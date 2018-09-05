@@ -221,8 +221,10 @@ class paypal extends \Paypal\Gateway
         // If using a gift card, the gc amount could exceed the item total
         // which won't work with Paypal. Just create one cart item to
         // represent the entire cart including tax, shipping, etc.
-        if (PP_getVar($custom_arr, 'by_gc', 'float') > 0) {
-            $total_amount = $cart->getInfo('final_total');
+        //if (PP_getVar($custom_arr, 'by_gc', 'float') > 0) {
+        $by_gc = $cart->getInfo('apply_gc');
+        if ($by_gc > 0) {
+            $total_amount = $cart->getTotal() - $by_gc;
             $fields['item_number_1'] = $LANG_PP['cart'];
             $fields['item_name_1'] = $LANG_PP['all_items'];
             $fields['amount_1'] = $total_amount;
@@ -230,14 +232,16 @@ class paypal extends \Paypal\Gateway
             $cartItems = $cart->Cart();
             foreach ($cartItems as $cart_item_id=>$item) {
                 $opt_str = '';
-                $item_parts = explode('|', $item['item_id']);
-                $db_item_id = $item_parts[0];
-                $options = isset($item_parts[1]) ? $item_parts[1] : '';
-                $P = \Paypal\Product::getInstance($db_item_id, $custom_arr);
-                $db_item_id = DB_escapeString($db_item_id);
+                //$item_parts = explode('|', $item['item_id']);
+                //$db_item_id = $item_parts[0];
+                //$options = isset($item_parts[1]) ? $item_parts[1] : '';
+                $P = \Paypal\Product::getInstance($item->product_id, $custom_arr);
+                $db_item_id = DB_escapeString($item->product_id);
                 $oc = 0;
-                if (is_array($item['options'])) {
-                    $opts = explode(',', $options);
+                //$options = explode(',', $item->options);
+                //if (is_array($item['options'])) {
+                if ($item->options != '') {
+                    $opts = explode(',', $item->options);
                     foreach ($opts as $optval) {
                         $opt_info = $P->getOption($optval);
                         if ($opt_info) {
@@ -251,34 +255,37 @@ class paypal extends \Paypal\Gateway
                     $opts = array();
                 }
                 $overrides = array(
-                    'price' => $item['price'],
+                    'price' => $item->price,
                     'uid'   => $_USER['uid'],
                 );
-                $item_amount = $P->getPrice($opts, $item['quantity'], $overrides);
+                $item_amount = $P->getPrice($opts, $item->quantity, $overrides);
                 $fields['amount_' . $i] = $item_amount;
                 $fields['item_number_' . $i] = (int)$cart_item_id;
-                $fields['item_name_' . $i] = htmlspecialchars($item['descrip']);
-                $total_amount += $item['price'];
-                if (isset($item['extras']['custom']) && is_array($item['extras']['custom'])) {
-                    foreach ($item['extras']['custom'] as $id=>$val) {
+                $fields['item_name_' . $i] = htmlspecialchars($item->description);
+                $total_amount += $item->price;
+                if (isset($itemi->extras['custom']) && is_array($itemi->extras['custom'])) {
+                    foreach ($item->extras['custom'] as $id=>$val) {
                         $fields['on'.$oc.'_'.$i] = $P->getCustom($id);
                         $fields['os'.$oc.'_'.$i] = $val;
                         $oc++;
                     }
                 }
-                $fields['quantity_' . $i] = $item['quantity'];
+                $fields['quantity_' . $i] = $item->quantity;
 
-                if (isset($item['shipping'])) {
-                    $fields['shipping_' . $i] = $item['shipping'];
-                    $shipping += $item['shipping'];
+                //if (isset($item->shipping)) {
+                if ($item->shipping > 0) {
+                    $fields['shipping_' . $i] = $item->shipping;
+                    $shipping += $item->shipping;
                 }
-                if (isset($item['weight']) && $item['weight'] > 0) {
-                    $weight += $item['weight'];
+                if (isset($item->weight) && $item->weight > 0) {
+                    $weight += $item->weight;
                 }
                 $i++;
             }
 
-            $fields['tax_cart'] = (float)$cart->getInfo('tax');
+            //$fields['tax_cart'] = (float)$cart->getInfo('tax');
+            $fields['tax_cart'] = (float)$cart->tax;
+            $total_amount += $cart->tax;
             if ($shipping > 0) $total_amount += $shipping;
             if ($weight > 0) {
                 $fields['weight_cart'] = $weight;
@@ -537,7 +544,7 @@ class paypal extends \Paypal\Gateway
                 break;
             }
 
-            if ($P->isTaxable) {
+            if ($P->taxable) {
                 $vars['tax_rate'] = sprintf("%0.4f", PP_getTaxRate() * 100);
             }
 

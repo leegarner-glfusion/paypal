@@ -35,7 +35,7 @@ function listOrders($admin = false, $uid = 0)
 
     USES_lib_admin();
 
-    $where = ' WHERE is_cart = 0 ';
+    $where = " WHERE ord.status != 'cart'";
     if ($uid > 0) {
         $where .= " AND ord.uid = '" . (int)$uid . "'";
     }
@@ -43,7 +43,6 @@ function listOrders($admin = false, $uid = 0)
     $isAdmin = $admin == true ? 1 : 0;
 
     $sql = "SELECT ord.*,
-            UNIX_TIMESTAMP(CONVERT_TZ(`order_date`, '+00:00', @@session.time_zone)) AS ux_ts,
             SUM(itm.quantity * itm.price) as ord_total,
             u.username, $isAdmin as isAdmin
         FROM {$_TABLES['paypal.orders']} AS ord
@@ -55,7 +54,7 @@ function listOrders($admin = false, $uid = 0)
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
-                'field' => 'ux_ts', 'sort' => true),
+                'field' => 'order_date', 'sort' => true),
         array('text' => $LANG_PP['order_number'],
                 'field' => 'order_id', 'sort' => true),
         array('text' => $LANG_PP['total'],
@@ -359,7 +358,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     }
 
     switch($fieldname) {
-    case 'ux_ts':
+    case 'order_date':
         $dt->setTimestamp($fieldvalue);
         $retval = '<span class="tooltip" title="' .
                 $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
@@ -431,10 +430,8 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'status':
         if ($A['isAdmin'] && is_array($LANG_PP['orderstatus'])) {
             $retval = OrderStatus::Selection($A['order_id'], 0, $fieldvalue);
-        } elseif (isset($LANG_PP['orderstatus'][$fieldvalue])) {
-            $retval = $LANG_PP['orderstatus'][$fieldvalue];
         } else {
-            $retval = 'Unknown';
+            $retval = PP_getVar($LANG_PP['orderstatus'], $fieldvalue, 'string', 'Unknown');
         }
         break;
 
