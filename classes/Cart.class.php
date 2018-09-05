@@ -1116,8 +1116,10 @@ class Cart extends Order
 
 
     /**
-    *   Set the is_order flag in a cart to indicate that it is finalized
-    *   and submitted for payment.
+    *   Set the order status to indicate that this is no longer a cart and has
+    *   been submitted for payment.
+    *   Pass $status = false to revert back to a cart, e.g. if the purchase is
+    *   cancelled.
     *   Also removes the cart_id cookie for anonymous users.
     *
     *   @param  string  $cart_id    Cart ID to update
@@ -1131,7 +1133,7 @@ class Cart extends Order
         $cart_id = DB_escapeString($cart_id);
         $sql = "UPDATE {$_TABLES['paypal.orders']} SET
                 status = '{$status}',
-                order_date = UTC_TIMESTAMP()
+                order_date = UNIX_TIMESTAMP()
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
         if ($status == 'pending') {

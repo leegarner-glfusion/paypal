@@ -165,7 +165,7 @@ class Coupon extends Product
                 buyer = $uid,
                 amount = $amount,
                 balance = $amount,
-                purchased = UTC_TIMESTAMP(),
+                purchased = UNIX_TIMESTAMP(),
                 expires = '$exp'";
         DB_query($sql);
         return DB_error() ? false : $code;
@@ -209,7 +209,7 @@ class Coupon extends Product
         if ($amount > 0) {
             DB_query("UPDATE {$_TABLES['paypal.coupons']} SET
                     redeemer = $uid,
-                    redeemed = UTC_TIMESTAMP()
+                    redeemed = UNIX_TIMESTAMP(),
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
             self::writeLog($code, $uid, $amount, 'gc_redeemed');

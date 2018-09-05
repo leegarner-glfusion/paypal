@@ -45,7 +45,6 @@ class Order
 
         $this->isNew = true;
         $this->uid = (int)$_USER['uid'];
-        $this->order_date = PAYPAL_now()->toMySql(false);
         $this->instructions = '';
         $this->tax_rate = PP_getTaxRate();
         if (!empty($id)) {
@@ -59,6 +58,7 @@ class Order
         }
         if ($this->isNew) {
             $this->order_id = self::_createID();
+            $this->order_date = PAYPAL_now()->toUnix();
             $this->token = self::_createToken();
             $this->shipping = 0;
             $this->handling = 0;
@@ -143,9 +143,7 @@ class Order
         if ($id != '') {
             $this->order_id = $id;
 
-            $sql = "SELECT *,
-                    UNIX_TIMESTAMP(CONVERT_TZ(`order_date`, '+00:00', @@session.time_zone)) AS ux_ts
-                    FROM {$_TABLES['paypal.orders']}
+            $sql = "SELECT * FROM {$_TABLES['paypal.orders']}
                     WHERE order_id='{$this->order_id}'";
             //echo $sql;die;
             $res = DB_query($sql);
@@ -157,17 +155,11 @@ class Order
 
         // Now load the items
         $this->items = array();
-        $sql = "SELECT *,
-                UNIX_TIMESTAMP(CONVERT_TZ(`expiration`, '+00:00', @@session.time_zone)) AS ux_exp
-                FROM {$_TABLES['paypal.purchases']}
+        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
                 WHERE order_id = '{$this->order_id}'";
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
             $this->items[$A['id']] = new OrderItem($A);
-            $X = DB_fetchArray(DB_query("SELECT *
-                    FROM {$_TABLES['paypal.products']}
-                    WHERE id='".DB_escapeString($A['product_id'])."'"), false);
-            //$this->items[$A['id']]['data'] = $X;
         }
         return true;
     }
@@ -288,13 +280,19 @@ class Order
     */
     function SetVars($A)
     {
+        global $_USER, $_CONF;
+
         if (!is_array($A)) return false;
+        $tzid = COM_isAnonUser() ? $_CONF['timezone'] : $_USER['tzid'];
 
         $this->uid      = PP_getVar($A, 'uid', 'int');
         $this->status   = PP_getVar($A, 'status');
         $this->pmt_method = PP_getVar($A, 'pmt_method');
         $this->pmt_txn_id = PP_getVar($A, 'pmt_txn_id');
-        $this->order_date = PP_getVar($A, 'order_date');
+        $this->order_date = PP_getVar($A, 'order_date', 'integer');
+        if ($this->order_date > 0) {
+            $this->order_date = new \Date($this->order_date, $tzid);
+        }
         $this->order_id = PP_getVar($A, 'order_id');
         $this->shipping = PP_getVar($A, 'shipping', 'float');
         $this->handling = PP_getVar($A, 'handling', 'float');
@@ -302,7 +300,6 @@ class Order
         $this->instructions = PP_getVar($A, 'instructions');
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
-        $this->ux_ts = PP_getVar($A, 'ux_ts', 'int');
         $this->buyer_email = PP_getVar($A, 'buyer_email');
         $this->m_info = @unserialize(PP_getVar($A, 'info'));
         if ($this->m_info === false) $this->m_info = array();
@@ -380,7 +377,7 @@ class Order
             // Set field values that can only be set once and not updated
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
-                    order_date = UTC_TIMESTAMP(),
+                    order_date = '{$this->order_date}',
                     tax_rate = '{$this->tax_rate}',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
@@ -414,7 +411,7 @@ class Order
         }
         $sql = $sql1 . implode(', ', $fields) . $sql2;
         //echo $sql;die;
-        COM_errorLog("Save: " . $sql);
+        //COM_errorLog("Save: " . $sql);
         DB_query($sql);
         if ($log && !DB_error()) {
             $this->Log($log_msg);
@@ -510,8 +507,8 @@ class Order
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $Currency->Format($this->total),
             'not_final'     => !$final,
-            'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
-            'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
+            'order_date'    => $this->order_date->format($_PP_CONF['datetime_fmt'], true),
+            'order_date_tip' => $this->order_date->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
             'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
@@ -622,12 +619,12 @@ class Order
 
         // If the status isn't really changed, don't bother updating anything
         // and just treat it as successful
+        //COM_errorLog("updateStatus from $oldstatus to $newstatus");
         if ($oldstatus == $newstatus) return true;
 
         $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET status = '". DB_escapeString($newstatus) . "'
                 WHERE order_id = '$db_order_id'";
-COM_errorLog("updateStatus: " . $sql);
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) return false;
@@ -687,7 +684,7 @@ COM_errorLog("updateStatus: " . $sql);
     */
     public function getLastLog()
     {
-        global $_TABLES, $_PP_CONF, $_CONF;
+        global $_TABLES, $_PP_CONF, $_USER;
 
         $sql = "SELECT * FROM {$_TABLES['paypal.order_log']}
                 WHERE order_id = '" . DB_escapeString($this->order_id) . "'
@@ -697,7 +694,7 @@ COM_errorLog("updateStatus: " . $sql);
         if (!DB_error()) {
             $L = DB_fetchArray(DB_query($sql), false);
             if (!empty($L)) {
-                $dt = new \Date($L['ts'], $_CONF['timezone']);
+                $dt = new \Date($L['ts'], $_USER['tzid']);
                 $L['ts'] = $dt->format($_PP_CONF['datetime_fmt'], true);
             }
         }
@@ -1254,30 +1251,6 @@ COM_errorLog("updateStatus: " . $sql);
             return true;
         }
         return false;
-    }
-
-
-    /**
-     * Helper function to set the order date.
-     * This comes up when a cart is converted into an order. To show the
-     * correct order date, as opposed to when the cart was first created,
-     * this sets the order_date field to the current date.
-     *
-     * @param   string  $dt     Override date, current timestamp by default
-     */
-    public function setDate($dt='')
-    {
-        global $_TABLES;
-
-        if ($this->isNew) return;   // Not for unsaved orders
-        if ($dt == '') {
-            $dt = 'UTC_TIMESTAMP()';
-        }
-        $sql = "UPDATE {$_TABLES['paypal.orders']}
-                SET order_date = '". DB_escapeString($dt) . "'
-                WHERE order_id = '$this->order_id'";
-COM_errorLog("setDate: " . $sql);
-        DB_query($sql);
     }
 
 }

@@ -218,7 +218,7 @@ class OrderItem
         if (is_array($A)) {
             $this->setVars($A);
         }
-        $purchase_date = DB_escapeString(PAYPAL_now()->toMySQL());
+        $purchase_ts = PAYPAL_now()->toUnix();
         $shipping = $this->product->getShipping($this->quantity);
         $handling = $this->product->getHandling($this->quantity);
 
@@ -236,7 +236,7 @@ class OrderItem
                 user_id = '{$this->user_id}',
                 txn_id = '" . DB_escapeString($this->txn_id) . "',
                 txn_type = '" . DB_escapeString($this->txn_type) . "',
-                purchase_date = '$purchase_date',
+                purchase_date = '$purchase_ts',
                 status = '" . DB_escapeString($this->status) . "',
                 price = '$this->price',
                 taxable = '{$this->taxable}',
@@ -248,7 +248,7 @@ class OrderItem
                 handling = {$handling}";
             // add an expiration date if appropriate
         if ($this->product->expiration > 0) {
-            $sql2 .= ", expiration = DATE_ADD('$purchase_date', INTERVAL {$this->product->expiration} DAY)";
+            $sql2 .= ", expiration = " . (string)($purchase_ts + ($this->product->expiration * 86400));
         }
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;

@@ -43,7 +43,6 @@ function listOrders($admin = false, $uid = 0)
     $isAdmin = $admin == true ? 1 : 0;
 
     $sql = "SELECT ord.*,
-            UNIX_TIMESTAMP(CONVERT_TZ(`order_date`, '+00:00', @@session.time_zone)) AS ux_ts,
             SUM(itm.quantity * itm.price) as ord_total,
             u.username, $isAdmin as isAdmin
         FROM {$_TABLES['paypal.orders']} AS ord
@@ -55,7 +54,7 @@ function listOrders($admin = false, $uid = 0)
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
-                'field' => 'ux_ts', 'sort' => true),
+                'field' => 'order_date', 'sort' => true),
         array('text' => $LANG_PP['order_number'],
                 'field' => 'order_id', 'sort' => true),
         array('text' => $LANG_PP['total'],
@@ -359,7 +358,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     }
 
     switch($fieldname) {
-    case 'ux_ts':
+    case 'order_date':
         $dt->setTimestamp($fieldvalue);
         $retval = '<span class="tooltip" title="' .
                 $dt->format($_PP_CONF['datetime_fmt'], false) . '">' .
