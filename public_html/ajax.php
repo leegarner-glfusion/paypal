@@ -39,9 +39,16 @@ case 'addcartitem':
         echo json_encode(array('content' => '', 'statusMessage' => ''));;
         exit;
     }
+    $P = \Paypal\Product::getInstance($_POST['item_number']);
+    if ($P->isNew) {
+        // Invalid product ID passed
+        echo json_encode(array('content' => '', 'statusMessage' => ''));;
+        exit;
+    }
     $Cart = \Paypal\Cart::getInstance();
     if (isset($_POST['_unique']) && $_POST['_unique'] &&
-            $Cart->Contains($_POST['item_number']) !== false) {
+        $Cart->Contains($_POST['item_number']) !== false) {
+        // Do nothing if only one item instance may be added
         break;
     }
     $args = array(
@@ -49,7 +56,8 @@ case 'addcartitem':
         'item_name'     => PP_getVar($_POST, 'item_name'),
         'description'   => PP_getVar($_POST, 'item_descr'),
         'quantity'      => PP_getVar($_POST, 'quantity', 'int'),
-        'price'         => PP_getVar($_POST, 'base_price', 'float'),
+        //'price'         => PP_getVar($_POST, 'base_price', 'float'),
+        'price'         => $P->getPrice(),
         'options'       => PP_getVar($_POST, 'options', 'array'),
         'extras'        => PP_getVar($_POST, 'extras', 'array'),
         //'tax'           => PP_getVar($_POST, 'tax', 'float'),
