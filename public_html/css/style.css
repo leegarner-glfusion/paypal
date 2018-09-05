@@ -602,3 +602,7 @@ div.ppNoGCMsg {
     float:right;
     clear:both;
 }
+span.ppPlusShipping {
+    font-size: small;
+    font-style: italic;
+}
