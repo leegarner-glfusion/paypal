@@ -362,6 +362,8 @@ class Order
     {
         global $_TABLES, $_PP_CONF;
 
+        if (!PP_isMinVersion('0.6.0')) return '';
+
         // Save all the order items
         foreach ($this->items as $item) {
             $item->Save();
@@ -572,7 +574,7 @@ class Order
             }
         default:
             break;
-        } 
+        }
 
         $status = $this->status;
         if ($this->pmt_method != '') {
@@ -716,7 +718,7 @@ class Order
         $notify_buyer = OrderStatus::getInstance($newstatus)->notifyBuyer();
         $notify_admin = OrderStatus::getInstance($newstatus)->notifyAdmin();
         if (!$notify_buyer && !$notify_admin) {
-            PAYPAL_debug("Not sending any notification for status $newstatus");
+            PAYPAL_debug("Not sending any notification for status $status");
             return;
         }
 

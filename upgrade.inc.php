@@ -585,9 +585,11 @@ function PAYPAL_do_upgrade()
                     (cat_id, cat_name, description, grp_access, lft, rgt)
                 VALUES
                     (1, 'Home', 'Root Category', 2, 1, 2)";
-            $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
-                    (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
-                VALUES $sql_cats";
+            if (!empty($sql_cats)) {
+                $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
+                        (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
+                    VALUES $sql_cats";
+            }
             $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
                     SET cat_id = cat_id + 1";
         }
@@ -608,7 +610,7 @@ function PAYPAL_do_upgrade()
                         if ($A[$key] < '1970-01-01') {
                             $A[$key] = '1970-01-01';
                         } elseif ($A[$key] > '2037-12-31') {
-                            $A[$key = '2017-12-31';
+                            $A[$key] = '2017-12-31';
                         }
                     }
                     $st = new Date($A['sale_beg'], $_CONF['timezone']);
@@ -644,6 +646,7 @@ function PAYPAL_do_upgrade()
     PAYPAL_remove_old_files();
     CTL_clearCache();   // clear cache to ensure CSS updates come through
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
+    COM_setMsg("Paypal Plugin has been updated to $current_ver", 'error');
     return true;
 }
 
@@ -709,6 +712,9 @@ function PAYPAL_do_set_version($ver)
         return false;
     } else {
         COM_errorLog("{$_PP_CONF['pi_display-name']} version set to $ver");
+        // Set in-memory config vars to avoid tripping PP_isMinVersion();
+        $_PP_CONF['pi_version'] = $ver;
+        $_PLUGIN_INFO[$_PP_CONF['pi_name']]['pi_version'] = $ver;
         return true;
     }
 }

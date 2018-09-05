@@ -925,6 +925,8 @@ function plugin_getcommenturlid_paypal()
 */
 function phpblock_paypal_cart()
 {
+    if (!PP_isMinVersion('0.6.0')) return '';
+
     $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
     $contents = phpblock_paypal_cart_contents();

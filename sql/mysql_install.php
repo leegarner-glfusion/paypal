@@ -9,7 +9,7 @@
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -42,7 +42,7 @@ $PP_UPGRADE['0.5.4'] = array(
         `conversion_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (`code`)
     ) ENGINE=MyISAM",
-    "INSERT INTO `{$_TABLES['paypal.currency']}` VALUES 
+    "INSERT INTO `{$_TABLES['paypal.currency']}` VALUES
     ('AED','?.?','United Arab Emirates Dirham',784,'hidden',' ','before',2,0.00,',','.','Dirham','Fils',1.00000,'2014-01-03 20:51:17'),
     ('AFN','Af','Afghan Afghani',971,'hidden',' ','after',0,0.00,',','.','Afghani','Pul',1.00000,'2014-01-03 20:54:44'),
 	('ANG','NAf.','Netherlands Antillean Guilder',532,'hidden',' ','after',2,0.00,',','.','Guilder','Cent',1.00000,'2014-01-03 20:54:44'),
@@ -354,7 +354,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `shipto_country` varchar(255) DEFAULT NULL,
   `shipto_zip` varchar(40) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
-  `buyer_email` varchar(255) DEFAULT NULL, 
+  `buyer_email` varchar(255) DEFAULT NULL,
   `tax` decimal(5,2) unsigned DEFAULT NULL,
   `shipping` decimal(5,2) unsigned DEFAULT NULL,
   `handling` decimal(5,2) unsigned DEFAULT NULL,
@@ -508,7 +508,7 @@ $_PP_SAMPLEDATA = array(
 /*    "INSERT INTO {$_TABLES['paypal.gateways']}
             (id, orderby, enabled, description, config, services)
         VALUES
-            ('paypal', 10, 0, 'Paypal Website Payments Standard', '', 
+            ('paypal', 10, 0, 'Paypal Website Payments Standard', '',
              'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",*/
     "INSERT INTO {$_TABLES['paypal.workflows']}
             (id, wf_name, orderby, enabled)
@@ -531,9 +531,9 @@ $_PP_SAMPLEDATA = array(
 
 // Upgrade information for version 0.1.1 to version 0.2
 $PP_UPGRADE['0.2'] = array(
-    "ALTER TABLE {$_TABLES['paypal.purchases']} 
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
         ADD COLUMN quantity int NOT NULL DEFAULT 1 AFTER product_id",
-    "ALTER TABLE {$_TABLES['paypal.products']} 
+    "ALTER TABLE {$_TABLES['paypal.products']}
         ADD COLUMN category varchar(80) AFTER name,
         ADD KEY `products_category` (category)",
 );
@@ -568,14 +568,14 @@ $PP_UPGRADE['0.4.0'] = array(
         ADD `price` float(10,2) NOT NULL DEFAULT 0",
     "INSERT INTO {$_TABLES['blocks']}
         (type, name, title, tid, phpblockfn, is_enabled,
-        owner_id, group_id, 
+        owner_id, group_id,
         perm_owner, perm_group, perm_members, perm_anon)
-    VALUES 
-        ('phpblock', 'paypal_featured', 'Featured Product', 'all', 
+    VALUES
+        ('phpblock', 'paypal_featured', 'Featured Product', 'all',
             'phpblock_paypal_featured', 0, 2, 13, 3, 2, 2, 2),
-        ('phpblock', 'paypal_random', 'Random Product', 'all', 
+        ('phpblock', 'paypal_random', 'Random Product', 'all',
             'phpblock_paypal_random', 0, 2, 13, 3, 2, 2, 2),
-        ('phpblock', 'paypal_categories', 'Product Categories', 'all', 
+        ('phpblock', 'paypal_categories', 'Product Categories', 'all',
             'phpblock_paypal_categories', 0, 2, 13, 3, 2, 2, 2)",
 );
 
@@ -779,10 +779,10 @@ $PP_UPGRADE['0.5.6'] = array(
 $PP_UPGRADE['0.5.7'] = array(
     "INSERT INTO {$_TABLES['blocks']}
         (type, name, title, tid, phpblockfn, is_enabled,
-        owner_id, group_id, 
+        owner_id, group_id,
         perm_owner, perm_group, perm_members, perm_anon)
-    VALUES 
-        ('phpblock', 'paypal_recent', 'Newest Items', 'all', 
+    VALUES
+        ('phpblock', 'paypal_recent', 'Newest Items', 'all',
             'phpblock_paypal_recent', 0, 2, 13, 3, 2, 2, 2)",
     "ALTER TABLE {$_TABLES['paypal.products']}
         CHANGE dt_add dt_add datetime not null,
@@ -935,31 +935,27 @@ $PP_UPGRADE['0.6.0'] = array(
     // 2. Add an integer field to get the timestamp value
     "ALTER TABLE {$_TABLES['paypal.order_log']}
         CHANGE ts ts_old datetime,
-        ADD ts1 int(11) unsigned after ts",
+        ADD ts int(11) unsigned after id",
     // 3. Set the int field to the Unix timestamp
     "UPDATE {$_TABLES['paypal.order_log']}
-        SET ts1=UNIX_TIMESTAMP(CONVERT_TZ(`ts`, '+00:00', @@session.time_zone))",
+        SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`ts_old`, '+00:00', @@session.time_zone))",
     // 4. Drop the old timestamp field
-    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts",
-    // 5. Rename the new int field to "ts"
     "ALTER TABLE {$_TABLES['paypal.order_log']}
-        CHANGE ts1 ts int(11) unsigned",
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
-        DROP KEY `order_id`",
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
+        DROP ts_old,
+        DROP KEY `order_id`,
         ADD KEY `order_id` (`order_id`, `ts`)",
     "ALTER TABLE {$_TABLES['paypal.orders']}
         ADD `info` text,
         CHANGE last_mod last_mod timestamp",
-    "UPDATE TABLE {$_TABLES['paypal.orders']} SET
+    "UPDATE {$_TABLES['paypal.orders']} SET
         last_mod = NOW(),
-        order_date=UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))",
+        order_date = UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))",
     "ALTER TABLE {$_TABLES['paypal.orders']}
-        DROP order_date_old
+        DROP order_date_old,
         ADD KEY (`order_date`)",
     "UPDATE {$_TABLES['paypal.purchases']} SET
-        purchase_date=UNIX_TIMESTAMP(CONVERT_TZ(`p_dt_old`, '+00:00', @@session.time_zone));
-        expiration=UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
+        purchase_date = UNIX_TIMESTAMP(CONVERT_TZ(`p_dt_old`, '+00:00', @@session.time_zone));
+        expiration = UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
         DROP p_dt_old,
         DROP exp_old",
