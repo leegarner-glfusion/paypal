@@ -24,7 +24,10 @@ class OrderStatus extends Workflow
     static $table = 'paypal.orderstatus';
 
     private $name;
+    private $enabled;
+    private $orderby;
     private $notify_buyer;
+    private $notify_admin;
 
     /**
     *   Constructor.
@@ -37,6 +40,7 @@ class OrderStatus extends Workflow
     {
         if (is_array($A)) {
             $this->notify_buyer = (int)$A['notify_buyer'];
+            $this->notify_admin = (int)$A['notify_buyer'];
             $this->name = $A['name'];
             $this->enabled = (int)$A['enabled'];
             $this->orderby = (int)$A['orderby'];
@@ -45,6 +49,7 @@ class OrderStatus extends Workflow
             $this->enabled = 0;
             $this->orderby = 0;
             $this->notify_buyer = 0;
+            $this->notify_admin = 0;
         }
     }
 
@@ -132,6 +137,17 @@ class OrderStatus extends Workflow
     public function notifyBuyer()
     {
         return $this->notify_buyer == 1 ? true : false;
+    }
+
+
+    /**
+     * Find out whether this status requires notification to the administrator
+     *
+     * @return  boolean     True or False
+     */
+    public function notifyAdmin()
+    {
+        return $this->notify_admin == 1 ? true : false;
     }
 
 

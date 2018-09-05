@@ -439,6 +439,7 @@ $_SQL['paypal.orderstatus'] = "CREATE TABLE `{$_TABLES['paypal.orderstatus']}` (
   `enabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
   `name` VARCHAR(20) NOT NULL,
   `notify_buyer` TINYINT(1) NOT NULL DEFAULT '1',
+  `notify_admin` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `orderby` (`orderby`)
 ) ENGINE=MyISAM";
@@ -516,14 +517,14 @@ $_PP_SAMPLEDATA = array(
             (2, 'billto', 20, 0),
             (3, 'shipto', 30, 0)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
-            (id, orderby, enabled, name, notify_buyer)
+            (id, orderby, enabled, name, notify_buyer, notify_admin)
         VALUES
-            (1, 10, 1, 'pending', 0),
-            (2, 20, 1, 'processing', 0),
-            (3, 30, 1, 'paid', 0),
-            (4, 40, 1, 'shipped', 0),
-            (5, 50, 1, 'closed', 0),
-            (6, 60, 1, 'refunded', 0)",
+            (1, 10, 1, 'pending', 0, 0),
+            (2, 20, 1, 'paid', 1, 1),
+            (3, 30, 1, 'processing', 1, 0),
+            (4, 40, 1, 'shipped', 1, 0),
+            (5, 50, 1, 'closed', 0, 0),
+            (6, 60, 1, 'refunded', 0, 0)",
     $PP_UPGRADE['0.5.4'][1],
 );
 
@@ -746,15 +747,15 @@ $PP_UPGRADE['0.5.2'] = array(
         `orderby` INT(3) UNSIGNED NOT NULL DEFAULT '0',
         `enabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
         `name` VARCHAR(20) NOT NULL,
-        `notify_buyer` TINYINT(1) NOT NULL DEFAULT '1',
+        `notify_buyer` TINYINT(1) NOT NULL DEFAULT '0',
         PRIMARY KEY (`id`),
         KEY `orderby` (`orderby`) ) ENGINE=MyISAM",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
             (id, orderby, enabled, name, notify_buyer)
         VALUES
             (1, 10, 1, 'pending', 0),
-            (2, 20, 1, 'processing', 0),
-            (3, 30, 1, 'paid', 0),
+            (2, 20, 1, 'paid', 1),
+            (3, 30, 1, 'processing', 0),
             (4, 40, 1, 'shipped', 0),
             (5, 50, 1, 'closed', 0)",
     "CREATE TABLE `{$_TABLES['paypal.order_log']}` (
@@ -956,12 +957,17 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.orders']}
         DROP order_date_old
         ADD KEY (`order_date`)",
-    "UPDATE {$_TABLES['gl_pp_purchases']} SET
+    "UPDATE {$_TABLES['paypal.purchases']} SET
         purchase_date=UNIX_TIMESTAMP(CONVERT_TZ(`p_dt_old`, '+00:00', @@session.time_zone));
         expiration=UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
-    "ALTER TABLE {$_TABLES['gl_pp_purchases']}
+    "ALTER TABLE {$_TABLES['paypal.purchases']}
         DROP p_dt_old,
         DROP exp_old",
+    "ALTER TABLE {$_TABLES['paypal.orderstatus']}
+        ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
+    "UPDATE {$_TABLES['paypal.orderstatus']}
+        SET notify_admin = 1 WHERE name = 'paid'",
+    "DROP TABLE {$_TABLES['paypal.cart']}",
 );
 
 ?>

@@ -2,7 +2,9 @@
 
 ## Ver 0.6.0
 Released TBD
-- Removed separate configurations for email to buyers. Email is always sent if possible.
+- Merged shopping cart and order tables.
+- Use Unix timestamps instead of datetime fields.
+- Removed separate configurations for email to buyers and admins. Email is always sent if enabled for the updated status.
 - Removed attachment email for downloadable files, use order links instead.
 - Move sale pricing to separate table to serve both categories and products.
 - Select payment method prior to final checkout.
@@ -16,7 +18,7 @@ Released TBD
 - Create directories outside of auto-installer, to preserve data after plugin removal.
 - New option for products to accept IPN value as actual price, for donations, etc.
 - Use cookie instead of session to store cart IDs since session changes at login
-- Add privacy_export function
+- Add `privacy_export` function
 - Additional refactoring to support multiple product types
 - Support for selling gift cards
 - Implement glFusion 2.0.0 caching
@@ -46,10 +48,10 @@ Released 2016-12-16
 
 ## Ver. 0.5.9
 Released 2016-12-08
-- Change upgrade function to use COM_checkVersion() for better version checking
+- Change upgrade function to use `COM_checkVersion()` for better version checking
 - Add catalog search block
 - UIKit templates
-- Make sure item short_desc is included in purchase record
+- Make sure item `short_desc` is included in purchase record
 - Improve formatting of addresses on printed order
 - Make CSS more cascading for product lists
 - Add store phone and email configuration items

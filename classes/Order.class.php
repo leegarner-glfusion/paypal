@@ -634,9 +634,7 @@ class Order
                     $log_user);
         }
 
-        if (OrderStatus::getInstance($newstatus)->notifyBuyer()) {
-            $this->Notify($newstatus);
-        }
+        $this->Notify($newstatus);
         return true;
     }
 
@@ -712,7 +710,15 @@ class Order
     {
         global $_CONF, $_PP_CONF, $LANG_PP;
 
-        PAYPAL_debug("Sending email to " . $this->uid . ' at ' . $this->buyer_email);
+        // Check if any notification is to be sent for this status update, to
+        // save effort. If either the buyer or admin gets notified then
+        // proceed to construct the messages.
+        $notify_buyer = OrderStatus::getInstance($newstatus)->notifyBuyer();
+        $notify_admin = OrderStatus::getInstance($newstatus)->notifyAdmin();
+        if (!$notify_buyer && !$notify_admin) {
+            PAYPAL_debug("Not sending any notification for status $newstatus");
+            return;
+        }
 
         // setup templates
         $T = PP_getTemplate(array(
@@ -837,30 +843,32 @@ class Order
         $user_text  = $T->parse('user_out', 'msg_user');
         $admin_text = $T->parse('admin_out', 'msg_admin');
 
-        if ($this->buyer_email != '') {
-            COM_emailNotification(array(
-                        'to' => array($this->buyer_email),
-                        'from' => $_CONF['site_mail'],
-                        'htmlmessage' => $user_text,
-                        'subject' => $LANG_PP['subj_email_user'],
-                ) );
-        }
-
-        // Send a notification to the administrator, new purchases only
-        if ($status == '') {
-            if ($_PP_CONF['purch_email_admin'] == 2 ||
-                    ($have_physical && $_PP_CONF['purch_email_admin'] == 1)) {
-                PAYPAL_debug('Sending email to Admin');
-                $email_addr = empty($_PP_CONF['admin_email_addr']) ?
-                            $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
+        // Send a notification to the buyer, depending on the status
+        if ($notify_buyer) {
+            PAYPAL_debug("Sending email to " . $this->uid . ' at ' . $this->buyer_email);
+            if ($this->buyer_email != '') {
                 COM_emailNotification(array(
-                        'to' => array($email_addr),
-                        'from' => $_CONF['noreply_mail'],
-                        'htmlmessage' => $admin_text,
-                        'subject' => $LANG_PP['subj_email_admin'],
+                    'to' => array($this->buyer_email),
+                    'from' => $_CONF['site_mail'],
+                    'htmlmessage' => $user_text,
+                    'subject' => $LANG_PP['subj_email_user'],
                 ) );
             }
         }
+
+        // Send a notification to the administrator, depending on the status
+        if ($notify_admin) {
+            $email_addr = empty($_PP_CONF['admin_email_addr']) ?
+                $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
+            PAYPAL_debug("Sending email to admin at $email");
+            COM_emailNotification(array(
+                'to' => array($email_addr),
+                'from' => $_CONF['noreply_mail'],
+                'htmlmessage' => $admin_text,
+                'subject' => $LANG_PP['subj_email_admin'],
+            ) );
+        }
+
     }   // Notify()
 
 
@@ -1210,8 +1218,9 @@ class Order
     *   Apply a gift card amount to this cart
     *
     *   @param  float   $amt    Amount of credit to apply
+    *   @param  boolean $save   True to immediately save the order
     */
-    public function setGC($amt)
+    public function setGC($amt, $save=true)
     {
         global $_TABLES;
 
@@ -1220,7 +1229,7 @@ class Order
             $gc_bal = Coupon::getUserBalance();
             $amt = min($gc_bal, Coupon::canPayByGC($this));
         }
-        $this->setInfo('apply_gc', $amt);
+        $this->setInfo('apply_gc', $amt, $save);
     }
 
 

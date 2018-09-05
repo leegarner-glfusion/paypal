@@ -7,10 +7,10 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Mark Evans <mark@glfusion.org
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @copyright  Mark Evans <mark@glfusion.org
 *   @package    paypal
-*   @version    0.5.12
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -37,12 +37,10 @@ $_TABLES['paypal.downloads']    = $_PP_table_prefix . 'downloads';
 $_TABLES['paypal.purchases']    = $_PP_table_prefix . 'purchases';
 $_TABLES['paypal.images']       = $_PP_table_prefix . 'images';
 $_TABLES['paypal.categories']   = $_PP_table_prefix . 'categories';
-$_TABLES['paypal.prodXcat']     = $_PP_table_prefix . 'prodXcat';
 $_TABLES['paypal.prod_attr']    = $_PP_table_prefix . 'product_attributes';
 $_TABLES['paypal.address']      = $_PP_table_prefix . 'address';
 $_TABLES['paypal.orders']       = $_PP_table_prefix . 'orders';
 $_TABLES['paypal.userinfo']     = $_PP_table_prefix . 'userinfo';
-$_TABLES['paypal.cart']         = $_PP_table_prefix . 'cart';
 $_TABLES['paypal.buttons']      = $_PP_table_prefix . 'buttons';
 $_TABLES['paypal.gateways']     = $_PP_table_prefix . 'gateways';
 $_TABLES['paypal.workflows']    = $_PP_table_prefix . 'workflows';
@@ -52,6 +50,10 @@ $_TABLES['paypal.currency']     = $_PP_table_prefix . 'currency';
 $_TABLES['paypal.coupons']      = $_PP_table_prefix . 'coupons';
 $_TABLES['paypal.coupon_log']   = $_PP_table_prefix . 'coupon_log';
 $_TABLES['paypal.sales']        = $_PP_table_prefix . 'sales';
+
+// Deprecated tables
+$_TABLES['paypal.prodXcat']     = $_PP_table_prefix . 'prodXcat';
+$_TABLES['paypal.cart']         = $_PP_table_prefix . 'cart';   // Depr 0.6.0
 
 // Other relatively static values;
 $_PP_CONF['image_dir']  = $_CONF['path_html'] . $_PP_CONF['pi_name'] .

@@ -430,10 +430,8 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'status':
         if ($A['isAdmin'] && is_array($LANG_PP['orderstatus'])) {
             $retval = OrderStatus::Selection($A['order_id'], 0, $fieldvalue);
-        } elseif (isset($LANG_PP['orderstatus'][$fieldvalue])) {
-            $retval = $LANG_PP['orderstatus'][$fieldvalue];
         } else {
-            $retval = 'Unknown';
+            $retval = PP_getVar($LANG_PP['orderstatus'], $fieldvalue, 'string', 'Unknown');
         }
         break;
 
