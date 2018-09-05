@@ -88,15 +88,11 @@ case 'checkout':
     }
     if ($gateway !== '') $Cart->setGateway($gateway);
     if (isset($_POST['by_gc'])) {
-        $Cart->setGC($_POST['by_gc']);
+        $Cart->setGC($_POST['by_gc'], false);
     } elseif ($gateway == '_coupon') {
-        $Cart->setGC(-1);
+        $Cart->setGC(-1, false);
     } else {
-        $Cart->setGC(0);
-    }
-    if (isset($_POST['quantity'])) {
-        // Update the cart quantities if coming from the cart view.
-        $Cart->Update($_POST);
+        $Cart->setGC(0, false);
     }
     if (isset($_POST['order_instr'])) {
         $Cart->instructions = $_POST['order_instr'];
@@ -104,7 +100,11 @@ case 'checkout':
     if (isset($_POST['payer_email'])) {
         $Cart->buyer_email = $_POST['payer_email'];
     }
-    $Cart->Save();
+    if (isset($_POST['quantity'])) {
+        // Update the cart quantities if coming from the cart view.
+        // This also calls Save() on the cart
+        $Cart->Update($_POST);
+    }
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
         //$view = Workflow::getNextView();
