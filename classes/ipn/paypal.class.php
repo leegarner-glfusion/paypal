@@ -242,21 +242,20 @@ class paypal extends \Paypal\IPN
                 $quantity = 1;
             }
 
-                $payment_gross = PP_getVar($this->pp_data, 'pmt_gross', 'float') - $fees_paid;
-                $unit_price = $payment_gross / $quantity;
-                $this->AddItem(array(
-                        'item_id'   => $item_number,
-                        'quantity'  => $quantity,
-                        'price'     => $unit_price,
-                        'item_name' => PP_getVar($this->ipn_data, 'item_name', 'string', 'Undefined'),
-                        'shipping'  => PP_getVar($this->pp_data, 'pmt_shipping', 'float'),
-                        'handling'  => PP_getVar($this->pp_data, 'pmt_handling', 'float'),
-                ) );
+            $payment_gross = PP_getVar($this->pp_data, 'pmt_gross', 'float') - $fees_paid;
+            $unit_price = $payment_gross / $quantity;
+            $this->AddItem(array(
+                'item_id'   => $item_number,
+                'quantity'  => $quantity,
+                'price'     => $unit_price,
+                'item_name' => PP_getVar($this->ipn_data, 'item_name', 'string', 'Undefined'),
+                'shipping'  => PP_getVar($this->pp_data, 'pmt_shipping', 'float'),
+                'handling'  => PP_getVar($this->pp_data, 'pmt_handling', 'float'),
+            ) );
 
-                $currency = PP_getVar($this->pp_data, 'currency', 'string', 'Unk');
-                PAYPAL_debug("Net Settled: $payment_gross $currency");
-                $this->handlePurchase();
-            }
+            $currency = PP_getVar($this->pp_data, 'currency', 'string', 'Unk');
+            PAYPAL_debug("Net Settled: $payment_gross $currency");
+            $this->handlePurchase();
             break;
 
         case 'cart':
