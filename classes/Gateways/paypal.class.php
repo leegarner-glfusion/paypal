@@ -221,8 +221,10 @@ class paypal extends \Paypal\Gateway
         // If using a gift card, the gc amount could exceed the item total
         // which won't work with Paypal. Just create one cart item to
         // represent the entire cart including tax, shipping, etc.
-        if (PP_getVar($custom_arr, 'by_gc', 'float') > 0) {
-            $total_amount = $cart->getInfo('final_total');
+        //if (PP_getVar($custom_arr, 'by_gc', 'float') > 0) {
+        $by_gc = $cart->getInfo('apply_gc');
+        if ($by_gc > 0) {
+            $total_amount = $cart->getTotal() - $by_gc;
             $fields['item_number_1'] = $LANG_PP['cart'];
             $fields['item_name_1'] = $LANG_PP['all_items'];
             $fields['amount_1'] = $total_amount;
@@ -238,6 +240,7 @@ class paypal extends \Paypal\Gateway
                 $oc = 0;
                 //$options = explode(',', $item->options);
                 //if (is_array($item['options'])) {
+                if ($item->options != '') {
                     $opts = explode(',', $item->options);
                     foreach ($opts as $optval) {
                         $opt_info = $P->getOption($optval);
@@ -248,9 +251,9 @@ class paypal extends \Paypal\Gateway
                             $oc++;
                         }
                     }
-                /*} else {
+                } else {
                     $opts = array();
-                    }*/
+                }
                 $overrides = array(
                     'price' => $item->price,
                     'uid'   => $_USER['uid'],
@@ -269,7 +272,8 @@ class paypal extends \Paypal\Gateway
                 }
                 $fields['quantity_' . $i] = $item->quantity;
 
-                if (isset($item->shipping)) {
+                //if (isset($item->shipping)) {
+                if ($item->shipping > 0) {
                     $fields['shipping_' . $i] = $item->shipping;
                     $shipping += $item->shipping;
                 }

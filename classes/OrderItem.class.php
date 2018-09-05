@@ -219,6 +219,8 @@ class OrderItem
             $this->setVars($A);
         }
         $purchase_date = DB_escapeString(PAYPAL_now()->toMySQL());
+        $shipping = $this->product->getShipping($this->quantity);
+        $handling = $this->product->getHandling($this->quantity);
 
         if ($this->id > 0) {
             $sql1 = "UPDATE {$_TABLES['paypal.purchases']} ";
@@ -241,7 +243,9 @@ class OrderItem
                 token = '" . DB_escapeString($this->token) . "',
                 options = '" . DB_escapeString($this->options) . "',
                 options_text = '" . DB_escapeString(@json_encode($this->options_text)) . "',
-                extras = '" . DB_escapeString(json_encode($this->extras)) . "'";
+                extras = '" . DB_escapeString(json_encode($this->extras)) . "',
+                shipping = {$shipping},
+                handling = {$handling}";
             // add an expiration date if appropriate
         if ($this->product->expiration > 0) {
             $sql2 .= ", expiration = DATE_ADD('$purchase_date', INTERVAL {$this->product->expiration} DAY)";

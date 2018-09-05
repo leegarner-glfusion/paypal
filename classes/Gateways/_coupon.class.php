@@ -121,8 +121,9 @@ class _coupon extends \Paypal\Gateway
         // Add custom info for the internal ipn processor
         $cust = $cart->custom_info;
         $cust['uid'] = $_USER['uid'];
-        $cust['transtype'] = 'internal';
+        $cust['transtype'] = 'coupon';
         $cust['cart_id'] = $cart->CartID();
+        $cust['by_gc'] = $cart->getTotal();
 
         $gatewayVars = array(
             '<input type="hidden" name="processorder" value="by_gc" />',

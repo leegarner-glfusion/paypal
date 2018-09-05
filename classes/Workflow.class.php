@@ -268,7 +268,7 @@ class Workflow
         if (isset($workflows[$curr_key + 1])) {
             $view = $workflows[$curr_key + 1];
         } else {
-            $view = 'vieworder';
+            $view = 'checkoutcart';
         }
         return $view;
     }

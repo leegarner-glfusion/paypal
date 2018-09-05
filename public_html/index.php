@@ -87,8 +87,8 @@ case 'checkout':
         $Cart->setGateway($gateway);
     }
     if ($gateway !== '') $Cart->setGateway($gateway);
-    if (isset($_POST['apply_gc'])) {
-        $Cart->setGC($_POST['apply_gc']);
+    if (isset($_POST['by_gc'])) {
+        $Cart->setGC($_POST['by_gc']);
     } elseif ($gateway == '_coupon') {
         $Cart->setGC(-1);
     } else {
@@ -322,7 +322,7 @@ case 'order':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            $content .= $order->View(true);
+            $content .= $order->View('vieworder');
         } else {
             COM_404();
         }
@@ -335,7 +335,7 @@ case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            echo $order->View(9, 'print');
+            echo $order->View('vieworder', 'print');
             exit;
         }
     }
@@ -346,7 +346,7 @@ case 'printorder':
 case 'vieworder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         \Paypal\Cart::setSession('prevpage', $view);
-        $content .= \Paypal\Cart::getInstance()->View(9);
+        $content .= \Paypal\Cart::getInstance()->View($view);
         $page_title = $LANG_PP['vieworder'];
     } else {
         COM_404();
@@ -389,7 +389,7 @@ case 'viewcart':
     }
     $menu_opt = $LANG_PP['viewcart'];
     if (\Paypal\Cart::getInstance()->hasItems()) {
-        $content .= \Paypal\Cart::getInstance()->View(0);
+        $content .= \Paypal\Cart::getInstance()->View('viewcart');
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
@@ -399,7 +399,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $content .= \Paypal\Cart::getInstance()->View(9);
+    $content .= \Paypal\Cart::getInstance()->View($view);
     break;
 
 case 'productlist':

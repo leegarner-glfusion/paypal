@@ -318,7 +318,7 @@ class IPN
             }
         }   // foreach item
 
-        $status = $this->Order == NULL ? $this->createOrder() : 0;
+        $status = is_null($this->Order) ? $this->createOrder() : 0;
         if ($status == 0) {
             // Now all of the items are in the order object, check for sufficient
             // funds. If OK, then save the order and call each handlePurchase()
@@ -341,8 +341,8 @@ class IPN
                 $this->Order->Log(sprintf($LANG_PP['amt_paid_gw'], $by_gc, 'Gift Card'));
                 Coupon::Apply($by_gc, $this->Order->uid, $this->Order);
             }
-            $this->Order->Notify();
-            // If this was a user's cart, then clear that also
+            $this->Order->log_user = 'IPN: ' . $this->gw->Description();
+            $this->Order->updateStatus($this->pp_data['status']);
         } else {
             COM_errorLog('Error creating order: ' . print_r($status,true));
         }

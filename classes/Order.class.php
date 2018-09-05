@@ -60,6 +60,8 @@ class Order
         if ($this->isNew) {
             $this->order_id = self::_createID();
             $this->token = self::_createToken();
+            $this->shipping = 0;
+            $this->handling = 0;
         }
     }
 
@@ -206,7 +208,7 @@ class Order
         $args['order_id'] = $this->order_id;    // make sure it's set
         $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
-        COM_errorLog(print_r($item,true));
+        //COM_errorLog(print_r($item,true));      // DEBUG
         $this->items[] = $item;
         $this->Save();
         /*$shipping = PP_getVar($args, 'shipping', 'float');
@@ -235,14 +237,15 @@ class Order
         }
 
         if (!empty($A)) {
-            $this->billto_name     = PP_getVar($A, 'name');
-            $this->billto_company  = PP_getVar($A, 'company');
-            $this->billto_address1 = PP_getVar($A, 'address1');
-            $this->billto_address2 = PP_getVar($A, 'address2');
-            $this->billto_city     = PP_getVar($A, 'city');
-            $this->billto_state    = PP_getVar($A, 'state');
-            $this->billto_country  = PP_getVar($A, 'country');
-            $this->billto_zip      = PP_getVar($A, 'zip');
+            $this->billto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
+            $this->billto_name      = PP_getVar($A, 'name');
+            $this->billto_company   = PP_getVar($A, 'company');
+            $this->billto_address1  = PP_getVar($A, 'address1');
+            $this->billto_address2  = PP_getVar($A, 'address2');
+            $this->billto_city      = PP_getVar($A, 'city');
+            $this->billto_state     = PP_getVar($A, 'state');
+            $this->billto_country   = PP_getVar($A, 'country');
+            $this->billto_zip       = PP_getVar($A, 'zip');
         }
     }
 
@@ -266,14 +269,14 @@ class Order
 
         if (!empty($A)) {
             $this->shipto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
-            $this->shipto_name     = PP_getVar($A, 'name');
-            $this->shipto_company  = PP_getVar($A, 'company');
-            $this->shipto_address1 = PP_getVar($A, 'address1');
-            $this->shipto_address2 = PP_getVar($A, 'address2');
-            $this->shipto_city     = PP_getVar($A, 'city');
-            $this->shipto_state    = PP_getVar($A, 'state');
-            $this->shipto_country  = PP_getVar($A, 'country');
-            $this->shipto_zip      = PP_getVar($A, 'zip');
+            $this->shipto_name      = PP_getVar($A, 'name');
+            $this->shipto_company   = PP_getVar($A, 'company');
+            $this->shipto_address1  = PP_getVar($A, 'address1');
+            $this->shipto_address2  = PP_getVar($A, 'address2');
+            $this->shipto_city      = PP_getVar($A, 'city');
+            $this->shipto_state     = PP_getVar($A, 'state');
+            $this->shipto_country   = PP_getVar($A, 'country');
+            $this->shipto_zip       = PP_getVar($A, 'zip');
         }
     }
 
@@ -411,6 +414,7 @@ class Order
         }
         $sql = $sql1 . implode(', ', $fields) . $sql2;
         //echo $sql;die;
+        COM_errorLog("Save: " . $sql);
         DB_query($sql);
         if ($log && !DB_error()) {
             $this->Log($log_msg);
@@ -423,21 +427,25 @@ class Order
     /**
     *   View the current order summary
     *
-    *   @param  boolean $final      Indicates that this order is final.
+    *   @param  string  $step       Current step in the checkout process
     *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($step = 9, $tpl = '')
+    public function View($step = 'vieworder', $tpl = '')
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
+        $final = false;
         switch($step) {
-        case 0:
+        case 'viewcart':
             $tplname = 'viewcart';
             break;
+        case 'adminview':
+            $final = true;
+        case 'checkoutcart':
         default:
             $tplname = 'order';
             break;
@@ -463,7 +471,11 @@ class Order
         $items = $this->getItemView();
         $tax_items = 0;
         $cart_tax = 0;
+        $this->shipping = 0;
+        $this->handling = 0;
         foreach ($items as $item) {
+            $this->shipping += $item['shipping'];
+            $this->handling += $item['handling'];
             $T->set_var(array(
                 'item_id'       => $item['item_id'],
                 'item_dscp'     => $item['dscp'],
@@ -492,11 +504,12 @@ class Order
 
         $dt = new \Date($this->ux_ts, $_USER['tzid']);
         $this->total = $this->getTotal();     // also calls calcTax()
+        $by_gc = (float)$this->getInfo('apply_gc');
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $Currency->Format($this->total),
-            'not_final'     => $step > 3 ? '' : 'true',
+            'not_final'     => !$final,
             'order_date'    => $dt->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $dt->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
@@ -509,14 +522,15 @@ class Order
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
             'shop_phone'    => $_PP_CONF['shop_phone'],
-            'apply_gc'      => $this->by_gc > 0 ? $Currency->FormatValue($this->by_gc) : 0,
-            'net_total'     => $this->total - $this->by_gc,
+            'apply_gc'      => $by_gc > 0 ? $Currency->FormatValue($by_gc) : 0,
+            'net_total'     => $Currency->Format($this->total - $by_gc),
             'iconset'       => $_PP_CONF['_iconset'],
             'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
             'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], $this->tax_rate * 100, $this->tax_items),
             'status'        => $this->status,
             'token'         => $this->token,
             'is_uikit'      => $_PP_CONF['_is_uikit'],
+            'use_gc'        => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
         ) );
 
         if ($this->isAdmin) {
@@ -547,10 +561,10 @@ class Order
         $T->set_var('payer_email', $payer_email);
 
         switch ($step) {
-        case 0:
+        case 'viewcart':
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
             break;
-        case 9:
+        case 'checkoutcart':
             $gw = Gateway::getInstance($this->getInfo('gateway'));
             if ($gw) {
                 $T->set_var(array(
@@ -562,6 +576,7 @@ class Order
         default:
             break;
         } 
+
         $status = $this->status;
         if ($this->pmt_method != '') {
             $gw = Gateway::getInstance($this->pmt_method);
@@ -579,7 +594,6 @@ class Order
 
         $T->parse('output', 'order');
         $form = $T->finish($T->get_var('output'));
-
         return $form;
     }
 
@@ -613,6 +627,7 @@ class Order
         $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET status = '". DB_escapeString($newstatus) . "'
                 WHERE order_id = '$db_order_id'";
+COM_errorLog("updateStatus: " . $sql);
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) return false;
@@ -700,13 +715,6 @@ class Order
     {
         global $_CONF, $_PP_CONF, $LANG_PP;
 
-        // Check if we're supposed to send a notification
-        /*if ( ($this->uid > 1 &&
-                    $_PP_CONF['purch_email_user'] == 0) ||
-            ($this->uid == 1  &&
-                    $_PP_CONF['purch_email_anon'] == 0) ) {
-            return;
-        }*/
         PAYPAL_debug("Sending email to " . $this->uid . ' at ' . $this->buyer_email);
 
         // setup templates
@@ -717,11 +725,12 @@ class Order
             'msg_body' => 'purchase_email_body',
         ) );
 
-
         // Add all the items to the message
         $total = (float)0;      // Track total purchase value
         $files = array();       // Array of filenames, for attachments
         $item_total = 0;
+        $shipping = 0;
+        $handling = 0;
         $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
         $email_extras = array();
@@ -729,9 +738,12 @@ class Order
         $Cur = Currency::getInstance();     // get currency for formatting
 
         foreach ($this->items as $id=>$item) {
+            $shipping += $item->shipping;
+            $handling += $item->handling;
             $P = $item->getProduct();
-            if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+            if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL) {
                 $have_physical = 1;
+            }
 
             // Add the file to the filename array, if any. Download
             // links are only included if the order status is 'paid'
@@ -774,8 +786,7 @@ class Order
             if ($x != '') $email_extras[] = $x;
         }
 
-        $total_amount = $item_total + $this->tax + $this->shipping +
-            $this->handling;
+        $total_amount = $item_total + $this->tax + $shipping + $handling;
         $user_name = COM_getDisplayName($this->uid);
         if ($this->billto_name == '') {
             $this->billto_name = $user_name;
@@ -786,10 +797,10 @@ class Order
             'payment_items'     => $Cur->Format($item_total),
             'tax'               => $Cur->FormatValue($this->tax),
             'tax_num'           => $this->tax,
-            'shipping'          => $Cur->FormatValue($this->shipping),
-            'shipping_num'      => $this->shipping,
-            'handling'          => $Cur->FormatValue($this->handling),
-            'handling_num'      => $this->handling,
+            'shipping'          => $Cur->FormatValue($shipping),
+            'shipping_num'      => $shipping,
+            'handling'          => $Cur->FormatValue($handling),
+            'handling_num'      => $handling,
             'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
             'payer_name'        => $this->billto_name,
@@ -960,6 +971,8 @@ class Order
                 'tax_icon'  => $LANG_PP['tax'][0],
                 'token'     => $item->token,
                 'link'      => $P->getLink(),
+                'shipping'  => $P->getShipping($item->quantity),
+                'handling'  => $P->getHandling($item->quantity),
             );
             if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;
@@ -1023,10 +1036,12 @@ class Order
         $total = 0;
         foreach ($this->items as $id => $item) {
             $total += ($item->price * $item->quantity);
+            $total += $item->shipping + $item->handling;
         }
         // Need to call calcTax() since this function may be called before
         // the order is saved.
-        $total += $this->calcTax() + $this->shipping + $this->handling;
+        //$total += $this->calcTax() + $this->shipping + $this->handling;
+        $total += $this->calcTax();
         return round($total, Currency::getInstance()->Decimals());
     }
 
@@ -1240,6 +1255,31 @@ class Order
         }
         return false;
     }
+
+
+    /**
+     * Helper function to set the order date.
+     * This comes up when a cart is converted into an order. To show the
+     * correct order date, as opposed to when the cart was first created,
+     * this sets the order_date field to the current date.
+     *
+     * @param   string  $dt     Override date, current timestamp by default
+     */
+    public function setDate($dt='')
+    {
+        global $_TABLES;
+
+        if ($this->isNew) return;   // Not for unsaved orders
+        if ($dt == '') {
+            $dt = 'UTC_TIMESTAMP()';
+        }
+        $sql = "UPDATE {$_TABLES['paypal.orders']}
+                SET order_date = '". DB_escapeString($dt) . "'
+                WHERE order_id = '$this->order_id'";
+COM_errorLog("setDate: " . $sql);
+        DB_query($sql);
+    }
+
 }
 
 ?>

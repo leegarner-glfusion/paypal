@@ -1154,6 +1154,11 @@ class Product
             }
         }
 
+        if ($this->getShipping()) {
+            $shipping_txt = sprintf($LANG_PP['plus_shipping'], Currency::getInstance()->formatValue($this->shipping_amt));
+        } else {
+            $shipping_txt = '';
+        }
         $T->set_var(array(
             'is_uikit' => $_PP_CONF['_is_uikit'],
             'have_attributes'   => $this->hasAttributes(),
@@ -1173,6 +1178,7 @@ class Product
             'onhand'            => $this->track_onhand ? $this->onhand : '',
             'qty_disc'          => $qty_disc_txt,
             'session_id'        => session_id(),
+            'shipping_txt'      => $shipping_txt,
         ) );
         $T->set_block('product', 'SpecialFields', 'SF');
         foreach ($this->special_fields as $fld) {
@@ -1535,7 +1541,6 @@ class Product
                 }
             }
         }
-        $price *= $quantity;
         $price *= $discount_factor;
         $price = round($price, Currency::getInstance()->Decimals());
         return $price;
@@ -2028,6 +2033,24 @@ class Product
     public function buynowQty()
     {
         return 0;
+    }
+
+
+    public function getShipping($qty = 1)
+    {
+        if ($this->shipping_type == 2) {
+            // fixed per-item shipping
+            return (float)$this->shipping_amt * $qty;
+        } else {
+            // no shipping, or calculated by gateway
+            return 0;
+        }
+    }
+
+
+    public function getHandling($qty = 1)
+    {
+        return (float)$this->handling * $qty;
     }
 
 }   // class Product

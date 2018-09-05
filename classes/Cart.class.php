@@ -342,6 +342,7 @@ class Cart extends Order
                 'extras'    => $extras,
                 'taxable'   => $P->isTaxable() ? 1 : 0,
             );
+            //COM_errorLog(print_r($tmp,true));
             //$this->items[] = $tmp;
             parent::addItem($tmp);
             $new_quantity = $quantity;
@@ -709,9 +710,11 @@ class Cart extends Order
         $T->set_var(array(
             'is_uikit' => $_PP_CONF['_is_uikit'],
         ) );
+        $by_gc = (float)$this->getInfo('apply_gc');
+        $net_total = $this->total - $by_gc;
         // Special handling if there is a zero total due to discounts
         // or gift cards
-        if ($this->total < .001) {
+        if ($net_total < .001) {
             $this->custom_info['uid'] = $_USER['uid'];
             $this->custom_info['transtype'] = 'internal';
             $this->custom_info['cart_id'] = $this->CartID();
@@ -728,9 +731,9 @@ class Cart extends Order
             ) );
             $T->parse('checkout_btn', 'checkout');
             return $T->finish($T->get_var('checkout_btn'));
-        }
-        // Else, if amount > 0, regular checkout button
-        if ($gw->Supports('checkout')) {
+        } elseif ($gw->Supports('checkout')) {
+            // Else, if amount > 0, regular checkout button
+            $this->custom_info['by_gc'] = $by_gc;  // pass GC amount used via gateway
             return $gw->checkoutButton($this);
         } else {
             return 'Gateway does not support checkout';
@@ -799,10 +802,10 @@ class Cart extends Order
                 $gw_sel = '';
             }
             foreach ($gateways as $gw) {
-                COM_errorLog(print_r($gw,true));
+                //COM_errorLog(print_r($gw,true));
                 if (is_null($gw)) {
-                    var_dump($gateways);die;
-                    echo "bad gw";die;
+                //    var_dump($gateways);die;
+                //    echo "bad gw";die;
                     continue;
                 }
                 //COM_errorLog("supports: " . print_r($gw->Supports('checkout'),true));
@@ -1126,8 +1129,9 @@ class Cart extends Order
 
         $status = $status ? 'pending' : 'cart';
         $cart_id = DB_escapeString($cart_id);
-        $sql = "UPDATE {$_TABLES['paypal.orders']}
-                SET status = '{$status}'
+        $sql = "UPDATE {$_TABLES['paypal.orders']} SET
+                status = '{$status}',
+                order_date = UTC_TIMESTAMP()
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
         if ($status == 'pending') {
