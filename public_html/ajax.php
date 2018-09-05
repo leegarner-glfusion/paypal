@@ -3,9 +3,9 @@
 *   Common user-facing AJAX functions
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2010-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.4.6
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -17,8 +17,8 @@
 require_once '../lib-common.php';
 
 $uid = (int)$_USER['uid'];
-
-switch ($_GET['action']) {
+$action = PP_getVar($_GET, 'action');
+switch ($action) {
 case 'delAddress':          // Remove a shipping address
     if ($uid < 2) break;    // Not available to anonymous
     $id = (int)$_GET['id']; // Sanitize address ID
@@ -102,6 +102,9 @@ case 'redeem_gc':
         echo json_encode($A);
         exit;
     }
+default:
+    // Missing action, nothing to do
+    break;
 }
 
 ?>
