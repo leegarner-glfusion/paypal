@@ -544,7 +544,7 @@ class paypal extends \Paypal\Gateway
                 break;
             }
 
-            if ($P->isTaxable) {
+            if ($P->taxable) {
                 $vars['tax_rate'] = sprintf("%0.4f", PP_getTaxRate() * 100);
             }
 
