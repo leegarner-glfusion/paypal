@@ -1540,16 +1540,34 @@ function PAYPAL_adminlist_OrderStatus()
             FROM {$_TABLES['paypal.orderstatus']}";
 
     $header_arr = array(
-        array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => false),
-        array('text' => $LANG_PP['name'],
-                'field' => 'name', 'sort' => false),
-        array('text' => $LANG_PP['enabled'],
-                'field' => 'enabled', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['notify'],
-                'field' => 'notify_buyer', 'sort' => false,
-                'align' => 'center'),
+        array(
+            'text' => $LANG_PP['order'],
+            'field' => 'orderby',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['name'],
+            'field' => 'name',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['enabled'],
+            'field' => 'enabled',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['notify_buyer'],
+            'field' => 'notify_buyer',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['notify_admin'],
+            'field' => 'notify_admin',
+            'sort' => false,
+            'align' => 'center',
+        ),
     );
 
     $defsort_arr = array('field' => 'orderby',
@@ -1691,6 +1709,7 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     switch($fieldname) {
     case 'enabled':
     case 'notify_buyer':
+    case 'notify_admin':
         if ($fieldvalue == '1') {
                 $switch = ' checked="checked"';
                 $enabled = 1;

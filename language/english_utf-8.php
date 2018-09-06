@@ -346,7 +346,7 @@ $LANG_PP = array (
 'apply_gc_help' => 'Enter the gift card code below and click the &quot;Update&quot; button to apply to your account.',
 'apply_gc_email' => 'You may apply the gift card to your account by clicking <a href="%s">here</a>, or by visiting <a href="%s">%s</a> and entering the coupon code manually.<br />' . LB . 'NOTE: Do not apply this code to your account if this is a gift or the recipient will not be able to apply it.',
 'subj_email_admin' => $_CONF['site_name'] . ': Order Notification',
-'subj_email_user' => $_CONF['site_name'] . ': Purchase Receipt',
+'subj_email_user' => $_CONF['site_name'] . ': Order Update',
 'sale_prices' => 'Sale Prices',
 'new_sale' => 'New Sale',
 'apply_disc_to' => 'Apply Discount To',
@@ -371,6 +371,8 @@ $LANG_PP = array (
 'user_hdr_orderhist' => 'View all of your previous orders. Click on an order number to view the complete order.',
 'user_hdr_couponlog' => 'This is a list of all transactions related to Gift Cards.',
 'plus_shipping' => '(Plus %s Shipping)',
+'notify_buyer' => 'Notify Buyer',
+'notify_admin' => 'Notify Admin',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

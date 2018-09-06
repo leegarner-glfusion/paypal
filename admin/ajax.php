@@ -125,6 +125,7 @@ case 'toggle':
         switch ($field) {
         case 'enabled':
         case 'notify_buyer':
+        case 'notify_admin':
             $newval = \Paypal\OrderStatus::Toggle($_POST['id'], $field, $_POST['oldval']);
             break;
 
