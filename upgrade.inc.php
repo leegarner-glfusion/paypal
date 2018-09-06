@@ -737,6 +737,8 @@ function PAYPAL_remove_old_files()
             'classes/ppFile.class.php',
             'classes/ipn/internal_ipn.class.php',
             'classes/ipn/paypal_ipn.class.php',
+            'classes/ipn/authorizenet_sim.class.php',
+            'classes/ipn/BaseIPN.class.php',
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
@@ -767,7 +769,8 @@ function PAYPAL_remove_old_files()
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), array('.','..'));
             foreach ($files as $file) {
-                if (is_file($file)) @unlink("$dir/$file");
+                $path = "$dir/$file";
+                if (is_file($path)) @unlink($path);
             }
             @rmdir($dir);
         }
