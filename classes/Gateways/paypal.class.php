@@ -70,6 +70,16 @@ class paypal extends \Paypal\Gateway
             'ipn_url'           => '',
         );
 
+        // This gateway can service all button type by default
+        $this->services = array(
+            'buy_now'   => 1,
+            'donation'  => 1,
+            'pay_now'   => 1,
+            'subscribe' => 1,
+            'checkout'  => 1,
+            'external'  => 1,
+        );
+
         // Call the parent constructor to initialize the common variables.
         parent::__construct();
 
