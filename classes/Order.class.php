@@ -362,11 +362,9 @@ class Order
                     tax_rate = '{$this->tax_rate}',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
-            $log_msg = 'Order Created';
         } else {
             $sql1 = "UPDATE {$_TABLES['paypal.orders']} SET ";
             $sql2 = " WHERE order_id = '{$this->order_id}'";
-            $log_msg = 'Order Updated';
         }
         $tax = $this->calcTax();
 
@@ -394,9 +392,6 @@ class Order
         //echo $sql;die;
         //COM_errorLog("Save: " . $sql);
         DB_query($sql);
-        if ($log && !DB_error()) {
-            $this->Log($log_msg);
-        }
         $this->isNew = false;
         return $this->order_id;
     }
