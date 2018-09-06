@@ -575,21 +575,8 @@ class Gateway
     *   if only that gateway is to be checked.
     *
     *   @param  string  $btn_type   Button type to check
-    *   @param  array   $gw_info    Array from $_PP_CONF, empty to check current
     *   @return boolean             True if the button is supported
     */
-    public static function XSupports($btn_type, $gw_info = '')
-    {
-        $retval = false;
-        if (is_array($gw_info)) {
-            // if an array is passed in, check it for the button type
-            if ($gw_info['enabled'] == 1 &&
-                    isset($gw_info['services'][$btn_type]))
-                $retval = true;
-        }
-        return $retval;
-    }
-
     public function Supports($btn_type)
     {
         return isset($this->services[$btn_type]) ? true : false;

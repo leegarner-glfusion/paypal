@@ -127,7 +127,7 @@ case 'saveproduct':
 case 'savecat':
     $C = new \Paypal\Category($_POST['cat_id']);
     if (!$C->Save($_POST)) {
-        $content .= PAYPAL_popupMsg($C->PrintErrors());
+        $content .= COM_showMessageText($C->PrintErrors());
         $view = 'editcat';
     } else {
         $view = 'catlist';
@@ -137,7 +137,7 @@ case 'savecat':
 case 'saveopt':
     $Attr = new \Paypal\Attribute($_POST['attr_id']);
     if (!$Attr->Save($_POST)) {
-        $content .= PAYPAL_popupMsg($LANG_PP['invalid_form']);
+        $content .= COM_showMessageText($LANG_PP['invalid_form']);
     }
     if (isset($_POST['attr_id']) && !empty($_POST['attr_id'])) {
         // Updating an existing option, return to the list

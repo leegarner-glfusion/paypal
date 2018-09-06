@@ -378,22 +378,6 @@ class Attribute
 
 
     /**
-    *   Create a formatted display-ready version of the error messages.
-    *
-    *   @return string      Formatted error messages.
-    */
-    public function PrintErrors()
-    {
-        $retval = '';
-
-        foreach($this->Errors as $key=>$msg) {
-            $retval .= "<li>$msg</li>\n";
-        }
-        return $retval;
-    }
-
-
-    /**
     *   Reorder all option items
     */
     public function ReOrder()

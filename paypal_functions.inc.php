@@ -557,36 +557,8 @@ function ProductList($cat_id = 0)
         }
     }
 
-    if (isset($_PP_CONF['cat_columns']) &&
-            $_PP_CONF['cat_columns'] > 0) {
-/*        $sql = "SELECT cat.cat_id, cat.cat_name, count(prod.id) AS cnt
-            FROM {$_TABLES['paypal.categories']} cat
-            LEFT JOIN {$_TABLES['paypal.products']} prod
-                ON prod.cat_id = cat.cat_id
-            WHERE cat.enabled = '1' AND cat.parent_id = '{$RootCat->cat_id}'
-                AND prod.enabled = '1' " .
-            SEC_buildAccessSql('AND', 'cat.grp_access') .
-            " GROUP BY cat.cat_id
-            ORDER BY cat.cat_name";
-            //HAVING cnt > 0
-        //echo $sql;die;
-
-        $res = DB_query($sql);
-        $A = array(
-            $RootCat->cat_id => array(
-                'name' => $RootCat->cat_name,
-            ),
-        );
-        while ($C = DB_fetchArray($res, false)) {
-            if ($C['cat_id'] == $Cat->cat_id) {
-                $C['cat_name'] = '<b>' . $C['cat_name'] . '</b>';
-            }
-            $A[$C['cat_id']] = array(
-                'name' => $C['cat_name'],
-                'count' => $C['cnt'],
-            );
-        }
-*/
+    $cat_cols = PP_getVar($_PP_CONF, 'cat_columns', 'integer', 0);
+    if ($cat_cols > 0) {
         // Now get categories from plugins
         foreach ($_PLUGINS as $pi_name) {
             $pi_cats = PLG_callFunctionForOnePlugin('plugin_paypal_getcategories_' . $pi_name);
@@ -610,7 +582,7 @@ function ProductList($cat_id = 0)
                 $CT->set_var('catimg_url', $cat_img_url);
             }
 
-            $CT->set_var('width', floor (100 / $_PP_CONF['cat_columns']));
+            $CT->set_var('width', floor (100 / $cat_cols));
             foreach ($A as $category => $info) {
                 if (isset($info['url'])) {
                     $url = $info['url'];
@@ -623,13 +595,13 @@ function ProductList($cat_id = 0)
                     //'count'         => $info['count'],
                 ) );
                 $CT->parse('catrow', 'category', true);
-                if ($i % $_PP_CONF['cat_columns'] == 0) {
+                if ($i % $cat_cols == 0) {
                     $CT->parse('categories', 'row', true);
                     $CT->set_var('catrow', '');
                 }
                 $i++;
             }
-            if ($catrows % $_PP_CONF['cat_columns'] != 0) {
+            if ($catrows % $cat_cols != 0) {
                 $CT->parse('categories', 'row', true);
             }
             $display .= $CT->parse('', 'table');
@@ -712,24 +684,25 @@ function ProductList($cat_id = 0)
     if ($count === NULL) {
         $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
         $x = DB_fetchArray($res, false);
-        $count = isset($x['cnt']) ? (int)$x['cnt'] : 0;
+        $count = PP_getVar($x, 'cnt', 'integer');
         Cache::set($cache_key, $count, array('product', 'categories'));
     }
 
     // If applicable, handle pagination of query
-    if (isset($_PP_CONF['prod_per_page']) && $_PP_CONF['prod_per_page'] > 0) {
+    $prod_per_page = PP_getVar($_PP_CONF, 'prod_per_page', 'integer');
+    if ($prod_per_page > 0) {
         // Make sure page requested is reasonable, if not, fix it
         if (!isset($_REQUEST['page']) || $_REQUEST['page'] <= 0) {
             $_REQUEST['page'] = 1;
         }
         $page = (int)$_REQUEST['page'];
-        $start_limit = ($page - 1) * $_PP_CONF['prod_per_page'];
+        $start_limit = ($page - 1) * $prod_per_page;
         if ($start_limit > $count) {
-            $page = ceil($count / $_PP_CONF['prod_per_page']);
+            $page = ceil($count / $prod_per_page);
         }
         // Add limit for pagination (if applicable)
-        if ($count > $_PP_CONF['prod_per_page']) {
-            $sql .= " LIMIT $start_limit, {$_PP_CONF['prod_per_page']}";
+        if ($count > $prod_per_page) {
+            $sql .= " LIMIT $start_limit, $prod_per_page";
         }
     }
 
@@ -960,13 +933,11 @@ function ProductList($cat_id = 0)
 
     $pagenav_args = empty($pagenav_args) ? '' : '?'.implode('&', $pagenav_args);
     // Display pagination
-    if (isset($_PP_CONF['prod_per_page']) &&
-            $_PP_CONF['prod_per_page'] > 0 &&
-            $count > $_PP_CONF['prod_per_page'] ) {
+    if ($prod_per_page > 0 && $count > $prod_per_page) {
         $product->set_var('pagination',
             COM_printPageNavigation(PAYPAL_URL . '/index.php' . $pagenav_args,
                         $page,
-                        ceil($count / $_PP_CONF['prod_per_page'])));
+                        ceil($count / $prod_per_page)));
     } else {
         $product->set_var('pagination', '');
     }
@@ -1059,200 +1030,35 @@ function ipnlogSingle($id, $txn_id)
 
 
 /**
- *  Displays the list of ipn history from the log stored in the database.
- *
-*   @deprecated
- *  @return string      HTML string containing the contents of the ipnlog
- */
-function X_PAYPAL_ipnlogList()
-{
-    global $_TABLES, $_CONF;
-
-    $display = COM_startBlock('IPN History');
-
-    // Get ipnlog from database
-    $sql = "SELECT *
-            FROM {$_TABLES['paypal.ipnlog']}
-            ORDER BY time DESC";
-    $res = DB_query($sql);
-
-    // Create ipnlog template
-    $ipnlog = PP_getTemplate(array('ipnlog' => 'ipnlog_item.thtml',
-            'start'  => 'ipnlog_start',
-            'end'    => 'ipnlog_end',
-    ) );
-    $ipnlog->set_var('site_url', $_CONF['site_url']);
-
-    // Display the begging of the ipnlog list
-    $display .= $ipnlog->parse('output', 'start');
-
-    // Display each ipnlog row
-    while ($A = DB_fetchArray($res)) {
-        $ipnlog->set_var('id', $A['id']);
-        $ipnlog->set_var('ip_addr', $A['ip_addr']);
-        $ipnlog->set_var('time', $A['time']);
-        if ($A['verified']) {
-            $ipnlog->set_var('verified', 'true');
-        } else {
-            $ipnlog->set_var('verified', 'false');
-        }
-        $ipn = unserialize($A['ipn_data']);
-        $ipnlog->set_var('txn_id', $ipn['txn_id']);
-        $ipnlog->set_var('status', $ipn['payment_status']);
-        $ipnlog->set_var('purchaser', $ipn['custom']);
-        $display .= $ipnlog->parse('output', 'ipnlog');
-    }
-
-    // Display the end of the ipnlog list
-    $display .= $ipnlog->parse('output', 'end');
-    $display .= COM_endBlock();
-    return $display;
-}
-
-
-/**
- *  Display a popup text message
- *
- *  @param string $msg Text to display
- */
-function PAYPAL_popupMsg($msg)
-{
-    global $_CONF;
-
-    $msg = htmlspecialchars($msg, ENT_QUOTES, COM_getEncodingt());
-    $popup = COM_showMessageText($msg);
-    return $popup;
-}
-
-
-/**
 *   Display an error message.
 *   Uses glFusion's typography to display an "alert" type message.
-*   The provided message should be a string containing one or more
-*   list elements, e.g. "<li>Bad input</li>".
+*   The provided message may be a single message string or array of strings.
+*   An array will be formatted as an unnumbered list.
 *
-*   @param  string  $msg    List elements of the error message
-*   @param  string  $title  Optional title string, shown above list
+*   @param  array|string    $msg    Single message string or array
+*   @param  string          $title  Optional title string, shown above list
 *   @return string          Complete error message
 */
-function PAYPAL_errMsg($msg, $title = '')
+function PAYPAL_errMsg($msg = array(), $title = '')
 {
+    if (empty($msg)) return '';
+
     $retval = '<span class="alert paypalErrorMsg">' . "\n";
-    if (!empty($title))
+    if (!empty($title)) {
         $retval .= "<p>$title</p>\n";
+    }
 
-    $retval .= "<ul>$msg</ul>\n";
-    $retval .= "</span>\n";
+    if (is_array($msg)) {
+        $retval .= '<ul>';
+        foreach ($msg as $m) {
+            $retval .= '<li>' . $m . '</li>' . LB;
+        }
+        $retval .= '<ul>' . LB;
+    } else {
+        $retval .= $msg;
+    }
+    $retval .= "/span>\n";
     return $retval;
-}
-
-
-/**
-*   Recurse through the category table building an option list
-*   sorted by id.
-*
-*   @param integer  $sel        Category ID to be selected in list
-*   @param integer  $parent_id  Parent category ID
-*   @param string   $char       Separator characters
-*   @param string   $not        'NOT' to exclude $items, '' to include
-*   @param string   $items      Optional comma-separated list of items to include or exclude
-*   @return string              HTML option list, without <select> tags
-*   @deprecated
-*/
-function X_PAYPAL_recurseCats(
-        $function, $sel=0, $parent_id=0, $char='', $not='', $items='',
-        $level=0, $maxlevel=0, $prepost = array())
-{
-    global $_TABLES, $_GROUPS;
-
-    $str = '';
-    if (empty($prepost)) {
-        $prepost = array('', '');
-    }
-
-    // Locate the parent category of this one, or the root categories
-    // if papa_id is 0.
-    $sql = "SELECT cat_id, cat_name, parent_id, description
-        FROM {$_TABLES['paypal.categories']}
-        WHERE parent_id = $parent_id " .
-        SEC_buildAccessSql();
-
-    if (!empty($items)) {
-        $sql .= " AND cat_id $not IN ($items) ";
-    }
-    $sql .= ' ORDER BY cat_name ASC ';
-    //echo $sql;die;
-    $result = DB_query($sql);
-    // If there is no top-level category, just return.
-    if (!$result)
-        return '';
-
-    while ($row = DB_fetchArray($result, false)) {
-        $txt = $char . $row['cat_name'];
-        $selected = $row['cat_id'] == $sel ? 'selected="selected"' : '';
-        if (!function_exists($function)) {
-            $function = __NAMESPACE__ . '\callbackCatOptionList';
-        }
-        $str .= $function($row, $sel, $parent_id, $txt);
-        if ($maxlevel == 0 || $level < $maxlevel) {
-            $str .= $prepost[0] .
-                    PAYPAL_recurseCats($function, $sel, $row['cat_id'],
-                        $char."-", $not, $items, $level++, $maxlevel) .
-                    $prepost[1];
-        }
-    }
-    return $str;
-}   // function PAYPAL_recurseCats()
-
-
-/**
-*   Callback function to create a comma-separated list of categories.
-*   Used to create a SQL IN() clause. Will return a prepended comma, need
-*   to call trim($str, ',') in the calling function.
-*
-*   @param  array   $A      Complete category record
-*   @param  integer $sel    Selectd item (optional)
-*   @param  integer $parent_id  Parent ID from which we've started searching
-*   @param  string  $txt    Different text to use for category name.
-*   @return string          Option list element for a category
-*   @deprecated
-*/
-function X_callbackCatCommaList($A, $sel=0, $parent=0, $txt='')
-{
-    return ',' . $A['cat_id'];
-}
-
-
-/**
-*   Callback function to create text for option list items.
-*
-*   @param  array   $A      Complete category record
-*   @param  integer $sel    Selectd item (optional)
-*   @param  integer $parent_id  Parent ID from which we've started searching
-*   @param  string  $txt    Different text to use for category name.
-*   @return string          Option list element for a category
-*/
-function callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
-{
-    if ($sel > 0 && $A['cat_id'] == $sel) {
-        $selected = 'selected="selected"';
-    } else {
-        $selected = '';
-    }
-
-    if ($A['parent_id'] == 0) {
-        $style = 'class="paypalCategorySelectRoot"';
-    } else {
-        $style = '';
-    }
-
-    if ($txt == '')
-        $txt = $A['cat_name'];
-
-    $str = "<option value=\"{$A['cat_id']}\" $style $selected>";
-    $str .= $txt;
-    $str .= "</option>\n";
-    return $str;
 }
 
 

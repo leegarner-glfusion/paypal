@@ -426,10 +426,6 @@ class Category
             'ena_chk'       => $this->enabled == 1 ? 'checked="checked"' : '',
             'old_parent'    => $this->parent_id,
             'old_grp'       => $this->grp_access,
-            /*'parent_sel'    => PAYPAL_recurseCats(
-                                    __NAMESPACE__ . '\callbackCatOptionList',
-                                    $this->parent_id, 0, '',
-                                    $not, $items),*/
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
             'doc_url'       => PAYPAL_getDocURL('category_form'),
             'iconset'   => $_PP_CONF['_iconset'],
