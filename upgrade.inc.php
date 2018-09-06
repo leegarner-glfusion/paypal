@@ -643,7 +643,8 @@ function PAYPAL_do_upgrade()
     PAYPAL_remove_old_files();
     CTL_clearCache();   // clear cache to ensure CSS updates come through
     COM_errorLog("Successfully updated the {$_PP_CONF['pi_display_name']} Plugin", 1);
-    COM_setMsg("Paypal Plugin has been updated to $current_ver", 'error');
+    // Set a message in the session to replace the "has not been upgraded" message
+    COM_setMsg("Paypal Plugin has been updated to $current_ver", 'info', 1);
     return true;
 }
 
