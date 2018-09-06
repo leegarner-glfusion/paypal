@@ -129,6 +129,7 @@ class _coupon extends \Paypal\Gateway
             '<input type="hidden" name="processorder" value="by_gc" />',
             '<input type="hidden" name="cart_id" value="' . $cart->CartID() . '" />',
             '<input type="hidden" name="custom" value=\'' . @serialize($cust) . '\' />',
+            '<input type="hidden" name="payment_status" value="Completed" />',
         );
         $cart->setInfo('apply_gc', $cart->getInfo('final_total'));
         if (COM_isAnonUser()) {
