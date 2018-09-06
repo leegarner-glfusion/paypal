@@ -166,27 +166,6 @@ class Order
 
 
     /**
-    *   Set the order items from the provided array.
-    *
-    *   @param  array   $A      Array of item_id=>item_data
-    */
-    public function XXsetItems($A)
-    {
-        global $_TABLES;
-
-        if (!is_array($A)) return;
-        $this->items = array();         // re-initialize the array
-
-        // For each item, break out the item data and set the array value.
-        // Look up the product information from the database and set that
-        // into the array's "data" element.
-        foreach ($A as $item_number => $data) {
-            $this->AddItem($item_number, $data);
-        }
-    }
-
-
-    /**
     *   Add a single item to this order
     *   Extracts item information from the provided $data variable, and
     *   reads the item information from the database as well.  The entire
@@ -715,8 +694,8 @@ class Order
         // Check if any notification is to be sent for this status update, to
         // save effort. If either the buyer or admin gets notified then
         // proceed to construct the messages.
-        $notify_buyer = OrderStatus::getInstance($newstatus)->notifyBuyer();
-        $notify_admin = OrderStatus::getInstance($newstatus)->notifyAdmin();
+        $notify_buyer = OrderStatus::getInstance($status)->notifyBuyer();
+        $notify_admin = OrderStatus::getInstance($status)->notifyAdmin();
         if (!$notify_buyer && !$notify_admin) {
             PAYPAL_debug("Not sending any notification for status $status");
             return;
