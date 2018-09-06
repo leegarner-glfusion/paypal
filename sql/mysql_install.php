@@ -395,21 +395,6 @@ $_SQL['paypal.userinfo'] = "CREATE TABLE `{$_TABLES['paypal.userinfo']}` (
   PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM";
 
-// since 0.5.0
-$_SQL['paypal.cart'] = "CREATE TABLE `{$_TABLES['paypal.cart']}` (
-  `cart_id` varchar(40) NOT NULL,
-  `cart_uid` int(11) unsigned NOT NULL,
-  `cart_info` text,
-  `cart_contents` text,
-  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `apply_gc` float(8,2) DEFAULT NULL,
-  `total` float(8,2) DEFAULT NULL,
-  `tax` float(5,2) DEFAULT NULL,
-  `shipping` float(5,2) DEFAULT NULL,
-  `is_order` tinyint(1) unsigned not null default 0,
-  PRIMARY KEY (`cart_id`)
-) ENGINE=MyISAM";
-
 // since .5.0
 $_SQL['paypal.gateways'] = "CREATE TABLE `{$_TABLES['paypal.gateways']}` (
   `id` varchar(25) NOT NULL,
