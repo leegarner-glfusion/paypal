@@ -471,6 +471,9 @@ $LANG_confignames['paypal'] = array(
     'gc_suffix'     => 'Use Suffix',
     'gc_length'     => 'Code Length',
     'gc_mask'       => 'Code Mask',
+    'centerblock'   => 'Centerblock',
+    'days_purge_cart' => 'Days before purging carts',
+    'days_purge_pending' => 'Days before purging unpaid orders',
 );
 
 /** Language strings for the subgroup names in the config section */

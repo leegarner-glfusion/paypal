@@ -410,10 +410,6 @@ $LANG_configsections['paypal'] = array(
 $LANG_confignames['paypal'] = array(
     'currency'      => 'Currency',
     'anon_buy'      => 'Anonymous users can buy?',
-//    'purch_email_user' => 'Email User upon purchase?',
-//    'purch_email_user_attach' => 'Attach files to user\'s email message?',
-//    'purch_email_anon' => 'Email anonymous buyer upon purchase?',
-//    'purch_email_anon_attach' => 'Attach files to anonymous buyer email?',
     'prod_per_page' => 'Max products displayed per page',
     'order'         => 'Default sort order for product display',
     'menuitem'      => 'Add to main menu?',
@@ -425,7 +421,6 @@ $LANG_confignames['paypal'] = array(
     'img_max_height' => 'Max Image Height (px)',
     'max_image_size' => 'Max. Product Image Size',
     'max_file_size' => 'Max size for downloadable files, in MB',
-//    'download_path' => 'Full path to downloadable files',
     'commentsupport' => 'Comments Supported?',
     'tmpdir'        => 'Temporary Working Directory',
     'ena_comments'  => 'Enable Comments?',
@@ -471,6 +466,9 @@ $LANG_confignames['paypal'] = array(
     'gc_suffix'     => 'Use Suffix',
     'gc_length'     => 'Code Length',
     'gc_mask'       => 'Code Mask',
+    'centerblock'   => 'Centerblock',
+    'days_purge_cart' => 'Days before purging carts',
+    'days_purge_pending' => 'Days before purging unpaid orders',
 );
 
 /** Language strings for the subgroup names in the config section */
