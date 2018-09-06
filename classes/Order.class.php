@@ -832,7 +832,7 @@ class Order
         if ($notify_admin) {
             $email_addr = empty($_PP_CONF['admin_email_addr']) ?
                 $_CONF['site_mail'] : $_PP_CONF['admin_email_addr'];
-            PAYPAL_debug("Sending email to admin at $email");
+            PAYPAL_debug("Sending email to admin at $email_addr");
             COM_emailNotification(array(
                 'to' => array($email_addr),
                 'from' => $_CONF['noreply_mail'],
