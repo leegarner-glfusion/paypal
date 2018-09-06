@@ -134,7 +134,7 @@ case 'saveshipto':
     $addr_type = substr($action, 4);   // get 'billto' or 'shipto'
     $status = \Paypal\UserInfo::isValidAddress($_POST);
     if ($status != '') {
-        $content .= PAYPAL_errMsg($status, $LANG_PP['invalid_form']);
+        $content .= \Paypal\PAYPAL_errMsg($status, $LANG_PP['invalid_form']);
         $view = $addr_type;
         break;
     }

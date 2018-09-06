@@ -295,7 +295,7 @@ class UserInfo
     *
     *   @param  array   $A      Array of parameters, e.g. $_POST
     *   @param  string  $type   Type of address (billing or shipping)
-    *   @return string      Invalid items, or empty string for success
+    *   @return string      List of invalid items, or empty string for success
     */
     public static function isValidAddress($A)
     {
@@ -323,8 +323,8 @@ class UserInfo
             foreach ($invalid as $id) {
                 $retval .= '<li> ' . $LANG_PP[$id] . '</li>' . LB;
             }
+            $retval = '<ul>' . $retval . '</ul>';
         }
-
         return $retval;
     }
 

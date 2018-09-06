@@ -530,7 +530,7 @@ class Product
         Cache::delete('prod_attr_' . $this->id);
         Cache::clear('product');
 
-        PAYPAL_debug('Status of last update: ' . print_r($status,true));
+        //PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {
             // Handle image uploads.  This is done last because we need
             // the product id to name the images filenames.
@@ -1303,9 +1303,9 @@ class Product
     */
     public function PrintErrors()
     {
-        $retval = '';
+        $retval = array();
         foreach($this->Errors as $key=>$msg) {
-            $retval .= "<li>$msg</li>\n";
+            $retval[] = $msg;
         }
         return $retval;
     }
