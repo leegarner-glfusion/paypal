@@ -604,7 +604,7 @@ function PAYPAL_do_upgrade()
                 $s_price = (float)$A['sale_price'];
                 if ($s_price != 0) {
                     $price = (float)$A['price'];
-                    $discount = $price = $s_price;
+                    $discount = (float)($price - $s_price);
                     // Fix dates to fit in an Unix timestamp
                     foreach (array('sale_beg', 'sale_end') as $key) {
                         if ($A[$key] < '1970-01-01') {
@@ -620,18 +620,11 @@ function PAYPAL_do_upgrade()
             }
             if (!empty($sql)) {
                 $sql = implode(',', $sql);
-                $_PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.sales']}
+                $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.sales']}
                         (item_type, item_id, start, end, discount_type, amount)
                         VALUES $sql";
             }
         }
-
-        // Change orders to use UTC for dates. Logs already do.
-        /*date_default_timezone_set($_CONF['timezone']);
-        $offset = date('P');
-        $sql = "UPDATE {$_TABLES['paypal.orders']}
-                SET order_date = convert_tz(order_date, '$offset', '+00:00')";
-        $PP_UPGRADE['0.6.0'][] = $sql;*/
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
