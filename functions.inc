@@ -801,7 +801,6 @@ function plugin_autouninstall_paypal ()
         'tables' => array(
                 'paypal.address',
                 'paypal.buttons',
-                'paypal.cart',
                 'paypal.categories',
                 'paypal.currency',
                 'paypal.gateways',
@@ -817,6 +816,7 @@ function plugin_autouninstall_paypal ()
                 'paypal.workflows',
                 'paypal.coupons',
                 'paypal.coupon_log',
+                'paypal.sales',
         ),
         // Give the full name of the group, as in the db
         'groups' => array('paypal Admin'),

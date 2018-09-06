@@ -159,7 +159,7 @@ $INSTALL_plugin['paypal'] = array(
 );
 
 $tables = array(
-    'products', 'categories', 'purchases', 'ipnlog', 'cart', 'orders',
+    'products', 'categories', 'purchases', 'ipnlog', 'orders', 'sales',
     'prod_attr', 'images', 'gateways', 'address', 'userinfo', 'workflows',
     'buttons', 'orderstatus', 'order_log', 'currency', 'coupons', 'coupon_log',
 );
