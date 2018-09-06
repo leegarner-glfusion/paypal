@@ -734,6 +734,7 @@ function PAYPAL_remove_old_files()
             'templates/detail/v1/product_detail.thtml',
             'templates/order.uikit.thtml',
             'classes/paymentgw.class.php',
+            'classes/ppFile.class.php',
             'classes/ipn/internal_ipn.class.php',
             'classes/ipn/paypal_ipn.class.php',
         ),
