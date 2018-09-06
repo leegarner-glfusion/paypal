@@ -129,12 +129,6 @@ class OrderStatus extends Workflow
     }
 
 
-    public function notifyBuyer()
-    {
-        return $this->notify_buyer == 1 ? true : false;
-    }
-
-
     /**
      * Find out whether this status requires notification to the buyer.
      *
