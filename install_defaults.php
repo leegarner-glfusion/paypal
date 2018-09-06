@@ -134,6 +134,10 @@ $_PP_DEFAULTS['list_tpl_ver'] = 'v1';   // default product list item template
 $_PP_DEFAULTS['cache_max_age'] = 900;   // default cache file age, 15 minutes
 $_PP_DEFAULTS['tc_link'] = '';     // Link to terms and conditions
 
+// Default number of days for unfinished orders to remain
+$_PP_DEFAULTS['days_purge_cart'] = 14;
+$_PP_DEFAULTS['days_purge_pending'] = 180;
+
 $_PP_DEFAULTS['gc_enabled'] = 0;        // enable gift cards? 1=yes, 0=no
 $_PP_DEFAULTS['gc_exp_days'] = 365;     // default expiration for gift cards
 $_PP_DEFAULTS['gc_mask'] = 'XXXX-XXXX-XXXX-XXXX';
@@ -210,7 +214,10 @@ function plugin_initconfig_paypal($group_id = 0)
                 'select', 0, 0, 15, 230, true, $_PP_CONF['pi_name']);
         $c->add('tc_link', $_PP_DEFAULTS['tc_link'],
                 'text', 0, 0, 2, 240, true, $_PP_CONF['pi_name']);
-
+        $c->add('days_purge_cart', $_PP_DEFAULTS['days_purge_cart'],
+                'text', 0, 0, 2, 250, true, $_PP_CONF['pi_name']);
+        $c->add('days_purge_pending', $_PP_DEFAULTS['days_purge_pending'],
+                'text', 0, 0, 2, 260, true, $_PP_CONF['pi_name']);
 
         // Path and image handling
         $c->add('fs_paths', NULL, 'fieldset', 0, 10, NULL, 0, true,

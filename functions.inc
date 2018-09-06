@@ -1447,15 +1447,27 @@ function plugin_runScheduledTask_paypal()
 {
     global $_PP_CONF, $_TABLES, $_CONF;
 
+    $sql = array();
     if ($_PP_CONF['ena_cart'] == 1) {
-        // New method: Delete old orders that haven't been finalized
-        $sql = "DELETE FROM {$_TABLES['paypal.orders']}
-            WHERE (
-                status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL 7 DAY)
-                OR
-                status = 'pending' AND last_mod < DATE_SUB(NOW(), INTERVAL 90 DAY)
-            )";
-        DB_query($sql);
+        // Delete carts not updated in a while
+        $days = PP_getVar($_PP_CONF, 'days_purge_cart', 'integer');
+        if ($days > 0) {
+            $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
+                WHERE status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)";
+        }
+
+        // Delete orders not updated in a while
+        $days = PP_getVar($_PP_CONF, 'days_purge_pending', 'integer');
+        if ($days > 0) {
+            $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
+                WHERE status = 'pending' AND last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)";
+        }
+    }
+
+    if (!empty($sql)) {
+        foreach ($sql as $stmt) {
+            DB_query($stmt);
+        }
     }
 
     // Clean up the HTML cache if used

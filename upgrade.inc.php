@@ -562,6 +562,10 @@ function PAYPAL_do_upgrade()
                 'text', 20, 10, 0, 60, true, $_PP_CONF['pi_name']);
         $c->add('gc_mask', $_PP_DEFAULTS['gc_mask'],
                 'text', 20, 10, 0, 70, true, $_PP_CONF['pi_name']);
+        $c->add('days_purge_cart', $_PP_DEFAULTS['days_purge_cart'],
+                'text', 0, 0, 2, 250, true, $_PP_CONF['pi_name']);
+        $c->add('days_purge_pending', $_PP_DEFAULTS['days_purge_pending'],
+                'text', 0, 0, 2, 260, true, $_PP_CONF['pi_name']);
 
         // Previously, categories were not required. With the MPTT method,
         // there must be at least one. Collect all the categories, increment
