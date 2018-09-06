@@ -907,7 +907,7 @@ $PP_UPGRADE['0.6.0'] = array(
         DROP sale_beg,
         DROP sale_end,
         CHANGE weight weight decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE shipping_amt shipping amt decimal(9,4) NOT NULL DEFAULT 0,
+        CHANGE shipping_amt shipping_amt decimal(9,4) NOT NULL DEFAULT 0,
         CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
     "UPDATE {$_TABLES['conf_values']}
         SET fieldset = 0, sort_order = 240
