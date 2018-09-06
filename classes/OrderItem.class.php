@@ -14,11 +14,9 @@
 namespace Paypal;
 
 /**
-*   Class for order processing workflow items
-*   Order statuses are defined in the database and can be re-ordered and
-*   individually enabled or disabled.
-*   @package paypal
-*/
+ * Class for order items.
+ *  @package paypal
+ */
 class OrderItem
 {
     private $properties = array();
@@ -100,6 +98,12 @@ class OrderItem
     }
 
 
+    /**
+     * Setter function
+     *
+     * @param   string  $key    Name of property to set
+     * @param   mixed   $value  Value to set for property
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -132,6 +136,12 @@ class OrderItem
     }
 
 
+    /**
+     * Getter function
+     *
+     * @param   string  $key    Property to retrieve
+     * @return  mixed           Value of property, NULL if undefined
+     */
     public function __get($key)
     {
         if (array_key_exists($key, $this->properties)) {

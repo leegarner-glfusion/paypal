@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Standardize in SQL decimal type for money amounts.
 - Merged shopping cart and order tables.
 - Use Unix timestamps instead of datetime fields.
 - Removed separate configurations for email to buyers and admins. Email is always sent if enabled for the updated status.

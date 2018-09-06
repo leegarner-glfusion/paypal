@@ -182,10 +182,6 @@ class Order
         //COM_errorLog(print_r($item,true));      // DEBUG
         $this->items[] = $item;
         $this->Save();
-        /*$shipping = PP_getVar($args, 'shipping', 'float');
-        if ($shipping > 0) {
-            $this->shipping = $this->shipping + $shipping;
-        }*/
     }
 
 
@@ -360,6 +356,7 @@ class Order
                     order_id='{$this->order_id}',
                     order_date = '{$this->order_date}',
                     tax_rate = '{$this->tax_rate}',
+                    token = '" . DB_escapeString($this->token) . "',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
         } else {
@@ -379,7 +376,6 @@ class Order
                 "handling = '{$this->handling}'",
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
-                "token = '" . DB_escapeString($this->token) . "'",
                 "info = '" . DB_escapeString(@serialize($this->m_info)) . "'",
         );
         foreach (array('billto', 'shipto') as $type) {
