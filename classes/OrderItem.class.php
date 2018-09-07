@@ -274,6 +274,25 @@ class OrderItem
         }
     }
 
+
+    /**
+    *   Update the quantity for a cart item.
+    *
+    *   @param  integer $newqty New quantity
+    *   @return object          Updated item object
+    */
+    public function setQuantity($newqty)
+    {
+        if ($newqty > 0) {
+            $this->quantity = (float)$newqty;
+            $product = $this->getProduct();
+            $price = $product->getPrice($this->options, $newqty);
+            $this->price = $price;
+            $this->Save();
+        }
+        return $this;
+    }
+
 }
 
 ?>

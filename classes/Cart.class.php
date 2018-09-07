@@ -270,7 +270,7 @@ class Cart extends Order
         }
         foreach ($items as $id=>$value) {
             $value = (float)$value;
-            $this->UpdateQty($id, $value, false);
+            $this->items[$id]->setQuantity($value);
         }
         // Now look for a coupon code to redeem against the user's account.
         if ($_PP_CONF['gc_enabled']) {
@@ -287,36 +287,8 @@ class Cart extends Order
         if (isset($A['by_gc'])) {
             $this->setGC($A['by_gc']);
         }
-        $this->Save();  // UpdateQty didn't save the cart, so do it here
+        $this->Save();  // Save cart vars, if changed, and update the timestamp
         return $this->m_cart;
-    }
-
-
-    /**
-    *   Update the quantity for a cart item.
-    *   Since this may be called by Cart::UpdateAllQty, the $save parameter
-    *   may be false to keep from updating the DB after every save.  In that
-    *   case, it's up to the caller to promptly save the cart.
-    *
-    *   @param  string  $id     Item ID to update
-    *   @param  integer $newqty New quantity
-    *   @param  boolean $save   Indicate whether to save the cart after update
-    *   @return array           Updated cart contents
-    */
-    public function UpdateQty($id, $newqty, $save=true)
-    {
-        if (isset($this->items[$id])) {
-            if ($newqty <= 0) {
-                $this->Remove($id);
-            } else {
-                $this->items[$id]->quantity = (float)$newqty;
-                $product = $this->items[$id]->getProduct();
-                $price = $product->getPrice($this->items[$id]->options, $newqty);
-                $this->items[$id]->price = $price;
-            }
-            if ($save) $this->Save();
-        }
-        return $this->Cart();
     }
 
 
