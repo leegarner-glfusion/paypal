@@ -189,9 +189,9 @@ case 'delcartitem':
     break;
 
 case 'emptycart':
-    $view = 'productlist';
     \Paypal\Cart::getInstance()->Clear();
-    LGLIB_storeMessage($LANG_PP['cart_empty']);
+    COM_setMsg($LANG_PP['cart_empty']);
+    echo COM_refresh(PAYPAL_URL);
     break;
 
 case 'thanks':
