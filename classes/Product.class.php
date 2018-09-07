@@ -1518,7 +1518,7 @@ class Product
     */
     public function getPrice($options = array(), $quantity = 1, $override = array())
     {
-        if (!is_array($options)) $options = array($options);
+        if (!is_array($options)) $options = explode(',', $options);
         if ($this->override_price && isset($override['price'])) {
             // If an override price is specified, just return it.
             return round((float)$override['price'], Currency::getInstance()->Decimals());

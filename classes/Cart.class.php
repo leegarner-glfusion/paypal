@@ -310,6 +310,9 @@ class Cart extends Order
                 $this->Remove($id);
             } else {
                 $this->items[$id]->quantity = (float)$newqty;
+                $product = $this->items[$id]->getProduct();
+                $price = $product->getPrice($this->items[$id]->options, $newqty);
+                $this->items[$id]->price = $price;
             }
             if ($save) $this->Save();
         }
