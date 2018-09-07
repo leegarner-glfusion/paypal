@@ -894,13 +894,11 @@ function plugin_itemdeleted_paypal($id, $type)
         DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', $_PP_CONF['pi_name']);
         unset($_POST['enabledplugins'][$_PP_CONF['pi_name']]);
         unset($_POST['pluginarray'][$_PP_CONF['pi_name']]);
-    }
-    $type = DB_escapeString($type);
-    $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
-            WHERE pi_name = '$type'";
-    if ($id != '*') {
+    } elseif ($type == 'paypal' && $id != '*') {
+        $type = DB_escapeString($type);
         $id = DB_escapeString($id);
-        $sql .= " AND item_id = '{$id}'";
+        $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
+                WHERE pi_name = '$type' AND item_id = '{$id}'";
     }
     DB_query($sql);
 }
@@ -925,7 +923,7 @@ function plugin_getcommenturlid_paypal()
 */
 function phpblock_paypal_cart()
 {
-    if (!PP_isMinVersion('0.6.0')) return '';
+    if (!PP_isMinVersion()) return '';
 
     $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
