@@ -26,7 +26,7 @@ namespace Paypal;
 */
 function listOrders($admin = false, $uid = 0)
 {
-    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_PP_HELP;
 
     if (!$admin) {
         $uid = $_USER['uid'];
@@ -35,7 +35,13 @@ function listOrders($admin = false, $uid = 0)
 
     USES_lib_admin();
 
-    $where = " WHERE ord.status != 'cart'";
+    if (isset($_REQUEST['filt_status']) && !empty($_REQUEST['filt_status'])) {
+        $filt_status = DB_escapeString($_REQUEST['filt_status']);
+        $where = " WHERE ord.status = '$filt_status'";
+    } else {
+        $filt_status = '';
+        $where = " WHERE ord.status != 'cart'";
+    }
     if ($uid > 0) {
         $where .= " AND ord.uid = '" . (int)$uid . "'";
     }
@@ -57,8 +63,13 @@ function listOrders($admin = false, $uid = 0)
                 'field' => 'order_date', 'sort' => true),
         array('text' => $LANG_PP['order_number'],
                 'field' => 'order_id', 'sort' => true),
-        array('text' => $LANG_PP['total'],
-                'field' => 'ord_total', 'sort' => false),
+        array(
+            'text' => $LANG_PP['total'] .
+                    '&nbsp;<i class="uk-icon uk-icon-question-circle tooltip" title="' .
+                    $LANG_PP_HELP['orderlist_total'] . '"></i>',
+                'field' => 'ord_total',
+                'sort' => false,
+            ),
         array('text' => $LANG_PP['status'],
                 'field' => 'status', 'sort' => true),
     );
@@ -102,10 +113,22 @@ function listOrders($admin = false, $uid = 0)
 
     $text_arr = array(
         'has_extras' => $admin ? true : false,
-        'form_url' => $base_url . '/index.php?orderhist=x',
+        'form_url' => $base_url . '/index.php?orderhist=x&filt_status=' . $filt_status,
         'has_limit' => true,
         'has_paging' => true,
     );
+
+    $filter = "select_event: <select name=\"filt_status\">" . LB .
+        '<option value=""';
+    if ($filt_status == '') $filter .= ' selected="selected"';
+    $filter .= '>All Statuses</option>' . LB;
+    foreach (OrderStatus::getAll() as $stat) {
+        $sel = $filt_status == $stat->getName() ? 'selected="selected"' : '';
+        $filter .= '<option value="' . $stat->getName() . '" ' . $sel . '>' .
+            PP_getVar($LANG_PP['orderstatus'], $stat->getName(), 'string', $stat->getName()) .
+            '</option>' . LB;
+    }
+    $filter .= '</select>' . LB;
 
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
@@ -114,7 +137,7 @@ function listOrders($admin = false, $uid = 0)
         COM_getBlockTemplate('_admin_block', 'header'));
     $display .= \ADMIN_list('paypal_orderlog',
         __NAMESPACE__ . '\getPurchaseHistoryField',
-        $header_arr, $text_arr, $query_arr, $defsort_arr);
+        $header_arr, $text_arr, $query_arr, $defsort_arr, $filter);
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $display;
 }

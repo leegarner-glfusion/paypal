@@ -255,6 +255,17 @@ class OrderStatus extends Workflow
         if ($changed) Cache::clear('orderstatuses');
     }
 
+
+    /**
+     * Get the name of the order status from the private variable
+     *
+     * @return  string      Name value
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
 }   // class OrderStatus
 
 ?>
