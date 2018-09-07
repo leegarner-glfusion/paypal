@@ -1181,11 +1181,13 @@ class Product
             'shipping_txt'      => $shipping_txt,
         ) );
         $T->set_block('product', 'SpecialFields', 'SF');
+        //var_dump($this->special_fields);die;
         foreach ($this->special_fields as $fld) {
             $T->set_var(array(
-                'sf_name' => $fld['name'],
-                'sf_text' => $fld['text'],
-                'sf_class' => isset($fld['class']) ? $fld['class'] : '',
+                'sf_name'   => $fld['name'],
+                'sf_text'   => $fld['text'],
+                'sf_class'  => isset($fld['class']) ? $fld['class'] : '',
+                'sf_help'   => $fld['help'],
             ) );
             $T->parse('SF', 'SpecialFields', true);
         }
@@ -1455,26 +1457,29 @@ class Product
     */
     public function addSpecialField($fld_name, $fld_lang = '', $opts=array())
     {
-        global $LANG_PP;
+        global $LANG_PP, $LANG_PP_HELP;
 
-        if (!array_key_exists($fld_name, $this->special_fields)) {
+        if (array_key_exists($fld_name, $this->special_fields)) {
             // Only add if the field doesn't already exist
-            if (empty($fld_lang)) {
-                // No text supplied, try to get one from the language file.
-                if (array_key_exists($fld_name, $LANG_PP)) {
-                    $fld_lang = $LANG_PP[$fld_name];
-                } else {
-                    // If all else fails, use the field name as the prompt.
-                    $fld_lang = $fld_name;
-                }
-            }
-            $this->special_fields[$fld_name] = array(
-                'name' => $fld_name,
-                'text' => $fld_lang,
-            );
-            foreach ($opts as $opt_name=>$opt_data) {
-                $this->special_fields[$fld_name][$opt_name] = $opt_data;
-            }
+            return;
+        }
+
+        if (empty($fld_lang)) {
+            // No text supplied, try to get one from the language file.
+            $fld_lang = PP_getVar($LANG_PP, $fld_name);
+        }
+
+        // Default to help string from the language file.
+        // May be overridden from the $opts array if one is supplied there.
+        $fld_help = PP_getVar($LANG_PP_HELP, $fld_name);
+
+        $this->special_fields[$fld_name] = array(
+            'name' => $fld_name,
+            'text' => $fld_lang,
+            'help' => $fld_help,
+        );
+        foreach ($opts as $opt_name=>$opt_data) {
+            $this->special_fields[$fld_name][$opt_name] = $opt_data;
         }
     }
 

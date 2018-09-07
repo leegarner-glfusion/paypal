@@ -389,6 +389,7 @@ $LANG_PP_HELP = array(
 'notify_email' => 'Enter an optional email address to receive the notification of this order. Your own email address will be used if this is empty.',
 'hlp_cat_delete' => 'Only unused categories may be deleted',
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
+'recipient_email' => 'The gift card will be emailed to this address. If left blank, the gift card will be emailed to you.',
 );
 
 $LANG_MYACCOUNT['pe_paypal'] = 'Shopping';

@@ -52,7 +52,11 @@
       <!-- END CustAttrib -->
 <!-- BEGIN SpecialFields -->
       <div class=uk-form-row>
-        <label class="uk-form-label" for="{sf_name}">{sf_text}:</label>
+        <label class="uk-form-label" for="{sf_name}">{sf_text}:
+{!if sf_help}
+           <i class="uk-icon uk-icon-question-circle tooltip" title="{sf_help}"></i>
+{!endif} 
+        </label>
         <div class="uk-form-controls">
           <input type="text" class="{sf_class}" name="extras[special][{sf_name}]" id="{sf_name}" size="40" />
         </div>
