@@ -132,6 +132,7 @@ class _coupon extends \Paypal\Gateway
             '<input type="hidden" name="payment_status" value="Completed" />',
         );
         $cart->setInfo('apply_gc', $cart->getInfo('final_total'));
+        $cart->Save();
         if (COM_isAnonUser()) {
             //$T->set_var('need_email', true);
         } else {

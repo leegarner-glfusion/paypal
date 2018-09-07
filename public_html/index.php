@@ -88,11 +88,11 @@ case 'checkout':
     }
     if ($gateway !== '') $Cart->setGateway($gateway);
     if (isset($_POST['by_gc'])) {
-        $Cart->setGC($_POST['by_gc'], false);
+        $Cart->setGC($_POST['by_gc']);
     } elseif ($gateway == '_coupon') {
-        $Cart->setGC(-1, false);
+        $Cart->setGC(-1);
     } else {
-        $Cart->setGC(0, false);
+        $Cart->setGC(0);
     }
     if (isset($_POST['order_instr'])) {
         $Cart->instructions = $_POST['order_instr'];

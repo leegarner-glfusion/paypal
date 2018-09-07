@@ -180,7 +180,8 @@ class Order
         $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
         $this->items[] = $item;
-        $this->Save();
+        //$this->Save();
+        $item->Save();
     }
 
 
@@ -1143,45 +1144,13 @@ class Order
 
     /**
      * Set an info item into the private info array.
-     * The $save parameter can be set to "false" if this is called
-     * several times in a row.
      *
      * @param   string  $key    Name of var to set
      * @param   mixed   $value  Value to set
-     * @param   boolean $save   True to immediately save the order
      */
-    public function setInfo($key, $value, $save=true)
+    public function setInfo($key, $value)
     {
         $this->m_info[$key] = $value;
-        if ($save) {
-            $this->Save();
-        }
-    }
-
-
-    /**
-     * Set the special instructions text during checkout
-     *
-     * @param   string  $text   Text to set
-     * @param   boolean $sav    True to immediately save the order
-     */
-    public function setInstructions($text, $save=true)
-    {
-        $this->instructions = $text;
-        if ($save) $this->Save();
-    }
-
-
-    /**
-     * Set the buyer's email address during checkout
-     *
-     * @param   string  $text   Text to set
-     * @param   boolean $sav    True to immediately save the order
-     */
-    public function setEmail($text, $save=true)
-    {
-        $this->buyer_email = $text;
-        if ($save) $this->Save();
     }
 
 
@@ -1202,7 +1171,7 @@ class Order
     *   @param  float   $amt    Amount of credit to apply
     *   @param  boolean $save   True to immediately save the order
     */
-    public function setGC($amt, $save=true)
+    public function setGC($amt)
     {
         global $_TABLES;
 
@@ -1211,7 +1180,7 @@ class Order
             $gc_bal = Coupon::getUserBalance();
             $amt = min($gc_bal, Coupon::canPayByGC($this));
         }
-        $this->setInfo('apply_gc', $amt, $save);
+        $this->setInfo('apply_gc', $amt);
     }
 
 
@@ -1225,23 +1194,6 @@ class Order
     public function setGateway($gw_name)
     {
         $this->m_info['gateway'] = $gw_name;
-    }
-
-
-    /**
-    *   Check if this cart has any physical items.
-    *   Not currently used, may be used later to adapt workflows based on
-    *   product types
-    *
-    *   @return boolean     True if at least one physical product is present
-    */
-    public function hasPhysical()
-    {
-        foreach ($this->m_cart as $id=>$item) {
-        if ($item['type'] & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
-            return true;
-        }
-        return false;
     }
 
 }
