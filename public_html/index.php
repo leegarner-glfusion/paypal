@@ -217,6 +217,7 @@ case 'thanks':
 
 case 'redeem':
     if (COM_isAnonUser()) {
+        SESS_setVar('login_referer', $_CONF['site_url'] . $_SERVER['REQUEST_URI']);
         COM_setMsg($LANG_PP['gc_need_acct']);
         COM_refresh($_CONF['site_url'] . '/users.php?mode=login');
         exit;
@@ -225,7 +226,7 @@ case 'redeem':
     // the apply_gc form
     $code = PP_getVar($_REQUEST, 'gc_code');
     $uid = $_USER['uid'];
-    $status = \Paypal\Coupon::Redeem($code, $uid);
+    list($status, $msg) = \Paypal\Coupon::Redeem($code, $uid);
     if ($status > 0) {
         $persist = true;
         $type = 'error';
@@ -233,7 +234,6 @@ case 'redeem':
         $persist = false;
         $type = 'info';
     }
-    $msg = sprintf($LANG_PP['coupon_apply_msg' . $status], $_CONF['site_mail']);
     // Redirect back to the provided view, or to the default page
     if (isset($_REQUEST['refresh'])) {
         COM_setMsg($msg, $type, $persist);

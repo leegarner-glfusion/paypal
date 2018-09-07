@@ -176,20 +176,23 @@ class Coupon extends Product
     *   Apply a coupon to the user's account.
     *   Adds the value to the gc_bal field in user info, and marks the coupon
     *   as "redeemed" so it can't be used again.
+    *   Status code returned will be 0=success, 1=already done, 2=error
     *
     *   @param  string  $code   Coupon code
     *   @param  integer $uid    Optional user ID, current user by default
-    *   @return integer     Status code (0=success, 1=already done, 2=error)
+    *   @return array       Array of (Status code, Message)
     */
     public static function Redeem($code, $uid = 0)
     {
-        global $_TABLES, $_USER;
+        global $_TABLES, $_USER, $LANG_PP;
 
         if ($uid == 0) {
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
-        if ($uid < 2) return 2;
+        if ($uid < 2) {
+            return array(2, sprintf($LANG_PP['coupon_apply_msg2'], $_CONF['site_email']));
+        }
 
         $code = DB_escapeString($code);
         $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
@@ -197,28 +200,28 @@ class Coupon extends Product
         $res = DB_query($sql);
         if (DB_numRows($res) == 0) {
             COM_errorLog("Attempting to redeem coupon $code, not found in database");
-            return 3;
+            return array(3, sprintf($LANG_PP['coupon_apply_msg3'], $_CONF['site_email']));;
         } else {
             $A = DB_fetchArray($res, false);
-            if (!is_null($A['redeemed'])) {
+            if ($A['redeemed'] > 0 && $A['uid'] > 0) {
                 COM_errorLog("Coupon code $code was already redeemed");
-                return 1;
+                return array(1, $LANG_PP['coupon_apply_msg1']);
             }
         }
         $amount = (float)$A['amount'];
         if ($amount > 0) {
             DB_query("UPDATE {$_TABLES['paypal.coupons']} SET
                     redeemer = $uid,
-                    redeemed = UNIX_TIMESTAMP(),
+                    redeemed = UNIX_TIMESTAMP()
                     WHERE code = '$code'");
             Cache::delete('coupons_' . $uid);
             self::writeLog($code, $uid, $amount, 'gc_redeemed');
             if (DB_error()) {
                 COM_errorLog("A DB error occurred marking coupon $code as redeemed");
-                return 2;
+                return array(2, sprintf($LANG_PP['coupon_apply_msg2'], $_CONF['site_email']));
             }
         }
-        return 0;
+        return array(0, sprintf($LANG_PP['coupon_apply_msg0'], Currency::getInstance()->Format($A['amount'])));
     }
 
 
