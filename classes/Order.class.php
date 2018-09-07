@@ -179,7 +179,6 @@ class Order
         $args['order_id'] = $this->order_id;    // make sure it's set
         $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
-        //COM_errorLog(print_r($item,true));      // DEBUG
         $this->items[] = $item;
         $this->Save();
     }
@@ -276,6 +275,9 @@ class Order
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
         $this->buyer_email = PP_getVar($A, 'buyer_email');
+        if ($this->status != 'cart') {
+            $this->tax_rate = PP_getVar($A, 'tax_rate');
+        }
         $this->m_info = @unserialize(PP_getVar($A, 'info'));
         if ($this->m_info === false) $this->m_info = array();
         foreach (array('billto', 'shipto') as $type) {
@@ -355,7 +357,6 @@ class Order
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
                     order_date = '{$this->order_date}',
-                    tax_rate = '{$this->tax_rate}',
                     token = '" . DB_escapeString($this->token) . "',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
@@ -377,6 +378,7 @@ class Order
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
                 "info = '" . DB_escapeString(@serialize($this->m_info)) . "'",
+                "tax_rate = '{$this->tax_rate}'",
         );
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
@@ -438,8 +440,6 @@ class Order
         $Currency = Currency::getInstance();
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $items = $this->getItemView();
-        $tax_items = 0;
-        $cart_tax = 0;
         $this->shipping = 0;
         $this->handling = 0;
         foreach ($items as $item) {
@@ -467,6 +467,7 @@ class Order
                 $T->set_var('option_dscp', $opt_dscp);
                 $T->parse('iOpts', 'ItemOptions', true);
             }*/
+
             $T->parse('iRow', 'ItemRow', true);
             $T->clear_var('iOpts');
         }
@@ -944,7 +945,7 @@ class Order
                 'options'   => $P->getOptionDisplay($item),
                 'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
                 'is_file'   => $P->file != '' && $item->ux_exp > time() ? true : false,
-                'taxable'   => $P->taxable,
+                'taxable'   => $this->tax_rate > 0 ? $P->taxable : 0,
                 'tax_icon'  => $LANG_PP['tax'][0],
                 'token'     => $item->token,
                 'link'      => $P->getLink(),
@@ -967,15 +968,20 @@ class Order
     */
     public function calcTax()
     {
-        $tax_amt = 0;
-        $this->tax_items = 0;
-        foreach ($this->items as $item) {
-            if ($item->taxable) {
-                $tax_amt += ($item->price * $item->quantity);
-                $this->tax_items += 1;
+        if ($this->tax_rate == 0) {
+            $this->tax_items = 0;
+            $this->tax = 0;
+        } else {
+            $tax_amt = 0;
+            $this->tax_items = 0;
+            foreach ($this->items as $item) {
+                if ($item->getProduct()->taxable) {
+                    $tax_amt += ($item->price * $item->quantity);
+                    $this->tax_items += 1;
+                }
             }
+            $this->tax = round($this->tax_rate * $tax_amt, 2);
         }
-        $this->tax = round($this->tax_rate * $tax_amt, 2);
         return $this->tax;
     }
 
