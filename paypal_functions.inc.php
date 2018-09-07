@@ -164,7 +164,7 @@ function CouponLog($uid = 0)
         'table' => 'paypal.coupon_log',
         'sql' => $sql,
         'query_fields' => array(),
-        'default_filter' => '',
+        'default_filter' => 'WHERE uid = ' . $uid,
     );
 
     $text_arr = array(
