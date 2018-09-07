@@ -1127,10 +1127,10 @@ class Gateway
         $key = $enabled ? 1 : 0;
 
         if (!isset($gateways[$key])) {
-            $gateways[$key] = array();
             $cache_key = 'gateways_' . $key;
             $gateways[$key] = Cache::get($cache_key);
             if ($gateways[$key] === NULL) {
+                $gateways[$key] = array();
                 // Load the gateways
                 $sql = "SELECT id, enabled, services
                     FROM {$_TABLES['paypal.gateways']}";
