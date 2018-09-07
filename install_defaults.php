@@ -142,7 +142,7 @@ $_PP_DEFAULTS['gc_enabled'] = 0;        // enable gift cards? 1=yes, 0=no
 $_PP_DEFAULTS['gc_exp_days'] = 365;     // default expiration for gift cards
 $_PP_DEFAULTS['gc_mask'] = 'XXXX-XXXX-XXXX-XXXX';
 $_PP_DEFAULTS['gc_letters'] = 1;
-$_PP_DEFAULTS['gc_numbers'] = 0;
+$_PP_DEFAULTS['gc_numbers'] = 1;
 $_PP_DEFAULTS['gc_symbols'] = 0;
 $_PP_DEFAULTS['gc_length'] = 10;
 $_PP_DEFAULTS['gc_prefix'] = '';
