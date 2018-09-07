@@ -337,7 +337,7 @@ class Order
     {
         global $_TABLES, $_PP_CONF;
 
-        if (!PP_isMinVersion('0.6.0')) return '';
+        if (!PP_isMinVersion()) return '';
 
         // Save all the order items
         foreach ($this->items as $item) {

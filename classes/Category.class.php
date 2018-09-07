@@ -717,7 +717,7 @@ class Category
     {
         global $_TABLES;
 
-        if (!PP_isMinVersion('0.6.0')) return array();
+        if (!PP_isMinVersion()) return array();
 
         $between = '';
         $root = (int)$root;

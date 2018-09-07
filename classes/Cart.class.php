@@ -596,7 +596,7 @@ class Cart extends Order
         global $_USER, $_TABLES, $_PP_CONF, $_PLUGIN_INFO;
 
         // Guard against invalid SQL if the DB hasn't been updated
-        if (!PP_isMinVersion('0.6.0')) return NULL;
+        if (!PP_isMinVersion()) return NULL;
 
         $cart_id = NULL;
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
