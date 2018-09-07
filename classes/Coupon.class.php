@@ -559,6 +559,25 @@ class Coupon extends Product
         return $gc_can_apply;
     }
 
+
+    /**
+    *   Determine if the current user has access to view this product.
+    *   Checks that gift cards are enabled in the configuration, then
+    *   checks the general product hasAccess() function.
+    *
+    *   @return boolean     True if access and purchase is allowed.
+    */
+    public function hasAccess()
+    {
+        global $_PP_CONF;
+
+        if (!$_PP_CONF['gc_enabled']) {
+            return false;
+        } else {
+            return parent::hasAccess();
+        }
+    }
+
 }
 
 ?>

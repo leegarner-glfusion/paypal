@@ -763,6 +763,11 @@ function ProductList($cat_id = 0)
     // Display each product
     $prodrows = 0;
     foreach ($Products as $P) {
+        // Don't display products if the viewer doesn't have access
+        if (!$P->hasAccess()) {
+            continue;
+        }
+
         $prodrows++;
 
         if ( @in_array($P->id, $ratedIds)) {
