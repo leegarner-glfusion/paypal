@@ -1854,7 +1854,6 @@ function PAYPAL_itemhist($item_id = '')
     if ($item_id != '') {
         $sql .= " WHERE product_id = '" . DB_escapeString($item_id) . "'";
     }
-    $sql .= " GROUP BY order_id";
 
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
@@ -1874,6 +1873,7 @@ function PAYPAL_itemhist($item_id = '')
         'sql' => $sql,
         'query_fields' => array(),
         'default_filter' => '',
+        'group_by' => 'ord.order_id',
     );
 
     $text_arr = array();
@@ -1913,6 +1913,8 @@ function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
 
     $retval = '';
     static $username = array();
+    static $dt = NULL;
+    if ($dt === NULL) $dt = new Date('now', $_CONF['timezone']);
 
     switch($fieldname) {
     case 'user_id':
@@ -1920,12 +1922,27 @@ function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
             $username[$fieldvalue] = COM_getDisplayName($fieldvalue);
         }
         $retval = COM_createLink($username[$fieldvalue],
-            PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $fieldvalue);
+            PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $fieldvalue,
+            array(
+                'title' => $LANG_PP['user_history'],
+                'class' => 'tooltip',
+            )
+        );
         break;
 
     case 'order_id':
         $retval = COM_createLink($fieldvalue,
-            PAYPAL_ADMIN_URL . '/index.php?order=' . $fieldvalue);
+            PAYPAL_ADMIN_URL . '/index.php?order=' . $fieldvalue,
+            array(
+                'title' => $LANG_PP['vieworder'],
+                'class' => 'tooltip',
+            )
+        );
+        break;
+
+    case 'purchase_date':
+        $dt->setTimestamp($fieldvalue);
+        $retval = $dt->toMySQL(true);
         break;
 
     default:

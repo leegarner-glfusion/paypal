@@ -360,6 +360,7 @@ $LANG_PP = array (
 'plus_shipping' => '(Plus %s Shipping)',
 'notify_buyer' => 'Notify Buyer',
 'notify_admin' => 'Notify Admin',
+'user_history' => 'View this user&apos; purchase history',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
