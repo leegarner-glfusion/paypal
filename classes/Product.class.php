@@ -1379,7 +1379,7 @@ class Product
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
                 'iconset'   => $_PP_CONF['_iconset'],
-                'quantity'  => $this->_getFixedQuantity(),
+                'quantity'  => $this->getFixedQuantity(),
             ) );
             $buttons['add_cart'] = $T->parse('', 'cart');
         }
@@ -2071,9 +2071,21 @@ class Product
      *
      * return   @integer    Fixed quantity number, zero for varible qty
      */
-    protected function _getFixedQuantity()
+    public function getFixedQuantity()
     {
         return 0;
+    }
+
+
+    /**
+     * Determine if like items can be accumulated in the cart under a single
+     * line item.
+     *
+     * @return  boolean     True if items can be accumulated, False if not
+     */
+    public function cartCanAccumulate()
+    {
+        return true;
     }
 
 }   // class Product

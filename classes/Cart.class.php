@@ -196,7 +196,11 @@ class Cart extends Order
 
         // Look for identical items, including options (to catch
         // attributes).  If found, just update the quantity.
-        $have_id = $this->Contains($item_id, $extras);
+        if ($P->cartCanAccumulate()) {
+            $have_id = $this->Contains($item_id, $extras);
+        } else {
+            $have_id = false;
+        }
         if ($have_id !== false) {
             $this->items[$have_id]->quantity += $quantity;
             $this->Save();

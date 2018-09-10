@@ -462,6 +462,7 @@ class Order
                 'item_link'     => $item['link'],
                 'cart_item_id'  => $item['cart_item_id'],
                 'pi_url'        => PAYPAL_URL,
+                'fixed_q'       => $item['fixed_q'],
             ) );
             $T->set_block('order', 'ItemOptions', 'iOpts');
             /*foreach ($item['options'] as $opt_dscp) {
@@ -952,6 +953,7 @@ class Order
                 'link'      => $P->getLink(),
                 'shipping'  => $P->getShipping($item->quantity),
                 'handling'  => $P->getHandling($item->quantity),
+                'fixed_q'   => $P->getFixedQuantity(),
             );
             if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;

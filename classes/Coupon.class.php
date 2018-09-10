@@ -586,9 +586,21 @@ class Coupon extends Product
      *
      * return   @integer    Fixed quantity number, zero for varible qty
      */
-    protected function _getFixedQuantity()
+    public function getFixedQuantity()
     {
         return 1;
+    }
+
+
+    /**
+     * Determine if like items can be accumulated in the cart under a single
+     * line item.
+     *
+     * @return  boolean     True if items can be accumulated, False if not
+     */
+    public function cartCanAccumulate()
+    {
+        return false;
     }
 
 }
