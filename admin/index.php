@@ -697,9 +697,14 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'name':
-        $retval = COM_createLink($fieldvalue,
-            PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $A['id']);
-        //        PAYPAL_URL . '/index.php?detail=x&id=' . $A['id']);
+        $retval = COM_createLink(
+            $fieldvalue,
+            PAYPAL_ADMIN_URL . '/index.php?itemhist=' . $A['id'],
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_PP['item_history'],
+            )
+         );
         break;
 
     case 'prod_type':
@@ -714,6 +719,18 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = COM_createLink($fieldvalue,
                 PAYPAL_ADMIN_URL . '/index.php?cat_id=' . $A['cat_id']);
         break;
+
+    case 'short_description':
+        $retval = COM_createLink(
+            $fieldvalue,
+            PAYPAL_ADMIN_URL . '/detail.php?id=' . $A['id'],
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_PP['see_details'],
+            )
+            );
+        break;
+
     default:
         $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
         break;

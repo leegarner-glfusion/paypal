@@ -462,13 +462,15 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
         $retval = COM_createLink($fieldvalue,
                 $base_url. '/index.php?order=' . $fieldvalue,
-                array('data-uk-tooltip' => '{delay:500}',
+                array(
+                    'class' => 'tooltip',
                     'title' => $LANG_PP['vieworder'],
                 )
         );
         $retval .= '&nbsp;&nbsp;' . COM_createLink('<i class="uk-icon-mini uk-icon-print gl_mootip"></i>',
                 PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
-                array('data-uk-tooltip' => '{delay:500}',
+                array(
+                    'class' => 'tooltip',
                     'title' => $LANG_PP['print'],
                     'target' => '_new',
                 )
