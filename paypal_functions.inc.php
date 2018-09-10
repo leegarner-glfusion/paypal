@@ -483,16 +483,21 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'ord_total':
         $total = (float)$fieldvalue;
-        $tip = 'Items: ' . $fieldvalue;
+        $tip = '<table width=&quot;50%&quot; align=&quot;center&quot;>' . LB;
+        $tip .= '<tr><td>' . $LANG_PP['item_total'] .
+            '</td><td style=&quot;text-align:right&quot;>' . $fieldvalue . '</td></tr>' . LB;
         foreach (array('tax', 'shipping', 'handling') as $fld) {
             if (is_numeric($A[$fld]) && $A[$fld] > 0) {
-                $tip .= '<br />' . $LANG_PP[$fld] . ': ' . $A[$fld];
+                $tip .= '<tr><td>' . $LANG_PP[$fld] . ': ' .
+                    '</td><td style=&quot;text-align:right&quot;>' . $A[$fld] . '</td></tr>' . LB;
                 $total += (float)$A[$fld];
             }
         }
         if ($total > $fieldvalue) {
-            $tip .= '<br />' . $LANG_PP['total'] . ': ' . $total;
+            $tip .= '<tr><td>' . $LANG_PP['total'] . ': ' .
+                    '</td><td style=&quot;text-align:right&quot;>' . $total . '</td></tr>' . LB;
         }
+        $tip .= '</table>' . LB;
         $retval = '<span class="tooltip" title="' . $tip . '">' . $fieldvalue . '</span>';
         break;
     default:
