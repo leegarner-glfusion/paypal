@@ -89,10 +89,10 @@
         <!-- BEGIN ItemRow -->
         <tr>
           <td>
-            {item_descrip}
-            {!if item_options}
+            {item_dscp}
+{!if item_options}
             <br />{item_options}
-            {!endif}
+{!endif}
         <!-- BEGIN ItemOptions -->
             <div class="ItemOptions">{option_dscp}</div>
         <!-- END ItemOptions -->

@@ -459,7 +459,7 @@ class Order
                 'item_dscp'     => htmlspecialchars($item->description),
                 'item_price'    => COM_numberFormat($item->price, 2),
                 'item_quantity' => (int)$item->quantity,
-                'item_total'    => $item_total,
+                'item_total'    => $Currency->FormatValue($item_total),
                 'is_admin'      => plugin_ismoderator_paypal() ? 'true' : '',
                 'is_file'       => $P->file != '' && $item->expiration > time() ? true : false,
                 'taxable'       => $this->tax_rate > 0 ? $P->taxable : 0,
@@ -473,12 +473,6 @@ class Order
             if ($P->prod_type == PP_PROD_PHYSICAL) {
                 $this->no_shipping = 0;
             }
-            $T->set_block('order', 'ItemOptions', 'iOpts');
-            /*foreach ($item['options'] as $opt_dscp) {
-                $T->set_var('option_dscp', $opt_dscp);
-                $T->parse('iOpts', 'ItemOptions', true);
-            }*/
-
             $T->parse('iRow', 'ItemRow', true);
             $T->clear_var('iOpts');
         }
@@ -496,7 +490,7 @@ class Order
             'order_number' => $this->order_id,
             'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
-            'subtotal'      => $Currency->Format($this->subtotal),
+            'subtotal'      => $this->subtotal == $this->total ? '' : $Currency->Format($this->subtotal),
             'have_billto'   => 'true',
             'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
