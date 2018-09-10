@@ -155,7 +155,7 @@
     </tr>
     <!-- BEGIN LogMessages -->
     <tr>
-      <td style="white-space:nowrap;" title="{log_ts_tip}">{log_ts}</td>
+      <td style="white-space:nowrap;">{log_ts}</td>
       <td>{log_username}</td>
       <td>{log_msg}</td>
     </tr>

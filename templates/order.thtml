@@ -247,7 +247,7 @@
     </tr>
     <!-- BEGIN LogMessages -->
     <tr style="line-height: 1.5rem;">
-      <td style="vertical-align:top;white-space:nowrap" title="{log_ts_tip}">{log_ts}</td>
+      <td style="vertical-align:top;white-space:nowrap" class="tooltip" title="{log_ts_tip}">{log_ts}</td>
 {!if is_admin}
       <td style="vertical-align:top;white-space:nowrap" >{log_username}</td>
 {!endif}
