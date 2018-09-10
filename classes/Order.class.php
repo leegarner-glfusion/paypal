@@ -365,7 +365,7 @@ class Order
             $sql1 = "UPDATE {$_TABLES['paypal.orders']} SET ";
             $sql2 = " WHERE order_id = '{$this->order_id}'";
         }
-        $tax = $this->calcTax();
+        $this->calcTotalCharges();
 
         $fields = array(
                 "status = '{$this->status}'",
@@ -373,7 +373,7 @@ class Order
                 "pmt_method = '" . DB_escapeString($this->pmt_method) . "'",
                 "by_gc = '{$this->by_gc}'",
                 "phone = '" . DB_escapeString($this->phone) . "'",
-                "tax = '{$tax}'",
+                "tax = '{$this->tax}'",
                 "shipping = '{$this->shipping}'",
                 "handling = '{$this->handling}'",
                 "instructions = '" . DB_escapeString($this->instructions) . "'",
@@ -945,7 +945,7 @@ class Order
                 'total'     => COM_numberFormat($item_total, 2),
                 'options'   => $P->getOptionDisplay($item),
                 'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
-                'is_file'   => $P->file != '' && $item->ux_exp > time() ? true : false,
+                'is_file'   => $P->file != '' && $item->expiration > time() ? true : false,
                 'taxable'   => $this->tax_rate > 0 ? $P->taxable : 0,
                 'tax_icon'  => $LANG_PP['tax'][0],
                 'token'     => $item->token,
@@ -988,6 +988,25 @@ class Order
 
 
     /**
+     * Calculate total additional charges: tax, shipping and handling..
+     * Simply totals the amounts for each item.
+     *
+     * @return  float   Total additional charges
+     */
+    public function calcTotalCharges()
+    {
+        $this->shipping = 0;
+        $this->handling = 0;
+        foreach ($this->items as $item) {
+            $this->shipping += $item->shipping;
+            $this->handling += $item->handling;
+        }
+        $this->calcTax();   // Tax calculation is slightly more complex
+        return $this->tax + $this->shipping + $this->handling;
+    }
+
+
+    /**
     *   Create a random token string for this order to allow anonymous users
     *   to view the order from an email link.
     *
@@ -1024,12 +1043,8 @@ class Order
         $total = 0;
         foreach ($this->items as $id => $item) {
             $total += ($item->price * $item->quantity);
-            $total += $item->shipping + $item->handling;
         }
-        // Need to call calcTax() since this function may be called before
-        // the order is saved.
-        //$total += $this->calcTax() + $this->shipping + $this->handling;
-        $total += $this->calcTax();
+        $total += $this->calcTotalCharges();
         return round($total, Currency::getInstance()->Decimals());
     }
 
