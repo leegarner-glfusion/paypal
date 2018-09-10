@@ -18,14 +18,9 @@
 /** Import core glFusion libraries */
 require_once('../lib-common.php');
 
-/** Import Downloader Class */
-require_once($_CONF['path'] . 'system/classes/downloader.class.php');
-
 // Sanitize the product ID and token
-// Could be POST if downloading from the product list, or GET if downloading
-// from a link in the order view or receipt
-$id = PP_getVar($_REQUEST, 'id', 'int');
-$token = PP_getVar($_REQUEST, 'token');
+$id = PP_getVar($_GET, 'id', 'int');
+$token = PP_getVar($_GET, 'token');
 
 // Need to have one or the other, prefer token
 if (empty($token) && $id == 0) {
@@ -47,7 +42,7 @@ if (!empty($token)) {
         LEFT JOIN {$_TABLES['paypal.products']} AS d 
             ON d.id = p.product_id 
         WHERE $id_sql p.token = '$token'
-        AND p.expiration > '" . PAYPAL_now()->toMySQL() . "'";
+        AND p.expiration > '" . PAYPAL_now()->toUnix() . "'";
 } else {
     // Get product by product ID.  Have to check the user id also
     $sql = "SELECT d.id, d.file, d.prod_type
@@ -62,10 +57,10 @@ if (!empty($token)) {
                 AND 
                 p.user_id = '" . (int)$_USER['uid'] . "'
                 AND 
-                p.expiration > '" . PAYPAL_now()->toMySql() . "'
+                p.expiration > '" . PAYPAL_now()->toUnix() . "'
             )
             OR 
-                ( d.price <= 0 )
+                ( p.price <= 0 )
         ) 
         LIMIT 1";
 }
