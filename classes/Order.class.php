@@ -440,30 +440,39 @@ class Order
 
         $Currency = Currency::getInstance();
         $this->no_shipping = 1;   // no shipping unless physical item ordered
-        $items = $this->getItemView();
+        $this->subtotal = 0;
         $this->shipping = 0;
         $this->handling = 0;
-        foreach ($items as $item) {
-            $this->shipping += $item['shipping'];
-            $this->handling += $item['handling'];
+        foreach ($this->items as $item) {
+            $P = $item->getProduct();
+            $item_total = $item->price * $item->quantity;
+            $this->subtotal += $item_total;
+            if ($item->taxable) {
+                $this->tax_items++;       // count the taxable items for display
+            }
+            $this->shipping += $P->getShipping($item->quantity);
+            $this->handling += $P->getHandling($item->quantity);
             $T->set_var(array(
-                'item_id'       => $item['item_id'],
-                'item_dscp'     => $item['dscp'],
-                'item_price'    => $item['price'],
-                'item_quantity' => $item['quantity'],
-                'item_total'    => $item['total'],
-                'is_admin'      => $this->isAdmin,
-                'is_file'       => $item['is_file'],
-                'taxable'       => $item['taxable'],
-                'tax_icon'      => $item['tax_icon'],
-                'token'         => $item['token'],
+                'cart_item_id'  => $item->id,
+                'fixed_q'       => $P->getFixedQuantity(),
+                'item_id'       => htmlspecialchars($item->product_id),
+                'item_dscp'     => htmlspecialchars($item->description),
+                'item_price'    => COM_numberFormat($item->price, 2),
+                'item_quantity' => (int)$item->quantity,
+                'item_total'    => $item_total,
+                'is_admin'      => plugin_ismoderator_paypal() ? 'true' : '',
+                'is_file'       => $P->file != '' && $item->expiration > time() ? true : false,
+                'taxable'       => $this->tax_rate > 0 ? $P->taxable : 0,
+                'tax_icon'      => $LANG_PP['tax'][0],
+                'token'         => $item->token,
                 'iconset'       => $_PP_CONF['_iconset'],
-                'item_options'  => $item['options'],
-                'item_link'     => $item['link'],
-                'cart_item_id'  => $item['cart_item_id'],
+                'item_options'  => $P->getOptionDisplay($item),
+                'item_link'     => $P->getLink(),
                 'pi_url'        => PAYPAL_URL,
-                'fixed_q'       => $item['fixed_q'],
             ) );
+            if ($P->prod_type == PP_PROD_PHYSICAL) {
+                $this->no_shipping = 0;
+            }
             $T->set_block('order', 'ItemOptions', 'iOpts');
             /*foreach ($item['options'] as $opt_dscp) {
                 $T->set_var('option_dscp', $opt_dscp);
@@ -911,55 +920,6 @@ class Order
             Cache::set($cache_key, $log, 'order_log');
         }
         return $log;
-    }
-
-
-    /**
-    *   Get the items in this order prepared for viewing.
-    *   Uses the product object to determine if there's a downloadable file
-    *   for the item.
-    *   Also sets global values for tax, shipping, and handling
-    *
-    *   @return array   Array of item information.
-    */
-    public function getItemView()
-    {
-        global $LANG_PP;
-
-        $this->subtotal = 0;
-        $items = array();
-        foreach ($this->items as $key => $item) {
-            $item_options = '';
-            $P = $item->getProduct();
-            $item_total = $item->price * $item->quantity;
-            $this->subtotal += $item_total;
-            if ($item->taxable) {
-                $this->tax_items++;       // count the taxable items for display
-            }
-            $P = Product::getInstance($item->product_id);
-            $items[] = array(
-                'cart_item_id' => $item->id,
-                'item_id'   => htmlspecialchars($item->product_id),
-                'dscp'      => htmlspecialchars($item->description),
-                'price'     => COM_numberFormat($item->price, 2),
-                'quantity'  => (int)$item->quantity,
-                'total'     => COM_numberFormat($item_total, 2),
-                'options'   => $P->getOptionDisplay($item),
-                'is_admin'  => plugin_ismoderator_paypal() ? 'true' : '',
-                'is_file'   => $P->file != '' && $item->expiration > time() ? true : false,
-                'taxable'   => $this->tax_rate > 0 ? $P->taxable : 0,
-                'tax_icon'  => $LANG_PP['tax'][0],
-                'token'     => $item->token,
-                'link'      => $P->getLink(),
-                'shipping'  => $P->getShipping($item->quantity),
-                'handling'  => $P->getHandling($item->quantity),
-                'fixed_q'   => $P->getFixedQuantity(),
-            );
-            if ($P->prod_type == PP_PROD_PHYSICAL) {
-                $this->no_shipping = 0;
-            }
-        }
-        return $items;
     }
 
 
