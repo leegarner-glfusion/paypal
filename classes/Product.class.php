@@ -1331,16 +1331,7 @@ class Product
         // and is available for immediate download, this will be turned off.
         $add_cart = $_PP_CONF['ena_cart'] == 1 ? true : false;
 
-        // Get the free download button, if this is a downloadable product
-        // already purchased and not expired
-        $exptime = DB_getItem($_TABLES['paypal.purchases'],
-                "MAX(UNIX_TIMESTAMP(CONVERT_TZ(`expiration`, '+00:00', @@session.time_zone)))",
-                "user_id = {$_USER['uid']} AND product_id = '" .
-                DB_escapeString($this->id) . "'");
-
-        if ($this->prod_type == PP_PROD_DOWNLOAD &&
-            ( $this->price == 0 || ($_USER['uid'] > 1 && $exptime > time()) )
-            ) {
+        if ($this->prod_type == PP_PROD_DOWNLOAD && $this->price == 0) {
             // Free, or unexpired downloads for non-anymous
             $T = PP_getTemplate('btn_download', 'download', 'buttons');
             $T->set_var('pi_url', PAYPAL_URL);
@@ -1388,6 +1379,7 @@ class Product
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
                 'iconset'   => $_PP_CONF['_iconset'],
+                'quantity'  => $this->_getFixedQuantity(),
             ) );
             $buttons['add_cart'] = $T->parse('', 'cart');
         }
@@ -2068,6 +2060,20 @@ class Product
     public function getHandling($qty = 1)
     {
         return (float)$this->handling * $qty;
+    }
+
+
+    /**
+     * Get the fixed quantity that can be ordered per item view.
+     * If this is zero, then an input box will be shown for the buyer to enter
+     * a quantity. If nonzero, then the input box is a hidden variable with
+     * the value set to the fixed quantity
+     *
+     * return   @integer    Fixed quantity number, zero for varible qty
+     */
+    protected function _getFixedQuantity()
+    {
+        return 0;
     }
 
 }   // class Product

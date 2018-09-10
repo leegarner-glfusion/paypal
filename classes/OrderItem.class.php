@@ -22,8 +22,8 @@ class OrderItem
     private $properties = array();
     private $product = NULL;
     private static $fields = array('id', 'order_id', 'product_id',
-            'description', 'quantity', 'user_id', 'txn_id', 'txn_type',
-            'purchase_date', 'status', 'expiration', 'price', 'token',
+            'description', 'quantity', 'txn_id', 'txn_type',
+            'status', 'expiration', 'price', 'token',
             'options', 'options_text', 'extras', 'taxable', 'paid',
             'shipping', 'handling',
     );
@@ -108,7 +108,6 @@ class OrderItem
     {
         switch ($key) {
         case 'id':
-        case 'user_id':
         case 'quantity':
             $this->properties[$key] = (int)$value;
             break;
@@ -149,6 +148,17 @@ class OrderItem
         } else {
             return NULL;
         }
+    }
+
+
+    /**
+     * Get the order object related to this item
+     *
+     * @return  object  Order Object
+     */
+    public function getOrder()
+    {
+        return Order::getInstance($this->order_id);
     }
 
 
@@ -243,10 +253,8 @@ class OrderItem
                 product_id = '" . DB_escapeString($this->product_id) . "',
                 description = '" . DB_escapeString($this->description) . "',
                 quantity = '{$this->quantity}',
-                user_id = '{$this->user_id}',
                 txn_id = '" . DB_escapeString($this->txn_id) . "',
                 txn_type = '" . DB_escapeString($this->txn_type) . "',
-                purchase_date = '$purchase_ts',
                 status = '" . DB_escapeString($this->status) . "',
                 price = '$this->price',
                 taxable = '{$this->taxable}',

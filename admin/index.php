@@ -1850,14 +1850,16 @@ function PAYPAL_itemhist($item_id = '')
         $item_desc = $item_id;
     }
 
-    $sql = "SELECT *, sum(quantity) as qty FROM {$_TABLES['paypal.purchases']}";
+    $sql = "SELECT purch.*, sum(purch.quantity) as qty, ord.order_date, ord.uid AS user_id
+        FROM {$_TABLES['paypal.purchases']} purch
+        LEFT JOIN {$_TABLES['paypal.orders']} ord ON ord.order_id = purch.order_id";
     if ($item_id != '') {
-        $sql .= " WHERE product_id = '" . DB_escapeString($item_id) . "'";
+        $sql .= " WHERE purch.product_id = '" . DB_escapeString($item_id) . "'";
     }
 
     $header_arr = array(
         array('text' => $LANG_PP['purch_date'],
-                'field' => 'purchase_date', 'sort' => true),
+                'field' => 'order_date', 'sort' => true),
         array('text' => $LANG_PP['quantity'],
                 'field' => 'qty', 'sort' => false),
         array('text' => $LANG_PP['order'],
@@ -1866,10 +1868,11 @@ function PAYPAL_itemhist($item_id = '')
                 'field' => 'user_id', 'sort' => true),
     );
 
-    $defsort_arr = array('field' => 'purchase_date',
+    $defsort_arr = array('field' => 'ord.order_date',
             'direction' => 'DESC');
 
-    $query_arr = array('table' => 'paypal.orderstatus',
+    $query_arr = array(
+        'table' => 'paypal.orderstatus',
         'sql' => $sql,
         'query_fields' => array(),
         'default_filter' => '',
@@ -1940,7 +1943,7 @@ function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
         );
         break;
 
-    case 'purchase_date':
+    case 'order_date':
         $dt->setTimestamp($fieldvalue);
         $retval = $dt->toMySQL(true);
         break;

@@ -10,7 +10,7 @@
 *   @copyright  Copyright (c) 2005-2006 Vincent Furia
 *   @package    paypal
 *   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -28,47 +28,25 @@ if (empty($token) && $id == 0) {
     exit;
 }
 
-if (!empty($token)) {
-    // Get product by token
-    // Also check for a product ID
-    $id = PP_getVar($_REQUEST, 'i', 'int');
-    if ($id > 0) {
-        $id_sql = "p.id = '$id' AND ";
-    } else {
-        $id_sql = '';
-    }
-    $sql = "SELECT d.id, d.file, d.prod_type
-        FROM {$_TABLES['paypal.purchases']} AS p 
-        LEFT JOIN {$_TABLES['paypal.products']} AS d 
-            ON d.id = p.product_id 
-        WHERE $id_sql p.token = '$token'
-        AND p.expiration > '" . PAYPAL_now()->toUnix() . "'";
+// Get product by token
+// Also check for a product ID
+$id = PP_getVar($_REQUEST, 'id', 'int');
+if ($id > 0) {
+    $id_sql = "item.product_id = '$id' AND ";
 } else {
-    // Get product by product ID.  Have to check the user id also
-    $sql = "SELECT d.id, d.file, d.prod_type
-        FROM {$_TABLES['paypal.products']} AS d 
-        LEFT JOIN {$_TABLES['paypal.purchases']} AS p 
-        ON d.id = p.product_id 
-        WHERE d.id = '$id' 
-        AND
-        ( 
-            (
-                p.user_id <> 1 
-                AND 
-                p.user_id = '" . (int)$_USER['uid'] . "'
-                AND 
-                p.expiration > '" . PAYPAL_now()->toUnix() . "'
-            )
-            OR 
-                ( p.price <= 0 )
-        ) 
-        LIMIT 1";
+    $id_sql = '';
 }
+$sql = "SELECT prod.id, prod.file, prod.prod_type
+        FROM {$_TABLES['paypal.purchases']} AS item
+        LEFT JOIN {$_TABLES['paypal.products']} AS prod
+            ON prod.id = item.product_id
+        WHERE $id_sql item.token = '$token'
+        AND item.expiration > '" . PAYPAL_now()->toUnix() . "'";
 //echo $sql;die;
 $res = DB_query($sql);
 $A = DB_fetchArray($res, false);
 
-//  If a file was found, do the download.  
+//  If a file was found, do the download.
 //  Otherwise refresh to the home page and log it.
 if (is_array($A) && !empty($A['file'])) {
     $dwnld = new downloader();
@@ -100,7 +78,7 @@ if (is_array($A) && !empty($A['file'])) {
         echo COM_refresh($_CONF['site_url']);
     }
 
-    $dwnld->_logItem('Download Success', 
+    $dwnld->_logItem('Download Success',
             "{$_USER['username']} successfully downloaded "
             . "the file with id {$id}.");
 } else {

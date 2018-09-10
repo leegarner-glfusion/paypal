@@ -14,7 +14,12 @@
 {!endif}
   <div class="uk-form-row frmAddCart {tpl_ver}">
     <div class="uk-form-controls">
+{!if quantity}
+      <input type="hidden" name="quantity" value="{quantity}" />
+      {$LANG_PP['qty']}: {quantity}
+{!else}
       <input type="text" name="quantity" size="3" maxlength="5" value="1" />
+{!endif}
       &nbsp;&nbsp;<button type="submit" class="paypalButton orange" border="0"
         onclick='ppAddToCart("add_cart_{item_number}");return false;'>
         <i class="{iconset}-shopping-cart">&nbsp;</i>{$LANG_PP['add_to_cart']}

@@ -285,8 +285,8 @@ class Coupon extends Product
         $special = PP_getVar($Item->extras, 'special', 'array');
         $recip_email = PP_getVar($special, 'recipient_email', 'string');
         $sender_name = PP_getVar($special, 'sender_name', 'string');
-
-        $gc_code = self::Purchase($amount, $Item->user_id);
+        $uid = $Item->getOrder()->uid;
+        $gc_code = self::Purchase($amount, $uid);
         // Add the code to the options text. Saving the item will happen
         // next during addSpecial
         $Item->addOptionText($LANG_PP['code'] . ': ' . $gc_code, false);
@@ -551,8 +551,7 @@ class Coupon extends Product
         foreach ($items as $item) {
             $P = $item->getProduct();
             if ($P->isNew || $P->prod_type == PP_PROD_COUPON) {
-                echo "here";die;
-                $gc_can_apply -= $P->getPrice($item['options'], $item['quantity']);
+                $gc_can_apply -= $P->getPrice($item->options, $item->quantity) * $item->quantity;
             }
         }
         if ($gc_can_apply < 0) $gc_can_apply = 0;
@@ -576,6 +575,20 @@ class Coupon extends Product
         } else {
             return parent::hasAccess();
         }
+    }
+
+
+    /**
+     * Get the fixed quantity that can be ordered per item view.
+     * If this is zero, then an input box will be shown for the buyer to enter
+     * a quantity. If nonzero, then the input box is a hidden variable with
+     * the value set to the fixed quantity
+     *
+     * return   @integer    Fixed quantity number, zero for varible qty
+     */
+    protected function _getFixedQuantity()
+    {
+        return 1;
     }
 
 }

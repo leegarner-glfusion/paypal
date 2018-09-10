@@ -14,11 +14,12 @@
   {!if have_tax}
     <input type="hidden" name="options[tax]" value="{tax}" />
   {!endif}
-  {!if quantity}
+{!if quantity}
+    {$LANG_PP['qty']}: {quantity}
     <input type="hidden" name="quantity" value="{quantity}" />
-  {!else}
+{!else}
     <input type="text" name="quantity" size="3" maxlength="5" value="1" />
-  {!endif}
+{!endif}
   {!if _ret_url}
     <input type="hidden" name="_ret_url" value="{_ret_url}" />
   {!endif}

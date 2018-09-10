@@ -277,7 +277,7 @@ function getCouponLogField($fieldname, $fieldvalue, $A, $icon_arr)
 *   @param  integer $uid    User ID to view, current user by default
 *   @return string          HTML for order list
 */
-function history($admin = false, $uid = '')
+function XXXhistory($admin = false, $uid = '')
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER;
 
@@ -485,17 +485,17 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $total = (float)$fieldvalue;
         $tip = '<table width=&quot;50%&quot; align=&quot;center&quot;>' . LB;
         $tip .= '<tr><td>' . $LANG_PP['item_total'] .
-            '</td><td style=&quot;text-align:right&quot;>' . $fieldvalue . '</td></tr>' . LB;
+            ': </td><td style=&quot;text-align:right&quot;>' . $fieldvalue . '</td></tr>' . LB;
         foreach (array('tax', 'shipping', 'handling') as $fld) {
             if (is_numeric($A[$fld]) && $A[$fld] > 0) {
-                $tip .= '<tr><td>' . $LANG_PP[$fld] . ': ' .
-                    '</td><td style=&quot;text-align:right&quot;>' . $A[$fld] . '</td></tr>' . LB;
+                $tip .= '<tr><td>' . $LANG_PP[$fld] .
+                    ': </td><td style=&quot;text-align:right&quot;>' . $A[$fld] . '</td></tr>' . LB;
                 $total += (float)$A[$fld];
             }
         }
         if ($total > $fieldvalue) {
-            $tip .= '<tr><td>' . $LANG_PP['total'] . ': ' .
-                    '</td><td style=&quot;text-align:right&quot;>' . $total . '</td></tr>' . LB;
+            $tip .= '<tr><td>' . $LANG_PP['total'] .
+                    ': </td><td style=&quot;text-align:right&quot;>' . $total . '</td></tr>' . LB;
         }
         $tip .= '</table>' . LB;
         $retval = '<span class="tooltip" title="' . $tip . '">' . $fieldvalue . '</span>';

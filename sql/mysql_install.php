@@ -252,14 +252,10 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   `product_id` varchar(128) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `quantity` int(11) NOT NULL DEFAULT '1',
-  `user_id` int(11) NOT NULL,
   `txn_id` varchar(128) DEFAULT '',
   `txn_type` varchar(255) DEFAULT '',
-  `purchase_date` int(11) unsigned NOT NULL DEFAULT '0',
-  `p_dt_old` datetime DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `expiration` int(11) unsigned NOT NULL DEFAULT '0',
-  `exp_old` datetime DEFAULT NULL,
   `price` float(10,2) NOT NULL DEFAULT '0.00',
   `taxable` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `token` varchar(40) NOT NULL DEFAULT '',
@@ -272,7 +268,6 @@ $_SQL['paypal.purchases'] = "CREATE TABLE {$_TABLES['paypal.purchases']} (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `purchases_productid` (`product_id`),
-  KEY `purchases_userid` (`user_id`),
   KEY `purchases_txnid` (`txn_id`),
   KEY `purchases_expiration` (`expiration`)
 ) ENGINE=MyISAM";
@@ -849,9 +844,6 @@ $PP_UPGRADE['0.6.0'] = array(
         ADD `tax` decimal(5,2) NOT NULL DEFAULT '0.00',
         ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`,
         CHANGE price price decimal(12,4) NOT NULL DEFAULT 0,
-        DROP key purchases_date,
-        CHANGE purchase_date p_dt_old datetime,
-        ADD purchase_date int(11) unsigned not null default 0 after txn_type,
         DROP key purchases_expiration,
         CHANGE expiration exp_old datetime,
         ADD expiration int(11) unsigned not null default 0 after status",
@@ -942,11 +934,10 @@ $PP_UPGRADE['0.6.0'] = array(
         DROP order_date_old,
         ADD KEY (`order_date`)",
     "UPDATE {$_TABLES['paypal.purchases']} SET
-        purchase_date = UNIX_TIMESTAMP(CONVERT_TZ(`p_dt_old`, '+00:00', @@session.time_zone));
         expiration = UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
     "ALTER TABLE {$_TABLES['paypal.purchases']}
-        DROP p_dt_old,
-        DROP exp_old",
+        DROP exp_old,
+        DROP purchase_date",
     "ALTER TABLE {$_TABLES['paypal.orderstatus']}
         ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
     "UPDATE {$_TABLES['paypal.orderstatus']}
