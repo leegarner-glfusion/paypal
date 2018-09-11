@@ -1439,13 +1439,22 @@ function PAYPAL_adminlist_Workflow()
             FROM {$_TABLES['paypal.workflows']}";
 
     $header_arr = array(
-        array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => false),
-        array('text' => $LANG_PP['name'],
-                'field' => 'wf_name', 'sort' => false),
-        array('text' => $LANG_PP['enabled'],
-                'field' => 'enabled', 'sort' => false,
-                'align' => 'center'),
+        array(
+            'text' => $LANG_PP['order'],
+            'field' => 'orderby',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['name'],
+            'field' => 'wf_name',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['enabled'],
+            'field' => 'wf_enabled',
+            'sort' => false,
+            'align' => 'center',
+        ),
     );
 
     $defsort_arr = array('field' => 'orderby',
@@ -1724,6 +1733,22 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     $retval = '';
 
     switch($fieldname) {
+    case 'wf_enabled':
+        $fieldvalue = $A['enabled'];
+        $opts = array(
+            0 => 'Disabled',
+            1 => 'Physical Only',
+            3 => 'All Orders',
+        );
+        $retval = "<select id=\"sel{$fieldname}{$A['id']}\" name=\"{$fieldname}_sel\" " .
+            "onchange='PPupdateSel(this,\"{$A['id']}\",\"enabled\", \"workflow\");'>" . LB;
+        foreach ($opts as $val=>$str) {
+            $sel = $fieldvalue == $val ? 'selected="selected"' : '';
+            $retval .= "<option value=\"{$val}\" $sel>{$str}</option>" . LB;
+        }
+        $retval .= '</select>' . LB;
+        break;
+
     case 'enabled':
     case 'notify_buyer':
     case 'notify_admin':

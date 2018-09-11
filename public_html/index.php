@@ -111,7 +111,7 @@ case 'checkout':
         $view = 'checkoutcart';
 
         // See what workflow elements we already have.
-        foreach (\Paypal\Workflow::getAll() as $wf_name) {
+        foreach (\Paypal\Workflow::getAll($Cart) as $wf_name) {
             switch ($wf_name) {
             case 'billto':
             case 'shipto':

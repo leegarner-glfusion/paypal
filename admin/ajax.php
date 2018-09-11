@@ -20,6 +20,7 @@ if (!plugin_ismoderator_paypal()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the paypal admin ajax function.");
     exit;
 }
+
 switch ($_POST['action']) {
 case 'updatestatus':
     if (!empty($_POST['order_id']) &&
@@ -110,9 +111,14 @@ case 'toggle':
 
     case 'workflow':
         $field = $_POST['type'];
+        $wf = \Paypal\Workflow::getInstance($_POST['id']);
+        if (!$wf) break;
+        $newval = $_POST['oldval'];
+        $_POST['oldval'] = $wf['enabled'];
         switch ($field) {
         case 'enabled':
-            $newval = \Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
+            //$newval = \Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
+            $newval = \Paypal\Workflow::setValue($_POST['id'], $field, $newval);
             break;
 
         default:
@@ -145,8 +151,9 @@ case 'toggle':
         'component' => $_POST['component'],
         'newval'    => $newval,
         'statusMessage' => $newval != $_POST['oldval'] ? 
-                $LANG_PP['msg_updated'] : $LANG_PP['msg_unchanged'],
+                $LANG_PP['msg_updated'] : $LANG_PP['msg_nochange'],
     );
+    COM_errorLog(print_r($retval,true));
 
     header('Content-Type: applicsation/json');
     header("Cache-Control: no-cache, must-revalidate");

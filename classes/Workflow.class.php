@@ -47,7 +47,7 @@ class Workflow
             $_PP_CONF['workflows'] = array();
             $sql = "SELECT wf_name
                     FROM {$_TABLES[self::$table]}
-                    WHERE enabled = 1
+                    WHERE enabled > 0
                     ORDER BY orderby ASC";
             $res = DB_query($sql);
             while ($A = DB_fetchArray($res, false)) {
@@ -62,18 +62,23 @@ class Workflow
      *
      * @return  array   Array of workflow names
      */
-    public static function getAll()
+    public static function getAll($Cart = NULL)
     {
         global $_TABLES;
         static $workflows = NULL;
 
+        if ($Cart) {
+            $min_status = $Cart->hasPhysical() ? 1 : 2;
+        } else {
+            $min_status = 1;
+        }
         if ($workflows === NULL) {
             $cache_key = 'workflows_enabled';
             $workflows = Cache::get($cache_key);
             if (!$workflows) {
                 $sql = "SELECT wf_name
                         FROM {$_TABLES[self::$table]}
-                        WHERE enabled = 1
+                        WHERE enabled >= $min_status
                         ORDER BY orderby ASC";
                 $res = DB_query($sql);
                 while ($A = DB_fetchArray($res, false)) {
@@ -83,6 +88,17 @@ class Workflow
             }
         }
         return $workflows;
+    }
+
+
+    public static function getInstance($id)
+    {
+        global $_TABLES;
+
+        $sql = "SELECT * FROM {$_TABLES[self::$table]} WHERE id = " . (int)$id;
+        $res = DB_query($sql);
+        $A = DB_fetchArray($res, false);
+        return $A;
     }
 
 
@@ -134,36 +150,35 @@ class Workflow
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @uses   _toggle()
     *   @param  integer $id         ID number of element to modify
     *   @param  string  $field      Database fieldname to change
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    public static function Toggle($id, $field, $oldvalue)
+    //public static function Toggle($id, $field, $oldvalue)
+    public static function setValue($id, $field, $newvalue)
     {
         global $_TABLES;
 
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
         if ($id < 1)
-            return $oldvalue;
+            return -1;
         $field = DB_escapeString($field);
 
         // Determing the new value (opposite the old)
-        $newvalue = $oldvalue == 1 ? 0 : 1;
+        $newvalue = (int)$newvalue;
 
         $sql = "UPDATE {$_TABLES[self::$table]}
                 SET $field = $newvalue
                 WHERE id='$id'";
-        //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
             Cache::clear('workflows');
+            COM_errorLog("returning $newvalue");
             return $newvalue;
         } else {
             COM_errorLog("Workflow::Toggle() SQL error: $sql", 1);
-            return $oldvalue;
+            return -1;
         }
     }
 

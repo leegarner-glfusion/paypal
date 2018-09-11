@@ -749,6 +749,23 @@ class Cart extends Order
         return DB_error() ? 1 : 0;
     }
 
+
+    /**
+    *   Check if this cart has any physical items.
+    *   Used to adapt workflows based on product types
+    *
+    *   @return boolean     True if at least one physical product is present
+    */
+    public function hasPhysical()
+    {
+        foreach ($this->items as $id=>$item) {
+            if ($item->type  & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL)
+                return true;
+        }
+        return false;
+    }
+
+
 }   // class Cart
 
 ?>
