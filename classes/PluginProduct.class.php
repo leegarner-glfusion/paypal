@@ -125,7 +125,7 @@ class PluginProduct extends Product
                 'quantity' => $Item->quantity,
                 'name' => $Item->item_name,
                 'price' => $Item->price,
-                'paid' => $Item->paid,
+                'paid' => $Item->price,
             ),
             'ipn_data'  => $ipn_data,
             'order' => $Order,      // Pass the order object, may be used in the future
