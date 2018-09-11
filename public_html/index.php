@@ -108,9 +108,13 @@ case 'checkout':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         // Start with the first view.
         //$view = Workflow::getNextView();
-        $view = 'checkoutcart';
+        //$view = 'checkoutcart';
+        $view = 'none';
 
         // See what workflow elements we already have.
+        $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
+        /*$wf = \Paypal\Workflow::getAll($Cart);
+        if ($step > count($wf)) $step = 9;
         foreach (\Paypal\Workflow::getAll($Cart) as $wf_name) {
             switch ($wf_name) {
             case 'billto':
@@ -122,7 +126,9 @@ case 'checkout':
                 }
                 break;
             }
-        }
+        }*/
+        $content .= $Cart->getView($next_step);
+        break;
     } else {
         $content .= SEC_loginRequiredForm();
         $view = 'none';
@@ -151,7 +157,10 @@ case 'saveshipto':
             $_POST['useaddress'] = $addr_id[0];
         }
     }
-    $view = \Paypal\Workflow::getNextView($addr_type);
+    //$view = \Paypal\Workflow::getNextView($addr_type);
+    $next_step = PP_getVar($_POST, 'next_step', 'integer');
+    $content = \Paypal\Cart::getInstance()->getView($next_step);
+    $view = 'none';
     \Paypal\Cart::getInstance()->setAddress($_POST, $addr_type);
     break;
 
@@ -310,10 +319,11 @@ case 'billto':
 case 'shipto':
     /*if (COM_isAnonUser()) {
         $content .= SEC_loginRequiredForm();
-    } else {*/
+} else {*/
+    $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
         $U = new \Paypal\UserInfo();
         $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
-        $content .= $U->AddressForm($view, $A);
+        $content .= $U->AddressForm($view, $A, $next_step);
 //   }
     break;
 
@@ -389,7 +399,8 @@ case 'viewcart':
     }
     $menu_opt = $LANG_PP['viewcart'];
     if (\Paypal\Cart::getInstance()->hasItems()) {
-        $content .= \Paypal\Cart::getInstance()->View('viewcart');
+        //$content .= \Paypal\Cart::getInstance()->View(0);
+        $content .= \Paypal\Cart::getInstance()->getView(0);
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
@@ -399,7 +410,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $content .= \Paypal\Cart::getInstance()->View($view);
+    $content .= \Paypal\Cart::getInstance()->View(5);
     break;
 
 case 'productlist':

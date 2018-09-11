@@ -196,6 +196,7 @@ function removeAddress(id)
 
     <p>
       {hiddenvars}
+      <input type="hidden" name="next_view" value="{next_view}" />
       <input class="paypalButton green" type="submit" name="{action}" value="Submit" />
       <input class="paypalButton blue" type="reset" value="Reset" /> 
     </p>

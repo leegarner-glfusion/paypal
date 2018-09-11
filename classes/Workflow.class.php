@@ -23,6 +23,10 @@ namespace Paypal;
 class Workflow
 {
     static $table = 'paypal.workflows';
+    public $wf_name;
+    public $orderby;
+    public $wf_id;
+    public $enabled;
 
     /**
     *   Constructor.
@@ -30,9 +34,14 @@ class Workflow
     *
     *   @uses   Load()
     */
-    public function __construct()
+    public function __construct($A = array())
     {
-        self::Init();
+        if (!empty($A)) {
+            $this->wf_name = $A['wf_name'];
+            $this->enabled = (int)$A['enabled'];
+            $this->wf_id = (int)$A['id'];
+            $this->orderby = (int)$A['orderby'];
+        }
     }
 
 
@@ -65,28 +74,24 @@ class Workflow
     public static function getAll($Cart = NULL)
     {
         global $_TABLES;
-        static $workflows = NULL;
 
         if ($Cart) {
             $min_status = $Cart->hasPhysical() ? 1 : 2;
         } else {
             $min_status = 1;
         }
-        if ($workflows === NULL) {
-            $cache_key = 'workflows_enabled';
+            $cache_key = 'workflows_enabled_' . $min_status;
             $workflows = Cache::get($cache_key);
             if (!$workflows) {
-                $sql = "SELECT wf_name
-                        FROM {$_TABLES[self::$table]}
+                $sql = "SELECT * FROM {$_TABLES[self::$table]}
                         WHERE enabled >= $min_status
                         ORDER BY orderby ASC";
                 $res = DB_query($sql);
                 while ($A = DB_fetchArray($res, false)) {
-                    $workflows[] = $A['wf_name'];
+                    $workflows[] = new self($A);
                 }
                 Cache::set($cache_key, $workflows, 'workflows');
             }
-        }
         return $workflows;
     }
 
@@ -155,7 +160,6 @@ class Workflow
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    //public static function Toggle($id, $field, $oldvalue)
     public static function setValue($id, $field, $newvalue)
     {
         global $_TABLES;

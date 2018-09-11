@@ -403,7 +403,7 @@ class Order
     *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($step = 'vieworder', $tpl = '')
+    public function View($step = 9, $tpl = '')
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -413,12 +413,15 @@ class Order
         $final = false;
         switch($step) {
         case 'viewcart':
+        case 0:
             $tplname = 'viewcart';
             break;
         case 'adminview':
         case 'vieworder':
+        case 9:
             $final = true;
         case 'checkoutcart':
+        case 5:
         default:
             $tplname = 'order';
             break;
@@ -435,8 +438,8 @@ class Order
 
         $T->set_block('order', 'ItemRow', 'iRow');
 
-        foreach (Workflow::getAll() as $key => $value) {
-            $T->set_var('have_' . $value, 'true');
+        foreach (Workflow::getAll($this) as $key => $wf) {
+            $T->set_var('have_' . $wf->wf_name, 'true');
         }
 
         $Currency = Currency::getInstance();
@@ -492,8 +495,8 @@ class Order
             'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
             'subtotal'      => $this->subtotal == $this->total ? '' : $Currency->Format($this->subtotal),
-            'have_billto'   => 'true',
-            'have_shipto'   => 'true',
+//            'have_billto'   => 'true',
+//            'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
@@ -507,6 +510,7 @@ class Order
             'token'         => $this->token,
             'is_uikit'      => $_PP_CONF['_is_uikit'],
             'use_gc'        => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
+            'next_step'     => $step + 1,
         ) );
 
         if ($this->isAdmin) {
@@ -537,9 +541,11 @@ class Order
         $T->set_var('payer_email', $payer_email);
 
         switch ($step) {
+        case 0:
         case 'viewcart':
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
             break;
+        case 9:
         case 'checkoutcart':
             $gw = Gateway::getInstance($this->getInfo('gateway'));
             if ($gw) {
@@ -1166,6 +1172,47 @@ class Order
     public function setGateway($gw_name)
     {
         $this->m_info['gateway'] = $gw_name;
+    }
+
+
+    /**
+    *   Check if this cart has any physical items.
+    *   Used to adapt workflows based on product types
+    *
+    *   @return boolean     True if at least one physical product is present
+    */
+    public function hasPhysical()
+    {
+        foreach ($this->items as $id=>$item) {
+            if (($item->getProduct()->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public function getView($step)
+    {
+        $wf = Workflow::getAll($this);
+        if ($step < count($wf)) {
+            $wf_name = $wf[$step]->wf_name;
+        } else {
+            $wf_name = 'finalize';
+        }
+        switch($wf_name) {
+        case 'viewcart':
+            return $this->View(0);
+        case 'billto':
+        case 'shipto':
+            $U = new \Paypal\UserInfo();
+            $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
+            return $U->AddressForm($wf_name, $A, $step);
+        case 'finalize':
+            return $this->View();
+        default:
+            return $this->View();
+        }
     }
 
 }

@@ -227,6 +227,7 @@ function removeAddress(id)
 {!endif}
 
 {hiddenvars}
+  <input type="hidden" name="next_step" value="{next_step}" />
   <div class="uk-form-row">
     <div class="uk-form-controls">
       <button class="uk-button uk-button-success" type="submit" name="{action}">Submit</button>
