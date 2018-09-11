@@ -958,6 +958,7 @@ function phpblock_paypal_cart_contents()
     $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
+    $Cur = \Paypal\Currency::getInstance();
     foreach ($cart->Cart() as $id=>$item) {
         $item_id = $item->product_id;
         if ($item->options != '') $item_id .= '|' . $item->options;
@@ -967,11 +968,10 @@ function phpblock_paypal_cart_contents()
         $T->set_var(array(
             'item_id'       => $item_id,
 //            'options'       => $P->getOptionDisplay($item),
-            'item_name'     => $P->short_description,
-            'item_dscp'     => $P->descrip,
-            'price'         => COM_numberFormat($item->price, 2),
+            'item_name'     => $item->description,
+            'price'         => $Cur->FormatValue($item->price),
             'quantity'      => $item->quantity,
-            'item_total'    => COM_numberFormat($item_total, 2),
+            'item_total'    => $Cur->FormatValue($item_total),
             'pi_url'        => PAYPAL_URL,
             'item_link'     => $P->getLink(),
         ) );
@@ -979,7 +979,7 @@ function phpblock_paypal_cart_contents()
         $total += $item_total;
     }
     $T->set_var(array(
-        'grand_total' => COM_numberFormat($total, 2),
+        'grand_total' => $Cur->Format($total),
     ) );
     $T->parse('output', 'shopping_cart_contents');
     return $T->finish ($T->get_var('output'));
