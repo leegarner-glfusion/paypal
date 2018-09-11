@@ -37,10 +37,11 @@ $output = array(
     'short_description' => 'Short Product Description',
     'price'             => Unit price
     'override_price' => 1,      // set if the payment price will be accepted as full payment
+    'fixed_q'       => 0,     // Optional, 0 = buyer enters quanty, >1 means only that number can be purchased
 );
 ```
 
-### `service_handlePurchase_<plugin_name`
+### `service_handlePurchase_<plugin_name>`
 Handles the purchase of the item
 ```
 $args = array(
