@@ -11,7 +11,7 @@
 {!if order_number}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_blank"
-        title="{$LANG_PP['print']}"><i class="{iconset}-print" title="{$LANG_PP['print']}"></i>
+        title="{$LANG_PP['print']}"><i class="{iconset}-print tooltip" title="{$LANG_PP['print_order']}"></i>
     </a>
   </div>
 {!endif}

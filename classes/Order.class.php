@@ -416,6 +416,7 @@ class Order
             $tplname = 'viewcart';
             break;
         case 'adminview':
+        case 'vieworder':
             $final = true;
         case 'checkoutcart':
         default:
@@ -460,7 +461,7 @@ class Order
                 'item_price'    => COM_numberFormat($item->price, 2),
                 'item_quantity' => (int)$item->quantity,
                 'item_total'    => $Currency->FormatValue($item_total),
-                'is_admin'      => plugin_ismoderator_paypal() ? 'true' : '',
+                'is_admin'      => $this->isAdmin ? 'true' : '',
                 'is_file'       => $P->file != '' && $item->expiration > time() ? true : false,
                 'taxable'       => $this->tax_rate > 0 ? $P->taxable : 0,
                 'tax_icon'      => $LANG_PP['tax'][0],
