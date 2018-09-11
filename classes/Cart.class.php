@@ -232,19 +232,17 @@ class Cart extends Order
     *   This only works where items are unique since the caller has no access
     *   to the cart ID.
     *
-    *   @param  string  $item_number    Item number to update
+    *   @param  string  $item_number    Product ID of item to update
     *   @param  array   $updates        Array (field=>value) of new values
     */
     public function updateItem($item_number, $updates)
     {
         // Search through the cart for the item number
-        foreach ($this->m_cart as $id=>$item) {
-            if ($item['item_id'] == $item_number) {
+        foreach ($this->items as $id=>$item) {
+            if ($item->product_id == $item_number) {
                 // If the item is found, loop through the updates and apply
                 foreach ($updates as $fld=>$val) {
-                    if (isset($item[$fld])) {
-                        $this->m_cart[$id][$fld] = $val;
-                    }
+                    $this->items[$id]->$fld = $val;
                 }
                 break;
             }
