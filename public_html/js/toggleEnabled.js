@@ -33,6 +33,32 @@ var PP_toggle = function(cbox, id, type, component) {
     return false;
 };
 
+var PPupdateSel = function(sel, id, type, component) {
+    newval = sel.value;
+    var dataS = {
+        "action" : "toggle",
+        "id": id,
+        "type": type,
+        "oldval": newval,
+        "component": component,
+    };
+    data = $.param(dataS);
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: site_admin_url + "/plugins/paypal/ajax.php",
+        data: data,
+        success: function(result) {
+            try {
+                $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+            }
+            catch(err) {
+                alert(result.statusMessage);
+            }
+        }
+    });
+}
+
 var PP_status = {};
 
 function PP_updateOrderStatus(order_id, oldstatus, newstatus, showlog)
