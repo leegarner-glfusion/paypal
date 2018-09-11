@@ -42,6 +42,7 @@ class Product
     //var $buttons = array();
     public $buttons;
     protected $special_fields = array();
+    protected $_fixed_q = 0;
     public $Cat;        // Category object
     public $override_price = false;
     private $_uid = 0;  // user id, for pricing
@@ -2073,7 +2074,7 @@ class Product
      */
     public function getFixedQuantity()
     {
-        return 0;
+        return $this->_fixed_q;
     }
 
 

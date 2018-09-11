@@ -70,7 +70,8 @@ class PluginProduct extends Product
             $this->btn_type = PP_getVar($A, 'btn_type', 'string', 'buy_now');
             $this->btn_text = PP_getVar($A, 'btn_text');
             $this->_have_detail_svc = PP_getVar($A, 'have_detail_svc', 'boolean', false);
-            $this->_buynow_qty = PP_getVar($A, 'buynow_qty', 'integer', 0);
+            $this->_fixed_q = PP_getVar($A, 'fixed_q', 'integer', 0);
+            $this->_buynow_qty = PP_getVar($A, 'buynow_qty', 'integer', $this->_fixed_q);
          } else {
             // probably an invalid product ID
             $this->price = 0;
