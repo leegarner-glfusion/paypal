@@ -526,7 +526,7 @@ class paypal extends \Paypal\Gateway
 
             // Get the allowed buy-now quantity. If not defined, set
             // undefined_quantity.
-            $qty = $P->buynowQty();
+            $qty = $P->getFixedQuantity();
             if ($qty < 1) {
                 $vars['undefined_quantity'] = '1';
             } else {

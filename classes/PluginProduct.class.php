@@ -22,7 +22,6 @@ class PluginProduct extends Product
     public $url;        // URL to product detail page, if any
     public $pi_info;    // plugin info with item_id and other vars
     private $_have_detail_svc = false;  // Plugin has a detail page service function
-    private $_buynow_qty = 0;   // Quantity to use for buy-now buttons
 
     /**
     *   Constructor.
@@ -71,7 +70,6 @@ class PluginProduct extends Product
             $this->btn_text = PP_getVar($A, 'btn_text');
             $this->_have_detail_svc = PP_getVar($A, 'have_detail_svc', 'boolean', false);
             $this->_fixed_q = PP_getVar($A, 'fixed_q', 'integer', 0);
-            $this->_buynow_qty = PP_getVar($A, 'buynow_qty', 'integer', $this->_fixed_q);
          } else {
             // probably an invalid product ID
             $this->price = 0;
@@ -231,20 +229,6 @@ class PluginProduct extends Product
         LGLIB_invokeService($this->pi_name, 'emailReceiptInfo',
                     $this->pi_info, $text, $svc_msg);
         return $text;
-    }
-
-
-    /**
-     * Get the quantity for a buy-now button.
-     * This is used to either set a fixed quantity, or if zero then
-     * the buyer can enter a quantity.
-     * Plugin products like subscriptions may set a specific quantity.
-     *
-     * @return  integer     Fixed quantity
-     */
-    public function buynowQty()
-    {
-        return $this->_buynow_qty;
     }
 
 }   // class PluginProduct
