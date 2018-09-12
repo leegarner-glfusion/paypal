@@ -429,6 +429,7 @@ class Order
             $tplname = 'order.print';
             break;
         }
+        $step = (int)$step;
 
         $T = PP_getTemplate($tplname, 'order');
         foreach (array('billto', 'shipto') as $type) {
