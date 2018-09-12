@@ -895,8 +895,8 @@ function plugin_itemdeleted_paypal($id, $type)
         $id = DB_escapeString($id);
         $sql = "DELETE FROM {$_TABLES['paypal.buttons']}
                 WHERE pi_name = '$type' AND item_id = '{$id}'";
+        DB_query($sql);
     }
-    DB_query($sql);
 }
 
 
