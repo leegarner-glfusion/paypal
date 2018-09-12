@@ -22,7 +22,16 @@ namespace Paypal;
 */
 class Workflow
 {
+    public const DISABLED = 0;
+    public const REQ_PHYSICAL = 1;
+    public const REQ_VIRTUAL = 2;   // unused placeholder
+    public const REQ_ALL = 3;
+
     static $table = 'paypal.workflows';
+    public $wf_name;
+    public $orderby;
+    public $wf_id;
+    public $enabled;
 
     /**
     *   Constructor.
@@ -30,9 +39,14 @@ class Workflow
     *
     *   @uses   Load()
     */
-    public function __construct()
+    public function __construct($A = array())
     {
-        self::Init();
+        if (!empty($A)) {
+            $this->wf_name = $A['wf_name'];
+            $this->enabled = (int)$A['enabled'];
+            $this->wf_id = (int)$A['id'];
+            $this->orderby = (int)$A['orderby'];
+        }
     }
 
 
@@ -47,7 +61,7 @@ class Workflow
             $_PP_CONF['workflows'] = array();
             $sql = "SELECT wf_name
                     FROM {$_TABLES[self::$table]}
-                    WHERE enabled = 1
+                    WHERE enabled > 0
                     ORDER BY orderby ASC";
             $res = DB_query($sql);
             while ($A = DB_fetchArray($res, false)) {
@@ -58,48 +72,60 @@ class Workflow
 
 
     /**
-     * Get all workflow items, in order of processing
+     * Get all workflow items, in order of processing.
+     * If a cart is supplied, get the appropriate enabled workflows based
+     * on the cart contents.
+     * If the cart is NULL, get all workflows.
      *
      * @return  array   Array of workflow names
      */
-    public static function getAll()
+    public static function getAll($Cart = NULL)
     {
         global $_TABLES;
-        static $workflows = NULL;
 
-        if ($workflows === NULL) {
-            $cache_key = 'workflows_enabled';
-            $workflows = Cache::get($cache_key);
-            if (!$workflows) {
-                $sql = "SELECT wf_name
-                        FROM {$_TABLES[self::$table]}
-                        WHERE enabled = 1
-                        ORDER BY orderby ASC";
-                $res = DB_query($sql);
-                while ($A = DB_fetchArray($res, false)) {
-                    $workflows[] = $A['wf_name'];
-                }
-                Cache::set($cache_key, $workflows, 'workflows');
+        if ($Cart) {
+            $statuses = array(self::REQ_ALL, self::REQ_VIRTUAL);
+            if ($Cart->hasPhysical()) $statuses[] = self::REQ_PHYSICAL;
+            $statuslist = implode(',', $statuses);
+            $where = " WHERE enabled IN ($statuslist)";
+        } else {
+            $where = '';
+            $statuslist = '0';
+        }
+        $cache_key = 'workflows_enabled_' . $statuslist;
+        $workflows = Cache::get($cache_key);
+        if (!$workflows) {
+            $sql = "SELECT * FROM {$_TABLES[self::$table]}
+                $where
+                ORDER BY orderby ASC";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $workflows[] = new self($A);
             }
+            Cache::set($cache_key, $workflows, 'workflows');
         }
         return $workflows;
     }
 
 
     /**
-    *   Initilize the workflow array, if not already done.
-    *   Scope is Public since it's called from Cart's constructor
-    *
-    *   @uses   Load()
-    */
-    public static function Init()
+     * Get an instance of a workflow step
+     *
+     * @uses    self::getall() to take advantage of caching
+     * @param   integer $id     Workflow record ID
+     * @return  object          Workflow object, or NULL if not defined/disabled
+     */
+    public static function getInstance($id)
     {
-        global $_PP_CONF;
+        global $_TABLES;
 
-        if (!isset($_PP_CONF['workflows']) ||
-            !is_array($_PP_CONF['workflows'])) {
-            self::Load();
+        $workflows = self::getAll();
+        foreach ($workflows as $wf) {
+            if ($wf->wf_id == $id) {
+                return $wf;
+            }
         }
+        return NULL;
     }
 
 
@@ -134,36 +160,34 @@ class Workflow
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @uses   _toggle()
     *   @param  integer $id         ID number of element to modify
     *   @param  string  $field      Database fieldname to change
     *   @param  integer $oldvalue   Original value to change
     *   @return         New value, or old value upon failure
     */
-    public static function Toggle($id, $field, $oldvalue)
+    public static function setValue($id, $field, $newvalue)
     {
         global $_TABLES;
 
-        $oldvalue = $oldvalue == 0 ? 0 : 1;
         $id = (int)$id;
         if ($id < 1)
-            return $oldvalue;
+            return -1;
         $field = DB_escapeString($field);
 
         // Determing the new value (opposite the old)
-        $newvalue = $oldvalue == 1 ? 0 : 1;
+        $newvalue = (int)$newvalue;
 
         $sql = "UPDATE {$_TABLES[self::$table]}
                 SET $field = $newvalue
                 WHERE id='$id'";
-        //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
             Cache::clear('workflows');
+            COM_errorLog("returning $newvalue");
             return $newvalue;
         } else {
             COM_errorLog("Workflow::Toggle() SQL error: $sql", 1);
-            return $oldvalue;
+            return -1;
         }
     }
 
@@ -250,7 +274,6 @@ class Workflow
         global $_PP_CONF;
 
         /** Load the views, if not done already */
-        //self::Init();
         $workflows = self::getAll();
 
         // If the current view is empty, or isn't part of our array,

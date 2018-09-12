@@ -8,7 +8,8 @@
   </p>
 {!endif}
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
-{!if order_number}
+{!if not_final}
+{!else}
   <div class="floatright">
     <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_blank"
         title="{$LANG_PP['print']}"><i class="{iconset}-print tooltip" title="{$LANG_PP['print_order']}"></i>
@@ -55,9 +56,9 @@
     {!if have_shipto}
     <div id="paypalShipping">
       <b>{$LANG_PP['ship_to']}:</b>&nbsp;
-      {!if not_final}
+{!if not_final}
       <a href="{pi_url}/index.php?view=shipto">[{$LANG_ADMIN['edit']}]</a>
-      {!endif}
+{!endif}
       <br />
       {!if shipto_name}
       {shipto_name}<br />

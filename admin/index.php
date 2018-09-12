@@ -1434,27 +1434,37 @@ function PAYPAL_adminlist_Workflow()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
-    $sql = "SELECT id, wf_name, orderby, enabled,
-                'workflow' AS rec_type
+    $sql = "SELECT *, 'workflow' AS rec_type
             FROM {$_TABLES['paypal.workflows']}";
 
     $header_arr = array(
-        array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => false),
-        array('text' => $LANG_PP['name'],
-                'field' => 'wf_name', 'sort' => false),
-        array('text' => $LANG_PP['enabled'],
-                'field' => 'enabled', 'sort' => false,
-                'align' => 'center'),
+        array(
+            'text' => $LANG_PP['order'],
+            'field' => 'orderby',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['name'],
+            'field' => 'wf_name',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['enabled'],
+            'field' => 'wf_enabled',
+            'sort' => false,
+        ),
     );
 
-    $defsort_arr = array('field' => 'orderby',
-            'direction' => 'ASC');
+    $defsort_arr = array(
+        'field' => 'orderby',
+        'direction' => 'ASC',
+    );
 
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
 
-    $query_arr = array('table' => 'paypal.workflows',
+    $query_arr = array(
+        'table' => 'paypal.workflows',
         'sql' => $sql,
         'query_fields' => array('wf_name'),
         'default_filter' => '',
@@ -1724,6 +1734,21 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     $retval = '';
 
     switch($fieldname) {
+    case 'wf_enabled':
+        $fieldvalue = $A['enabled'];
+        if ($A['can_disable'] == 1) {
+            $retval = "<select id=\"sel{$fieldname}{$A['id']}\" name=\"{$fieldname}_sel\" " .
+                "onchange='PPupdateSel(this,\"{$A['id']}\",\"enabled\", \"workflow\");'>" . LB;
+            foreach ($LANG_PP['wf_statuses'] as $val=>$str) {
+                $sel = $fieldvalue == $val ? 'selected="selected"' : '';
+                $retval .= "<option value=\"{$val}\" $sel>{$str}</option>" . LB;
+            }
+            $retval .= '</select>' . LB;
+        } else {
+            $retval = $LANG_PP['required'];
+        }
+        break;
+
     case 'enabled':
     case 'notify_buyer':
     case 'notify_admin':

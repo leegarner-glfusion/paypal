@@ -24,8 +24,8 @@ class OrderStatus extends Workflow
     static $table = 'paypal.orderstatus';
 
     private $name;
-    private $enabled;
-    private $orderby;
+    public $enabled;
+    public $orderby;
     private $notify_buyer;
     private $notify_admin;
 
@@ -57,7 +57,7 @@ class OrderStatus extends Workflow
     /**
     *   Get all order status objects into an array
     */
-    public static function getAll()
+    public static function getAll($Cart = NULL)
     {
         global $_TABLES;
         static $statuses = NULL;

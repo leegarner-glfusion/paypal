@@ -132,6 +132,7 @@
       </div>
       <div style="float:right;" id="checkoutButtons">
 {!if gateway_radios}
+        <input type="hidden" name="next_step" value="{next_step}" />
 {!if is_uikit}
         <button style="float:none;" id="submit" type="submit" class="uk-button uk-button-success" name="checkout">
           <i class="{iconset}-shopping-cart"></i>&nbsp;{$LANG_PP['checkout']} &gt;&gt;</button>

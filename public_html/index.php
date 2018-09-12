@@ -105,24 +105,12 @@ case 'checkout':
         // This also calls Save() on the cart
         $Cart->Update($_POST);
     }
+    // See what workflow elements we already have.
+    $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        // Start with the first view.
-        //$view = Workflow::getNextView();
-        $view = 'checkoutcart';
-
-        // See what workflow elements we already have.
-        foreach (\Paypal\Workflow::getAll() as $wf_name) {
-            switch ($wf_name) {
-            case 'billto':
-            case 'shipto':
-                if (!(\Paypal\UserInfo::isValidAddress($Cart->getAddress($wf_name)) == '')) {
-                    //$view = Workflow::getNextView($wf_name);
-                    $view = $wf_name;
-                    break 2;    // exit switch and foreach
-                }
-                break;
-            }
-        }
+        $view = 'none';
+        $content .= $Cart->getView($next_step);
+        break;
     } else {
         $content .= SEC_loginRequiredForm();
         $view = 'none';
@@ -151,8 +139,11 @@ case 'saveshipto':
             $_POST['useaddress'] = $addr_id[0];
         }
     }
-    $view = \Paypal\Workflow::getNextView($addr_type);
+    //$view = \Paypal\Workflow::getNextView($addr_type);
     \Paypal\Cart::getInstance()->setAddress($_POST, $addr_type);
+    $next_step = PP_getVar($_POST, 'next_step', 'integer');
+    $content = \Paypal\Cart::getInstance()->getView($next_step);
+    $view = 'none';
     break;
 
 case 'addcartitem':
@@ -308,13 +299,13 @@ case 'history':
 
 case 'billto':
 case 'shipto':
-    /*if (COM_isAnonUser()) {
-        $content .= SEC_loginRequiredForm();
-    } else {*/
-        $U = new \Paypal\UserInfo();
-        $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
-        $content .= $U->AddressForm($view, $A);
-//   }
+    // Editing the previously-submitted billing or shipping info.
+    // This is accessed from the final order confirmation page, so return
+    // there after submission
+    $step = 8;     // form will return to ($step + 1)
+    $U = new \Paypal\UserInfo();
+    $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
+    $content .= $U->AddressForm($view, $A, $step);
     break;
 
 case 'order':
@@ -322,7 +313,7 @@ case 'order':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            $content .= $order->View('vieworder');
+            $content .= $order->View();
         } else {
             COM_404();
         }
@@ -334,8 +325,10 @@ case 'order':
 case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
-        if ($order->canView()) {
-            echo $order->View('vieworder', 'print');
+        if ($order->status == 'cart') {
+            COM_404();
+        } elseif ($order->canView()) {
+            echo $order->View('print');
             exit;
         }
     }
@@ -389,7 +382,7 @@ case 'viewcart':
     }
     $menu_opt = $LANG_PP['viewcart'];
     if (\Paypal\Cart::getInstance()->hasItems()) {
-        $content .= \Paypal\Cart::getInstance()->View('viewcart');
+        $content .= \Paypal\Cart::getInstance()->getView(0);
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
@@ -399,7 +392,8 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
-    $content .= \Paypal\Cart::getInstance()->View($view);
+    echo "DEPRECATED";die;
+    $content .= \Paypal\Cart::getInstance()->View(5);
     break;
 
 case 'productlist':

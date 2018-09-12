@@ -24,8 +24,6 @@ namespace Paypal;
 */
 class Cart extends Order
 {
-    private static $session_var = 'ppGCart';
-
     /** Holder for custom information
     *   @var array */
     public $custom_info = array();
@@ -527,20 +525,14 @@ class Cart extends Order
     */
     public function setAddress($A, $type = 'billto')
     {
-        global $_TABLES;
-
-        if ($type != 'billto') $type = 'shipto';
-
-        $this->m_info[$type] = array();
-        $this->m_info[$type]['addr_id'] = isset($A['addr_id']) ?
-            (int)$A['addr_id'] : '0';
-        $var = $type . '_id';
-        $this->$var = PP_getVar($A, 'addr_id', 'integer', 0);
-        foreach($this->_addr_fields as $fld) {
-            $var = $type . '_' . $fld;
-            $this->$var = isset($A[$fld]) ? htmlspecialchars($A[$fld]) : '';
+        switch ($type) {
+        case 'billto':
+            $this->setBilling($A);
+            break;
+        default:
+            $this->setShipping($A);
+            break;
         }
-        $this->Save();
     }
 
 

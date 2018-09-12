@@ -375,6 +375,11 @@ $LANG_PP = array (
 'notify_admin' => 'Notify Admin',
 'user_history' => 'View this user&apos; purchase history',
 'print_order' => 'Print this order',
+'wf_statuses' => array(
+    0   => 'Disabled',
+    1   => 'Physical Only',
+    3   => 'All Orders',
+),
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

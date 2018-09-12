@@ -18,6 +18,8 @@ namespace Paypal;
 */
 class Order
 {
+    protected static $session_var = 'ppGCart';
+
     private $isAdmin = false;       // True if viewing via admin interface
     private $properties = array();  // Array of properties (DB fields)
     protected $isNew = true;        // Flag to indicate a new, empty order
@@ -95,6 +97,8 @@ class Order
         switch ($name) {
         case 'uid':
         case 'ux_ts':
+        case 'billto_id':
+        case 'shipto_id':
             $this->properties[$name] = (int)$value;
             break;
 
@@ -192,19 +196,16 @@ class Order
     */
     public function setBilling($A)
     {
-        if (isset($A['useaddress'])) {
+        $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
+        if ($addr_id > 0) {
             // If set, the user has selected an existing address. Read
             // that value and use it's values.
-            Cart::setSession('billing', $A['useaddress']);
-            $A = UserInfo::getAddress($A['useaddress']);
-            $prefix = '';
-        } else {
-            // form vars have this prefix
-            $prefix = 'billto_';
+            Cart::setSession('billing', $addr_id);
+            $A = UserInfo::getAddress($addr_id);
         }
 
         if (!empty($A)) {
-            $this->billto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
+            $this->billto_id        = $addr_id;
             $this->billto_name      = PP_getVar($A, 'name');
             $this->billto_company   = PP_getVar($A, 'company');
             $this->billto_address1  = PP_getVar($A, 'address1');
@@ -214,6 +215,7 @@ class Order
             $this->billto_country   = PP_getVar($A, 'country');
             $this->billto_zip       = PP_getVar($A, 'zip');
         }
+        $this->Save();
     }
 
 
@@ -224,18 +226,15 @@ class Order
     */
     public function setShipping($A)
     {
-        if (isset($A['useaddress'])) {
+        $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
+        if ($addr_id > 0) {
             // If set, read and use an existing address
-            Cart::setSession('shipping', $A['useaddress']);
-            $A = UserInfo::getAddress($A['useaddress']);
-            $prefix = '';
-        } else {
-            // form vars have this prefix
-            $prefix = 'shipto_';
+            Cart::setSession('shipping', $addr_id);
+            $A = UserInfo::getAddress($addr_id);
         }
 
         if (!empty($A)) {
-            $this->shipto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
+            $this->shipto_id        = $addr_id;
             $this->shipto_name      = PP_getVar($A, 'name');
             $this->shipto_company   = PP_getVar($A, 'company');
             $this->shipto_address1  = PP_getVar($A, 'address1');
@@ -245,6 +244,7 @@ class Order
             $this->shipto_country   = PP_getVar($A, 'country');
             $this->shipto_zip       = PP_getVar($A, 'zip');
         }
+        $this->Save();
     }
 
 
@@ -276,6 +276,8 @@ class Order
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
         $this->buyer_email = PP_getVar($A, 'buyer_email');
+        $this->billto_id = PP_getVar($A, 'billto_id', 'integer');
+        $this->shipto_id = PP_getVar($A, 'shipto_id', 'integer');
         if ($this->status != 'cart') {
             $this->tax_rate = PP_getVar($A, 'tax_rate');
         }
@@ -382,6 +384,8 @@ class Order
                 "tax_rate = '{$this->tax_rate}'",
         );
         foreach (array('billto', 'shipto') as $type) {
+            $fld = $type . '_id';
+            $fields[] = "$fld = '{$this->$fld}'";
             foreach ($this->_addr_fields as $name) {
                 $fld = $type . '_' . $name;
                 $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -399,11 +403,11 @@ class Order
     /**
     *   View the current order summary
     *
-    *   @param  string  $step       Current step in the checkout process
-    *   @param  string  $tpl        "print" for a printable template
+    *   @param  string  $view       View to display (cart, final order, etc.)
+    *   @param  integer $step       Current step, for updating next_step in the form
     *   @return string      HTML for order view
     */
-    public function View($step = 'vieworder', $tpl = '')
+    public function View($view = 'order', $step = 0)
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -411,20 +415,21 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
         $final = false;
-        switch($step) {
+
+        switch ($view) {
+        case 'order':
+            $final = true;
+        case 'checkout':
+            $tplname = 'order';
+            break;
         case 'viewcart':
             $tplname = 'viewcart';
             break;
-        case 'adminview':
-        case 'vieworder':
-            $final = true;
-        case 'checkoutcart':
-        default:
-            $tplname = 'order';
+        case 'print':
+            $tplname = 'order.print';
             break;
         }
 
-        if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
@@ -435,8 +440,8 @@ class Order
 
         $T->set_block('order', 'ItemRow', 'iRow');
 
-        foreach (Workflow::getAll() as $key => $value) {
-            $T->set_var('have_' . $value, 'true');
+        foreach (Workflow::getAll($this) as $key => $wf) {
+            $T->set_var('have_' . $wf->wf_name, 'true');
         }
 
         $Currency = Currency::getInstance();
@@ -492,8 +497,8 @@ class Order
             'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
             'subtotal'      => $this->subtotal == $this->total ? '' : $Currency->Format($this->subtotal),
-            'have_billto'   => 'true',
-            'have_shipto'   => 'true',
+//            'have_billto'   => 'true',
+//            'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
@@ -507,6 +512,7 @@ class Order
             'token'         => $this->token,
             'is_uikit'      => $_PP_CONF['_is_uikit'],
             'use_gc'        => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
+            'next_step'     => $step + 1,
         ) );
 
         if ($this->isAdmin) {
@@ -536,11 +542,11 @@ class Order
         }
         $T->set_var('payer_email', $payer_email);
 
-        switch ($step) {
+        switch ($view) {
         case 'viewcart':
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
             break;
-        case 'checkoutcart':
+        case 'checkout':
             $gw = Gateway::getInstance($this->getInfo('gateway'));
             if ($gw) {
                 $T->set_var(array(
@@ -879,8 +885,8 @@ class Order
             plugin_ismoderator_paypal()) {
             // Administrator, or logged-in buyer
             return true;
-        } elseif ($this->uid == 1 && isset($_SESSION['ppGCart']['order_id']) &&
-            $_SESSION['ppGCart']['order_id'] == $this->order_id) {
+        } elseif ($this->uid == 1 && isset($_SESSION[self::$session_var]['order_id']) &&
+            $_SESSION[self::$session_var]['order_id'] == $this->order_id) {
             return true;
         } elseif (isset($_GET['token']) && $_GET['token'] == $this->token) {
             // Anonymous with the correct token
@@ -1166,6 +1172,55 @@ class Order
     public function setGateway($gw_name)
     {
         $this->m_info['gateway'] = $gw_name;
+    }
+
+
+    /**
+    *   Check if this cart has any physical items.
+    *   Used to adapt workflows based on product types
+    *
+    *   @return boolean     True if at least one physical product is present
+    */
+    public function hasPhysical()
+    {
+        foreach ($this->items as $id=>$item) {
+            if (($item->getProduct()->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Get the order view based on the current step in the checkout process
+     *
+     * @param   integer $step   Checkout step
+     * @return  string          Order view page
+     */
+    public function getView($step = 0)
+    {
+        $wf = Workflow::getAll($this);
+        if ($step < count($wf)) {
+            $wf_name = $wf[$step]->wf_name;
+        } else {
+            $wf_name = 'checkout';
+            $step = 9;
+        }
+        switch($wf_name) {
+        case 'viewcart':
+        case 'checkout':
+                return $this->View($wf_name, '', $step);
+        case 'billto':
+        case 'shipto':
+            $U = new \Paypal\UserInfo();
+            $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
+            return $U->AddressForm($wf_name, $A, $step);
+        case 'finalize':
+            return $this->View('checkout');
+        default:
+            return $this->View();
+        }
     }
 
 }

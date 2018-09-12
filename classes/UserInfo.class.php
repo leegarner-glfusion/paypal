@@ -135,7 +135,7 @@ class UserInfo
     *   @param  integer $add_id     DB Id of address
     *   @return array               Array of address values
     */
-    public function getAddress($add_id)
+    public static function getAddress($add_id)
     {
         global $_TABLES;
 
@@ -337,7 +337,7 @@ class UserInfo
     *   @param  array   $A      Optional values to pre-fill form
     *   @return string          HTML for edit form
     */
-    public function AddressForm($type='billto', $A=array())
+    public function AddressForm($type='billto', $A=array(), $step)
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
@@ -428,6 +428,7 @@ class UserInfo
 
             'hiddenvars'    => $hiddenvars,
             'action'        => $this->formaction,
+            'next_step'     => (int)$step + 1,
         ) );
 
         $T->parse('output','address');
