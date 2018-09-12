@@ -478,6 +478,7 @@ $LANG_confignames['paypal'] = array(
     'centerblock'   => 'Centerblock',
     'days_purge_cart' => 'Days before purging carts',
     'days_purge_pending' => 'Days before purging unpaid orders',
+    'purge_sale_prices' => 'Purge Expired Sale Prices?',
 );
 
 /** Language strings for the subgroup names in the config section */
