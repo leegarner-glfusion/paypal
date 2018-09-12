@@ -135,7 +135,7 @@ class UserInfo
     *   @param  integer $add_id     DB Id of address
     *   @return array               Array of address values
     */
-    public function getAddress($add_id)
+    public static function getAddress($add_id)
     {
         global $_TABLES;
 

@@ -95,6 +95,8 @@ class Order
         switch ($name) {
         case 'uid':
         case 'ux_ts':
+        case 'billto_id':
+        case 'shipto_id':
             $this->properties[$name] = (int)$value;
             break;
 
@@ -192,19 +194,16 @@ class Order
     */
     public function setBilling($A)
     {
-        if (isset($A['useaddress'])) {
+        $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
+        if ($addr_id > 0) {
             // If set, the user has selected an existing address. Read
             // that value and use it's values.
-            Cart::setSession('billing', $A['useaddress']);
-            $A = UserInfo::getAddress($A['useaddress']);
-            $prefix = '';
-        } else {
-            // form vars have this prefix
-            $prefix = 'billto_';
+            Cart::setSession('billing', $addr_id);
+            $A = UserInfo::getAddress($addr_id);
         }
 
         if (!empty($A)) {
-            $this->billto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
+            $this->billto_id        = $addr_id;
             $this->billto_name      = PP_getVar($A, 'name');
             $this->billto_company   = PP_getVar($A, 'company');
             $this->billto_address1  = PP_getVar($A, 'address1');
@@ -214,6 +213,7 @@ class Order
             $this->billto_country   = PP_getVar($A, 'country');
             $this->billto_zip       = PP_getVar($A, 'zip');
         }
+        $this->Save();
     }
 
 
@@ -224,18 +224,15 @@ class Order
     */
     public function setShipping($A)
     {
-        if (isset($A['useaddress'])) {
+        $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
+        if ($addr_id > 0) {
             // If set, read and use an existing address
-            Cart::setSession('shipping', $A['useaddress']);
-            $A = UserInfo::getAddress($A['useaddress']);
-            $prefix = '';
-        } else {
-            // form vars have this prefix
-            $prefix = 'shipto_';
+            Cart::setSession('shipping', $addr_id);
+            $A = UserInfo::getAddress($addr_id);
         }
 
         if (!empty($A)) {
-            $this->shipto_id        = PP_getVar($A, 'useaddress', 'integer', 0);
+            $this->shipto_id        = $addr_id;
             $this->shipto_name      = PP_getVar($A, 'name');
             $this->shipto_company   = PP_getVar($A, 'company');
             $this->shipto_address1  = PP_getVar($A, 'address1');
@@ -245,6 +242,7 @@ class Order
             $this->shipto_country   = PP_getVar($A, 'country');
             $this->shipto_zip       = PP_getVar($A, 'zip');
         }
+        $this->Save();
     }
 
 
@@ -276,6 +274,8 @@ class Order
         $this->by_gc = PP_getVar($A, 'by_gc', 'float');
         $this->token = PP_getVar($A, 'token', 'string');
         $this->buyer_email = PP_getVar($A, 'buyer_email');
+        $this->billto_id = PP_getVar($A, 'billto_id', 'integer');
+        $this->shipto_id = PP_getVar($A, 'shipto_id', 'integer');
         if ($this->status != 'cart') {
             $this->tax_rate = PP_getVar($A, 'tax_rate');
         }
@@ -382,6 +382,8 @@ class Order
                 "tax_rate = '{$this->tax_rate}'",
         );
         foreach (array('billto', 'shipto') as $type) {
+            $fld = $type . '_id';
+            $fields[] = "$fld = '{$this->$fld}'";
             foreach ($this->_addr_fields as $name) {
                 $fld = $type . '_' . $name;
                 $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -403,7 +405,7 @@ class Order
     *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($step = 9, $tpl = '')
+    public function View($step = -1, $tpl = '')
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -411,17 +413,20 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
         $final = false;
+
+        // Set the template and view status based on $step.
         switch($step) {
-        case 'viewcart':
-        case 0:
+        case 'viewcart':    // todo: remove
+        case 0:             // initial cart view
             $tplname = 'viewcart';
             break;
-        case 'adminview':
-        case 'vieworder':
-        case 9:
+        case 'adminview':   // todo: remove
+        case 'vieworder':   // todo: remove
+        case 9:             // all options selected, ready to confirm
             $final = true;
-        case 'checkoutcart':
+        case 'checkoutcart':    // todo: remove
         case 5:
+        case -1:            // view processed order, not in the cart workflow
         default:
             $tplname = 'order';
             break;
@@ -1192,7 +1197,13 @@ class Order
     }
 
 
-    public function getView($step)
+    /**
+     * Get the order view based on the current step in the checkout process
+     *
+     * @param   integer $step   Checkout step
+     * @return  string          Order view page
+     */
+    public function getView($step = 0)
     {
         $wf = Workflow::getAll($this);
         if ($step < count($wf)) {
@@ -1202,14 +1213,14 @@ class Order
         }
         switch($wf_name) {
         case 'viewcart':
-            return $this->View(0);
+                return $this->View(0);
         case 'billto':
         case 'shipto':
             $U = new \Paypal\UserInfo();
             $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
             return $U->AddressForm($wf_name, $A, $step);
         case 'finalize':
-            return $this->View();
+            return $this->View(9);
         default:
             return $this->View();
         }

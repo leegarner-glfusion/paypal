@@ -332,7 +332,7 @@ case 'order':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            $content .= $order->View('vieworder');
+            $content .= $order->View();
         } else {
             COM_404();
         }
@@ -345,7 +345,7 @@ case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
         if ($order->canView()) {
-            echo $order->View('vieworder', 'print');
+            echo $order->View(-1, 'print');
             exit;
         }
     }
@@ -410,6 +410,7 @@ case 'viewcart':
     break;
 
 case 'checkoutcart':
+    echo "DEPRECATED";die;
     $content .= \Paypal\Cart::getInstance()->View(5);
     break;
 
