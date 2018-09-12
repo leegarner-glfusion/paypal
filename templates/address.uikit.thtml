@@ -12,7 +12,7 @@ function updateForm(id)
         document.getElementById("countryDefault").value = "";
         document.getElementById("stateDefault").value = "";
         document.getElementById("addr_id").value = id;
-    } else {    
+    } else {
         document.getElementById("name").value = document.getElementById("ad_name["+id+"]").value;
         document.getElementById("company").value = document.getElementById("ad_company["+id+"]").value;
         document.getElementById("address1").value = document.getElementById("ad_addr_1["+id+"]").value;
@@ -68,12 +68,12 @@ function removeAddress(id)
   <div class="paypalContent">
     <p>{sel_addr_text}</p>
     <div class="paypalSavedAddress" id="use_addr0">
-      <input type="radio" name="useaddress" value="0" {none_chk} 
+      <input type="radio" name="useaddress" value="0" {none_chk}
        onclick="updateForm(0);" /><i>&nbsp;{$LANG_PP['new_address']}</i>
     </div>
   <!-- BEGIN SavedAddress -->
   <div class="paypalSavedAddress" id="use_addr{id}">
-    <input type="radio" name="useaddress" value="{id}" {ad_checked} 
+    <input type="radio" name="useaddress" value="{id}" {ad_checked}
        onclick="updateForm({id});"
         />&nbsp;{ad_name},
 {!if ad_company}
@@ -84,7 +84,7 @@ function removeAddress(id)
     {ad_addr_2},
 {!endif}
     {ad_city}, {ad_state} {ad_zip}
-    <img src="{layout_url}/images/admin/delete.png" 
+    <img src="{layout_url}/images/admin/delete.png"
         onclick="removeAddress({id});" />
     <input type="hidden" name="ad_name[{id}]" id="ad_name[{id}]" value="{ad_name}" />
     <input type="hidden" name="ad_company[{id}]" id="ad_company[{id}]" value="{ad_company}" />
@@ -123,7 +123,7 @@ function removeAddress(id)
   <div class="uk-form-row">
     <label class="uk-form-label" for="address1">{$LANG_PP['address1']}</label>
     <div class="uk-form-controls">
-      <input 
+      <input
 {!if req_street}
       required
 {!endif}
@@ -153,7 +153,7 @@ function removeAddress(id)
 {!if req_country}
         required
 {!endif}
-        id="countrySelect" name="country" 
+        id="countrySelect" name="country"
             onchange='updateState(this.id)' class="paypalStateSelect">
       </select>
 {!if req_country}
@@ -169,7 +169,7 @@ function removeAddress(id)
   <div class="uk-form-row">
     <label class="uk-form-label" for="city">{$LANG_PP['city']}</label>
     <div class="uk-form-controls">
-      <input 
+      <input
 {!if req_city}
       required
 {!endif}
@@ -219,21 +219,22 @@ function removeAddress(id)
 
 {!if allow_default}
   <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['make_def_addr']}</label>
     <div class="uk-form-controls">
       <input type="checkbox" name="is_default" value="1" {def_checked} />
-      {$LANG_PP['make_def_addr']}
     </div>
   </div>
 {!endif}
 
 {hiddenvars}
   <input type="hidden" name="next_step" value="{next_step}" />
-  <div class="uk-form-row">
-    <div class="uk-form-controls">
+  <div class="uk-form-row" style="margin-top:10px;">
+    <label class="uk-form-label">&nbsp;</label>
+    <div class="uk-form-controls" style="text-align:center;">
       <button class="uk-button uk-button-success" type="submit" name="{action}">Submit</button>
-      <button class="uk-button uk-button-primary" type="reset">Reset</button> 
+      <button class="uk-button uk-button-primary" type="reset">Reset</button>
     </div>
-  </div>    
+  </div>
 </form>
 <script type="text/javascript">
     {!if addr_id}

@@ -422,16 +422,15 @@ class Order
             break;
         case 'adminview':   // todo: remove
         case 'vieworder':   // todo: remove
-        case 9:             // all options selected, ready to confirm
-            $final = true;
         case 'checkoutcart':    // todo: remove
-        case 5:
+        case 5:             // todo: remove
         case -1:            // view processed order, not in the cart workflow
+            $final = true;
+        case 9:             // all options selected, ready to confirm
         default:
             $tplname = 'order';
             break;
         }
-
         if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
         foreach (array('billto', 'shipto') as $type) {

@@ -317,14 +317,13 @@ case 'history':
 
 case 'billto':
 case 'shipto':
-    /*if (COM_isAnonUser()) {
-        $content .= SEC_loginRequiredForm();
-} else {*/
-    $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
-        $U = new \Paypal\UserInfo();
-        $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
-        $content .= $U->AddressForm($view, $A, $next_step);
-//   }
+    // Editing the previously-submitted billing or shipping info.
+    // This is accessed from the final order confirmation page, so return
+    // there after submission
+    $step = 8;     // form will return to ($step + 1)
+    $U = new \Paypal\UserInfo();
+    $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($view);
+    $content .= $U->AddressForm($view, $A, $step);
     break;
 
 case 'order':
