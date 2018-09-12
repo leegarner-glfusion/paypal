@@ -1434,8 +1434,7 @@ function PAYPAL_adminlist_Workflow()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
 
-    $sql = "SELECT id, wf_name, orderby, enabled,
-                'workflow' AS rec_type
+    $sql = "SELECT *, 'workflow' AS rec_type
             FROM {$_TABLES['paypal.workflows']}";
 
     $header_arr = array(
@@ -1453,7 +1452,6 @@ function PAYPAL_adminlist_Workflow()
             'text' => $LANG_PP['enabled'],
             'field' => 'wf_enabled',
             'sort' => false,
-            'align' => 'center',
         ),
     );
 
@@ -1735,18 +1733,17 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     switch($fieldname) {
     case 'wf_enabled':
         $fieldvalue = $A['enabled'];
-        $opts = array(
-            0 => 'Disabled',
-            1 => 'Physical Only',
-            3 => 'All Orders',
-        );
-        $retval = "<select id=\"sel{$fieldname}{$A['id']}\" name=\"{$fieldname}_sel\" " .
-            "onchange='PPupdateSel(this,\"{$A['id']}\",\"enabled\", \"workflow\");'>" . LB;
-        foreach ($opts as $val=>$str) {
-            $sel = $fieldvalue == $val ? 'selected="selected"' : '';
-            $retval .= "<option value=\"{$val}\" $sel>{$str}</option>" . LB;
+        if ($A['can_disable'] == 1) {
+            $retval = "<select id=\"sel{$fieldname}{$A['id']}\" name=\"{$fieldname}_sel\" " .
+                "onchange='PPupdateSel(this,\"{$A['id']}\",\"enabled\", \"workflow\");'>" . LB;
+            foreach ($LANG_PP['wf_statuses'] as $val=>$str) {
+                $sel = $fieldvalue == $val ? 'selected="selected"' : '';
+                $retval .= "<option value=\"{$val}\" $sel>{$str}</option>" . LB;
+            }
+            $retval .= '</select>' . LB;
+        } else {
+            $retval = $LANG_PP['required'];
         }
-        $retval .= '</select>' . LB;
         break;
 
     case 'enabled':

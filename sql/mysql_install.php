@@ -407,7 +407,8 @@ $_SQL['paypal.workflows'] = "CREATE TABLE `{$_TABLES['paypal.workflows']}` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `wf_name` varchar(40) DEFAULT NULL,
   `orderby` int(2) DEFAULT NULL,
-  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '3',
+  `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `orderby` (`orderby`)
 ) ENGINE=MyISAM";
@@ -945,6 +946,12 @@ $PP_UPGRADE['0.6.0'] = array(
     "DROP TABLE {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']}
         CHANGE attr_price `attr_price` decimal(9,4) default NULL",
+    "ALTER TABLE {$_TABLES['paypal.workflows']}
+        ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'",
+    "UPDATE {$_TABLES['paypal.workflows']}
+        SET can_disable = 0 WHERE wf_name = 'viewcart'",
+    "UPDATE {$_TABLES['paypal.workflows']}
+        SET enabled = 3 WHERE enabled = 1",
 );
 
 ?>

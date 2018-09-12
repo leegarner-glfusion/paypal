@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Some workflows can be enabled and disabled based on cart contents
 - Standardize in SQL decimal type for money amounts.
 - Merged shopping cart and order tables.
 - Use Unix timestamps instead of datetime fields.

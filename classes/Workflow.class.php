@@ -22,6 +22,11 @@ namespace Paypal;
 */
 class Workflow
 {
+    public const DISABLED = 0;
+    public const REQ_PHYSICAL = 1;
+    public const REQ_VIRTUAL = 2;   // unused placeholder
+    public const REQ_ALL = 3;
+
     static $table = 'paypal.workflows';
     public $wf_name;
     public $orderby;
@@ -67,7 +72,10 @@ class Workflow
 
 
     /**
-     * Get all workflow items, in order of processing
+     * Get all workflow items, in order of processing.
+     * If a cart is supplied, get the appropriate enabled workflows based
+     * on the cart contents.
+     * If the cart is NULL, get all workflows.
      *
      * @return  array   Array of workflow names
      */
@@ -76,16 +84,20 @@ class Workflow
         global $_TABLES;
 
         if ($Cart) {
-            $min_status = $Cart->hasPhysical() ? 1 : 2;
+            $statuses = array(self::REQ_ALL, self::REQ_VIRTUAL);
+            if ($Cart->hasPhysical()) $statuses[] = self::REQ_PHYSICAL;
+            $statuslist = implode(',', $statuses);
+            $where = " WHERE enabled IN ($statuslist)";
         } else {
-            $min_status = 0;        // include disabled by default
+            $where = '';
+            $statuslist = '0';
         }
-        $cache_key = 'workflows_enabled_' . $min_status;
+        $cache_key = 'workflows_enabled_' . $statuslist;
         $workflows = Cache::get($cache_key);
         if (!$workflows) {
             $sql = "SELECT * FROM {$_TABLES[self::$table]}
-                    WHERE enabled >= $min_status
-                    ORDER BY orderby ASC";
+                $where
+                ORDER BY orderby ASC";
             $res = DB_query($sql);
             while ($A = DB_fetchArray($res, false)) {
                 $workflows[] = new self($A);
