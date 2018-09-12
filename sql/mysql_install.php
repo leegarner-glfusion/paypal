@@ -870,21 +870,22 @@ $PP_UPGRADE['0.6.0'] = array(
       `redeemer` int(11) unsigned NOT NULL DEFAULT '0',
       `purchased` int(11) unsigned NOT NULL DEFAULT '0',
       `redeemed` int(11) unsigned NOT NULL DEFAULT '0',
-      `expires` int(11) unsigned NOT NULL DEFAULT '0',
+      `expires` date DEFAULT '9999-12-31',
       PRIMARY KEY (`code`),
-      KEY `purchased` (`purchased`),
-      KEY `owner` (`redeemer`,`balance`,`expires`)
+      KEY `owner` (`redeemer`,`balance`,`expires`),
+      KEY `purchased` (`purchased`)
     ) ENGINE=MyIsam",
     "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `uid` int(11) unsigned NOT NULL DEFAULT '0',
       `code` varchar(128) NOT NULL,
-      `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      `ts` int(11) unsigned DEFAULT NULL,
       `order_id` varchar(50) DEFAULT NULL,
-      `amount` decimal(12,4) DEFAULT NULL,
+      `amount` float(8,2) DEFAULT NULL,
       `msg` varchar(255) DEFAULT NULL,
       PRIMARY KEY (`id`),
       KEY `order_id` (`order_id`),
-      KEY `code` (`code`,`ts`)
+      KEY `code` (`code`)
     ) ENGINE=MyIsam",
     "ALTER TABLE {$_TABLES['paypal.buttons']}
         ADD `pi_name` varchar(20) NOT NULL DEFAULT 'paypal' FIRST,
@@ -935,6 +936,8 @@ $PP_UPGRADE['0.6.0'] = array(
         last_mod = NOW(),
         order_date = UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))",
     "ALTER TABLE {$_TABLES['paypal.orders']}
+        ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0',
+        ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0',
         DROP order_date_old,
         ADD KEY (`order_date`)",
     "UPDATE {$_TABLES['paypal.purchases']} SET
