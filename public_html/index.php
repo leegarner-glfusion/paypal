@@ -158,10 +158,10 @@ case 'saveshipto':
         }
     }
     //$view = \Paypal\Workflow::getNextView($addr_type);
+    \Paypal\Cart::getInstance()->setAddress($_POST, $addr_type);
     $next_step = PP_getVar($_POST, 'next_step', 'integer');
     $content = \Paypal\Cart::getInstance()->getView($next_step);
     $view = 'none';
-    \Paypal\Cart::getInstance()->setAddress($_POST, $addr_type);
     break;
 
 case 'addcartitem':
