@@ -24,8 +24,6 @@ namespace Paypal;
 */
 class Cart extends Order
 {
-    private static $session_var = 'ppGCart';
-
     /** Holder for custom information
     *   @var array */
     public $custom_info = array();

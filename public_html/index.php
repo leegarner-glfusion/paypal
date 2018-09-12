@@ -105,28 +105,10 @@ case 'checkout':
         // This also calls Save() on the cart
         $Cart->Update($_POST);
     }
+    // See what workflow elements we already have.
+    $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        // Start with the first view.
-        //$view = Workflow::getNextView();
-        //$view = 'checkoutcart';
         $view = 'none';
-
-        // See what workflow elements we already have.
-        $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
-        /*$wf = \Paypal\Workflow::getAll($Cart);
-        if ($step > count($wf)) $step = 9;
-        foreach (\Paypal\Workflow::getAll($Cart) as $wf_name) {
-            switch ($wf_name) {
-            case 'billto':
-            case 'shipto':
-                if (!(\Paypal\UserInfo::isValidAddress($Cart->getAddress($wf_name)) == '')) {
-                    //$view = Workflow::getNextView($wf_name);
-                    $view = $wf_name;
-                    break 2;    // exit switch and foreach
-                }
-                break;
-            }
-        }*/
         $content .= $Cart->getView($next_step);
         break;
     } else {
@@ -343,8 +325,10 @@ case 'order':
 case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = new \Paypal\Order($actionval);
-        if ($order->canView()) {
-            echo $order->View(-1, 'print');
+        if ($order->status == 'cart') {
+            COM_404();
+        } elseif ($order->canView()) {
+            echo $order->View('print');
             exit;
         }
     }
@@ -398,7 +382,6 @@ case 'viewcart':
     }
     $menu_opt = $LANG_PP['viewcart'];
     if (\Paypal\Cart::getInstance()->hasItems()) {
-        //$content .= \Paypal\Cart::getInstance()->View(0);
         $content .= \Paypal\Cart::getInstance()->getView(0);
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);

@@ -18,6 +18,8 @@ namespace Paypal;
 */
 class Order
 {
+    protected static $session_var = 'ppGCart';
+
     private $isAdmin = false;       // True if viewing via admin interface
     private $properties = array();  // Array of properties (DB fields)
     protected $isNew = true;        // Flag to indicate a new, empty order
@@ -405,7 +407,7 @@ class Order
     *   @param  string  $tpl        "print" for a printable template
     *   @return string      HTML for order view
     */
-    public function View($step = -1, $tpl = '')
+    public function View($view = 'order', $tpl = '', $step = 0)
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -414,23 +416,20 @@ class Order
         if (!$this->canView()) return '';
         $final = false;
 
-        // Set the template and view status based on $step.
-        switch($step) {
-        case 'viewcart':    // todo: remove
-        case 0:             // initial cart view
-            $tplname = 'viewcart';
-            break;
-        case 'adminview':   // todo: remove
-        case 'vieworder':   // todo: remove
-        case 'checkoutcart':    // todo: remove
-        case 5:             // todo: remove
-        case -1:            // view processed order, not in the cart workflow
+        switch ($view) {
+        case 'order':
             $final = true;
-        case 9:             // all options selected, ready to confirm
-        default:
+        case 'checkout':
             $tplname = 'order';
             break;
+        case 'viewcart':
+            $tplname = 'viewcart';
+            break;
+        case 'print':
+            $tplname = 'order.print';
+            break;
         }
+
         if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
         foreach (array('billto', 'shipto') as $type) {
@@ -544,13 +543,11 @@ class Order
         }
         $T->set_var('payer_email', $payer_email);
 
-        switch ($step) {
-        case 0:
+        switch ($view) {
         case 'viewcart':
             $T->set_var('gateway_radios', $this->getCheckoutRadios());
             break;
-        case 9:
-        case 'checkoutcart':
+        case 'checkout':
             $gw = Gateway::getInstance($this->getInfo('gateway'));
             if ($gw) {
                 $T->set_var(array(
@@ -889,8 +886,8 @@ class Order
             plugin_ismoderator_paypal()) {
             // Administrator, or logged-in buyer
             return true;
-        } elseif ($this->uid == 1 && isset($_SESSION['ppGCart']['order_id']) &&
-            $_SESSION['ppGCart']['order_id'] == $this->order_id) {
+        } elseif ($this->uid == 1 && isset($_SESSION[self::$session_var]['order_id']) &&
+            $_SESSION[self::$session_var]['order_id'] == $this->order_id) {
             return true;
         } elseif (isset($_GET['token']) && $_GET['token'] == $this->token) {
             // Anonymous with the correct token
@@ -1208,18 +1205,20 @@ class Order
         if ($step < count($wf)) {
             $wf_name = $wf[$step]->wf_name;
         } else {
-            $wf_name = 'finalize';
+            $wf_name = 'checkout';
+            $step = 9;
         }
         switch($wf_name) {
         case 'viewcart':
-                return $this->View(0);
+        case 'checkout':
+                return $this->View($wf_name, '', $step);
         case 'billto':
         case 'shipto':
             $U = new \Paypal\UserInfo();
             $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
             return $U->AddressForm($wf_name, $A, $step);
         case 'finalize':
-            return $this->View(9);
+            return $this->View('checkout');
         default:
             return $this->View();
         }
