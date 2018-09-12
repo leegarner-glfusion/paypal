@@ -403,11 +403,11 @@ class Order
     /**
     *   View the current order summary
     *
-    *   @param  string  $step       Current step in the checkout process
-    *   @param  string  $tpl        "print" for a printable template
+    *   @param  string  $view       View to display (cart, final order, etc.)
+    *   @param  integer $step       Current step, for updating next_step in the form
     *   @return string      HTML for order view
     */
-    public function View($view = 'order', $tpl = '', $step = 0)
+    public function View($view = 'order', $step = 0)
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
             $_SYSTEM;
@@ -430,7 +430,6 @@ class Order
             break;
         }
 
-        if (!empty($tpl)) $tplname .= '.' . $tpl;
         $T = PP_getTemplate($tplname, 'order');
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
