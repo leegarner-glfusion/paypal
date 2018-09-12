@@ -1455,13 +1455,16 @@ function PAYPAL_adminlist_Workflow()
         ),
     );
 
-    $defsort_arr = array('field' => 'orderby',
-            'direction' => 'ASC');
+    $defsort_arr = array(
+        'field' => 'orderby',
+        'direction' => 'ASC',
+    );
 
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
 
-    $query_arr = array('table' => 'paypal.workflows',
+    $query_arr = array(
+        'table' => 'paypal.workflows',
         'sql' => $sql,
         'query_fields' => array('wf_name'),
         'default_filter' => '',
