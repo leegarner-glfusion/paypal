@@ -114,10 +114,9 @@ case 'toggle':
         $wf = \Paypal\Workflow::getInstance($_POST['id']);
         if (!$wf) break;
         $newval = $_POST['oldval'];
-        $_POST['oldval'] = $wf['enabled'];
+        $_POST['oldval'] = $wf->enabled;
         switch ($field) {
         case 'enabled':
-            //$newval = \Paypal\Workflow::Toggle($_POST['id'], $field, $_POST['oldval']);
             $newval = \Paypal\Workflow::setValue($_POST['id'], $field, $newval);
             break;
 
