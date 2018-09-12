@@ -330,7 +330,7 @@ class Gateway
     *
     *   @param  integer $oldvalue   Original value, 1 or 0
     *   @param  string  $varname    Field name to set
-    *   @param  integer $id         ID number of element to modify
+    *   @param  string  $id         Gateway ID
     *   @return integer             New value, or old value upon failure
     */
     private static function _toggle($oldvalue, $varname, $id)
@@ -363,7 +363,7 @@ class Gateway
     *
     *   @uses   _toggle()
     *   @param  integer $oldvalue   Original value
-    *   @param  integer $id         ID number of element to modify
+    *   @param  string  $id         Gateway ID
     *   @return integer             New value, or old value upon failure
     */
     public static function toggleEnabled($oldvalue, $id)
@@ -377,7 +377,7 @@ class Gateway
     *
     *   @uses   _toggle()
     *   @param  integer $oldvalue    Original value
-    *   @param  integer $id          ID number of element to modify
+    *   @param  string  $id         Gateway ID
     *   @return integer              New value, or old value upon failure
     */
     public static function toggleBuyNow($oldvalue, $id)
@@ -391,7 +391,7 @@ class Gateway
     *
     *   @uses   _toggle()
     *   @param  integer $oldvalue    Original value
-    *   @param  integer $id          ID number of element to modify
+    *   @param  string  $id         Gateway ID
     *   @return integer              New value, or old value upon failure
     */
     public static function toggleDonation($oldvalue, $id)
