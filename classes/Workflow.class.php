@@ -78,49 +78,42 @@ class Workflow
         if ($Cart) {
             $min_status = $Cart->hasPhysical() ? 1 : 2;
         } else {
-            $min_status = 1;
+            $min_status = 0;        // include disabled by default
         }
-            $cache_key = 'workflows_enabled_' . $min_status;
-            $workflows = Cache::get($cache_key);
-            if (!$workflows) {
-                $sql = "SELECT * FROM {$_TABLES[self::$table]}
-                        WHERE enabled >= $min_status
-                        ORDER BY orderby ASC";
-                $res = DB_query($sql);
-                while ($A = DB_fetchArray($res, false)) {
-                    $workflows[] = new self($A);
-                }
-                Cache::set($cache_key, $workflows, 'workflows');
+        $cache_key = 'workflows_enabled_' . $min_status;
+        $workflows = Cache::get($cache_key);
+        if (!$workflows) {
+            $sql = "SELECT * FROM {$_TABLES[self::$table]}
+                    WHERE enabled >= $min_status
+                    ORDER BY orderby ASC";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $workflows[] = new self($A);
             }
+            Cache::set($cache_key, $workflows, 'workflows');
+        }
         return $workflows;
     }
 
 
+    /**
+     * Get an instance of a workflow step
+     *
+     * @uses    self::getall() to take advantage of caching
+     * @param   integer $id     Workflow record ID
+     * @return  object          Workflow object, or NULL if not defined/disabled
+     */
     public static function getInstance($id)
     {
         global $_TABLES;
 
-        $sql = "SELECT * FROM {$_TABLES[self::$table]} WHERE id = " . (int)$id;
-        $res = DB_query($sql);
-        $A = DB_fetchArray($res, false);
-        return $A;
-    }
-
-
-    /**
-    *   Initilize the workflow array, if not already done.
-    *   Scope is Public since it's called from Cart's constructor
-    *
-    *   @uses   Load()
-    */
-    public static function Init()
-    {
-        global $_PP_CONF;
-
-        if (!isset($_PP_CONF['workflows']) ||
-            !is_array($_PP_CONF['workflows'])) {
-            self::Load();
+        $workflows = self::getAll();
+        foreach ($workflows as $wf) {
+            if ($wf->wf_id == $id) {
+                return $wf;
+            }
         }
+        return NULL;
     }
 
 
@@ -269,7 +262,6 @@ class Workflow
         global $_PP_CONF;
 
         /** Load the views, if not done already */
-        //self::Init();
         $workflows = self::getAll();
 
         // If the current view is empty, or isn't part of our array,
