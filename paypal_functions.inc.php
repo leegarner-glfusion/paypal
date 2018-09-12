@@ -59,23 +59,36 @@ function listOrders($admin = false, $uid = 0)
 
     $base_url = $admin ? PAYPAL_ADMIN_URL : PAYPAL_URL;
     $header_arr = array(
-        array('text' => $LANG_PP['purch_date'],
-                'field' => 'order_date', 'sort' => true),
-        array('text' => $LANG_PP['order_number'],
-                'field' => 'order_id', 'sort' => true),
+        array(
+            'text' => $LANG_PP['purch_date'],
+            'field' => 'order_date',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['order_number'],
+            'field' => 'order_id',
+            'sort' => true,
+        ),
         array(
             'text' => $LANG_PP['total'] .
-                    '&nbsp;<i class="uk-icon uk-icon-question-circle tooltip" title="' .
-                    $LANG_PP_HELP['orderlist_total'] . '"></i>',
-                'field' => 'ord_total',
-                'sort' => false,
-            ),
-        array('text' => $LANG_PP['status'],
-                'field' => 'status', 'sort' => true),
+                '&nbsp;<i class="uk-icon uk-icon-question-circle tooltip" title="' .
+                $LANG_PP_HELP['orderlist_total'] . '"></i>',
+            'field' => 'ord_total',
+            'sort' => false,
+            'align' => 'right',
+        ),
+        array(
+            'text' => $LANG_PP['status'],
+            'field' => 'status',
+            'sort' => true,
+        ),
     );
     if ($admin) {
-        $header_arr[] = array('text' => $LANG_PP['username'],
-                'field' => 'username', 'sort' => true);
+        $header_arr[] = array(
+            'text' => $LANG_PP['username'],
+            'field' => 'username',
+            'sort' => true,
+        );
     }
 
     $defsort_arr = array(
@@ -373,11 +386,15 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
     static $dt = NULL;
+    static $Cur = NULL;
     $retval = '';
 
     if ($dt === NULL) {
         // Instantiate a date object once
         $dt = new \Date('now', $_USER['tzid']);
+    }
+    if ($Cur === NULL) {
+        $Cur = Currency::getInstance();
     }
 
     switch($fieldname) {
@@ -485,20 +502,20 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         $total = (float)$fieldvalue;
         $tip = '<table width=&quot;50%&quot; align=&quot;center&quot;>' . LB;
         $tip .= '<tr><td>' . $LANG_PP['item_total'] .
-            ': </td><td style=&quot;text-align:right&quot;>' . $fieldvalue . '</td></tr>' . LB;
+            ': </td><td style=&quot;text-align:right&quot;>' . $Cur->Format($fieldvalue) . '</td></tr>' . LB;
         foreach (array('tax', 'shipping', 'handling') as $fld) {
             if (is_numeric($A[$fld]) && $A[$fld] > 0) {
                 $tip .= '<tr><td>' . $LANG_PP[$fld] .
-                    ': </td><td style=&quot;text-align:right&quot;>' . $A[$fld] . '</td></tr>' . LB;
+                    ': </td><td style=&quot;text-align:right&quot;>' . $Cur->FormatValue($A[$fld]) . '</td></tr>' . LB;
                 $total += (float)$A[$fld];
             }
         }
         if ($total > $fieldvalue) {
             $tip .= '<tr><td>' . $LANG_PP['total'] .
-                    ': </td><td style=&quot;text-align:right&quot;>' . $total . '</td></tr>' . LB;
+                    ': </td><td style=&quot;text-align:right&quot;>' . $Cur->Format($total) . '</td></tr>' . LB;
         }
         $tip .= '</table>' . LB;
-        $retval = '<span class="tooltip" title="' . $tip . '">' . $fieldvalue . '</span>';
+        $retval = '<span class="tooltip" title="' . $tip . '">' . $Cur->FormatValue($fieldvalue) . '</span>';
         break;
     default:
         $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
@@ -749,7 +766,7 @@ function ProductList($cat_id = 0)
         }
         Cache::set($cache_key, $Products, array('product', 'categories'));
     }
- 
+
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
     $product = PP_getTemplate(array(
