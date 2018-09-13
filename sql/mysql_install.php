@@ -495,11 +495,11 @@ $_PP_SAMPLEDATA = array(
             ('paypal', 10, 0, 'Paypal Website Payments Standard', '',
              'a:6:{s:7:\"buy_now\";s:1:\"1\";s:8:\"donation\";s:1:\"1\";s:7:\"pay_now\";s:1:\"1\";s:9:\"subscribe\";s:1:\"1\";s:8:\"checkout\";s:1:\"1\";s:8:\"external\";s:1:\"1\";}')",*/
     "INSERT INTO {$_TABLES['paypal.workflows']}
-            (id, wf_name, orderby, enabled)
+            (id, wf_name, orderby, enabled, can_disable)
         VALUES
-            (1, 'viewcart', 10, 1),
-            (2, 'billto', 20, 0),
-            (3, 'shipto', 30, 0)",
+            (1, 'viewcart', 10, 1, 0),
+            (2, 'billto', 20, 0, 1),
+            (3, 'shipto', 30, 0, 1)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
             (id, orderby, enabled, name, notify_buyer, notify_admin)
         VALUES
