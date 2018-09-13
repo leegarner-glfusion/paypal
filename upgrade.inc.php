@@ -618,7 +618,7 @@ function PAYPAL_do_upgrade()
                         }
                     }
                     $st = new Date($A['sale_beg'], $_CONF['timezone']);
-                    $end = new Date($A['sale_end'], $_CONF['timezone']);
+                    $end = new Date($A['sale_end'] . ' 23:59:59', $_CONF['timezone']);
                     $sql[] = "('product', '{$A['id']}', '{$st->toUnix()}', '{$end->toUnix()}', 'amount', '$discount')";
                 }
             }
