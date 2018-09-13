@@ -813,6 +813,8 @@ function plugin_autouninstall_paypal ()
                 'paypal.coupons',
                 'paypal.coupon_log',
                 'paypal.sales',
+                // deprecated, leave here to facilitate rollbacks
+                'paypal.cart',
         ),
         // Give the full name of the group, as in the db
         'groups' => array('paypal Admin'),
