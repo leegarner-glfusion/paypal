@@ -497,7 +497,7 @@ $_PP_SAMPLEDATA = array(
     "INSERT INTO {$_TABLES['paypal.workflows']}
             (id, wf_name, orderby, enabled, can_disable)
         VALUES
-            (1, 'viewcart', 10, 1, 0),
+            (1, 'viewcart', 10, 3, 0),
             (2, 'billto', 20, 0, 1),
             (3, 'shipto', 30, 0, 1)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
@@ -955,7 +955,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.workflows']}
         ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'",
     "UPDATE {$_TABLES['paypal.workflows']}
-        SET can_disable = 0 WHERE wf_name = 'viewcart'",
+        SET can_disable = 0, enabled = 3 WHERE wf_name = 'viewcart'",
     "UPDATE {$_TABLES['paypal.workflows']}
         SET enabled = 3 WHERE enabled = 1",
 );
