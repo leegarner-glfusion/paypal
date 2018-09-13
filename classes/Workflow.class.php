@@ -95,6 +95,7 @@ class Workflow
         $cache_key = 'workflows_enabled_' . $statuslist;
         $workflows = Cache::get($cache_key);
         if (!$workflows) {
+            $workflows = array();
             $sql = "SELECT * FROM {$_TABLES[self::$table]}
                 $where
                 ORDER BY orderby ASC";
