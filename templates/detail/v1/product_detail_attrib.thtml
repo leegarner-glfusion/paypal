@@ -67,9 +67,11 @@
 
       {add_cart_button}
 
+        <div class="frmAddCart v1">
       <!-- BEGIN BtnBlock -->
         {buy_now_button}<br />
       <!-- END BtnBlock -->
+        </div>
       {!if onhand}
       <div id="paypalOnhand">
         {onhand} {$LANG_PP['available']}
