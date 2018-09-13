@@ -96,7 +96,6 @@ class Order
     {
         switch ($name) {
         case 'uid':
-        case 'ux_ts':
         case 'billto_id':
         case 'shipto_id':
             $this->properties[$name] = (int)$value;
@@ -439,11 +438,13 @@ class Order
             }
         }
 
-        $T->set_block('order', 'ItemRow', 'iRow');
-
+        // Set flags in the template to indicate which address blocks are
+        // to be shown.
         foreach (Workflow::getAll($this) as $key => $wf) {
             $T->set_var('have_' . $wf->wf_name, 'true');
         }
+
+        $T->set_block('order', 'ItemRow', 'iRow');
 
         $Currency = Currency::getInstance();
         $this->no_shipping = 1;   // no shipping unless physical item ordered
@@ -484,7 +485,6 @@ class Order
             $T->clear_var('iOpts');
         }
 
-        $dt = new \Date($this->ux_ts, $_USER['tzid']);
         $this->total = $this->getTotal();     // also calls calcTax()
         $by_gc = (float)$this->getInfo('apply_gc');
         $T->set_var(array(
@@ -524,6 +524,9 @@ class Order
                 'stat_update' => OrderStatus::Selection($this->order_id, 1, $this->status),
             ) );
         }
+
+        // Instantiate a date objet to handle formatting of log timestamps
+        $dt = new \Date('now', $_USER['tzid']);
         $log = $this->getLog();
         $T->set_block('order', 'LogMessages', 'Log');
         foreach ($log as $L) {
@@ -809,12 +812,17 @@ class Order
             'token'             => $this->token,
             'email_extras'      => implode('<br />' . LB, $email_extras),
         ) );
+
+        // If any part of the order is paid by gift card, indicate that and
+        // calculate the net amount paid by paypal, etc.
         if ($this->by_gc > 0) {
             $T->set_var(array(
                 'by_gc'     => $Cur->FormatValue($this->by_gc),
                 'net_total' => $Cur->Format($total_amount - $this->by_gc),
             ) );
         }
+
+        // Show the remaining gift card balance, if any.
         $gc_bal = Coupon::getUserBalance($this->uid);
         if ($gc_bal > 0) {
             $T->set_var(array(
