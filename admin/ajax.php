@@ -152,7 +152,6 @@ case 'toggle':
         'statusMessage' => $newval != $_POST['oldval'] ? 
                 $LANG_PP['msg_updated'] : $LANG_PP['msg_nochange'],
     );
-    COM_errorLog(print_r($retval,true));
 
     header('Content-Type: applicsation/json');
     header("Cache-Control: no-cache, must-revalidate");
