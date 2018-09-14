@@ -773,6 +773,34 @@ class Cart extends Order
         }
     }
 
+
+    /**
+     * Determine if the current user can view this cart.
+     * Checks that this is actually a cart, then calls Order::_checkAcess()
+     * to check user permissions.
+     *
+     * @return boolean     True if allowed to view, False if denied.
+     */
+    public function canView()
+    {
+        global $_USER;
+
+        // Check that this is an existing record
+        if ($this->isNew || $this->status != 'cart') {
+            return false;
+        } elseif ($this->uid > 1 && $_USER['uid'] == $this->uid) {
+            // Logged-in cart owner
+            return true;
+        } elseif ($this->uid == 1 && isset($_SESSION[self::$session_var]['order_id']) &&
+            $_SESSION[self::$session_var]['order_id'] == $this->order_id) {
+            // Anonymous with this cart ID set in the session
+            return true;
+        } else {
+            // Unauthorized
+            return false;
+        }
+    }
+
 }   // class Cart
 
 ?>

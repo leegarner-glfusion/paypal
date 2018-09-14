@@ -76,7 +76,6 @@ class Order
     */
     public static function getInstance($id)
     {
-        global $_TABLES;
         static $orders = array();
         if (!array_key_exists($id, $orders)) {
             $orders[$id] = new self($id);
@@ -145,7 +144,9 @@ class Order
 
         if ($id != '') {
             $this->order_id = $id;
-
+        }
+        $A = Cache::get('order_' . $this->order_id);
+        if ($A === NULL) {
             $sql = "SELECT * FROM {$_TABLES['paypal.orders']}
                     WHERE order_id='{$this->order_id}'";
             //echo $sql;die;
@@ -153,16 +154,27 @@ class Order
             if (!$res) return false;    // requested order not found
             $A = DB_fetchArray($res, false);
             if (empty($A)) return false;
-            if ($this->SetVars($A)) $this->isNew = false;
+            Cache::set('order_' . $this->order_id, $A, 'orders');
         }
+        if ($this->SetVars($A)) $this->isNew = false;
 
         // Now load the items
-        $this->items = array();
-        $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
-                WHERE order_id = '{$this->order_id}'";
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $this->items[$A['id']] = new OrderItem($A);
+        $items = Cache::get('items_order_' . $this->id);
+        if ($items === NULL) {
+            $items = array();
+            $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
+                    WHERE order_id = '{$this->order_id}'";
+            $res = DB_query($sql);
+            if ($res) {
+                while ($A = DB_fetchArray($res, false)) {
+                    $items[$A['id']] = $A;
+                }
+            }
+            Cache::set('items_order_' . $this->id, $items, array('items'));
+        }
+        // Now load the arrays into objects
+        foreach ($items as $item) {
+            $this->items[$item['id']] = new OrderItem($item);
         }
         return true;
     }
@@ -394,6 +406,7 @@ class Order
         //echo $sql;die;
         //COM_errorLog("Save: " . $sql);
         DB_query($sql);
+        Cache::delete('order_' . $this->order_id);
         $this->isNew = false;
         return $this->order_id;
     }
@@ -498,8 +511,6 @@ class Order
             'shipping'      => $this->shipping > 0 ? $Currency->FormatValue($this->shipping) : 0,
             'handling'      => $this->handling > 0 ? $Currency->FormatValue($this->handling) : 0,
             'subtotal'      => $this->subtotal == $this->total ? '' : $Currency->Format($this->subtotal),
-//            'have_billto'   => 'true',
-//            'have_shipto'   => 'true',
             'order_instr'   => htmlspecialchars($this->instructions),
             'shop_name'     => $_PP_CONF['shop_name'],
             'shop_addr'     => $_PP_CONF['shop_addr'],
@@ -514,8 +525,8 @@ class Order
             'is_uikit'      => $_PP_CONF['_is_uikit'],
             'use_gc'        => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'next_step'     => $step + 1,
+            'not_anon'      => !COM_isAnonUser(),
         ) );
-
         if ($this->isAdmin) {
             $T->set_var(array(
                 'is_admin'  => true,
@@ -879,23 +890,20 @@ class Order
 
 
     /**
-    *   Determine if the current user can view this order.
-    *
-    *   @return boolean     True if allowed to view, False if denied.
-    */
+     *  Check the user's permission to view this order or cart.
+     *
+     *  @return boolean     True if allowed to view, False if denied.
+     */
     public function canView()
     {
         global $_USER;
 
-        if ($this->isNew) {
-            // Order wasn't found in the DB
+        if ($this->isNew || $this->status == 'cart') {
+            // Record not found in DB, or this is a cart (not an order)
             return false;
         } elseif ($this->uid > 1 && $_USER['uid'] == $this->uid ||
             plugin_ismoderator_paypal()) {
             // Administrator, or logged-in buyer
-            return true;
-        } elseif ($this->uid == 1 && isset($_SESSION[self::$session_var]['order_id']) &&
-            $_SESSION[self::$session_var]['order_id'] == $this->order_id) {
             return true;
         } elseif (isset($_GET['token']) && $_GET['token'] == $this->token) {
             // Anonymous with the correct token

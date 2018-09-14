@@ -311,7 +311,7 @@ case 'shipto':
 case 'order':
     // View a completed order record
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        $order = new \Paypal\Order($actionval);
+        $order = \Paypal\Order::getInstance($actionval);
         if ($order->canView()) {
             $content .= $order->View();
         } else {
@@ -324,10 +324,8 @@ case 'order':
 
 case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
-        $order = new \Paypal\Order($actionval);
-        if ($order->status == 'cart') {
-            COM_404();
-        } elseif ($order->canView()) {
+        $order = \Paypal\Order::getInstance($actionval);
+        if ($order->canView()) {
             echo $order->View('print');
             exit;
         }
@@ -380,8 +378,9 @@ case 'viewcart':
         COM_refresh(PAYPAL_URL. '/index.php?view=cart');
     }
     $menu_opt = $LANG_PP['viewcart'];
-    if (\Paypal\Cart::getInstance()->hasItems()) {
-        $content .= \Paypal\Cart::getInstance()->getView(0);
+    $Cart = \Paypal\Cart::getInstance();
+    if ($Cart->hasItems() && $Cart->canView()) {
+        $content .= $Cart->getView(0);
     } else {
         LGLIB_storeMessage($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');

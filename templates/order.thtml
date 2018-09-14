@@ -4,7 +4,9 @@
 {!else}
   <p>
     <div style="display:inline-block;"><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></div>
+{!if not_anon}
     <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/?orderhist=x">{$LANG_PP['my_account']}</a></div>
+{!endif}
   </p>
 {!endif}
   <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
