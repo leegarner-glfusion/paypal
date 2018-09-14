@@ -129,8 +129,8 @@ $_PP_DEFAULTS['tax_rate'] = 0;      // Default tax rate
 
 $_PP_DEFAULTS['centerblock'] = 0;   // Enable centerblock?
 
-$_PP_DEFAULTS['product_tpl_ver'] = 'v1';   // default product detail template
-$_PP_DEFAULTS['list_tpl_ver'] = 'v1';   // default product list item template
+$_PP_DEFAULTS['product_tpl_ver'] = 'v2';   // default product detail template
+$_PP_DEFAULTS['list_tpl_ver'] = 'v2';   // default product list item template
 $_PP_DEFAULTS['cache_max_age'] = 900;   // default cache file age, 15 minutes
 $_PP_DEFAULTS['tc_link'] = '';     // Link to terms and conditions
 
