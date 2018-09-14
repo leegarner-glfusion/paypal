@@ -723,7 +723,7 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
     case 'short_description':
         $retval = COM_createLink(
             $fieldvalue,
-            PAYPAL_ADMIN_URL . '/detail.php?id=' . $A['id'],
+            PAYPAL_URL . '/detail.php?id=' . $A['id'],
             array(
                 'class' => 'tooltip',
                 'title' => $LANG_PP['see_details'],
