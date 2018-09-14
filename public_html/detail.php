@@ -37,7 +37,6 @@ if (isset($_GET['id'])) {
 
 $display = \Paypal\siteHeader();
 $T = PP_getTemplate('paypal_title', 'title');
-$T->set_var('title', $LANG_PP['main_title']);
 $display .= $T->parse('', 'title');
 if (!empty($msg)) {
     //msg block

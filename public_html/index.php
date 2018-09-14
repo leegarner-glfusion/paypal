@@ -368,7 +368,6 @@ case 'detail':
     $P = new \Paypal\Product($id);
     $content .= $P->Detail();
     $menu_opt = $LANG_PP['product_list'];
-    $page_title = $LANG_PP['product_detail'];
     break;
 
 case 'cart':
@@ -388,7 +387,6 @@ case 'viewcart':
         COM_refresh(PAYPAL_URL . '/index.php');
         exit;
     }
-    $page_title = $LANG_PP['viewcart'];
     break;
 
 case 'checkoutcart':
