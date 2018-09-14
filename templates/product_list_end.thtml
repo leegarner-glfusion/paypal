@@ -1,4 +1,3 @@
 {# begin {templatelocation} #}
-</div>
   <div class="aligncenter">{pagination}</div>
 {# end {templatelocation} #}

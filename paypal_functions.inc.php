@@ -769,10 +769,11 @@ function ProductList($cat_id = 0)
 
     // Create product template
     if (empty($_PP_CONF['list_tpl_ver'])) $_PP_CONF['list_tpl_ver'] = 'v1';
-    $product = PP_getTemplate(array(
+    $T = PP_getTemplate(array(
+        'wrapper'   => 'list/' . $_PP_CONF['list_tpl_ver'] . '/wrapper',
         'start'   => 'product_list_start',
         'end'     => 'product_list_end',
-        'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item',
+        //'product' => 'list/' . $_PP_CONF['list_tpl_ver'] .'/product_list_item',
         //    'product' => 'product_list',
         //'buy'     => 'buttons/btn_buy_now',
         //'cart'    => 'buttons/btn_add_cart',
@@ -780,7 +781,7 @@ function ProductList($cat_id = 0)
         'login_req' => 'buttons/btn_login_req',
         'btn_details' => 'buttons/btn_details',
     ) );
-    $product->set_var(array(
+    $T->set_var(array(
         'pi_url'        => PAYPAL_URL,
         'user_id'       => $_USER['uid'],
         'currency'      => $_PP_CONF['currency'],
@@ -788,20 +789,21 @@ function ProductList($cat_id = 0)
         'search_text'   => $search,
         'uikit'         => $_PP_CONF['_is_uikit'] ? 'true' : '',
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
+        'sortby_options' => $sortby_options,
+        'sortby'        => $sortby,
     ) );
 
     if (!empty($cat_name)) {
-        $product->set_var('title', $cat_name);
-        $product->set_var('cat_desc', $cat_desc);
-        $product->set_var('cat_img_url', $cat_img_url);
+        $T->set_var(array(
+            'title'     => $cat_name,
+            'cat_desc'  => $cat_desc,
+            'cat_img_url' => $cat_img_url,
+        ) );
     } else {
-        $product->set_var('title', $LANG_PP['blocktitle']);
+        $T->set_var('title', $LANG_PP['blocktitle']);
     }
 
-    $product->set_var('sortby_options', $sortby_options);
-    $product->set_var('sortby', $sortby);
-
-    $display .= $product->parse('', 'start');
+    $display .= $T->parse('', 'start');
 
     if ($_PP_CONF['ena_ratings'] == 1) {
         $PP_ratedIds = RATING_getRatedIds($_PP_CONF['pi_name']);
@@ -809,6 +811,7 @@ function ProductList($cat_id = 0)
 
     // Display each product
     $prodrows = 0;
+    $T->set_block('wrapper', 'ProductItems', 'PI');
     foreach ($Products as $P) {
         // Don't display products if the viewer doesn't have access
         if (!$P->hasAccess()) {
@@ -827,31 +830,17 @@ function ProductList($cat_id = 0)
 
         if ($_PP_CONF['ena_ratings'] == 1 && $P->rating_enabled == 1) {
             $static = 1;
-            // can't rate from list page, messes with product links on some
-            // templates. Uncomment the following to enable ratings from the
-            // list page.
-            /*if (in_array($P->id, $PP_ratedIds)) {
-                $static = true;
-                $voted = 1;
-            } elseif (plugin_canuserrate_paypal($P->id, $_USER['uid'])) {
-                $static = 0;
-                $voted = 0;
-            } else {
-                $static = 1;
-                $voted = 0;
-            }*/
             $rating_box = RATING_ratingBar($_PP_CONF['pi_name'], $P->id,
                     $P->votes, $P->rating,
                     $voted, 5, $static, 'sm');
-            $product->set_var('rating_bar', $rating_box);
+            $T->set_var('rating_bar', $rating_box);
         } else {
-            $product->set_var('rating_bar', '');
+            $T->set_var('rating_bar', '');
         }
 
         $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
                 "product_id = '{$P->id}'");
-
-        $product->set_var(array(
+        $T->set_var(array(
             'id'            => $P->id,
             'name'          => htmlspecialchars($P->name),
             'short_description' => htmlspecialchars(PLG_replacetags($P->short_description)),
@@ -870,7 +859,7 @@ function ProductList($cat_id = 0)
         ) );
 
         if ($isAdmin) {
-            $product->set_var(array(
+            $T->set_var(array(
                 'is_admin'  => 'true',
                 'pi_admin_url' => PAYPAL_ADMIN_URL,
                 'edit_icon' =>
@@ -878,41 +867,36 @@ function ProductList($cat_id = 0)
             ) );
         }
 
-        // FIXME: If a user purchased once with no expiration, this query
-        // will not operate correctly
-        /*$time = DB_getItem($_TABLES['paypal.purchases'],
-                    'MAX(UNIX_TIMESTAMP(expiration))',
-                    "user_id = {$_USER['uid']} AND product_id ='{$A['id']}'");
-        */
-        $product->set_block('product', 'BtnBlock', 'Btn');
+        // Get the product buttons for the list
+        $T->set_block('product', 'BtnBlock', 'Btn');
         if (!$P->hasAttributes() && !$P->hasCustomFields() && !$P->hasSpecialFields()) {
             // Buttons only show in the list if there are no options to select
             $buttons = $P->PurchaseLinks('list');
             foreach ($buttons as $name=>$html) {
-                $product->set_var('button', $html);
-                $product->parse('Btn', 'BtnBlock', true);
+                $T->set_var('button', $html);
+                $T->parse('Btn', 'BtnBlock', true);
             }
         } else {
             if ($_PP_CONF['ena_cart']) {
                 // If the product has attributes, then the cart must be
                 // enabled to allow purchasing
-                $button = $product->parse('', 'btn_details') . '&nbsp;';
-                $product->set_var('button', $button);
-                $product->parse('Btn', 'BtnBlock', true);
+                $button = $T->parse('', 'btn_details') . '&nbsp;';
+                $T->set_var('button', $button);
+                $T->parse('Btn', 'BtnBlock', true);
             }
         }
-        $display .= $product->parse('', 'product');
-        $product->clear_var('Btn');
+
+        $T->parse('PI', 'ProductItems', true);
+        $T->clear_var('Btn');
     }
 
     // Get products from plugins.
     // For now, this hack shows plugins only on the first page, since
     // they're not included in the page calculation.
-    if ($_PP_CONF['show_plugins'] && $page == 1 && $show_plugins &&
-                empty($search)) {
+    if ($_PP_CONF['show_plugins']&& $page == 1 && $show_plugins && empty($search)) {
         // Get the currency class for formatting prices
         $Cur = Currency::getInstance();
-        $product->clear_var('rating_bar');  // no ratings for plugins (yet)
+        $T->clear_var('rating_bar');  // no ratings for plugins (yet)
         foreach ($_PLUGINS as $pi_name) {
             $status = LGLIB_invokeService($pi_name, 'getproducts',
                     array(), $plugin_data, $svc_msg);
@@ -937,7 +921,7 @@ function ProductList($cat_id = 0)
                 $item_dscp = PP_getVar($A, 'short_description', 'string', $item_name);
                 $img = PP_getVar($A, 'image', 'string', '');
                 $price = PP_getVar($A, 'price', 'float', 0);
-                $product->set_var(array(
+                $T->set_var(array(
                     'id'        => $A['id'],        // required
                     'name'      => $item_name,
                     'short_description' => $item_dscp,
@@ -948,50 +932,52 @@ function ProductList($cat_id = 0)
                     'on_sale'   => '',
                 ) );
                 if ($price > 0) {
-                    $product->set_var('price', $Cur->Format($price));
+                    $T->set_var('price', $Cur->Format($price));
                 } else {
-                    $product->clear_var('price');
+                    $T->clear_var('price');
                 }
 
                 if ( $price > 0 &&
                         $_USER['uid'] == 1 &&
                         !$_PP_CONF['anon_buy'] ) {
-                    $buttons .= $product->set_var('', 'login_req') . '&nbsp;';
+                    $buttons .= $T->set_var('', 'login_req') . '&nbsp;';
                 } elseif ( (!isset($A['prod_type']) || $A['prod_type'] > PP_PROD_PHYSICAL) &&
                             $A['price'] == 0 ) {
                     // Free items or items purchases and not expired, download.
-                    $buttons .= $product->set_var('', 'download') . '&nbsp;';
+                    $buttons .= $T->set_var('', 'download') . '&nbsp;';
                 } elseif (is_array($A['buttons'])) {
                     // Buttons for everyone else
-                    $product->set_block('product', 'BtnBlock', 'Btn');
+                    $T->set_block('wrapper', 'BtnBlock', 'Btn');
                     foreach ($A['buttons'] as $type=>$html) {
-                        $product->set_var('button', $html);
-                        $product->parse('Btn', 'BtnBlock', true);
+                        $T->set_var('button', $html);
+                        $T->parse('Btn', 'BtnBlock', true);
                     }
                 }
-                //$product->set_var('buttons', $buttons);
-                $display .= $product->parse('', 'product');
-                $product->clear_var('Btn');
+                $T->clear_var('Btn');
                 $prodrows++;
+                $T->parse('PI', 'ProductItems', true);
             }   // foreach plugin_data
 
         }   // foreach $_PLUGINS
 
     }   // if page == 1
 
+    //$T->parse('output', 'wrapper');
+    $display .= $T->parse('', 'wrapper');
+
     if ($catrows == 0 && COM_isAnonUser()) {
-        $product->set_var('anon_and_empty', 'true');
+        $T->set_var('anon_and_empty', 'true');
     }
 
     $pagenav_args = empty($pagenav_args) ? '' : '?'.implode('&', $pagenav_args);
     // Display pagination
     if ($prod_per_page > 0 && $count > $prod_per_page) {
-        $product->set_var('pagination',
+        $T->set_var('pagination',
             COM_printPageNavigation(PAYPAL_URL . '/index.php' . $pagenav_args,
                         $page,
                         ceil($count / $prod_per_page)));
     } else {
-        $product->set_var('pagination', '');
+        $T->set_var('pagination', '');
     }
 
     // Display a "not found" message if count == 0
@@ -1003,7 +989,7 @@ function ProductList($cat_id = 0)
         }
     }
 
-    $display .= $product->parse('', 'end');
+    $display .= $T->parse('', 'end');
     return $display;
 }
 

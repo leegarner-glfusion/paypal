@@ -733,6 +733,8 @@ function PAYPAL_remove_old_files()
             'templates/viewcart.uikit.thtml',
             'templates/detail/v2/product_detail.thtml',
             'templates/detail/v1/product_detail.thtml',
+            'templates/list/v1/product_list_item.thtml',
+            'templates/list/v2/product_list_item.thtml',
             'templates/order.uikit.thtml',
             'classes/paymentgw.class.php',
             'classes/ppFile.class.php',

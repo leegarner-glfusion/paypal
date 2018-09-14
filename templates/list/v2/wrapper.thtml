@@ -1,0 +1,46 @@
+{# begin {templatelocation} #}
+<div class="ppProductListOuter {tpl_ver}">
+<ul class="uk-grid uk-grid-width-small-1-3 uk-grid-width-medium-1-3 uk-grid-width-large-1-4" data-uk-grid-margin>
+<!-- BEGIN ProductItems -->
+<li class="uk-vertical-align-top paypal v2">
+<a href="{item_url}">
+<div class="paypalProductListItem v2">
+  <div class="ItemImage">
+    {!if small_pic}
+        <img src="{small_pic}" alt="{name}" />
+    {!else}
+        &nbsp;
+   {!endif}
+  </div>
+  <div class="ItemUrl">
+    <div class="shortdescription">{short_description}</div>
+    {!if price}
+        {!if track_onhand}
+        ({qty_onhand} {$LANG_PP['available']})<br />
+        {!endif}
+       <div class="paypalPrice list normal v2">
+        {!if on_sale}
+          <span class="paypalPrice list was v2">{orig_price}</span><br />
+          <span class="paypalPrice list sale v2" id="price" name="price">{price}</span>
+        {!else}
+          {price}
+        {!endif}
+        {!if has_discounts}
+        <span class="ppQtyDiscSmall">{$LANG_PP['qty_discounts_avail']}</span>
+        {!endif}
+      </div>
+    {!endif}
+    <div class="Button list v2">
+    <button type="button" class="paypalButton black">{$LANG_PP['customize']}</button>
+    </div>
+  </div>
+{!if rating_bar}
+  <div class="ppRatingBar list v2">{rating_bar}</div>
+{!endif}
+</div>
+</a>
+</li>
+<!-- END ProductItems -->
+</ul>
+</div>
+{# end {templatelocation} #}
