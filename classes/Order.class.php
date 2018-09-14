@@ -1200,38 +1200,6 @@ class Order
         return false;
     }
 
-
-    /**
-     * Get the order view based on the current step in the checkout process
-     *
-     * @param   integer $step   Checkout step
-     * @return  string          Order view page
-     */
-    public function getView($step = 0)
-    {
-        $wf = Workflow::getAll($this);
-        if ($step < count($wf)) {
-            $wf_name = $wf[$step]->wf_name;
-        } else {
-            $wf_name = 'checkout';
-            $step = 9;
-        }
-        switch($wf_name) {
-        case 'viewcart':
-        case 'checkout':
-                return $this->View($wf_name, '', $step);
-        case 'billto':
-        case 'shipto':
-            $U = new \Paypal\UserInfo();
-            $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
-            return $U->AddressForm($wf_name, $A, $step);
-        case 'finalize':
-            return $this->View('checkout');
-        default:
-            return $this->View();
-        }
-    }
-
 }
 
 ?>
