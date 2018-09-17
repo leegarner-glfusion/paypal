@@ -430,6 +430,7 @@ class Order
 
         switch ($view) {
         case 'order':
+        case 'adminview';
             $final = true;
         case 'checkout':
             $tplname = 'order';
@@ -609,7 +610,7 @@ class Order
     */
     public function updateStatus($newstatus, $log = true)
     {
-        global $_TABLES;
+        global $_TABLES, $LANG_PP;
 
         $order_id = $this->order_id;
         $oldstatus = $this->status;
@@ -630,11 +631,12 @@ class Order
         if (DB_error()) return false;
         $this->status = $newstatus;     // update in-memory object
         if ($log) {
-            $this->Log("Status changed from $oldstatus to $newstatus",
+            $this->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus),
                     $log_user);
         }
 
         $this->Notify($newstatus);
+        Cache::delete('order_' . $this->order_id);
         return true;
     }
 

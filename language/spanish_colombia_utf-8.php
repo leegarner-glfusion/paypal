@@ -375,6 +375,7 @@ $LANG_PP = array (
     1   => 'Physical Only',
     3   => 'All Orders',
 ),
+'status_changed' => 'Status updated from %1$s to %2$s',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
