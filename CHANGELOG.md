@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Requires a UIKit-based theme for product list version 2
 - Some workflows can be enabled and disabled based on cart contents
 - Standardize in SQL decimal type for money amounts.
 - Merged shopping cart and order tables.

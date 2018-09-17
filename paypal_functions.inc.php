@@ -803,6 +803,20 @@ function ProductList($cat_id = 0)
         $T->set_var('title', $LANG_PP['blocktitle']);
     }
 
+    // Adjust the number of product block columns depending on whether
+    // glFusion blocks are shown
+    if ($_PP_CONF['displayblocks'] > 0) {
+        $T->set_var(array(
+            'lg_cols'   => 4,
+            'med_cols'  => 3,
+        ) );
+    } else {
+        $T->set_var(array(
+            'lg_cols'   => 5,
+            'med_cols'  => 4,
+        ) );
+    }
+
     $display .= $T->parse('', 'start');
 
     if ($_PP_CONF['ena_ratings'] == 1) {
