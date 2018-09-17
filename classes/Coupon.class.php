@@ -518,7 +518,9 @@ class Coupon extends Product
 
     /**
      * Mask a gift card code for display in the log.
-     * Replaces characters, except hyphens, with "X"
+     * Replaces characters, except symbols, with "X".
+     * Leaves the last 4 characters alone for identification if the total
+     * string length is > 10 characters, otherwise all characters are replaced.
      *
      * @param   string  $code   Original gift card code
      * @return  string          Masked code
@@ -531,7 +533,9 @@ class Coupon extends Product
             $len -= 4;
         }
         for ($i = 0; $i < $len; $i++) {
-            if ($code[$i] != '-') $code[$i] = 'X';
+            if (ctype_alnum($code[$i])) {
+                $code[$i] = 'X';
+            }
         }
         return $code;
     }
