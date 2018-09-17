@@ -159,7 +159,7 @@ class Order
         if ($this->SetVars($A)) $this->isNew = false;
 
         // Now load the items
-        $items = Cache::get('items_order_' . $this->id);
+        $items = Cache::get('items_order_' . $this->order_id);
         if ($items === NULL) {
             $items = array();
             $sql = "SELECT * FROM {$_TABLES['paypal.purchases']}
@@ -170,7 +170,7 @@ class Order
                     $items[$A['id']] = $A;
                 }
             }
-            Cache::set('items_order_' . $this->id, $items, array('items'));
+            Cache::set('items_order_' . $this->order_id, $items, array('items'));
         }
         // Now load the arrays into objects
         foreach ($items as $item) {
@@ -195,8 +195,7 @@ class Order
         $args['token'] = self::_createToken();  // create a unique token
         $item = new OrderItem($args);
         $this->items[] = $item;
-        //$this->Save();
-        $item->Save();
+        $this->Save();
     }
 
 
@@ -407,6 +406,7 @@ class Order
         //COM_errorLog("Save: " . $sql);
         DB_query($sql);
         Cache::delete('order_' . $this->order_id);
+        Cache::delete('items_order_' . $this->order_id);
         $this->isNew = false;
         return $this->order_id;
     }

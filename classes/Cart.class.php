@@ -215,12 +215,9 @@ class Cart extends Order
                 'extras'    => $extras,
                 'taxable'   => $P->isTaxable() ? 1 : 0,
             );
-            //COM_errorLog(print_r($tmp,true));
-            //$this->items[] = $tmp;
             parent::addItem($tmp);
             $new_quantity = $quantity;
         }
-        //$this->Save();
         return $new_quantity;
     }
 
@@ -333,7 +330,7 @@ class Cart extends Order
         if (isset($this->items[$id])) {
             DB_delete($_TABLES['paypal.purchases'], 'id', (int)$id);
             unset($this->items[$id]);
-            $this->Save();  // just to update timestamp
+            $this->Save();
         }
         return $this->items;
     }
