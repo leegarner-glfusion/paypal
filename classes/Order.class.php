@@ -1052,8 +1052,13 @@ class Order
     protected static function _createID()
     {
         global $_TABLES;
+        if (function_exists('CUSTOM_paypal_orderID')) {
+            $func = 'CUSTOM_paypal_orderID';
+        } else {
+            $func = 'COM_makeSid';
+        }
         do {
-            $id = COM_makeSid();
+            $id = COM_sanitizeID($func());
         } while (DB_getItem($_TABLES['paypal.orders'], 'order_id', "order_id = '$id'") !== NULL);
         return $id;
     }
