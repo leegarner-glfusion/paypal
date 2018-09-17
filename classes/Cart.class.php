@@ -49,39 +49,6 @@ class Cart extends Order
         if (COM_isAnonUser()) {
             self::setAnonCartID($this->order_id);
         }
-        return;
-
-        // Don't use session-based carts for paypal IPN, for those
-        // we just want an empty cart that can be read.
-        if ($interactive) {
-            Workflow::Init();
-            self::initSession();
-
-            // Cart ID can be passed in, typically by IPN processors
-            // If not, get the cart based on session or user ID
-            if (empty($cart_id)) {
-                $cart_id = self::getCart();
-            }
-            // If a cart ID still not found, create a new one
-            if (empty($cart_id)) {
-                $cart_id = self::_createID();
-            }
-            // Set the cart ID in the cookie and the local variable
-            $this->order_id = $cart_id;
-            $this->Save();
-            /*$this->m_cart_id = $cart_id;
-            if (COM_isAnonUser()) {
-                self::setAnonCartID($this->m_cart_id);
-            }*/
-        } else {
-            // For non-interactive sessions a cart ID must be provided
-            $this->order_id = $cart_id;
-            //$this->m_cart_id = $cart_id;
-        }
-
-//        $this->m_cart = array();
-//        $this->m_info = array();
-        $this->Load();
     }
 
 
