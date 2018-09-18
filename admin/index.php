@@ -366,7 +366,7 @@ case 'itemhist':
     break;
 
 case 'order':
-    $order = new \Paypal\Order($actionval);
+    $order = \Paypal\Order::getInstance($actionval);
     $order->setAdmin(true);
     $content .= $order->View('adminview');
     break;
