@@ -46,7 +46,7 @@ class paypal extends \Paypal\Gateway
         // These are used by the parent constructor, set them first.
         $this->gw_name = 'paypal';
         $this->gw_desc = 'PayPal Web Payments Standard';
-        $this->button_url = '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal Logo">';
+        $this->button_url = '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-medium.png" alt="Check out with PayPal" />';
 
         // Set default values for the config items, just to be sure that
         // something is set here.
@@ -956,8 +956,7 @@ class paypal extends \Paypal\Gateway
     */
     public function getLogo()
     {
-        return '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal Logo">';
-        //return $this->button_url;
+        return $this->button_url;
     }
 
 }   // class paypal
