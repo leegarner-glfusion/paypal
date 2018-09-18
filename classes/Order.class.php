@@ -524,7 +524,7 @@ class Order
             'status'        => $this->status,
             'token'         => $this->token,
             'is_uikit'      => $_PP_CONF['_is_uikit'],
-            'use_gc'        => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
+            'allow_gc'      => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'next_step'     => $step + 1,
             'not_anon'      => !COM_isAnonUser(),
         ) );

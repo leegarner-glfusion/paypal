@@ -113,7 +113,7 @@
         {$LANG_PP['hlp_gw_select']}<br />
 {!if gateway_radios}
         {gateway_radios}
-{!if use_gc}
+{!if allow_gc}
     <div class="enterGC">{$LANG_PP['enter_gc']}:<br />
     <input type="text" name="gc_code" />
     <input type="reset" class="lgButton green" name="redeem" value="{$LANG_PP['apply']}"
