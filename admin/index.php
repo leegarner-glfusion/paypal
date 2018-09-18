@@ -1825,30 +1825,58 @@ function PAYPAL_couponlist()
     $sql = "SELECT * FROM {$_TABLES['paypal.coupons']} $filt_sql";
 
     $header_arr = array(
-        array('text' => $LANG_PP['code'],
-                'field' => 'code', 'sort' => true),
-        array('text' => $LANG_PP['purch_date'],
-                'field' => 'purchased', 'sort' => true),
-        array('text' => $LANG_PP['amount'],
-                'field' => 'amount', 'sort' => false),
-        array('text' => $LANG_PP['balance'],
-                'field' => 'balance', 'sort' => false),
-        array('text' => $LANG_PP['buyer'],
-                'field' => 'buyer', 'sort' => true),
-        array('text' => $LANG_PP['redeemer'],
-                'field' => 'redeemer', 'sort' => true),
+        array(
+            'text' => $LANG_PP['code'],
+            'field' => 'code',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['purch_date'],
+            'field' => 'purchased',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['amount'],
+            'field' => 'amount',
+            'sort' => false,
+            'align' => 'right',
+        ),
+        array(
+            'text' => $LANG_PP['balance'],
+            'field' => 'balance',
+            'sort' => false,
+            'align' => 'right',
+        ),
+        array(
+            'text' => $LANG_PP['buyer'],
+            'field' => 'buyer',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['redeemer'],
+            'field' => 'redeemer',
+            'sort' => true,
+        ),
     );
 
-    $defsort_arr = array('field' => 'purchased',
-            'direction' => 'DESC');
+    $defsort_arr = array(
+        'field' => 'purchased',
+        'direction' => 'DESC',
+    );
 
-    $query_arr = array('table' => 'paypal.coupons',
+    $query_arr = array(
+        'table' => 'paypal.coupons',
         'sql' => $sql,
         'query_fields' => array(),
         'default_filter' => '',
     );
 
     $text_arr = array();
+    $text_arr = array(
+        'has_extras' => false,
+        'form_url' => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
+    );
+
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
@@ -1856,7 +1884,8 @@ function PAYPAL_couponlist()
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= '<h2>' . $LANG_PP['couponlist'] . '</h2>';
     $display .= '<div><a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?sendcards_form=x' . '">' . $LANG_PP['send_giftcards'] . "</a></div>\n";
+        '/index.php?sendcards_form=x' . '"><button class="uk-button uk-button-primary">' .
+        $LANG_PP['send_giftcards'] . '</button></a></div>' . LB;
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_couponlist',
             __NAMESPACE__ . '\getAdminField_coupons',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
@@ -2006,6 +2035,10 @@ function getAdminField_coupons($fieldname, $fieldvalue, $A, $icon_arr)
 
     $retval = '';
     static $username = array();
+    static $Cur = NULL;
+    static $Dt = NULL;
+    if ($Dt === NULL) $Dt = new Date('now', $_CONF['timezone']);
+    if ($Cur === NULL) $Cur = \Paypal\Currency::getInstance();
 
     switch($fieldname) {
     case 'buyer':
@@ -2020,6 +2053,18 @@ function getAdminField_coupons($fieldname, $fieldvalue, $A, $icon_arr)
                 'class' => 'tooltip',
             )
         );
+        break;
+
+    case 'amount':
+    case 'balance':
+        $retval = $Cur->FormatValue($fieldvalue);
+        break;
+
+    case 'purchased':
+    case 'redeemed':
+        $Dt->setTimestamp((int)$fieldvalue);
+        $retval = '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
+            . $Dt->toMySQL(true) . '</span>';
         break;
 
     default:
