@@ -572,7 +572,7 @@ form.ppViewCart div.ppGatewayRadios {
     text-align:left;
     font-size: 125%;
 }
-form.ppViewCart div.gwRadiosOuter {
+div.gwRadiosOuter {
     float: left;
     text-align: left;
     margin-right: 20px;
