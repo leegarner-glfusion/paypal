@@ -47,7 +47,7 @@ $expected = array(
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
-    'deldiscount', 'savediscount',
+    'deldiscount', 'savediscount', 'purgecarts',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
@@ -156,7 +156,14 @@ case 'deleteopt':
 
 case 'resetbuttons':
     DB_query("TRUNCATE {$_TABLES['paypal.buttons']}");
-    $view = 'other';
+    COM_setMsg($LANG_PP['buttons_purged']);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
+    break;
+
+case 'purgecarts':
+    \Paypal\Cart::Purge();
+    COM_setMsg($LANG_PP['carts_purged']);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
     break;
 
 case 'gwinstall':
@@ -303,7 +310,8 @@ case 'sendcards':
 
 case 'purgecache':
     \Paypal\Cache::clear();
-    COM_refresh(PAYPAL_ADMIN_URL);
+    COM_setMsg($LANG_PP['cache_purged']);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
     break;
 
 case 'savediscount':
@@ -438,10 +446,10 @@ case 'editdiscount':
     break;
 
 case 'other':
-    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?resetbuttons=x' . '">' . $LANG_PP['resetbuttons'] . "</a></div>\n";
-    $content .= '<div><a href="' . PAYPAL_ADMIN_URL .
-            '/index.php?purgecache=x' . '">' . $LANG_PP['purge_cache'] . "</a></div>\n";
+    $T = PP_getTemplate('other_functions', 'funcs');
+    $T->set_var('admin_url', PAYPAL_ADMIN_URL . '/index.php');
+    $T->parse('output', 'funcs');
+    $content = $T->finish($T->get_var('output'));
     break;
 
 case 'sendcards_form':

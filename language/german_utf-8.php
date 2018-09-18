@@ -368,6 +368,14 @@ $LANG_PP = array (
     3   => 'All Orders',
 ),
 'status_changed' => 'Status updated from %1$s to %2$s',
+'purge_carts' => 'Purge Shopping Carts',
+'buttons_purged' => 'The encrypted button cache has been cleared.',
+'cache_purged' => 'The data cache has been cleared.',
+'carts_purged' => 'All shopping carts have been deleted.',
+'q_purge_carts' => 'Are you sure you want to delete all active shopping carts?',
+'dscp_purge_buttons' => 'Delete all of the stored enrypted buttons in the database. This will force the buttons to be recreated the next time they are needed',
+'dscp_purge_cache' => 'Purge all of the cached orders, items, logs, etc. This is typically needed if the database has been restored from a backup or changed manuallly and the cache is out of sync.',
+'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><b>This will impact the guest experience and should not normally be necessary.</b>',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

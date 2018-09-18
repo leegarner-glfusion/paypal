@@ -765,6 +765,17 @@ class Cart extends Order
         }
     }
 
+
+    /**
+    *   Delete all carts.
+    */
+    public static function Purge()
+    {
+        global $_TABLES;
+        DB_delete($_TABLES['paypal.orders'], 'status', 'cart');
+        PAYPAL_debug("All carts for all users deleted");
+    }
+
 }   // class Cart
 
 ?>

@@ -606,3 +606,7 @@ span.ppPlusShipping {
 li.ppProductListItem.v2 {
   padding-bottom: 10px;
 }
+
+#otherfuncs button {
+    margin-bottom: 25px;
+}
