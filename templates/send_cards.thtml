@@ -1,15 +1,12 @@
 {# begin {templatelocation} #}
 <script src="{site_url}/javascript/moveusers.js"></script>
+<h2 class="aligncenter">{$LANG_PP['sendgc_header']}</h2>
 <form id="submit" action="{site_admin_url}/plugins/paypal/index.php" method="post" class="uk-form uk-form-horizontal">
-
-    <div class="uk-form-row">
-      <div class="uk-form-controls">{$LANG_PP['sendgc_header']}</div>
-    </div>
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['amount']}:</label>
       <div class="uk-form-controls">
-        <input type="text" name="amount" style="text-align:right;" placeholder="0.00" />
+        <input required type="text" name="amount" style="text-align:right;" placeholder="0.00" />
       </div>
     </div>
 
@@ -50,11 +47,11 @@
             </select>
           </td>
           <td class="aligncenter">
-            <input type="button" name="right" value="Include >>"
-              onclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)" />
+            <button class="uk-button uk-button-mini uk-button-primary" name="right" type="reset"
+              onclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)">{$LANG_PP['include']}&nbsp;&gt;&gt;</button>
             <br /><br />
-            <input type="button" name="left" value="<< Exclude"
-              onclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false)" />
+            <button class="uk-button uk-button-mini uk-button-primary" name="left" type="reset"
+              onclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false)">&lt;&lt;&nbsp;{$LANG_PP['exclude']}</button>
           </td>
           <td width="40%" class="alignleft" style="padding-left:5px;">
             <select multiple="multiple" size="10" name="fieldTo"
