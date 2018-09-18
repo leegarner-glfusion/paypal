@@ -24,7 +24,7 @@ require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 */
 function PAYPAL_do_upgrade()
 {
-    global $_TABLES, $_CONF, $_PP_CONF, $paypalConfigData, $PP_UPGRADE, $_PLUGIN_INFO;
+    global $_TABLES, $_CONF, $_PP_CONF, $paypalConfigData, $PP_UPGRADE, $_PLUGIN_INFO, $_DB_name;
 
     $pi_name = $_PP_CONF['pi_name'];
     if (isset($_PLUGIN_INFO[$pi_name])) {
@@ -461,6 +461,33 @@ function PAYPAL_do_upgrade()
             }
         }
 
+        // Update the order_date to an int if not already done
+        $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
+            "table_schema = '{$_DB_name}'
+            AND table_name = '{$_TABLES['paypal.orders']}'
+            AND COLUMN_NAME = 'order_date'");
+        if ($col_type == 'datetime') {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE order_date order_date_old datetime";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} ADD order_date int(11) unsigned NOT NULL DEFAULT 0 AFTER uid";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']} SET
+                last_mod = NOW(),
+                order_date = UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} DROP order_date_old";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} ADD KEY (`order_date`)";
+        }
+        $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
+            "table_schema = '{$_DB_name}'
+            AND table_name = '{$_TABLES['paypal.orders']}'
+            AND COLUMN_NAME = 'order_date'");
+        if ($col_type == 'datetime') {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} DROP key purchases_expiration";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} CHANGE expiration exp_old datetime";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} ADD expiration int(11) unsigned not null default 0 after status";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.purchases']} SET
+                expiration = UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} DROP exp_old";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} ADD KEY `purchases_expiration` (`expiration`)";
+        }
         // Sales and discounts have been moved to another table. Collect any active sales
         // and move them over.
         $res = DB_query("SHOW COLUMNS FROM {$_TABLES['paypal.products']} LIKE 'sale_price'");
