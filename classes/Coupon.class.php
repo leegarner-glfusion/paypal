@@ -184,7 +184,7 @@ class Coupon extends Product
     */
     public static function Redeem($code, $uid = 0)
     {
-        global $_TABLES, $_USER, $LANG_PP;
+        global $_TABLES, $_USER, $LANG_PP, $_CONF;
 
         if ($uid == 0) {
             $uid = $_USER['uid'];
@@ -200,10 +200,10 @@ class Coupon extends Product
         $res = DB_query($sql);
         if (DB_numRows($res) == 0) {
             COM_errorLog("Attempting to redeem coupon $code, not found in database");
-            return array(3, sprintf($LANG_PP['coupon_apply_msg3'], $_CONF['site_email']));;
+            return array(3, sprintf($LANG_PP['coupon_apply_msg3'], $_CONF['site_mail']));;
         } else {
             $A = DB_fetchArray($res, false);
-            if ($A['redeemed'] > 0 && $A['uid'] > 0) {
+            if ($A['redeemed'] > 0 && $A['redeemer'] > 0) {
                 COM_errorLog("Coupon code $code was already redeemed");
                 return array(1, $LANG_PP['coupon_apply_msg1']);
             }
