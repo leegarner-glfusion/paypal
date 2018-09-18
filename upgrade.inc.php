@@ -40,7 +40,6 @@ function PAYPAL_do_upgrade()
     }
     $installed_ver = plugin_chkVersion_paypal();
 
-
     if (!COM_checkVersion($current_ver, '0.2')) {
         // upgrade to 0.2.2
         $current_ver = '0.2.2';
@@ -505,7 +504,7 @@ function PAYPAL_do_upgrade()
 
     PAYPAL_update_config();
     if (!COM_checkVersion($current_ver, $installed_ver)) {
-        if (!PAYPAL_do_set_version($installed_ver)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
     }
     \Paypal\Cache::clear();
     PAYPAL_remove_old_files();
@@ -537,17 +536,15 @@ function PAYPAL_do_upgrade_sql($version)
 
     // Execute SQL now to perform the upgrade
     COM_errorLog("--- Updating Paypal to version $version", 1);
-    $errors = 0;
     foreach($PP_UPGRADE[$version] as $sql) {
         COM_errorLog("Paypal Plugin $version update: Executing SQL => $sql");
         DB_query($sql, '1');
         if (DB_error()) {
             COM_errorLog("SQL Error during Paypal Plugin update", 1);
-            $errors++;
         }
     }
     COM_errorLog("--- Paypal plugin SQL update to version $version done", 1);
-    return $errors ? false : true;
+    return true;
 }
 
 
@@ -575,7 +572,7 @@ function PAYPAL_do_set_version($ver)
         COM_errorLog("Error updating the {$_PP_CONF['pi_display_name']} Plugin version",1);
         return false;
     } else {
-        COM_errorLog("{$_PP_CONF['pi_display-name']} version set to $ver");
+        COM_errorLog("{$_PP_CONF['pi_display_name']} version set to $ver");
         // Set in-memory config vars to avoid tripping PP_isMinVersion();
         $_PP_CONF['pi_version'] = $ver;
         $_PLUGIN_INFO[$_PP_CONF['pi_name']]['pi_version'] = $ver;

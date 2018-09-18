@@ -836,32 +836,28 @@ $PP_UPGRADE['0.6.0'] = array(
     "DROP TABLE IF EXISTS {$_TABLES['paypal.sales']}",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.coupons']}",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.coupon_log']}",
-    "ALTER TABLE {$_TABLES['paypal.categories']}
-        ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0',
-        ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0',
-        ADD KEY `cat_lft` (`lft`),
-        ADD KEY `cat_rgt` (`rgt`)",
-    "ALTER TABLE {$_TABLES['paypal.purchases']}
-        ADD extras text,
-        ADD `shipping` decimal(9,4) NOT NULL DEFAULT '0.0000',
-        ADD `handling` decimal(9,4) NOT NULL DEFAULT '0.0000',
-        ADD `tax` decimal(9,4) NOT NULL DEFAULT '0.0000',
-        ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`,
-        CHANGE price price decimal(12,4) NOT NULL DEFAULT 0,
-        DROP key purchases_expiration,
-        CHANGE expiration exp_old datetime,
-        ADD expiration int(11) unsigned not null default 0 after status",
-    "ALTER TABLE {$_TABLES['paypal.purchases']}
-        ADD KEY `purchases_expiration` (`expiration`)",
-    "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD by_gc decimal(12,4) unsigned AFTER handling,
-        ADD token varchar(20),
-        ADD tax_rate decimal(7,5) NOT NULL DEFAULT '0.00000',
-        CHANGE shipping shipping decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE handling handling decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE tax tax decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE order_date order_date_old datetime,
-        ADD order_date int(11) unsigned NOT NULL DEFAULT 0 AFTER uid",
+    "ALTER TABLE {$_TABLES['paypal.categories']} ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0'",
+    "ALTER TABLE {$_TABLES['paypal.categories']} ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0'",
+    "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_lft` (`lft`)",
+    "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_rgt` (`rgt`)",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD extras text",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD `shipping` decimal(9,4) NOT NULL DEFAULT '0.0000'",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD `handling` decimal(9,4) NOT NULL DEFAULT '0.0000'",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD `tax` decimal(9,4) NOT NULL DEFAULT '0.0000'",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD taxable tinyint(1) unsigned NOT NULL DEFAULT '0' after `price`",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} DROP key purchases_expiration",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} CHANGE expiration exp_old datetime",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD expiration int(11) unsigned not null default 0 after status",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} ADD KEY `purchases_expiration` (`expiration`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD by_gc decimal(12,4) unsigned AFTER handling",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD token varchar(20)",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD tax_rate decimal(7,5) NOT NULL DEFAULT '0.00000'",
+    "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE shipping shipping decimal(9,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE handling handling decimal(9,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE tax tax decimal(9,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE order_date order_date_old datetime",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD order_date int(11) unsigned NOT NULL DEFAULT 0 AFTER uid",
     "CREATE TABLE `{$_TABLES['paypal.coupons']}` (
       `code` varchar(128) NOT NULL,
       `amount` decimal(12,4) unsigned NOT NULL DEFAULT '0.0000',
@@ -887,12 +883,11 @@ $PP_UPGRADE['0.6.0'] = array(
       KEY `order_id` (`order_id`),
       KEY `code` (`code`)
     ) ENGINE=MyIsam",
-    "ALTER TABLE {$_TABLES['paypal.buttons']}
-        ADD `pi_name` varchar(20) NOT NULL DEFAULT 'paypal' FIRST,
-        ADD `btn_key` varchar(20) AFTER gw_name,
-        CHANGE item_id item_id varchar(40),
-        DROP PRIMARY KEY,
-        ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
+    "ALTER TABLE {$_TABLES['paypal.buttons']} ADD `pi_name` varchar(20) NOT NULL DEFAULT 'paypal' FIRST",
+    "ALTER TABLE {$_TABLES['paypal.buttons']} ADD `btn_key` varchar(20) AFTER gw_name",
+    "ALTER TABLE {$_TABLES['paypal.buttons']} CHANGE item_id item_id varchar(40)",
+    "ALTER TABLE {$_TABLES['paypal.buttons']} DROP PRIMARY KEY",
+    "ALTER TABLE {$_TABLES['paypal.buttons']} ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
     "CREATE TABLE {$_TABLES['paypal.sales']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
       `item_type` varchar(10),
@@ -904,56 +899,44 @@ $PP_UPGRADE['0.6.0'] = array(
       PRIMARY KEY (`id`),
       KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
     ) ENGINE=MyIsam",
-    "ALTER TABLE {$_TABLES['paypal.products']}
-        DROP comments,
-        DROP sale_price,
-        DROP sale_beg,
-        DROP sale_end,
-        CHANGE weight weight decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE shipping_amt shipping_amt decimal(9,4) NOT NULL DEFAULT 0,
-        CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
-    "UPDATE {$_TABLES['conf_values']}
-        SET fieldset = 0, sort_order = 240
-        WHERE name = 'tc_link' AND group_name = 'paypal'",
+    "ALTER TABLE {$_TABLES['paypal.products']} DROP comments",
+    "ALTER TABLE {$_TABLES['paypal.products']} DROP sale_price",
+    "ALTER TABLE {$_TABLES['paypal.products']} DROP sale_beg",
+    "ALTER TABLE {$_TABLES['paypal.products']} DROP sale_end",
+    "ALTER TABLE {$_TABLES['paypal.products']} CHANGE weight weight decimal(9,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.products']} CHANGE shipping_amt shipping_amt decimal(9,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.products']} CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
     // Change the log table to use Unix timestamps.
     // 1. Change to datetime so timestamp doesn't get updated by these changes
     // 2. Add an integer field to get the timestamp value
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
-        CHANGE ts ts_old datetime,
-        ADD ts int(11) unsigned after id",
+    "ALTER TABLE {$_TABLES['paypal.order_log']} CHANGE ts ts_old datetime",
+    "ALTER TABLE {$_TABLES['paypal.order_log']} ADD ts int(11) unsigned after id",
     // 3. Set the int field to the Unix timestamp
     "UPDATE {$_TABLES['paypal.order_log']}
         SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`ts_old`, '+00:00', @@session.time_zone))",
     // 4. Drop the old timestamp field
-    "ALTER TABLE {$_TABLES['paypal.order_log']}
-        DROP ts_old,
-        DROP KEY `order_id`,
-        ADD KEY `order_id` (`order_id`, `ts`)",
-    "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD `info` text,
-        CHANGE last_mod last_mod timestamp",
+    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts_old",
+    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP KEY `order_id`",
+    "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD `info` text",
+    "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE last_mod last_mod timestamp",
     "UPDATE {$_TABLES['paypal.orders']} SET
         last_mod = NOW(),
         order_date = UNIX_TIMESTAMP(CONVERT_TZ(`order_date_old`, '+00:00', @@session.time_zone))",
-    "ALTER TABLE {$_TABLES['paypal.orders']}
-        ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0',
-        ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0',
-        DROP order_date_old,
-        ADD KEY (`order_date`)",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0'",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0'",
+    "ALTER TABLE {$_TABLES['paypal.orders']} DROP order_date_old",
+    "ALTER TABLE {$_TABLES['paypal.orders']}ADD KEY (`order_date`)",
     "UPDATE {$_TABLES['paypal.purchases']} SET
         expiration = UNIX_TIMESTAMP(CONVERT_TZ(`exp_old`, '+00:00', @@session.time_zone))",
-    "ALTER TABLE {$_TABLES['paypal.purchases']}
-        DROP exp_old,
-        DROP purchase_date",
-    "ALTER TABLE {$_TABLES['paypal.orderstatus']}
-        ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} DROP exp_old",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
+    "ALTER TABLE {$_TABLES['paypal.orderstatus']} ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
     "UPDATE {$_TABLES['paypal.orderstatus']}
         SET notify_admin = 1 WHERE name = 'paid'",
-    "DROP TABLE {$_TABLES['paypal.cart']}",
-    "ALTER TABLE {$_TABLES['paypal.prod_attr']}
-        CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
-    "ALTER TABLE {$_TABLES['paypal.workflows']}
-        ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'",
+    "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
+    "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
+    "ALTER TABLE {$_TABLES['paypal.workflows']} ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'",
     "UPDATE {$_TABLES['paypal.workflows']}
         SET can_disable = 0, enabled = 3 WHERE wf_name = 'viewcart'",
     "UPDATE {$_TABLES['paypal.workflows']}

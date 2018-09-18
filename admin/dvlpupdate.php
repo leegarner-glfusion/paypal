@@ -39,7 +39,9 @@ PAYPAL_do_set_version($ver);
 plugin_upgrade_paypal();
 
 // need to clear the template cache so do it here
-CACHE_clear();
+if (function_exists('CACHE_clear')) {
+    CACHE_clear();
+}
 header('Location: '.$_CONF['site_admin_url'].'/plugins.php?msg=600');
 exit;
 
