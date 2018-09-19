@@ -459,6 +459,9 @@ function PAYPAL_do_upgrade()
                 $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
                         SET cat_id = cat_id + 1";
             }
+            $add_cat_mptt = true;
+        } else {
+            $add_cat_mptt = false;
         }
 
         // Update the order_date to an int if not already done
@@ -525,7 +528,9 @@ function PAYPAL_do_upgrade()
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
-        \Paypal\Category::rebuildTree();
+        if ($add_cat_mptt) {
+            \Paypal\Category::rebuildTree();
+        }
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
