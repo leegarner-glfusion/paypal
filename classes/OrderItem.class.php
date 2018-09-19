@@ -273,7 +273,7 @@ class OrderItem
         //COM_errorLog($sql);
         DB_query($sql);
         if (!DB_error()) {
-            Cache::delete('items_order_' . $this->order_id);
+            Cache::deleteOrder($this->order_id);
             if ($this->id == 0) {
                 $this->id = DB_insertID();
             }

@@ -125,6 +125,18 @@ class Cache
         }
     }
 
+
+    /**
+     * Wrapper function to remove an order and its related items from cache.
+     *
+     * @param   string  $order_id   ID of order to remove
+     */
+    public static function deleteOrder($order_id)
+    {
+        self::delete('order_' . $order_id);
+        self::delete('items_order_' . $order_id);
+    }
+
 }   // class Paypal\Cache
 
 ?>

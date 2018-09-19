@@ -338,6 +338,7 @@ class Order
         // Checks passed, delete the order and items
         DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
         DB_delete($_TABLES['paypal.orders'], 'order_id', $order_id);
+        Cache::deleteOrder($order_id);
         return true;
     }
 
@@ -405,8 +406,7 @@ class Order
         //echo $sql;die;
         //COM_errorLog("Save: " . $sql);
         DB_query($sql);
-        Cache::delete('order_' . $this->order_id);
-        Cache::delete('items_order_' . $this->order_id);
+        Cache::deleteOrder($this->order_id);
         $this->isNew = false;
         return $this->order_id;
     }

@@ -110,6 +110,7 @@ class Cart extends Order
             DB_query($sql);
         }
         self::delAnonCart();    // Delete to avoid re-merging
+        Cache::deleteOrder($this->order_id);
         return $this->Cart();
     }
 
@@ -535,9 +536,6 @@ class Cart extends Order
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
         if (COM_isAnonUser()) {
             $cart_id = self::getAnonCartID();
-            /*if ($cart_id === NULL) {
-                $cart_id = self::_makeID();
-            }*/
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.orders'], 'order_id',
                 "uid = $uid AND status = 'cart' ORDER BY last_mod DESC limit 1");
@@ -554,20 +552,6 @@ class Cart extends Order
 
 
     /**
-    *   Create the Paypal session var if it doesn't exist
-    */
-    public static function initSession()
-    {
-        if (!isset($_SESSION[self::$session_var])) {
-            $_SESSION[self::$session_var] = array(
-                'cart_id' => '',
-                //'items' => array(),
-            );
-        }
-    }
-
-
-    /**
     *   Add a session variable.
     *
     *   @param  string  $key    Name of variable
@@ -575,6 +559,9 @@ class Cart extends Order
     */
     public static function setSession($key, $value)
     {
+        if (!isset($_SESSION[self::$session_var])) {
+            $_SESSION[self::$session_var] = array();
+        }
         $_SESSION[self::$session_var][$key] = $value;
     }
 
@@ -650,10 +637,7 @@ class Cart extends Order
             setcookie(self::$session_var, '', time()-3600, '/');
             // And delete the cart record
             Order::Delete($cart_id);
-            /*DB_delete($_TABLES['paypal.orders'],
-                array('order__id', 'uid', 'is_cart'),
-                array($cart_id, 1, 1)
-            );*/
+            Cache::deleteOrder($cart_id);
         }
     }
 
