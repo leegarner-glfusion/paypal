@@ -39,15 +39,15 @@ class OrderStatus extends Workflow
     public function __construct($A=array())
     {
         if (is_array($A)) {
-            $this->notify_buyer = (int)$A['notify_buyer'];
-            $this->notify_admin = (int)$A['notify_buyer'];
-            $this->name = $A['name'];
-            $this->enabled = (int)$A['enabled'];
-            $this->orderby = (int)$A['orderby'];
+            $this->name         = PP_getVar($A, 'name', 'string', 'undefined');
+            $this->enabled      = PP_getVar($A, 'enabled', 'integer', 1);
+            $this->orderby      = PP_getVar($A, 'orderby', 'integer', 999);
+            $this->notify_buyer = PP_getVar($A, 'notify_buyer', 'integer', 1);
+            $this->notify_admin = PP_getVar($A, 'notify_admin', 'integer', 1);
         } else {
-            $this->name = 'undefined';
-            $this->enabled = 0;
-            $this->orderby = 0;
+            $this->name         = 'undefined';
+            $this->enabled      = 0;
+            $this->orderby      = 0;
             $this->notify_buyer = 0;
             $this->notify_admin = 0;
         }
