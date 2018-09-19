@@ -398,7 +398,7 @@ $LANG_PP_EMAIL = array(
 );
 
 $LANG_PP_HELP = array(
-'enter_email' => 'Enter an e-mail address where your order receipt should be sent',
+'enter_email' => 'Enter an e-mail address where your order receipt should be sent. It will not be used for any other purpose.',
 'notify_email' => 'Enter an optional email address to receive the notification of this order. Your own email address will be used if this is empty.',
 'hlp_cat_delete' => 'Only unused categories may be deleted',
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
