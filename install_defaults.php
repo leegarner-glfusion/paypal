@@ -739,7 +739,7 @@ $paypalConfigData = array(
     ),
     array(
         'name' => 'gc_symbols',
-        'default_value' => '1',
+        'default_value' => '0',
         'type' => 'select',
         'subgroup' => 20,
         'fieldset' => 10,
