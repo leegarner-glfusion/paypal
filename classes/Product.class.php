@@ -154,7 +154,7 @@ class Product
                         $res = DB_query($sql);
                         $A = DB_fetchArray($res, false);
                         if (isset($A['id'])) {
-                            Cache::set($cache_key, $A, array('product', $A['id']));
+                            Cache::set($cache_key, $A, array('products', $A['id']));
                         }
                     }
                 }
@@ -529,7 +529,7 @@ class Product
         }
 
         Cache::delete('prod_attr_' . $this->id);
-        Cache::clear('product');
+        Cache::clear('products');
 
         //PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {

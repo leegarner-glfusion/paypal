@@ -642,7 +642,7 @@ function ProductList($cat_id = 0)
         $res = DB_query('SELECT COUNT(*) as cnt ' . $sql);
         $x = DB_fetchArray($res, false);
         $count = PP_getVar($x, 'cnt', 'integer');
-        Cache::set($cache_key, $count, array('product', 'categories'));
+        Cache::set($cache_key, $count, array('products', 'categories'));
     }
 
     // If applicable, handle pagination of query
@@ -674,7 +674,7 @@ function ProductList($cat_id = 0)
         while ($A = DB_fetchArray($res, false)) {
             $Products[] = Product::getInstance($A);
         }
-        Cache::set($cache_key, $Products, array('product', 'categories'));
+        Cache::set($cache_key, $Products, array('products', 'categories'));
     }
 
     // Create product template
