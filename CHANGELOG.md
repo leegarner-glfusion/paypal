@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Added Admin dvlpupdate.php with idempotent upgrades to assist those tracking development branches.
 - Enable template for Thanks message, allow customization.
 - Support `CUSTOM_paypal_orderID()` function to create custom order IDs.
 - Requires a UIKit-based theme for product list version 2.
