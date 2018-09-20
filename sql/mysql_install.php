@@ -836,10 +836,6 @@ $PP_UPGRADE['0.6.0'] = array(
     "DROP TABLE IF EXISTS {$_TABLES['paypal.sales']}",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.coupons']}",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.coupon_log']}",
-    "ALTER TABLE {$_TABLES['paypal.categories']} ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0'",
-    "ALTER TABLE {$_TABLES['paypal.categories']} ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0'",
-    "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_lft` (`lft`)",
-    "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_rgt` (`rgt`)",
     "ALTER TABLE {$_TABLES['paypal.purchases']} ADD extras text",
     "ALTER TABLE {$_TABLES['paypal.purchases']} ADD `shipping` decimal(9,4) NOT NULL DEFAULT '0.0000'",
     "ALTER TABLE {$_TABLES['paypal.purchases']} ADD `handling` decimal(9,4) NOT NULL DEFAULT '0.0000'",
@@ -900,33 +896,13 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE weight weight decimal(9,4) NOT NULL DEFAULT 0",
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE shipping_amt shipping_amt decimal(9,4) NOT NULL DEFAULT 0",
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
-    // Change the log table to use Unix timestamps.
-    // 1. Change to datetime so timestamp doesn't get updated by these changes
-    // 2. Add an integer field to get the timestamp value
-    "ALTER TABLE {$_TABLES['paypal.order_log']} CHANGE ts ts_old datetime",
-    "ALTER TABLE {$_TABLES['paypal.order_log']} ADD ts int(11) unsigned after id",
-    // 3. Set the int field to the Unix timestamp
-    "UPDATE {$_TABLES['paypal.order_log']}
-        SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`ts_old`, '+00:00', @@session.time_zone))",
-    // 4. Drop the old timestamp field
-    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts_old",
-    "ALTER TABLE {$_TABLES['paypal.order_log']} DROP KEY `order_id`",
-    "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `info` text",
     "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE last_mod last_mod timestamp",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
-    "ALTER TABLE {$_TABLES['paypal.orderstatus']} ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'",
-    "UPDATE {$_TABLES['paypal.orderstatus']}
-        SET notify_admin = 1 WHERE name = 'paid'",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
-    "ALTER TABLE {$_TABLES['paypal.workflows']} ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'",
-    "UPDATE {$_TABLES['paypal.workflows']}
-        SET can_disable = 0, enabled = 3 WHERE wf_name = 'viewcart'",
-    "UPDATE {$_TABLES['paypal.workflows']}
-        SET enabled = 3 WHERE enabled = 1",
 );
 
 ?>

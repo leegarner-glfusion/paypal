@@ -333,9 +333,7 @@ function PAYPAL_do_upgrade()
             // Populate with data
             $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][1];
         }
-        $res = DB_query("SHOW COLUMNS FROM {$_TABLES['paypal.products']}
-                        LIKE 'sale_price'", 1);
-        if (!$res || DB_numRows($res) < 1) {
+        if (!_PP_tableHasColumn('paypal.products', 'sale_price')) {
             // Add the field to the products table
             $PP_UPGRADE['0.5.6'][] = $PP_UPGRADE['0.5.4'][2];
         }
@@ -431,8 +429,11 @@ function PAYPAL_do_upgrade()
         // there must be at least one. Collect all the categories, increment
         // the ID and parent_id, add the home category, and update the products
         // to match.
-        $res = DB_query("SHOW COLUMNS FROM {$_TABLES['paypal.categories']} LIKE 'rgt'");
-        if (DB_numRows($res) == 0) {    // Category table hasn't been updated yet
+        if (!_PPtableHasColumn('paypal.categories', 'rgt')) { // Category table hasn't been updated yet
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.categories']} ADD `lft` smallint(5) unsigned NOT NULL DEFAULT '0'";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.categories']} ADD `rgt` smallint(5) unsigned NOT NULL DEFAULT '0'";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_lft` (`lft`)";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.categories']} ADD KEY `cat_rgt` (`rgt`)";
             $res = DB_query("SELECT * FROM {$_TABLES['paypal.categories']}");
             $cats = array();
             if ($res) {
@@ -446,18 +447,17 @@ function PAYPAL_do_upgrade()
                     $sql_cats[] = "('" . implode("','", $cats[$id]) . "')";
                 }
                 $sql_cats = implode(', ', $sql_cats);
-                $PP_UPGRADE['0.6.0'][] = "TRUNCATE {$_TABLES['paypal.categories']}";
-                $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
+                $PP_UPGRADE[$current_ver][] = "TRUNCATE {$_TABLES['paypal.categories']}";
+                $PP_UPGRADE[$current_ver][] = "INSERT INTO {$_TABLES['paypal.categories']}
                         (cat_id, cat_name, description, grp_access, lft, rgt)
                     VALUES
                         (1, 'Home', 'Root Category', 2, 1, 2)";
                 if (!empty($sql_cats)) {
-                    $PP_UPGRADE['0.6.0'][] = "INSERT INTO {$_TABLES['paypal.categories']}
+                    $PP_UPGRADE[$current_ver][] = "INSERT INTO {$_TABLES['paypal.categories']}
                             (cat_id, parent_id, cat_name, description, enabled, grp_access, image)
                         VALUES $sql_cats";
                 }
-                $PP_UPGRADE['0.6.0'][]= "UPDATE {$_TABLES['paypal.products']}
-                        SET cat_id = cat_id + 1";
+                $PP_UPGRADE[$current_ver][]= "UPDATE {$_TABLES['paypal.products']} SET cat_id = cat_id + 1";
             }
             $add_cat_mptt = true;
         } else {
@@ -465,11 +465,7 @@ function PAYPAL_do_upgrade()
         }
 
         // Update the order_date to an int if not already done
-        $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
-            "table_schema = '{$_DB_name}'
-            AND table_name = '{$_TABLES['paypal.orders']}'
-            AND COLUMN_NAME = 'order_date'");
-        if ($col_type == 'datetime') {
+        if (_PPcolumnType('paypal.orders', 'order_date') == 'datetime') {
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE order_date order_date_old datetime";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} ADD order_date int(11) unsigned NOT NULL DEFAULT 0 AFTER uid";
             $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']} SET
@@ -478,11 +474,7 @@ function PAYPAL_do_upgrade()
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} DROP order_date_old";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} ADD KEY (`order_date`)";
         }
-        $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
-            "table_schema = '{$_DB_name}'
-            AND table_name = '{$_TABLES['paypal.orders']}'
-            AND COLUMN_NAME = 'order_date'");
-        if ($col_type == 'datetime') {
+        if (_PPcolumnType('paypal.purchases', 'expiration') == 'datetime') {
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} DROP key purchases_expiration";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} CHANGE expiration exp_old datetime";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.purchases']} ADD expiration int(11) unsigned not null default 0 after status";
@@ -493,8 +485,7 @@ function PAYPAL_do_upgrade()
         }
         // Sales and discounts have been moved to another table. Collect any active sales
         // and move them over.
-        $res = DB_query("SHOW COLUMNS FROM {$_TABLES['paypal.products']} LIKE 'sale_price'");
-        if (DB_numRows($res) == 1) {        // Sales haven't been moved to new table yet
+        if (_PPtableHasColumn('paypal.products', 'sale_price')) {        // Sales haven't been moved to new table yet
             $sql = "SELECT id, sale_price, sale_beg, sale_end, price FROM {$_TABLES['paypal.products']}";
             $res = DB_query($sql);
             if ($res) {
@@ -524,6 +515,32 @@ function PAYPAL_do_upgrade()
                             VALUES $sql";
                 }
             }
+        }
+
+        // Update workflows table with can_delete flag, and change enabled values if this is the first pass.
+        if (!_PPtableHasColumn('paypal.workflows', 'can_disable')) {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.workflows']} ADD `can_disable` tinyint(1) unsigned NOT NULL DEFAULT '1'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.workflows']} SET can_disable = 0, enabled = 3 WHERE wf_name = 'viewcart'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.workflows']} SET enabled = 3 WHERE enabled = 1";
+        }
+
+        if (!_PPtableHasColumn('paypal.orderstatus', 'notify_admin')) {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orderstatus']} ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1 WHERE name = 'paid'";
+        }
+
+        // Change the log table to use Unix timestamps.
+        if (_PPcolumnType('paypal.order_log', 'ts') == 'datetime') {
+            // 1. Change to datetime so timestamp doesn't get updated by these changes
+            // 2. Add an integer field to get the timestamp value
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} CHANGE ts ts_old datetime";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} ADD ts int(11) unsigned after id";
+            // 3. Set the int field to the Unix timestamp
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.order_log']} SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`ts_old`, '+00:00', @@session.time_zone))";
+            // 4. Drop the old timestamp field
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts_old";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} DROP KEY `order_id`";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)";
         }
 
         if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
@@ -590,7 +607,7 @@ function PAYPAL_do_upgrade_sql($version)
 */
 function PAYPAL_do_set_version($ver)
 {
-    global $_TABLES, $_PP_CONF;
+    global $_TABLES, $_PP_CONF, $_PLUGIN_INFO;
 
     // now update the current version number.
     $sql = "UPDATE {$_TABLES['plugins']} SET
@@ -692,13 +709,41 @@ function PAYPAL_remove_old_files()
     }
 }
 
-function _PPsearchForIdKey($id, $array) {
-   foreach ($array as $key => $val) {
-       if ($val['name'] === $id) {
-           return $key;
-       }
-   }
-   return null;
+
+/**
+ * Check if a column exists in a table
+ *
+ * @param   string  $table      Table Key, defined in paypal.php
+ * @param   string  $col_name   Column name to check
+ * @return  boolean     True if the column exists, False if not
+ */
+function _PPtableHasColumn($table, $col_name)
+{
+    global $_TABLES;
+
+    $col_name = DB_escapeString($col_name);
+    $res = DB_query("SHOW COLUMNS FROM {$_TABLES[$table]} LIKE '$col_name'");
+    return DB_numRows($res) == 0 ? false : true;
+}
+
+
+/**
+ * Get the datatype for a specific column.
+ *
+ * @param   string  $table      Table Key, defined in paypal.php
+ * @param   string  $col_name   Column name to check
+ * @return  string      Column datatype
+ */
+function _PPcolumnType($table, $col_name)
+{
+    global $_TABLES, $_DB_name;
+
+    $col_name = DB_escapeString($col_name);
+    $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
+            "table_schema = '{$_DB_name}'
+            AND table_name = '{$_TABLES[$table]}'
+            AND COLUMN_NAME = '$col_name'");
+    return $col_type;
 }
 
 ?>
