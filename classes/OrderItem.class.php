@@ -298,6 +298,8 @@ class OrderItem
             $this->quantity = (float)$newqty;
             $product = $this->getProduct();
             $price = $product->getPrice($this->options, $newqty);
+            $this->handling = $product->getHandling($newqty);
+            $this->shipping = $product->getShipping($newqty);
             $this->price = $price;
         }
         return $this;
