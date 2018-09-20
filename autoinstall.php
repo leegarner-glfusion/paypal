@@ -4,16 +4,14 @@
 *
 *   @author     Lee Garner <lee@leegarner.com>
 *   @author     Mark Evans <mark@glfusion.org>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2009 Mark Evans <mark@glfusion.org>
 *   @package    paypal
-*   @version    0.5.9
+*   @version    0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
-global $_DB_dbms;
 
 /** Include plugin configuration */
 require_once __DIR__  . '/paypal.php';

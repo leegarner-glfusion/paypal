@@ -11,10 +11,10 @@
 *   @filesource
 */
 
-global $_CONF, $_PP_CONF, $_DB_dbms;
+global $_CONF, $_PP_CONF;
 
 /** Include the table creation strings */
-require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/mysql_install.php";
 
 /**
 *   Perform the upgrade starting at the current version.
@@ -22,7 +22,7 @@ require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 *   @since  version 0.4.0
 *   @return integer                 Error code, 0 for success
 */
-function PAYPAL_do_upgrade()
+function PAYPAL_do_upgrade($dvlp = false)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $paypalConfigData, $PP_UPGRADE, $_PLUGIN_INFO, $_DB_name;
 
@@ -543,7 +543,7 @@ function PAYPAL_do_upgrade()
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)";
         }
 
-        if (!PAYPAL_do_upgrade_sql($current_ver)) return false;
+        if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         if ($add_cat_mptt) {
             \Paypal\Category::rebuildTree();
@@ -575,7 +575,7 @@ function PAYPAL_do_upgrade()
 *   @param  boolean $ignore_error   True to ignore SQL errors.
 *   @param  array   $sql        Array of SQL statement(s) to execute
 */
-function PAYPAL_do_upgrade_sql($version)
+function PAYPAL_do_upgrade_sql($version, $ignore_error = false)
 {
     global $_TABLES, $_PP_CONF, $PP_UPGRADE;
 
@@ -587,9 +587,16 @@ function PAYPAL_do_upgrade_sql($version)
     COM_errorLog("--- Updating Paypal to version $version", 1);
     foreach($PP_UPGRADE[$version] as $sql) {
         COM_errorLog("Paypal Plugin $version update: Executing SQL => $sql");
-        DB_query($sql, '1');
-        if (DB_error()) {
-            COM_errorLog("SQL Error during Paypal Plugin update", 1);
+        try {
+            DB_query($sql, '1');
+            if (DB_error()) {
+                // check for error here for glFusion < 2.0.0
+                COM_errorLog('SQL Error during update', 1);
+                if (!$ignore_error) return false;
+            }
+        } catch (Exception $e) {
+            COM_errorLog('SQL Error ' . $e->getMessage(), 1);
+            if (!$ignore_error) return false;
         }
     }
     COM_errorLog("--- Paypal plugin SQL update to version $version done", 1);
