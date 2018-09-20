@@ -107,30 +107,32 @@
     <input type="submit" class="paypalButton red" name="emptycart"
         value="{$LANG_PP['empty_cart']}" />
 {!endif}
-    <div style="width:70%; clear:both;margin-top:15px;">
-      <div class="gwRadiosOuter">
-        <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
-        {$LANG_PP['hlp_gw_select']}<br />
+    <div class="uk-width-1-1 uk-margin">
+      <div class="uk-width-2-3 uk-margin floatleft">
+        <div class="gwRadiosOuter">
+          <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
+          {$LANG_PP['hlp_gw_select']}<br />
 {!if gateway_radios}
-        {gateway_radios}
+          {gateway_radios}
 {!if allow_gc}
-    <div class="enterGC">{$LANG_PP['enter_gc']}:<br />
-    <input type="text" name="gc_code" />
-    <input type="reset" class="lgButton green" name="redeem" value="{$LANG_PP['apply']}"
-        onclick="ppApplyGC('ppCartForm');" />
-    <input type="hidden" name="refresh" value="viewcart" />
-    </div>
+          <div class="enterGC">{$LANG_PP['enter_gc']}:&nbsp;<input type="text" name="gc_code" id="enterGC" />
+            <input type="submit" class="uk-button uk-button-mini uk-button-primary" name="redeem" value="{$LANG_PP['apply']}"
+              onclick="ppApplyGC('ppCartForm');return false;" />
+            <input type="hidden" name="refresh" value="viewcart" />
+          </div>
 {!endif}
 {!else}
-        <div class="uk-alert uk-alert-danger">{$LANG_PP['todo_nogateways']}</div>
+          <div class="uk-alert uk-alert-danger">{$LANG_PP['todo_nogateways']}</div>
 {!endif}
+        </div>
+        <div class="gwRadiosOuter">
+          {$LANG_PP['enter_email']}:
+          <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['enter_email']}"></i>
+          <br /><input required type="text" name="payer_email" size="40" value="{payer_email}"/><br />
+        </div>
       </div>
-      <div class="gwRadiosOuter">
-        {$LANG_PP['enter_email']}:
-        <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['enter_email']}"></i>
-        <br /><input required type="text" name="payer_email" size="40" value="{payer_email}"/><br />
-      </div>
-      <div style="float:right;" id="checkoutButtons">
+    
+      <div class="uk-width-1-4 uk-margin floatleft" id="checkoutButtons">
 {!if gateway_radios}
         <input type="hidden" name="next_step" value="{next_step}" />
 {!if is_uikit}

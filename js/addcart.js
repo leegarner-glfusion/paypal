@@ -106,6 +106,7 @@ var ppApplyGC = function(frm_id)
                 if (result.msg != '') {
                     $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 2000,pos:'top-center'});
                 }
+                document.getElementById('enterGC').value = '';
             } catch(err) {
             }
         }
