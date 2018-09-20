@@ -20,12 +20,7 @@ require_once '../../../lib-common.php';
 if (!SEC_inGroup('Root')) {
     // Someone is trying to illegally access this page
     COM_errorLog("Someone has tried to access the Paypal Development Code Upgrade Routine without proper permissions.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . $_SERVER['REMOTE_ADDR'],1);
-    $display  = COM_siteHeader();
-    $display .= COM_startBlock($LANG27[12]);
-    $display .= $LANG27[12];
-    $display .= COM_endBlock();
-    $display .= COM_siteFooter(true);
-    echo $display;
+    COM_404();
     exit;
 }
 require_once PAYPAL_PI_PATH . '/upgrade.inc.php';   // needed for set_version()
@@ -34,8 +29,8 @@ if (function_exists('CACHE_clear')) {
 }
 \Paypal\Cache::clear();
 
-$ver = '0.5.11';
-PAYPAL_do_set_version($ver);
+// Force the plugin version to the previous version and do the upgrade
+$_PLUGIN_INFO['paypal']['pi_version'] = '0.5.11';
 plugin_upgrade_paypal();
 
 // need to clear the template cache so do it here
