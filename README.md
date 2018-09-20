@@ -170,5 +170,7 @@ $output = array(
     'description' => Full product description,
     'price'     => Unit price,
     'taxable'   => 1 if the product is taxable, else 0,
+    'override_price' => 1 if the price is set in the link, 0 to get from the product,
+    'fixed_q' => 0 if the buyer can set the quantty, > 0 for a fixed quantity allowed,
 );
 ```
