@@ -21,6 +21,8 @@ namespace Paypal;
 */
 class Coupon extends Product
 {
+    const MAX_EXP = '9999-12-31';   // Max expiration date
+
     public function __construct($prod_id = 0)
     {
         parent::__construct($prod_id);
@@ -141,7 +143,7 @@ class Coupon extends Product
     *   @param  integer $uid        User ID, default = current user
     *   @return mixed       Coupon code, or false on error
     */
-    public static function Purchase($amount = 0, $uid = 0, $exp = '')
+    public static function Purchase($amount = 0, $uid = 0, $exp = self::MAX_EXP)
     {
         global $_TABLES, $_USER;
 
@@ -149,7 +151,6 @@ class Coupon extends Product
         if ($uid == 0) {
             $uid = $_USER['uid'];
         }
-        if ($exp == '') $exp = '9999-12-31';
         $options = array();     // Use all options from global config
         do {
             // Make sure there are no duplicates
@@ -306,16 +307,21 @@ class Coupon extends Product
     *   @param  float   $amount     Gift Card Amount
     *   @param  string  $sender     Optional sender, from the custom text field
     */
-    public static function Notify($gc_code, $recip, $amount, $sender='')
+    public static function Notify($gc_code, $recip, $amount, $sender='', $exp=self::MAX_EXP)
     {
         global $_CONF, $LANG_PP_EMAIL;
 
         if ($recip!= '') {
             PAYPAL_debug("Sending Coupon to " . $recip);
             $T = PP_getTemplate('coupon_email_message', 'message');
+            if ($exp != self::MAX_EXP) {
+                $dt = new \Date($exp, $_CONF['timezone']);
+                $exp = $dt->format($_CONF['shortdate']);
+            }
             $T->set_var(array(
                 'gc_code'   => $gc_code,
                 'sender_name' => $sender,
+                'expires'   => $exp,
             ) );
             $T->parse('output', 'message');
             $msg_text = $T->finish($T->get_var('output'));

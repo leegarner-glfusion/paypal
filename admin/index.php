@@ -297,7 +297,7 @@ case 'sendcards':
             $code = \Paypal\Coupon::Purchase($amt, $uid, $exp);
             $email = DB_getItem($_TABLES['users'], 'email', "uid = $uid");
             if (!empty($email)) {
-                \Paypal\Coupon::Notify($code, $email, $amt);
+                \Paypal\Coupon::Notify($code, $email, $amt, '', $exp);
             }
         }
         COM_setMsg(count($uids) . ' coupons sent');
@@ -465,7 +465,7 @@ case 'sendcards_form':
         $dt->add(new DateInterval($period));
         $expires = $dt->format('Y-m-d');
     } else {
-        $expires = '9999-12-31';
+        $expires = \Paypal\Coupon::MAX_EXP;
     }
     $tmp = array();
     while ($A = DB_fetchArray($res, false)) {

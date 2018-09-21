@@ -392,9 +392,10 @@ if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
 }
 
 $LANG_PP_EMAIL = array(
-'coupon_1' => 'You have received a gift card. Click on the link below to redeem it.',
-'coupon_id' => 'Gift Card',
-'coupon_subject' => 'You have a gift card!',
+    'coupon_1' => 'You have received a gift card. Click on the link below to redeem it.',
+    'coupon_2' => 'Act now, your gift card expires',
+    'coupon_id' => 'Gift Card',
+    'coupon_subject' => 'You have a gift card!',
 );
 
 $LANG_PP_HELP = array(

@@ -5,3 +5,8 @@
 <p>
 {$LANG_PP_EMAIL['coupon_id']}: <a href="{site_url}/paypal/index.php?redeem=x&gc_code={gc_code}">{gc_code}</a>
 </p>
+{!if expires}
+<p>
+{$LANG_PP_EMAIL['coupon_2']} {expires}.
+</p>
+{!endif}
