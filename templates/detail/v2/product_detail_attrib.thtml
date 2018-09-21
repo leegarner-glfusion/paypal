@@ -1,19 +1,20 @@
 {# begin {templatelocation} #}
 {javascript}
 <div class="paypalProductDetail v2" style="width: 50%;" id="paypalShortDesc">
-  <h1>{short_description}
+  <h1>{short_description}</h1>
+  {name}
+</div>
 {!if can_edit}
+<div class="floatright">
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
     {!if is_uikit}
-    <i class="uk-icon uk-icon-edit"></i>
+    <i class="uk-icon uk-icon-pencil uk-icon-small"></i>
     {!else}
     <img src="{layout_url}/images/admin/edit.png" />
     {!endif}
   </a>
-{!endif}
-  </h1>
-  {name}
 </div>
+{!endif}
 
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
