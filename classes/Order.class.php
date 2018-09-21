@@ -568,7 +568,7 @@ class Order
                 $T->set_var(array(
                     'gateway_vars'  => $this->checkoutButton($gw),
                     'checkout'      => 'true',
-                    'pmt_method'    => $gw->getLogo(),
+                    'pmt_method'    => $gw->Description(),
                 ) );
             }
         default:
