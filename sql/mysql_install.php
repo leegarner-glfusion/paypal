@@ -363,6 +363,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `token` varchar(20) DEFAULT NULL,
   `tax_rate` decimal(6,5) NOT NULL DEFAULT '0.00000',
   `info` text,
+  `currency` varchar(3) NOT NULL DEFAULT '',
   PRIMARY KEY (`order_id`),
   KEY (`order_date`)
 ) ENGINE=MyISAM";
@@ -903,6 +904,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
+    "ALTER TABLE {$_TABLES['paypal.orders']} ADD currency varchar(3) NOT NULL DEFAULT ''",
 );
 
 ?>

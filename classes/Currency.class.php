@@ -6,6 +6,7 @@
 *   @copyright  Copyright (c) 2014-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
 *   @version    0.6.0
+*   @since      0.5.4
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *              GNU Public License v2 or later
 *   @filesource
@@ -294,9 +295,9 @@ class Currency
     * @return
     *   The numeric amount value converted to its equivalent in the target currency.
     */
-    public function Convert($amount, $toCurrency, $fromCurrency='')
+    public static function Convert($amount, $toCurrency, $fromCurrency='')
     {
-       return $amount * $this->ConversionRate($toCurrency, $fromCurrency);
+       return $amount * self::getConversionRate($toCurrency, $fromCurrency);
     }
 
 
@@ -304,24 +305,26 @@ class Currency
     *   Get the conversion rate between currencies.
     *   If $from is not specified, uses the current default. $to must be given.
     *
-    *   @param  string  $toCurrency     Destination currency code
-    *   @param  string  $fromCurrency   Starting currency code
+    *   @param  string  $to     Target currency code
+    *   @param  string  $from   Starting currency code
     *   @return float       Conversion rate to get $from to $to
     */
-    public static function ConversionRate($toCurrency, $fromCurrency='')
+    public static function getConversionRate($to, $from='')
     {
         global $_PP_CONF;
-        static $rates = array();
 
-        if (empty($fromCurrency)) $fromCurrency = $_PP_CONF['currency'];
+        if (empty($from)) $from = $_PP_CONF['currency'];
 
-        // check if this conversion has already been done this session
-        if (!isset($rates[$fromCurrency][$toCurrency])) {
-            $amount = urlencode($amount);
-            $from_Currency = urlencode($fromCurrency);
-            $to_Currency = urlencode($toCurrency);
+        // currencyconverterapi keys currencies as "from_to"
+        $key = $from . '_' . $to;
+        $cache_key = 'currency_convert_' . $key;
+        $data = Cache::get($cache_key);
+        if ($data === NULL) {
+            $from = urlencode($from);
+            $to = urlencode($to);
 
-            $url = "http://download.finance.yahoo.com/d/quotes.csv?s={$from_Currency}{$to_Currency}=X&f=l1";
+            $url = "https://free.currencyconverterapi.com/api/v5/convert?q={$key}&compact=y";
+            //$url = "http://finance.yahoo.com/d/quotes.csv?s={$from}{$to}=X&f=l1";
             $timeout = 0;
             $ch = curl_init();
             curl_setopt ($ch, CURLOPT_URL, $url);
@@ -331,10 +334,18 @@ class Currency
             curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
             $data = curl_exec($ch);
             curl_close($ch);
-            if (!isset($rates[$fromCurrency])) $rates[$fromCurrency] = array();
-            $rates[$fromCurrency][$toCurrency] = trim($data);
+            $data = json_decode($data,true);
+            if ($data !== NULL) {
+                Cache::set($cache_key, $data, 'currencies', 3600);
+            }
         }
-        return (float)$data;
+
+        if ($data !== NULL && isset($data[$key]['val'])) {
+            $rate = (float)$data[$key]['val'];
+        } else {
+            $rate = false;
+        }
+        return $rate;
     }
 
  
@@ -358,6 +369,33 @@ class Currency
             }
         }
         return $currencies;
+    }
+
+
+    public static function convertAll($rate)
+    {
+        global $_TABLES, $_PP_CONF;
+
+        $rate = self::getConversionRate(
+        $Cur = self::getInstance();
+        $sql = "SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE status = 'cart'";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $Order = Order::getInstance($A['order_id']);
+            if (!$Order->isNew) {
+                foreach ($Order->items as $Item) {
+                    $Item->price = $Cur->FormatAmount($Item->price * $rate);
+                    $Item->shipping = $Cur->FormatAmount($Item->shipping * $rate);
+                    $Item->handling = $Cur->FormatAmount($Item->handling * $rate);
+                    $Item->tax = $Cur->FormatAmount($Item->tax * $rate);
+                }
+                $Order->tax = $Cur->FormatAmount($Order->tax * $rate);
+                $Order->shipping = $Cur->FormatAmount($Order->shipping * $rate);
+                $Order->handling = $Cur->FormatAmount($Order->handling * $rate);
+                $Order->currency = $_PP_CONF['currency'];
+                $Order->Save();
+            }
+        }
     }
 
 }

@@ -529,6 +529,11 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1 WHERE name = 'paid'";
         }
 
+        if (!_PPtableHasColumn('paypal.orders', 'currency') {
+            // Add currency data after column is added
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']} SET currency ='{$_PP_CONF['currency']}'";
+        }
+
         // Change the log table to use Unix timestamps.
         if (_PPcolumnType('paypal.order_log', 'ts') == 'datetime') {
             // 1. Change to datetime so timestamp doesn't get updated by these changes

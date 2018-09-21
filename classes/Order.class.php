@@ -64,6 +64,7 @@ class Order
             $this->token = self::_createToken();
             $this->shipping = 0;
             $this->handling = 0;
+            $this->currency = $_PP_CONF['currency'];
         }
     }
 
@@ -265,7 +266,7 @@ class Order
     */
     function SetVars($A)
     {
-        global $_USER, $_CONF;
+        global $_USER, $_CONF, $_PP_CONF;
 
         if (!is_array($A)) return false;
         $tzid = COM_isAnonUser() ? $_CONF['timezone'] : $_USER['tzid'];
@@ -300,6 +301,7 @@ class Order
             }
         }
         if (isset($A['uid'])) $this->uid = $A['uid'];
+        $this->currency = PP_getVar($A, 'currency', 'string', $_PP_CONF['currency']);
 
         if (isset($A['order_id']) && !empty($A['order_id'])) {
             $this->order_id = $A['order_id'];
@@ -460,7 +462,7 @@ class Order
 
         $T->set_block('order', 'ItemRow', 'iRow');
 
-        $Currency = Currency::getInstance();
+        $Currency = Currency::getInstance($this->currency);
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $this->subtotal = 0;
         $this->shipping = 0;
@@ -479,7 +481,7 @@ class Order
                 'fixed_q'       => $P->getFixedQuantity(),
                 'item_id'       => htmlspecialchars($item->product_id),
                 'item_dscp'     => htmlspecialchars($item->description),
-                'item_price'    => COM_numberFormat($item->price, 2),
+                'item_price'    => $Currency->FormatValue($item->price),
                 'item_quantity' => (int)$item->quantity,
                 'item_total'    => $Currency->FormatValue($item_total),
                 'is_admin'      => $this->isAdmin ? 'true' : '',
@@ -519,7 +521,7 @@ class Order
             'apply_gc'      => $by_gc > 0 ? $Currency->FormatValue($by_gc) : 0,
             'net_total'     => $Currency->Format($this->total - $by_gc),
             'iconset'       => $_PP_CONF['_iconset'],
-            'cart_tax'      => $this->tax > 0 ? COM_numberFormat($this->tax, 2) : 0,
+            'cart_tax'      => $this->tax > 0 ? $Currency->FormatValue($this->tax) : 0,
             'tax_on_items'  => sprintf($LANG_PP['tax_on_x_items'], $this->tax_rate * 100, $this->tax_items),
             'status'        => $this->status,
             'token'         => $this->token,
@@ -740,7 +742,7 @@ class Order
         $dl_links = '';         // Start with empty download links
         $email_extras = array();
 
-        $Cur = Currency::getInstance();     // get currency for formatting
+        $Cur = Currency::getInstance($this->currency);     // get currency for formatting
 
         foreach ($this->items as $id=>$item) {
             $shipping += $item->shipping;
@@ -1027,7 +1029,7 @@ class Order
             $total += ($item->price * $item->quantity);
         }
         $total += $this->calcTotalCharges();
-        return round($total, Currency::getInstance()->Decimals());
+        return round($total, Currency::getInstance($this->currency)->Decimals());
     }
 
 

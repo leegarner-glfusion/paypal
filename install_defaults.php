@@ -823,7 +823,7 @@ function plugin_initconfig_paypal($group_id = 0)
                 $cfgItem['group']
             );
         }
-     }
+    }
     return true;
 }
 
