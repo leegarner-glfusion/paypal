@@ -65,7 +65,7 @@ $paypalConfigData = array(
         'group' => 'paypal',
     ),
     array(
-        'name' => 'anonymous_buy',
+        'name' => 'anon_buy',
         'default_value' => true,
         'type' => 'select',
         'subgroup' => 0,
