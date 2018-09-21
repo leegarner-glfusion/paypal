@@ -673,12 +673,14 @@ class Cart extends Order
 
         $status = $status ? 'pending' : 'cart';
         $cart_id = DB_escapeString($cart_id);
+        $tax_rate = PP_getTaxRate();
         $sql = "UPDATE {$_TABLES['paypal.orders']} SET
                 status = '{$status}',
-                order_date = UNIX_TIMESTAMP()
+                order_date = UNIX_TIMESTAMP(),
+                tax_rate = $tax_rate
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
-        if ($status == 'pending') {
+        if ($status) {
             unset($_COOKIE[self::$session_var]);
             // Make sure the cookie gets deleted also
             setcookie(self::$session_var, '', time()-3600, '/');
