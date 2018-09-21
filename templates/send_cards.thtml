@@ -42,16 +42,16 @@
           <td class="alignright" width="40%" style="padding-right:5px;">
             <select multiple="multiple" size="10" name="fieldFrom"
               style="width: 15em; height: 20em; padding: 2px;"
-              ondblclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)">
+              ondblclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false);">
               {excluded}
             </select>
           </td>
           <td class="aligncenter">
-            <button class="uk-button uk-button-mini uk-button-primary" name="right" type="reset"
-              onclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false)">{$LANG_PP['include']}&nbsp;&gt;&gt;</button>
+            <button class="uk-button uk-button-mini uk-button-primary" name="right" type="submit"
+              onclick="moveSelectedOptions(this.form['fieldFrom'],this.form['fieldTo'],false);return false;">{$LANG_PP['include']}&nbsp;&gt;&gt;</button>
             <br /><br />
-            <button class="uk-button uk-button-mini uk-button-primary" name="left" type="reset"
-              onclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false)">&lt;&lt;&nbsp;{$LANG_PP['exclude']}</button>
+            <button class="uk-button uk-button-mini uk-button-primary" name="left" type="submit"
+              onclick="moveSelectedOptions(this.form['fieldTo'],this.form['fieldFrom'],false);return false;">&lt;&lt;&nbsp;{$LANG_PP['exclude']}</button>
           </td>
           <td width="40%" class="alignleft" style="padding-left:5px;">
             <select multiple="multiple" size="10" name="fieldTo"
