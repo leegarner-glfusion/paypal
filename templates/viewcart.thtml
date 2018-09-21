@@ -115,7 +115,7 @@
 {!if gateway_radios}
           {gateway_radios}
 {!if allow_gc}
-          <div class="enterGC">{$LANG_PP['enter_gc']}:&nbsp;<input type="text" name="gc_code" id="enterGC" />
+          <div class="enterGC ppGatewayRadios">{$LANG_PP['enter_gc']}:&nbsp;<input type="text" name="gc_code" id="enterGC" />
             <input type="submit" class="uk-button uk-button-mini uk-button-primary" name="redeem" value="{$LANG_PP['apply']}"
               onclick="ppApplyGC('ppCartForm');return false;" />
             <input type="hidden" name="refresh" value="viewcart" />
@@ -126,9 +126,9 @@
 {!endif}
         </div>
         <div class="gwRadiosOuter">
-          {$LANG_PP['enter_email']}:
+          <span class="ppGatewayRadios">{$LANG_PP['enter_email']}:</span>
           <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['enter_email']}"></i>
-          <br /><input required type="text" name="payer_email" size="40" value="{payer_email}"/>
+          <br /><input class="ppGatewayRadios" required type="text" name="payer_email" size="40" value="{payer_email}"/>
           <i class="uk-icon uk-icon-exclamation-triangle pp-icon-warning tooltip" title="{$LANG_PP['required']}"></i>
         </div>
       </div>

@@ -567,10 +567,10 @@ form.frm_buy_now {
     min-width: 50%;
 }
 
-form.ppViewCart div.ppGatewayRadios {
+form.ppViewCart .ppGatewayRadios {
     margin-top:10px;
     text-align:left;
-    font-size: 125%;
+    font-size: 110%;
 }
 div.gwRadiosOuter {
     float: left;
@@ -578,7 +578,7 @@ div.gwRadiosOuter {
     margin-right: 20px;
     padding: 5px;
     border: 1px solid;
-    width: 65%;
+    width: 100%;
 }
 
 div #orderPmtMethod {
@@ -586,9 +586,6 @@ div #orderPmtMethod {
     margin-bottom: 15px;
 }
 
-form.ppViewCart div.enterGC {
-    margin-left: 50px;
-}
 div.enterGC {
     clear:both;
 }
