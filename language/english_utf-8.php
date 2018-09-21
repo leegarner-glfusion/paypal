@@ -410,6 +410,7 @@ $LANG_PP_HELP = array(
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
 'recipient_email' => 'The gift card will be emailed to this address. If left blank, the gift card will be emailed to you.',
 'orderlist_total' => 'This is the total of items on the order, excluding taxes and fees. Hover over an amount to see all charges.',
+'sender_name' => 'Optionally enter your name to be shown to the recipient.',
 );
 
 $LANG_MYACCOUNT['pe_paypal'] = 'Shopping';
