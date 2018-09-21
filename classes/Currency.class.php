@@ -372,11 +372,12 @@ class Currency
     }
 
 
-    public static function convertAll($rate)
+    public static function convertAll($from, $to='')
     {
         global $_TABLES, $_PP_CONF;
 
-        $rate = self::getConversionRate(
+        if ($to == '') $to = $_PP_CONF['currency'];
+        $rate = self::getConversionRate($to, $from);
         $Cur = self::getInstance();
         $sql = "SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE status = 'cart'";
         $res = DB_query($sql);
