@@ -5,7 +5,8 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.12
+*   @version    0.6.0
+*   @since      0.6.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -15,7 +16,7 @@ namespace Paypal;
 
 /**
  * Class for order items.
- *  @package paypal
+ * @package paypal
  */
 class OrderItem
 {
