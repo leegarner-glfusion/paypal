@@ -296,15 +296,11 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
 
     static $dt = NULL;
-    static $Cur = NULL;
     $retval = '';
 
     if ($dt === NULL) {
         // Instantiate a date object once
         $dt = new \Date('now', $_USER['tzid']);
-    }
-    if ($Cur === NULL) {
-        $Cur = Currency::getInstance();
     }
 
     switch($fieldname) {
@@ -410,6 +406,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'ord_total':
         $total = (float)$fieldvalue;
+        $Cur = Currency::getInstance($A['currency']);
         $tip = '<table width=&quot;50%&quot; align=&quot;center&quot;>' . LB;
         $tip .= '<tr><td>' . $LANG_PP['item_total'] .
             ': </td><td style=&quot;text-align:right&quot;>' . $Cur->Format($fieldvalue) . '</td></tr>' . LB;
