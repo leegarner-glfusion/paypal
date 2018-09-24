@@ -679,7 +679,7 @@ class Cart extends Order
                 tax_rate = $tax_rate
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
-        if ($status) {
+        if ($status == 'pending') {
             // Make sure the cookie gets deleted also
             self::_expireCookie();
         } else {
