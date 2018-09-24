@@ -7,7 +7,7 @@
 *   @package    paypal
 *   @version    0.6.0
 *   @since      0.5.4
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *              GNU Public License v2 or later
 *   @filesource
 */
@@ -58,7 +58,7 @@ class Currency
         static $currencies = array();
 
         if ($code === NULL) $code = $_PP_CONF['currency'];
-        
+
         if (!isset($currencies[$code])) {
             $key = 'currency_' . $code;
             $currencies[$code] = Cache::get($key);
@@ -165,16 +165,13 @@ class Currency
     */
     public function Pre()
     {
-        static $prefix = NULL;  // cache for repeated use
-        if ($prefix === NULL) {
-            $prefix = '';
-            if ($this->symbol_placement == 'before') {
-                $prefix .= $this->symbol . $this->symbol_spacer;
-            }
+        $prefix = '';
+        if ($this->symbol_placement == 'before') {
+            $prefix .= $this->symbol . $this->symbol_spacer;
+        }
 
-            if ($this->code_placement == 'before') {
-                $prefix .= $this->code . $this->code_spacer;
-            }
+        if ($this->code_placement == 'before') {
+            $prefix .= $this->code . $this->code_spacer;
         }
         return $prefix;
     }
@@ -187,21 +184,18 @@ class Currency
     */
     public function Post()
     {
-        static $postfix = NULL;     // cache for repeated use
-        if ($postfix === NULL) {
-            $postfix = '';
-            if ($this->symbol_placement == 'after') {
-                $postfix .= $this->symbol . $this->symbol_spacer;
-            }
+        $postfix = '';
+        if ($this->symbol_placement == 'after') {
+            $postfix .= $this->symbol . $this->symbol_spacer;
+        }
 
-            if ($this->code_placement == 'after') {
-                $postfix .= $this->code . $this->code_spacer;
-            }
+        if ($this->code_placement == 'after') {
+            $postfix .= $this->code . $this->code_spacer;
         }
         return $postfix;
     }
 
- 
+
     /**
     *   Get the formatted string for an amount.
     *   e.g. "$ 125.00"
@@ -240,20 +234,14 @@ class Currency
     */
     private function _Format($amount, $code='')
     {
-        static $amounts = array();
-
-        $key = (string)$amount;
-        if (!array_key_exists($key, $amounts)) {
-            // Format the price as a number.
-            $price = number_format($this->currencyRound(abs($amount)), 
-                    $this->decimals, 
-                    $this->decimal_sep,
-                    $this->thousands_sep);
-            $negative = $amount < 0 ? '-' : '';
-            $formatted = array($this->Pre(), $negative.$price, $this->Post());
-            $amounts[$key] = $formatted;
-        }
-        return $amounts[$key];
+        $price = number_format($this->currencyRound(abs($amount)),
+            $this->decimals,
+            $this->decimal_sep,
+            $this->thousands_sep
+        );
+        $negative = $amount < 0 ? '-' : '';
+        $formatted = array($this->Pre(), $negative.$price, $this->Post());
+        return $formatted;
     }
 
 
@@ -348,7 +336,7 @@ class Currency
         return $rate;
     }
 
- 
+
     /**
     *   Get all currency info.
     *   Used by the plugin configuration to create a dropdown list
@@ -372,31 +360,35 @@ class Currency
     }
 
 
+    /**
+     * Convert all prices and fees to a new currency.
+     *
+     * @param   string  $from   Old currency code
+     * @param   string  $to     New currency code
+     */
     public static function convertAll($from, $to='')
     {
-        global $_TABLES, $_PP_CONF;
+        global $_PP_CONF, $LANG_PP;
 
         if ($to == '') $to = $_PP_CONF['currency'];
-        $rate = self::getConversionRate($to, $from);
-        $Cur = self::getInstance();
-        $sql = "SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE status = 'cart'";
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $Order = Order::getInstance($A['order_id']);
-            if (!$Order->isNew) {
-                foreach ($Order->items as $Item) {
-                    $Item->price = $Cur->FormatAmount($Item->price * $rate);
-                    $Item->shipping = $Cur->FormatAmount($Item->shipping * $rate);
-                    $Item->handling = $Cur->FormatAmount($Item->handling * $rate);
-                    $Item->tax = $Cur->FormatAmount($Item->tax * $rate);
-                }
-                $Order->tax = $Cur->FormatAmount($Order->tax * $rate);
-                $Order->shipping = $Cur->FormatAmount($Order->shipping * $rate);
-                $Order->handling = $Cur->FormatAmount($Order->handling * $rate);
-                $Order->currency = $_PP_CONF['currency'];
-                $Order->Save();
-            }
+        if (empty($from) || empty($to) || $from  == $to) {
+            COM_setMsg($LANG_PP['no_cur_change']);
+            return;
         }
+        $rate = self::getConversionRate($to, $from);
+        if ($rate == false) {
+            COM_setMsg($LANG_PP['no_cur_change']);
+            return;
+        }
+
+        // A rate was obtained, now convert all the currency numbers
+        Order::convertAllCurrency($from, $to, $rate);
+        Sales::convertAllCurrency($from, $to, $rate);
+        Product::convertAllCurrency($from, $to, $rate);
+        Coupon::convertAllCurrency($from, $to, $rate);
+        Cache::clear();
+        COM_setMsg(sprintf($LANG_PP['cur_changed'], $from, $to));
+        return;
     }
 
 }

@@ -395,6 +395,7 @@ class Order
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
                 "info = '" . DB_escapeString(@serialize($this->m_info)) . "'",
                 "tax_rate = '{$this->tax_rate}'",
+                "currency = '{$this->currency}'",
         );
         foreach (array('billto', 'shipto') as $type) {
             $fld = $type . '_id';
@@ -1215,6 +1216,44 @@ class Order
             }
         }
         return false;
+    }
+
+
+    /**
+     * Change the amount of fixed-dollar sales amounts based on a
+     * currency change
+     *
+     * @since   0.6.0
+     * @see     Currency::convertAll()
+     * @param   string  $from   Original currency code
+     * @param   string  $to     New currency code
+     * @param   float   $rate   Conversion rate
+     */
+    public static function convertAllCurrency($from, $to, $rate)
+    {
+        global $_TABLES;
+
+        $from = DB_escapeString($from);
+        $Cur = Currency::getInstance($to);
+        $sql = "SELECT order_id FROM {$_TABLES['paypal.orders']}
+            WHERE status = 'cart' AND currency = '$from'";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $Order = Order::getInstance($A['order_id']);
+            if (!$Order->isNew) {
+                foreach ($Order->items as $Item) {
+                    $Item->price = $Cur->FormatValue($Item->price * $rate);
+                    $Item->shipping = $Cur->FormatValue($Item->shipping * $rate);
+                    $Item->handling = $Cur->FormatValue($Item->handling * $rate);
+                    $Item->tax = $Cur->FormatValue($Item->tax * $rate);
+                }
+                $Order->tax = $Cur->FormatValue($Order->tax * $rate);
+                $Order->shipping = $Cur->FormatValue($Order->shipping * $rate);
+                $Order->handling = $Cur->FormatValue($Order->handling * $rate);
+                $Order->currency = $to;
+                $Order->Save();
+            }
+        }
     }
 
 }

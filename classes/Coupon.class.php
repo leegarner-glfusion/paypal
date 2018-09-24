@@ -613,6 +613,35 @@ class Coupon extends Product
         return false;
     }
 
+
+    /**
+     * Change the amount of fixed-dollar sales amounts based on a
+     * currency change
+     *
+     * @see     Currency::convertAll()
+     * @param   string  $from   Original currency code (not used)
+     * @param   string  $to     New currency code
+     * @param   float   $rate   Conversion rate
+     */
+    public static function convertAllCurrency($from, $to, $rate)
+    {
+        global $_TABLES;
+
+        $Cur = Currency::getInstance($to);
+        $sql = "SELECT code, amount, balance
+            FROM {$_TABLES['paypal.coupons']}
+            WHERE balance > 0";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $amount = $Cur->FormatValue($A['amount'] * $rate);
+            $balance = $Cur->FormatValue($A['balance'] * $rate);
+            $sql = "UPDATE {$_TABLES['paypal.coupons']} SET
+                amount = $amount, balance = $balance
+                WHERE code = {$A['code']}";
+            DB_query($sql);
+        }
+    }
+
 }
 
 ?>

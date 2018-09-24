@@ -905,6 +905,8 @@ $PP_UPGRADE['0.6.0'] = array(
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD currency varchar(3) NOT NULL DEFAULT ''",
+    "ALTER TABLE {$_TABLES['paypal.coupons']} ADD currency varchar(3) NOT NULL DEFAULT ''",
+    "ALTER TABLE {$_TABLES['paypal.coupon_log']} ADD currency varchar(3) NOT NULL DEFAULT ''",
 );
 
 ?>

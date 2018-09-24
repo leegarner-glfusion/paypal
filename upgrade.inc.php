@@ -529,9 +529,19 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1 WHERE name = 'paid'";
         }
 
-        if (!_PPtableHasColumn('paypal.orders', 'currency') {
+        if (!_PPtableHasColumn('paypal.orders', 'currency')) {
             // Add currency data after column is added
-            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']} SET currency ='{$_PP_CONF['currency']}'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']} SET currency = '{$_PP_CONF['currency']}'";
+        }
+
+        if (!_PPtableHasColumn('paypal.coupons', 'currency')) {
+            // Add currency data after column is added
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.coupons']} SET currency = '{$_PP_CONF['currency']}'";
+        }
+
+        if (!_PPtableHasColumn('paypal.coupon_log', 'currency')) {
+            // Add currency data after column is added
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.coupon_log']} SET currency = '{$_PP_CONF['currency']}'";
         }
 
         // Change the log table to use Unix timestamps.

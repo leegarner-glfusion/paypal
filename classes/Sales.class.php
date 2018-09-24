@@ -455,6 +455,35 @@ class Sales
         return max($price, 0);
     }
 
+
+    /**
+     * Change the amount of fixed-dollar sales amounts based on a
+     * currency change
+     *
+     * @see     Currency::convertAll()
+     * @param   string  $from   Original currency code (not used)
+     * @param   string  $to     New currency code
+     * @param   float   $rate   Conversion rate
+     */
+    public static function convertAllCurrency($from, $to, $rate)
+    {
+        global $_TABLES;
+
+        $Cur = Currency::getInstance($to);
+        $sql = "SELECT id, discount_type, amount
+            FROM {$_TABLES['paypal.sales']}
+            WHERE discount_type = 'amount'";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $amount = $Cur->FormatValue($A['amount'] * $rate);
+            $sql = "UPDATE {$_TABLES['paypal.sales']}
+                SET amount = $amount
+                WHERE id = {$A['id']}";
+            DB_query($sql);
+        }
+    }
+
+
 }   // class Sales
 
 ?>

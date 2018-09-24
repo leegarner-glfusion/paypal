@@ -2,12 +2,16 @@
 
 ## Ver 0.6.0
 Released TBD
+- Add function to change currency.
+  - Uses free.currencyconverterapi.com to get conversion rates
+  - Updates values for product and attribute prices, shopping carts, and gift carts not fully applied.
+  - Does now update paid orders or fully-applied gift cards.
 - Added Admin dvlpupdate.php with idempotent upgrades to assist those tracking development branches.
 - Enable template for Thanks message, allow customization.
 - Support `CUSTOM_paypal_orderID()` function to create custom order IDs.
 - Requires a UIKit-based theme for product list version 2.
 - Some workflows can be enabled and disabled based on cart contents.
-- Standardize in SQL decimal type for money amounts.
+- Standardize on SQL decimal type for money amounts.
 - Merged shopping cart and order tables.
 - Use Unix timestamps instead of datetime fields.
 - Removed separate configurations for email to buyers and admins. Email is always sent if enabled for the updated status.

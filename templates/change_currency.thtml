@@ -1,0 +1,45 @@
+{# begin {templatelocation} #}
+<p>Click the &quot;Change Currency&quot; button below to change prices from an old currency code to your currently-configured currency.</p>
+<p>This process must be performed AFTER setting the configured currency to the NEW value.</p>
+<p>The following prices will be changed:<ul>
+    <li>Product and Attribute prices.</li>
+    <li>Gift card amounts and balances for cards that have not been fully applied to orders.</li>
+    <li>Amount-based sale prices.</li>
+    <li>Product and Attribute prices for shopping-carts.</li>
+</ul></p>
+<p>The following prices will not be changed:<ul>
+    <li>Prices in paid orders.</li>
+    <li>Amounts and Balances for fully-applied gift cards.</li>
+    <li>Any amounts shown in log entries.</li>
+</ul></p>
+<form id="changecurrency" class="uk-form uk-form-horizontal" method="post" action="{admin_url}">
+    <div class="uk-form-row">
+        <label class="uk-form-label">{$LANG_PP['old_currency']}</label>
+        <div class="uk-form-controls">
+            <select required name="from_currency">
+            <option value="">-- {$LANG_PP['none']} --</option>
+<!-- BEGIN SelectCurrOpt -->
+            <option value="{curr_code}">{curr_code} - {curr_name}</option>
+<!-- END SelectCurrOpt -->
+            </select>
+        </div>
+    </div>
+    <div class="uk-form-row">
+        <label class="uk-form-label">{$LANG_PP['convert_to']}</label>
+        <div class="uk-form-controls">
+            <input type="hidden" name="to_currency" value="{current_code}" />
+            {current_code} - {current_name}
+        </div>
+    </div>
+
+    <div class="uk-form-row">
+        <label class="uk-form-label">&nbsp;</label>
+        <div class="uk-form-controls">
+        <button class="uk-button uk-button-danger uk-width-1-4" type="submit" name="dochangecurrency" value="x"
+            onclick="return confirm('{$LANG_PP['q_change_currency']}');">{$LANG_PP['change_currency']}</button>
+        <button class="uk-button uk-width-1-4" type="reset" name="index" value="x"
+            onclick="document.location.href='{admin_url}/index.php?other';">{$LANG_ADMIN['cancel']}</button>
+        </div>
+    </div>
+</form>
+{# end {templatelocation} #}

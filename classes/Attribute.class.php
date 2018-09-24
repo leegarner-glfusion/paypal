@@ -404,6 +404,33 @@ class Attribute
         }
     }
 
+
+    /**
+     * Change the amount of fixed-dollar sales amounts based on a
+     * currency change
+     *
+     * @since   0.6.0
+     * @see     Currency::convertAll()
+     * @param   string  $from   Original currency code
+     * @param   string  $to     New currency code
+     * @param   float   $rate   Conversion rate
+     */
+    public static function convertAllCurrency($from, $to, $rate)
+    {
+        global $_TABLES;
+
+        $Cur = Currency::getInstance($to);
+        $sql = "SELECT attr_id, attr_price FROM {$_TABLES['paypal.prod_attr']}";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $price = $Cur->FormatValue($A['attr_price'] * $rate);
+            $sql = "UPDATE {$_TABLES['paypal.prod_attr']} SET
+                price = $price
+                WHERE attr_id = {$A['attr_idid']}";
+            DB_query($sql);
+        }
+    }
+
 }   // class Attribute
 
 ?>

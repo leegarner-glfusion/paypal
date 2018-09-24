@@ -274,7 +274,7 @@ function getCouponLogField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
     case 'amount':
         if ($A['msg'] == 'gc_applied') $fieldvalue *= -1;
-        $retval = Currency::getInstance()->format($fieldvalue);
+        $retval = Currency::getInstance($A['currency'])->Format($fieldvalue);
         break;
     }
     return $retval;

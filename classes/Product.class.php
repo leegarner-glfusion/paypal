@@ -2075,6 +2075,34 @@ class Product
         return true;
     }
 
+
+    /**
+     * Change the amount of fixed-dollar sales amounts based on a
+     * currency change
+     *
+     * @since   0.6.0
+     * @see     Currency::convertAll()
+     * @param   string  $from   Original currency code
+     * @param   string  $to     New currency code
+     * @param   float   $rate   Conversion rate
+     */
+    public static function convertAllCurrency($from, $to, $rate)
+    {
+        global $_TABLES;
+
+        $Cur = Currency::getInstance($to);
+        $sql = "SELECT id, price, shipping_amt FROM {$_TABLES['paypal.products']}";
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $price = $Cur->FormatValue($A['price'] * $rate);
+            $shipping = $Cur->FormatValue($A['shipping_amt'] * $rate);
+            $sql = "UPDATE {$_TABLES['paypal.products']} SET
+                price = $price, shipping_amt = $shipping
+                WHERE id = {$A['id']}";
+            DB_query($sql);
+        }
+    }
+
 }   // class Product
 
 ?>
