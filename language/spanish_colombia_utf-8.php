@@ -386,6 +386,7 @@ $LANG_PP = array (
 'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><b>This will impact the guest experience and should not normally be necessary.</b>',
 'include' => 'Include',
 'exclude' => 'Exclude',
+'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

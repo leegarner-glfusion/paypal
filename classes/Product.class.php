@@ -1041,7 +1041,7 @@ class Product
 
         $qty_disc_txt = '';
         foreach ($this->qty_discounts as $qty=>$pct) {
-            $qty_disc_txt .= sprintf('Buy %d, save %.02f%%<br />', $qty, $pct);
+            $qty_disc_txt .= sprintf($LANG_PP['buy_x_save'], $qty, $pct) . '<br />';
         }
 
         // Get custom text input fields
