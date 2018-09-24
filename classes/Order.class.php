@@ -291,6 +291,9 @@ class Order
         $this->shipto_id = PP_getVar($A, 'shipto_id', 'integer');
         if ($this->status != 'cart') {
             $this->tax_rate = PP_getVar($A, 'tax_rate');
+            $this->currency = PP_getVar($A, 'currency', 'string', $_PP_CONF['currency']);
+        } else {
+            $this->currency = $_PP_CONF['currency'];
         }
         $this->m_info = @unserialize(PP_getVar($A, 'info'));
         if ($this->m_info === false) $this->m_info = array();
@@ -301,7 +304,6 @@ class Order
             }
         }
         if (isset($A['uid'])) $this->uid = $A['uid'];
-        $this->currency = PP_getVar($A, 'currency', 'string', $_PP_CONF['currency']);
 
         if (isset($A['order_id']) && !empty($A['order_id'])) {
             $this->order_id = $A['order_id'];
