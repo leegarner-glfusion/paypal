@@ -617,7 +617,7 @@ class Cart extends Order
     */
     public static function setAnonCartID($cart_id)
     {
-        setcookie(self::$session_var, $cart_id, 0, '/');
+        self::_setCookie($cart_id);
     }
 
 
@@ -633,8 +633,7 @@ class Cart extends Order
         $cart_id = self::getAnonCartID();
         if ($cart_id) {
             // Remove the cookie
-            unset($_COOKIE[self::$session_var]);
-            setcookie(self::$session_var, '', time()-3600, '/');
+            self::_expireCookie();
             // And delete the cart record
             Order::Delete($cart_id);
             Cache::deleteOrder($cart_id);
@@ -680,10 +679,9 @@ class Cart extends Order
                 tax_rate = $tax_rate
                 WHERE order_id = '{$cart_id}'";
         DB_query($sql);
-        if ($status) {
-            unset($_COOKIE[self::$session_var]);
+        if ($status == 'pending') {
             // Make sure the cookie gets deleted also
-            setcookie(self::$session_var, '', time()-3600, '/');
+            self::_expireCookie();
         } else {
             // restoring the cart, put back the cookie
             self::setAnonCartID($cart_id);
@@ -760,6 +758,28 @@ class Cart extends Order
         global $_TABLES;
         DB_delete($_TABLES['paypal.orders'], 'status', 'cart');
         PAYPAL_debug("All carts for all users deleted");
+    }
+
+
+    /**
+     * Helper function to set a cookie with no expiration
+     *
+     * @param   mixed   $value      Value to set
+     */
+    private static function _setCookie($value)
+    {
+        SEC_setCookie(self::$session_var, $value, 0, '/');
+    }
+
+
+    /**
+     * Helper function to expire the cart ID cookie.
+     * Also removes from the $_COOKIE array for immediate effect.
+     */
+    private static function _expireCookie()
+    {
+        unset($_COOKIE[self::$session_var]);
+        SEC_setCookie(self::$session_var, '', time()-3600, '/');
     }
 
 }   // class Cart

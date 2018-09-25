@@ -398,6 +398,7 @@ $LANG_PP = array (
 'q_change_currency' => 'Are you sure you want to change prices and other amounts based on the new currency?',
 'cur_changed' => 'Prices changed from %1$s to %2%s',
 'no_cur_change' => 'No currency conversion was done.',
+'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

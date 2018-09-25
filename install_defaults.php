@@ -810,18 +810,9 @@ function plugin_initconfig_paypal($group_id = 0)
 
     $c = config::get_instance();
     if (!$c->group_exists('paypal')) {
+        USES_lib_install();
         foreach ($paypalConfigData AS $cfgItem) {
-            $c->add(
-                $cfgItem['name'],
-                $cfgItem['default_value'],
-                $cfgItem['type'],
-                $cfgItem['subgroup'],
-                $cfgItem['fieldset'],
-                $cfgItem['selection_array'],
-                $cfgItem['sort'],
-                $cfgItem['set'],
-                $cfgItem['group']
-            );
+            _addConfigItem($cfgItem);
         }
     }
     return true;
