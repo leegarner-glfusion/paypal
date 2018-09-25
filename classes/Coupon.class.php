@@ -37,6 +37,27 @@ class Coupon extends Product
 
 
     /**
+     * Get an instance of a coupon
+     *
+     * @param   string  $code   Coupon code
+     * @return  array           Array of coupon fields, NULL if not found
+     */
+    public static function getInstance($code)
+    {
+        global $_TABLES;
+
+        $Coupon = NULL;
+        $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
+                WHERE code = '" . DB_escapeString($code) . "'";
+        $res = DB_query($sql);
+        if ($res && DB_numRows == 1) {
+            $Coupon = DB_fetchArrah($res, false);
+        }
+        return $Coupon;
+    }
+
+
+    /**
     *   Generate a single coupon code based on options given.
     *   Mask, if used, is "XXXX-XXXX" where "X" indicates a character and any
     *   other character is passed through.
@@ -228,10 +249,12 @@ class Coupon extends Product
 
     /**
     *   Apply a coupon value against an order.
-    *   Does not update the coupon table, but deducts the maximum of the
-    *   coupon balance or the order value from the userinfo table.
+    *   Adjusts the balance for each coupon in the coupons table untill either
+    *   the order is paid or all availabla coupon balances are used.
     *
     *   @param  float   $amount     Amount to redeem (order value)
+    *   @param  integer $uid        User ID making the purchase
+    *   @param  object  $Order      Order object
     *   @return float               Remaining order value, if any
     */
     public static function Apply($amount, $uid = 0, $Order = NULL)
@@ -266,6 +289,43 @@ class Coupon extends Product
         }
         Cache::delete('coupons_' . $uid);
         return $remain;     // Return unapplied balance
+    }
+
+
+    /**
+    *   Apply a coupon value against an anonymous buyer's order.
+    *   Updates the coupon table with the new balance for this coupon code.
+    *
+    *   @param  float   $amount     Amount to redeem (order value)
+    *   @param  string  $code       Coupon Code
+    *   @param  string  $order_id   Order ID
+    *   @return float               Remaining order value, if any
+    */
+    public static function ApplyAnon($amount, $code, $order_id)
+    {
+        global $_TABLES;
+
+        $Coupon - self::getInstance($code);
+        if ($Coupon === NULL) return $amount;   // coupon not found
+        $bal = PP_getVar($Coupon, 'balance', 'float');
+        if ($bal < .0001) return $amount;       // nothing to apply
+
+        if ($bal > $amount) {   // enough to pay entire order
+            $bal -= $amount;
+            $amount = 0;
+        } else {                // use all of the coupon as partial payment
+            $amount -= $bal;
+            $bal = 0;
+        }
+        $code = DB_escapeString($coupon['code']);
+        $order_id = DB_escapeString($order_id);
+        $uid = $Order->uid;
+        $sql = "UPDATE {$_TABLES['paypal.coupons']}
+                    SET balance = $bal
+                    WHERE code = '$code';";
+        self::writeLog($code, $uid, $amount, 'gc_applied', $order_id);
+        DB_query($sql);
+        return $amount;     // Return unapplied balance
     }
 
 
