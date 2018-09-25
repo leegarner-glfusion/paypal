@@ -47,12 +47,12 @@ $expected = array(
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
-    'deldiscount', 'savediscount', 'purgecarts',
+    'deldiscount', 'savediscount', 'purgecarts', 'dochangecurrency',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
     'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
-    'sales', 'editdiscount',
+    'sales', 'editdiscount', 'changecurrency',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -334,6 +334,13 @@ case 'deldiscount':
     COM_refresh(PAYPAL_ADMIN_URL . '/index.php?sales');
     break;
 
+case 'dochangecurrency':
+    $from = PP_getVar($_POST, 'from_currency');
+    $to = PP_getVar($_POST, 'to_currency');
+    \Paypal\Currency::convertAll($from, $to);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other');
+    break;
+
 default:
     $view = $action;
     break;
@@ -449,6 +456,26 @@ case 'other':
     $T = PP_getTemplate('other_functions', 'funcs');
     $T->set_var('admin_url', PAYPAL_ADMIN_URL . '/index.php');
     $T->parse('output', 'funcs');
+    $content = $T->finish($T->get_var('output'));
+    break;
+
+case 'changecurrency':
+    $currencies = \Paypal\Currency::getAll();
+    $T = PP_getTemplate('change_currency', 'chgcurr');
+    $T->set_var(array(
+        'admin_url'     => PAYPAL_ADMIN_URL . '/index.php',
+        'current_code'  => $_PP_CONF['currency'],
+        'current_name'  => $currencies[$_PP_CONF['currency']]->name,
+    ) );
+    $T->set_block('chgcurr', 'SelectCurrOpt', 'selcur');
+    foreach ($currencies as $code=>$data) {
+        $T->set_var(array(
+            'curr_code' => $code,
+            'curr_name' => $data->name,
+        ) );
+        $T->parse('selcur', 'SelectCurrOpt', true);
+    }
+    $T->parse('output', 'chgcurr');
     $content = $T->finish($T->get_var('output'));
     break;
 
