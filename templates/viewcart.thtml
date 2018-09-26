@@ -3,6 +3,7 @@
 <div style="text-align:center; margin-left:auto;">
   <h1>{$LANG_PP['cart_blocktitle']}</h1>
   <form action="{pi_url}/index.php" method="post" class="ppViewCart" id="ppCartForm">
+    <input type="hidden" name="order_id" value="{order_number}" />
 
     <table id="paypalViewCartTable" class="paypalViewCartTable">
       <tr>
