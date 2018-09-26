@@ -1,6 +1,6 @@
 <table border="0" cellpadding="2">
 <tr>
-  <th>Qty.</th><th>Item</th><th>Price</th><th>Extension</th>
+  <th>Qty.</th><th>Item</th><th style="text-align:right">Price</th><th style="text-align:right">Extension</th>
 </tr>
 
 <!-- BEGIN ItemList -->
