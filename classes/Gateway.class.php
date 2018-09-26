@@ -50,6 +50,11 @@ class Gateway
     */
     protected $gw_desc;
 
+    /** The provider name, e.g. "Amazon" or "Paypal"
+     * @var string;
+     */
+    protected $gw_provider;
+
     /** Services (button types) provided by the gateway.
     *   This is an array of button_name=>0/1 to indicate which services are
     *   available.
@@ -229,7 +234,11 @@ class Gateway
     */
     public function DisplayName()
     {
-        return ucfirst($this->gw_name);
+        if (empty($this->gw_provider)) {
+            return ucfirst($this->gw_name);
+        } else {
+            return $this->gw_provider;
+        }
     }
 
 
