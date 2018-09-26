@@ -50,6 +50,11 @@ class Gateway
     */
     protected $gw_desc;
 
+    /** The provider name, e.g. "Amazon" or "Paypal"
+     * @var string;
+     */
+    protected $gw_provider;
+
     /** Services (button types) provided by the gateway.
     *   This is an array of button_name=>0/1 to indicate which services are
     *   available.
