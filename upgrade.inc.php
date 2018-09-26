@@ -710,6 +710,7 @@ function PAYPAL_remove_old_files()
             'images/up.png',
             'images/update.png',
             'images/viewcart.gif',
+            'docs/english/authorizenetsim.html',
         ),
         // admin/plugins/paypal
         $_CONF['path_html'] . 'admin/plugins/paypal' => array(
