@@ -1654,6 +1654,9 @@ class Product
     public function getOptionDesc($options = array())
     {
         $opts = array();
+        if (!is_array($options)) {
+            $options = explode(',', $options);
+        }
         foreach ($options as $key) {
             if (strpos($key, '|') !== false) {  // complete option strings
                 list($key, $junk) = explode('|', $key);

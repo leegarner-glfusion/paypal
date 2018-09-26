@@ -651,11 +651,13 @@ class Order
     *
     *   @param  string  $msg        Log message
     *   @param  string  $log_user   Optional log username
-    *   @return boolean             True on success, False on DB error
     */
     public function Log($msg, $log_user = '')
     {
         global $_TABLES, $_USER;
+
+        // Don't log empty messages by mistake
+        if (empty($msg)) return;
 
         // If the order ID is omitted, get information from the current
         // object.
@@ -672,7 +674,7 @@ class Order
         DB_query($sql);
         $cache_key = 'orderlog_' . $order_id;
         Cache::delete($cache_key);
-        return true;
+        return;
     }
 
 

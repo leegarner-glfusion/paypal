@@ -177,6 +177,7 @@ class paypal extends \Paypal\Gateway
     *   @uses   Gateway::_Supports()
     *   @uses   _encButton()
     *   @uses   getActionUrl()
+    *   @param  object      $cart   Shopping Cart Object
     *   @return string      Gateay variable input fields
     */
     public function gatewayVars($cart)
