@@ -1136,31 +1136,32 @@ class Gateway
     {
         global $_TABLES, $_PP_CONF;
 
-        static $gateways = array();
         $key = $enabled ? 1 : 0;
+        $cache_key = 'gateways_' . $key;
+        $tmp = Cache::get($cache_key);
+        if ($tmp === NULL) {
+            $tmp = array();
+            // Load the gateways
+            $sql = "SELECT * FROM {$_TABLES['paypal.gateways']}";
+            // If not loading all gateways, get just then enabled ones
+            if ($enabled) $sql .= ' WHERE enabled=1';
+            $sql .= ' ORDER BY orderby';
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $tmp[] = $A;
+            }
+            Cache::set($cache_key, $tmp, 'gateways');
+        }
 
-        if (!isset($gateways[$key])) {
-            $cache_key = 'gateways_' . $key;
-            $gateways[$key] = Cache::get($cache_key);
-            if ($gateways[$key] === NULL) {
-                $gateways[$key] = array();
-                // Load the gateways
-                $sql = "SELECT id, enabled, services
-                    FROM {$_TABLES['paypal.gateways']}";
-                // If not loading all gateways, get just then enabled ones
-                if ($enabled) $sql .= ' WHERE enabled=1';
-                $sql .= ' ORDER BY orderby';
-                $res = DB_query($sql);
-                while ($A = DB_fetchArray($res, false)) {
-                    // For each available gateway, load its class file and add it
-                    // to the static array. Check that a valid object is
-                    // returned from getInstance()
-                    $gw = self::getInstance($A['id'], $A);
-                    if (is_object($gw)) {
-                        $gateways[$key][$A['id']] = $gw;
-                    }
-                }
-                Cache::set($cache_key, $gateways[$key], 'gateways');
+        // For each available gateway, load its class file and add it
+        // to the static array. Check that a valid object is
+        // returned from getInstance()
+        foreach ($tmp as $A) {
+            $gw = self::getInstance($A['id'], $A);
+            if (is_object($gw)) {
+                $gateways[$key][$A['id']] = $gw;
+            } else {
+                var_dump($A);die;
             }
         }
         return $gateways[$key];
