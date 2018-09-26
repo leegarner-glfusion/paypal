@@ -668,9 +668,11 @@ class Cart extends Order
     */
     public static function setFinal($cart_id, $status=true)
     {
-        global $_TABLES;
+        global $_TABLES, $LANG_PP;
 
-        $status = $status ? 'pending' : 'cart';
+        $Order = self::getInstance($cart_id);
+        $oldstatus = $Order->status;
+        $newstatus = $status ? 'pending' : 'cart';
         $cart_id = DB_escapeString($cart_id);
         $tax_rate = PP_getTaxRate();
         $sql = "UPDATE {$_TABLES['paypal.orders']} SET
@@ -686,7 +688,12 @@ class Cart extends Order
             // restoring the cart, put back the cookie
             self::setAnonCartID($cart_id);
         }
-        return DB_error() ? 1 : 0;
+        if (!DB_error()) {
+            $Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
 
