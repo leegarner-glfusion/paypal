@@ -132,7 +132,12 @@ class Gateway
         $this->custom = array();
         $this->ipn_url = PAYPAL_URL . '/ipn/' . $this->gw_name . '.php';
         $this->currency_code = empty($_PP_CONF['currency']) ? 'USD' :
-                $_PP_CONF['currency'];
+            $_PP_CONF['currency'];
+
+        // Set the provider name if not supplied by the gateway
+        if (empty($this->gw_provider)) {
+            $this->gw_provider = ucfirst($this->gw_name);
+        }
 
         // The child gateway can override the services array.
         if (!isset($this->services)) {
@@ -234,11 +239,7 @@ class Gateway
     */
     public function DisplayName()
     {
-        if (empty($this->gw_provider)) {
-            return ucfirst($this->gw_name);
-        } else {
-            return $this->gw_provider;
-        }
+        return $this->gw_provider;
     }
 
 
