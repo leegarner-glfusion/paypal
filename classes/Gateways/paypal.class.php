@@ -45,6 +45,7 @@ class paypal extends \Paypal\Gateway
 
         // These are used by the parent constructor, set them first.
         $this->gw_name = 'paypal';
+        $this->gw_provider = 'Paypal';
         $this->gw_desc = 'PayPal Web Payments Standard';
         $this->button_url = '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-medium.png" alt="Check out with PayPal" />';
 

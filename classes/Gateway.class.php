@@ -234,7 +234,11 @@ class Gateway
     */
     public function DisplayName()
     {
-        return ucfirst($this->gw_name);
+        if (empty($this->gw_provider)) {
+            return ucfirst($this->gw_name);
+        } else {
+            return $this->gw_provider;
+        }
     }
 
 
