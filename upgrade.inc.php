@@ -676,6 +676,7 @@ function PAYPAL_remove_old_files()
         // private/plugins/paypal
         __DIR__ => array(
             // 0.6.0
+            'language/authorizenetsim_english.php',
             'templates/viewcart.uikit.thtml',
             'templates/detail/v2/product_detail.thtml',
             'templates/detail/v1/product_detail.thtml',
@@ -691,6 +692,8 @@ function PAYPAL_remove_old_files()
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
+            'ipn/paypal_ipn.php',
+            'ipn/authorizenetsim_ipn.php',
         ),
         // admin/plugins/paypal
         $_CONF['path_html'] . 'admin/plugins/paypal' => array(
