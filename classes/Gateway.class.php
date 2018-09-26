@@ -153,8 +153,13 @@ class Gateway
             $this->enabled = (int)$A['enabled'];
             $services = @unserialize($A['services']);
             if ($services) {
-                $this->services = array_merge($this->services, $services);
+                foreach ($services as $name=>$status) {
+                    if (isset($this->services[$name])) {
+                        $this->services[$name] = $status;
+                    }
+                }
             }
+
             $props = @unserialize($A['config']);
             if ($props) {
                 foreach ($props as $key=>$value) {
