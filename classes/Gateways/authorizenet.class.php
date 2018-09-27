@@ -264,7 +264,7 @@ class authorizenet extends \Paypal\Gateway
      */
     public function gatewayVars($cart)
     {
-        global $_PP_CONF, $_USER;
+        global $_PP_CONF, $_USER, $LANG_PP;
 
         // Make sure we have at least one item
         if (empty($cart->Cart())) return '';
@@ -338,7 +338,7 @@ class authorizenet extends \Paypal\Gateway
                     'name' => $LANG_PP['all_items'],
                     'description' => $LANG_PP['all_items'],
                     'quantity' => 1,
-                    'unitPrice' => $total_amount,
+                    'unitPrice' => $Cur->FormatValue($total_amount),
                     'taxable' => false,
             );
         } else {
@@ -380,7 +380,7 @@ class authorizenet extends \Paypal\Gateway
         $bom = pack('H*','EFBBBF');
         $result = preg_replace("/^$bom/", '', $result);
         $result = json_decode($result);
-        if ($result->resultCode != 'Ok') {  // Check for errors due to invalid data, etc.
+        if ($result->messages->resultCode != 'Ok') {  // Check for errors due to invalid data, etc.
             foreach ($result->messages->message as $msg) {
                 COM_errorlog($this->gw_provider . ' error: ' . $msg->code . ' - ' . $msg->text);
             }
