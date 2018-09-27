@@ -272,7 +272,7 @@ class authorizenet extends \Paypal\Gateway
         $Cur = \Paypal\Currency::getInstance();
 
         $return_opts = array(
-            'url'       => PAYPAL_URL . '/index.php?thanks=authorizenet',
+            'url'       => PAYPAL_URL . '/index.php?' . urlencode('thanks=authorizenet'),
             'cancelUrl' => PAYPAL_URL . '/index.php?' . urlencode('view=cart&cid=' . $cart->order_id),
         );
 
@@ -307,7 +307,7 @@ class authorizenet extends \Paypal\Gateway
                     'setting' => array(
                         0 => array(
                             'settingName' => 'hostedPaymentReturnOptions',
-                            'settingValue' => json_encode($return_opts),
+                            'settingValue' => json_encode($return_opts, JSON_UNESCAPED_SLASHES),
                         ),
                         1 => array(
                             'settingName' => 'hostedPaymentButtonOptions',
@@ -360,7 +360,7 @@ class authorizenet extends \Paypal\Gateway
         }
 
         $json['getHostedPaymentPageRequest']['transactionRequest']['amount'] = $Cur->FormatValue($total_amount);
-        $jsonEncoded = json_encode($json);
+        $jsonEncoded = json_encode($json, JSON_UNESCAPED_SLASHES);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->token_url);
