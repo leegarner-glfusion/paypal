@@ -345,9 +345,9 @@ class authorizenet extends \Paypal\Gateway
             foreach ($cart->Cart() as $Item) {
                 $P = $Item->getProduct();
                 $json['getHostedPaymentPageRequest']['transactionRequest']['lineItems']['lineItem'][] = array(
-                    'itemId'    => substr($P->item_id, 31),
-                    'name'      => substr($P->short_description, 31),
-                    'description' => substr($P->description, 255),
+                    'itemId'    => substr($P->item_id, 0, 31),
+                    'name'      => substr($P->short_description, 0, 31),
+                    'description' => substr($P->description, 0, 255),
                     'quantity' => $Item->quantity,
                     'unitPrice' => $Cur->FormatValue($Item->price),
                     'taxable' => $Item->taxable ? true : false,
