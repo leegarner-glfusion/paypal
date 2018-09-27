@@ -345,9 +345,9 @@ class authorizenet extends \Paypal\Gateway
             foreach ($cart->Cart() as $Item) {
                 $P = $Item->getProduct();
                 $json['getHostedPaymentPageRequest']['transactionRequest']['lineItems']['lineItem'][] = array(
-                    'itemId' => $P->item_id,
-                    'name' => $P->short_description,
-                    'description' => $P->description,
+                    'itemId'    => substr($P->item_id, 31),
+                    'name'      => substr($P->short_description, 31),
+                    'description' => substr($P->description, 255),
                     'quantity' => $Item->quantity,
                     'unitPrice' => $Cur->FormatValue($Item->price),
                     'taxable' => $Item->taxable ? true : false,
@@ -373,13 +373,20 @@ class authorizenet extends \Paypal\Gateway
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($code != 200) {
+        if ($code != 200) {             // Check for a 200 code before anything else
             COM_setMsg("Error checking out");
             return false;
         }
         $bom = pack('H*','EFBBBF');
         $result = preg_replace("/^$bom/", '', $result);
         $result = json_decode($result);
+        if ($result->resultCode != 'Ok') {  // Check for errors due to invalid data, etc.
+            foreach ($result->messages->message as $msg) {
+                COM_errorlog($this->gw_provider . ' error: ' . $msg->code . ' - ' . $msg->text);
+            }
+            COM_setMsg("Error checking out");
+            return false;
+        }
 
         $vars = array(
             'token' => $result->token,
