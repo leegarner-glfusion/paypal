@@ -54,7 +54,7 @@ case 'addcartitem':
     $args = array(
         'item_number'   => $_POST['item_number'],     // isset ensured above
         'item_name'     => PP_getVar($_POST, 'item_name'),
-        'description'   => PP_getVar($_POST, 'item_descr'),
+        'short_dscp'    => PP_getVar($_POST, 'short_dscp'),
         'quantity'      => PP_getVar($_POST, 'quantity', 'int'),
         //'price'         => PP_getVar($_POST, 'base_price', 'float'),
         'price'         => $P->getPrice(),
