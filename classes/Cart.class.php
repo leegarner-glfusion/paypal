@@ -432,13 +432,9 @@ class Cart extends Order
                 $gw_sel = '';
             }
             foreach ($gateways as $gw) {
-                //COM_errorLog(print_r($gw,true));
                 if (is_null($gw)) {
-                //    var_dump($gateways);die;
-                //    echo "bad gw";die;
                     continue;
                 }
-                //COM_errorLog("supports: " . print_r($gw->Supports('checkout'),true));
                 if ($gw->Supports('checkout')) {
                     if ($gw_sel == '') $gw_sel = $gw->Name();
                     $T->set_var(array(
@@ -598,13 +594,23 @@ class Cart extends Order
     *
     *   @param  integer $uid    User ID
     */
-    public static function deleteUser($uid)
+    public static function deleteUser($uid = 0, $save = '')
     {
-        global $_TABLES;
-        DB_delete($_TABLES['paypal.orders'],
-            array('status', 'uid'),
-            array('cart',$uid ));
-        PAYPAL_debug("All carts for user {$uid} deleted");
+        global $_TABLES, $_USER;
+
+        if ($uid == 0) {
+            $uid = $_USER['uid'];
+        }
+        $uid = (int)$uid;
+        $msg = "All carts for user {$uid} deleted";
+        $sql = "DELETE FROM {$_TABLES['paypal.orders']}
+            WHERE uid = $uid AND status = 'cart'";
+        if ($save != '') {
+            $sql .= " AND order_id <> '" . DB_escapeString($save) . "'";
+            $msg .= " except $save";
+        }
+        DB_query($sql);
+        PAYPAL_debug($msg);
     }
 
 
@@ -670,30 +676,30 @@ class Cart extends Order
     {
         global $_TABLES, $LANG_PP;
 
-        $Order = self::getInstance($cart_id);
+        $Order = self::getInstance(0, $cart_id);
+        if ($Order->isNew) {
+            // Cart not found, do nothing
+            return;
+        }
+
         $oldstatus = $Order->status;
         $newstatus = $status ? 'pending' : 'cart';
-        $cart_id = DB_escapeString($cart_id);
-        $tax_rate = PP_getTaxRate();
-        $sql = "UPDATE {$_TABLES['paypal.orders']} SET
-                status = '{$status}',
-                order_date = UNIX_TIMESTAMP(),
-                tax_rate = $tax_rate
-                WHERE order_id = '{$cart_id}'";
-        DB_query($sql);
-        if ($status == 'pending') {
+        $Order->status = $newstatus;
+        $Order->tax_rate = PP_getTaxRate();
+        $Order->order_date = time();
+        $Order->Save();
+        self::setSession('order_id', $cart_id);
+
+        if ($newstatus == 'pending') {
             // Make sure the cookie gets deleted also
             self::_expireCookie();
         } else {
             // restoring the cart, put back the cookie
             self::setAnonCartID($cart_id);
+            self::deleteUser(0, $cart_id);
         }
-        if (!DB_error()) {
-            $Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));
-            return 0;
-        } else {
-            return 1;
-        }
+        $Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));
+        return;
     }
 
 
