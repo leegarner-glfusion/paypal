@@ -1161,7 +1161,7 @@ class Gateway
             if (is_object($gw)) {
                 $gateways[$key][$A['id']] = $gw;
             } else {
-                var_dump($A);die;
+                continue;       // Gateway enabled but not installed
             }
         }
         return $gateways[$key];
