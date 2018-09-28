@@ -90,6 +90,7 @@ class square extends \Paypal\IPN
         $this->pp_data['custom'] = array(
             'transtype' => $this->gw->Name(),
             'uid'       => $this->Order->uid,
+            'by_gc'     => $this->Order->getInfo()['apply_gc'],
         );
 
         foreach ($this->Order->Cart() as $idx=>$item) {

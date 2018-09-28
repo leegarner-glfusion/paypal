@@ -181,38 +181,52 @@ class square extends \Paypal\Gateway
         $checkoutClient = new \SquareConnect\Api\CheckoutApi($defaultApiClient);
 
         $lineItems = array();
-        foreach ($cart->Cart() as $Item) {
-            $P = $Item->getProduct();
-
+        $by_gc = $cart->getInfo('apply_gc');
+        if ($by_gc > 0) {
+            $total_amount = $cart->getTotal() - $by_gc;
             $PriceMoney = new \SquareConnect\Model\Money;
             $PriceMoney->setCurrency($this->currency_code);
-            $Item->Price = $P->getPrice($Item->options);
-            $PriceMoney->setAmount($Cur->toInt($Item->price));
+            $PriceMoney->setAmount($Cur->toInt($total_amount));
             $itm = new \SquareConnect\Model\CreateOrderRequestLineItem;
-            $opts = $P->getOptionDesc($Item->options);
-            $dscp = $Item->description;
-            if (!empty($opts)) {
-                $dscp .= ' : ' . $opts;
-            }
-            $itm->setName($dscp);
-            $itm->setQuantity((string)$Item->quantity);
+            $itm->setName($LANG_PP['all_items']);
+            $itm->setQuantity('1');
             $itm->setBasePriceMoney($PriceMoney);
+            //Puts our line item object in an array called lineItems.
+            array_push($lineItems, $itm);
+        } else {
+            foreach ($cart->Cart() as $Item) {
+                $P = $Item->getProduct();
 
-            // Add tax, if applicable
-            if ($Item->taxable) {
-                $TaxMoney = new \SquareConnect\Model\Money;
-                $TaxMoney->setCurrency($this->currency_code);
-                $taxObj = new \SquareConnect\Model\OrderLineItemTax(
-                    array(
-                        'percentage' => (string)$Cur->toInt($_PP_CONF['tax_rate']),
-                        'name' => 'Sales Tax',
-                    )
-                );
-                $tax = $Item->price * $Item->quantity * $_PP_CONF['tax_rate'];
-                $tax = $Cur->toInt($tax);
-                $TaxMoney->setAmount($tax);
-                $taxObj->setAppliedMoney($TaxMoney);
-                $itm->setTaxes(array($taxObj));
+                $PriceMoney = new \SquareConnect\Model\Money;
+                $PriceMoney->setCurrency($this->currency_code);
+                $Item->Price = $P->getPrice($Item->options);
+                $PriceMoney->setAmount($Cur->toInt($Item->price));
+                $itm = new \SquareConnect\Model\CreateOrderRequestLineItem;
+                $opts = $P->getOptionDesc($Item->options);
+                $dscp = $Item->description;
+                if (!empty($opts)) {
+                    $dscp .= ' : ' . $opts;
+                }
+                $itm->setName($dscp);
+                $itm->setQuantity((string)$Item->quantity);
+                $itm->setBasePriceMoney($PriceMoney);
+
+                // Add tax, if applicable
+                if ($Item->taxable) {
+                    $TaxMoney = new \SquareConnect\Model\Money;
+                    $TaxMoney->setCurrency($this->currency_code);
+                    $taxObj = new \SquareConnect\Model\OrderLineItemTax(
+                        array(
+                            'percentage' => (string)$Cur->toInt($_PP_CONF['tax_rate']),
+                            'name' => 'Sales Tax',
+                        )
+                    );
+                    $tax = $Item->price * $Item->quantity * $_PP_CONF['tax_rate'];
+                    $tax = $Cur->toInt($tax);
+                    $TaxMoney->setAmount($tax);
+                    $taxObj->setAppliedMoney($TaxMoney);
+                    $itm->setTaxes(array($taxObj));
+                }
                 $shipping += $Item->shipping;
             }
 
