@@ -72,11 +72,16 @@
         {buy_now_button}<br />
       <!-- END BtnBlock -->
         </div>
-      {!if onhand}
-      <div id="paypalOnhand">
+{!if onhand}
+      <div class="paypalOnhand">
         {onhand} {$LANG_PP['available']}
       </div>
-      {!endif}
+{!endif}
+{!if stock_msg}
+      <div class="paypalOnhand">
+        {$LANG_PP['out_of_stock']}
+      </div>
+{!endif}
 
     <div id="paypalProductDesc" class="ppProductDesc v1">
       {description}
