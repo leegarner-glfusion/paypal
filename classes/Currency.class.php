@@ -391,6 +391,32 @@ class Currency
         return;
     }
 
+
+    /**
+     * Convert an amount to an integer based on the number of decimals.
+     * Example: $1.95 US becomes 195
+     *
+     * @param   float   $amount     Money amount to convert
+     * @return  int                 Integer version of the amount
+     */
+    public function toInt($amount)
+    {
+        return (int)($amount * (10 ** $this->decimals));
+    }
+
+
+    /**
+     * Convert an amount to an integer based on the number of decimals.
+     * Example: 195 becomes 1.95
+     *
+     * @param   int     $amount     Integer version of the amount
+     * @return  float                Money amount to convert
+     */
+    public function fromInt($intval)
+    {
+        return (float)($intval / (10 ** $this->decimals));
+    }
+
 }
 
 ?>

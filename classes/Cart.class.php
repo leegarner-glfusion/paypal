@@ -73,6 +73,13 @@ class Cart extends Order
             // Get a cart for another user. Used to get the anonymous
             // cart by ID to merge when logging in. Can't cache this.
             $cart = new self($cart_id);
+            // If the cart user ID doesn't match the requested one, then the
+            // cookie may have gotten out of sync. This can happen when the
+            // user leaves the browser and the glFusion session expires.
+            if ($cart->uid != $uid) {
+                self::_expireCookie();
+                $cart = new self();
+            }
         }
         return $cart;
     }
@@ -602,6 +609,7 @@ class Cart extends Order
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
+        if ($uid < 2) return;       // Don't delete anonymous carts
         $msg = "All carts for user {$uid} deleted";
         $sql = "DELETE FROM {$_TABLES['paypal.orders']}
             WHERE uid = $uid AND status = 'cart'";
@@ -696,6 +704,7 @@ class Cart extends Order
         } else {
             // restoring the cart, put back the cookie
             self::setAnonCartID($cart_id);
+            // delete all open user carts except this one
             self::deleteUser(0, $cart_id);
         }
         $Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));

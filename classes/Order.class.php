@@ -617,11 +617,11 @@ class Order
     {
         global $_TABLES, $LANG_PP;
 
-        $order_id = $this->order_id;
         $oldstatus = $this->status;
         $this->status = $newstatus;
-        $db_order_id = DB_escapeString($order_id);
+        $db_order_id = DB_escapeString($this->order_id);
         $log_user = $this->log_user;
+        Cache::delete('order_' . $this->order_id);
 
         // If the status isn't really changed, don't bother updating anything
         // and just treat it as successful
@@ -641,7 +641,6 @@ class Order
         }
 
         $this->Notify($newstatus);
-        Cache::delete('order_' . $this->order_id);
         return true;
     }
 

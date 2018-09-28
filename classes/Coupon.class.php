@@ -440,22 +440,17 @@ class Coupon extends Product
     public static function getUserBalance($uid = 0)
     {
         global $_USER;
-        static $bals = array();
 
         if ($uid == 0) $uid = $_USER['uid'];
-        if (!isset($bals[$uid])) {
-            $bals[$uid] = (float)0;
-            // Coupon balances are not supported for anonymous users
-            if ($uid > 1) {
-                $coupons = self::getUserCoupons($uid);
-            } else {
-                $coupons = array();
-            }
-            foreach ($coupons as $coupon) {
-                $bals[$uid] += $coupon['balance'];
-            }
+        if ($uid == 1) return 0;    // no coupon bal for anonymous
+
+        // Total up the available balances from the coupons table
+        $bal = (float)0;
+        $coupons = self::getUserCoupons($uid);
+        foreach ($coupons as $coupon) {
+            $bal += $coupon['balance'];
         }
-        return (float)$bals[$uid];
+        return (float)$bal;
     }
 
 
