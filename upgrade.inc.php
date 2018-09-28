@@ -663,6 +663,7 @@ function PAYPAL_remove_old_files()
             // 0.6.0
             'language/authorizenetsim_english.php',
             'templates/viewcart.uikit.thtml',
+            'templates/detaul/product_detail_attrib.thtml',
             'templates/detail/v2/product_detail.thtml',
             'templates/detail/v1/product_detail.thtml',
             'templates/list/v1/product_list_item.thtml',
