@@ -22,9 +22,10 @@ if ($_PP_CONF['debug_ipn'] == 1) {
 
 // Process IPN request
 $ipn = \Paypal\IPN::getInstance('square', $_GET);
-$ipn->Process();
-
-$msg = 1;
-echo COM_refresh(PAYPAL_URL . '/index.php?msg=' . $msg);"Thanks";
+if ($ipn->Process()) {
+    echo COM_refresh(PAYPAL_URL . '/index.php?thanks=square');
+} else {
+    echo COM_refresh(PAYPAL_URL . '/index.php?msg=8');
+}
 
 ?>
