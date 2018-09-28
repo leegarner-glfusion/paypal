@@ -306,6 +306,25 @@ class OrderItem
         return $this;
     }
 
+
+    /**
+     * Check if the buyer can download a file from the order view.
+     *
+     */
+    public function canDownload()
+    {
+        // Check that the order is paid
+        if (!$this->getOrder()->isPaid()) return false;
+
+        // Check if product is not a download, or is expired
+        if ($this->getProduct()->file == '' || $this->expiration < time()) {
+            return false;
+        }
+
+        // All conditions passed, return true
+        return true;
+    }
+
 }
 
 ?>

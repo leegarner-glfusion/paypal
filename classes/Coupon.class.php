@@ -389,33 +389,45 @@ class Coupon extends Product
     public static function getUserCoupons($uid = 0, $all = false)
     {
         global $_TABLES, $_USER;
-        static $coupons = array();
 
         if ($uid == 0) $uid = $_USER['uid'];
         $uid = (int)$uid;
         if ($uid < 2) return array();   // Can't get anonymous coupons here
 
-        if (!isset($coupons[$uid])) {
-            $cache_key = 'coupons_' . $uid;
-            $coupons[$uid] = Cache::get($cache_key);
-            $today = date('Y-m-d');
-            if (!$coupons[$uid]) {
-                $coupons[$uid] = array();
-                $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
-                        WHERE redeemer = '$uid'";
-                if (!$all) {
-                    $sql .= " AND expires >= '$today'
-                            AND balance > 0";
+        $cache_key = 'coupons_' . $uid;
+        $updatecache = false;       // indicator that cache must be updated
+        $coupons = Cache::get($cache_key);
+        $coupons = null;
+        $today = date('Y-m-d');
+        if (!$coupons) {
+            $coupons = array();
+            $sql = "SELECT * FROM {$_TABLES['paypal.coupons']}
+                WHERE redeemer = '$uid'";
+            if (!$all) {
+                $sql .= " AND expires >= '$today' AND balance > 0";
+            }
+            $sql .= " ORDER BY redeemed ASC";
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $coupons[] = $A;
+            }
+            $updatecache = true;
+        } else {
+            // Check the expiration dates in case any expired while in cache
+            foreach ($coupons as $idx=>$coupon) {
+                if ($coupon['expires'] < $today) {
+                    unset($coupons[$idx]);
+                    $updatecache = true;
                 }
-                $sql .= " ORDER BY redeemed ASC";
-                $res = DB_query($sql);
-                while ($A = DB_fetchArray($res, false)) {
-                    $coupons[$uid][] = $A;
-                }
-                Cache::set($cache_key, $coupons[$uid], 'coupons');
             }
         }
-        return $coupons[$uid];
+
+        // If coupons were read from the DB, or any cached ones expired,
+        // update the cache
+        if ($updatecache) {
+            Cache::set($cache_key, $coupons, 'coupons', 3600);
+        }
+        return $coupons;
     }
 
 

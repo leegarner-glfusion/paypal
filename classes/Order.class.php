@@ -483,7 +483,7 @@ class Order
                 'item_quantity' => (int)$item->quantity,
                 'item_total'    => $Currency->FormatValue($item_total),
                 'is_admin'      => $this->isAdmin ? 'true' : '',
-                'is_file'       => $P->file != '' && $item->expiration > time() ? true : false,
+                'is_file'       => $item->canDownload() ? true : false,
                 'taxable'       => $this->tax_rate > 0 ? $P->taxable : 0,
                 'tax_icon'      => $LANG_PP['tax'][0],
                 'token'         => $item->token,
@@ -650,11 +650,13 @@ class Order
     *
     *   @param  string  $msg        Log message
     *   @param  string  $log_user   Optional log username
-    *   @return boolean             True on success, False on DB error
     */
     public function Log($msg, $log_user = '')
     {
         global $_TABLES, $_USER;
+
+        // Don't log empty messages by mistake
+        if (empty($msg)) return;
 
         // If the order ID is omitted, get information from the current
         // object.
@@ -671,7 +673,7 @@ class Order
         DB_query($sql);
         $cache_key = 'orderlog_' . $order_id;
         Cache::delete($cache_key);
-        return true;
+        return;
     }
 
 
@@ -1213,6 +1215,25 @@ class Order
             }
         }
         return false;
+    }
+
+
+    /**
+     * Check if this order is paid.
+     * The status may be one of several values like "shipped", "closed", etc.
+     * but should not be "cart" or "pending".
+     *
+     * @return  boolean     True if not a cart or pending order, false otherwise
+     */
+    public function isPaid()
+    {
+        switch ($this->status) {
+        case 'cart':
+        case 'pending':
+            return false;
+        default:
+            return true;
+        }
     }
 
 }

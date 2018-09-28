@@ -661,6 +661,7 @@ function PAYPAL_remove_old_files()
         // private/plugins/paypal
         __DIR__ => array(
             // 0.6.0
+            'language/authorizenetsim_english.php',
             'templates/viewcart.uikit.thtml',
             'templates/detail/v2/product_detail.thtml',
             'templates/detail/v1/product_detail.thtml',
@@ -676,6 +677,40 @@ function PAYPAL_remove_old_files()
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(
+            'ipn/paypal_ipn.php',
+            'ipn/authorizenetsim_ipn.php',
+            'images/paynow.gif',
+            'images/subscribe.gif',
+            'images/subscribe.sav.gif',
+            'images/addtocart.gif',
+            'images/addtocart.sav.gif',
+            'images/btnbgGreen.gif',
+            'images/btnbgRed.gif',
+            'images/btn_bg_sprite.gif',
+            'images/button.png',
+            'images/buynow.gif',
+            'images/buynow.png',
+            'images/buynow.sav.gif',
+            'images/closelabel.gif',
+            'images/creditcart.svg',
+            'images/db_commit.png',
+            'images/deleteitem.png',
+            'images/donate2.gif',
+            'images/donate.gif',
+            'images/donate.sav.gif',
+            'images/down.png',
+            'images/download.png',
+            'images/formbg.gif',
+            'images/loading.gif',
+            'images/nextlabel.gif',
+            'images/off.png',
+            'images/on.png',
+            'images/prevlabel.gif',
+            'images/undo.png',
+            'images/up.png',
+            'images/update.png',
+            'images/viewcart.gif',
+            'docs/english/authorizenetsim.html',
         ),
         // admin/plugins/paypal
         $_CONF['path_html'] . 'admin/plugins/paypal' => array(

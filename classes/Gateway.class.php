@@ -50,6 +50,11 @@ class Gateway
     */
     protected $gw_desc;
 
+    /** The provider name, e.g. "Amazon" or "Paypal"
+     * @var string;
+     */
+    protected $gw_provider;
+
     /** Services (button types) provided by the gateway.
     *   This is an array of button_name=>0/1 to indicate which services are
     *   available.
@@ -127,7 +132,12 @@ class Gateway
         $this->custom = array();
         $this->ipn_url = PAYPAL_URL . '/ipn/' . $this->gw_name . '.php';
         $this->currency_code = empty($_PP_CONF['currency']) ? 'USD' :
-                $_PP_CONF['currency'];
+            $_PP_CONF['currency'];
+
+        // Set the provider name if not supplied by the gateway
+        if (empty($this->gw_provider)) {
+            $this->gw_provider = ucfirst($this->gw_name);
+        }
 
         // The child gateway can override the services array.
         if (!isset($this->services)) {
@@ -153,8 +163,13 @@ class Gateway
             $this->enabled = (int)$A['enabled'];
             $services = @unserialize($A['services']);
             if ($services) {
-                $this->services = array_merge($this->services, $services);
+                foreach ($services as $name=>$status) {
+                    if (isset($this->services[$name])) {
+                        $this->services[$name] = $status;
+                    }
+                }
             }
+
             $props = @unserialize($A['config']);
             if ($props) {
                 foreach ($props as $key=>$value) {
@@ -224,7 +239,7 @@ class Gateway
     */
     public function DisplayName()
     {
-        return ucfirst($this->gw_name);
+        return $this->gw_provider;
     }
 
 
@@ -1121,31 +1136,32 @@ class Gateway
     {
         global $_TABLES, $_PP_CONF;
 
-        static $gateways = array();
         $key = $enabled ? 1 : 0;
+        $cache_key = 'gateways_' . $key;
+        $tmp = Cache::get($cache_key);
+        if ($tmp === NULL) {
+            $tmp = array();
+            // Load the gateways
+            $sql = "SELECT * FROM {$_TABLES['paypal.gateways']}";
+            // If not loading all gateways, get just then enabled ones
+            if ($enabled) $sql .= ' WHERE enabled=1';
+            $sql .= ' ORDER BY orderby';
+            $res = DB_query($sql);
+            while ($A = DB_fetchArray($res, false)) {
+                $tmp[] = $A;
+            }
+            Cache::set($cache_key, $tmp, 'gateways');
+        }
 
-        if (!isset($gateways[$key])) {
-            $cache_key = 'gateways_' . $key;
-            $gateways[$key] = Cache::get($cache_key);
-            if ($gateways[$key] === NULL) {
-                $gateways[$key] = array();
-                // Load the gateways
-                $sql = "SELECT id, enabled, services
-                    FROM {$_TABLES['paypal.gateways']}";
-                // If not loading all gateways, get just then enabled ones
-                if ($enabled) $sql .= ' WHERE enabled=1';
-                $sql .= ' ORDER BY orderby';
-                $res = DB_query($sql);
-                while ($A = DB_fetchArray($res, false)) {
-                    // For each available gateway, load its class file and add it
-                    // to the static array. Check that a valid object is
-                    // returned from getInstance()
-                    $gw = self::getInstance($A['id'], $A);
-                    if (is_object($gw)) {
-                        $gateways[$key][$A['id']] = $gw;
-                    }
-                }
-                Cache::set($cache_key, $gateways[$key], 'gateways');
+        // For each available gateway, load its class file and add it
+        // to the static array. Check that a valid object is
+        // returned from getInstance()
+        foreach ($tmp as $A) {
+            $gw = self::getInstance($A['id'], $A);
+            if (is_object($gw)) {
+                $gateways[$key][$A['id']] = $gw;
+            } else {
+                continue;       // Gateway enabled but not installed
             }
         }
         return $gateways[$key];

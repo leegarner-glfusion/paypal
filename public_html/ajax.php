@@ -54,7 +54,7 @@ case 'addcartitem':
     $args = array(
         'item_number'   => $_POST['item_number'],     // isset ensured above
         'item_name'     => PP_getVar($_POST, 'item_name'),
-        'description'   => PP_getVar($_POST, 'item_descr'),
+        'short_dscp'    => PP_getVar($_POST, 'short_dscp'),
         'quantity'      => PP_getVar($_POST, 'quantity', 'int'),
         //'price'         => PP_getVar($_POST, 'base_price', 'float'),
         'price'         => $P->getPrice(),
@@ -86,7 +86,11 @@ case 'finalizecart':
 
 case 'redeem_gc':
     if (COM_isAnonUser()) {
-        $msg = $LANG_PP['gc_need_acct'];
+        $A = array(
+            'statusMessage' => $LANG_PP['gc_need_acct'],
+            'html' => '',
+            'status' => false,
+        );
     } else {
         $code = PP_getVar($_POST, 'gc_code');
         $uid = $_USER['uid'];
@@ -98,9 +102,9 @@ case 'redeem_gc':
             'html' => $gw_radio,
             'status' => $status,
         );
-        echo json_encode($A);
-        exit;
     }
+    echo json_encode($A);
+    exit;
 default:
     // Missing action, nothing to do
     break;

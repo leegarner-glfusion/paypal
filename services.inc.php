@@ -210,19 +210,18 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
 
     // Force the price if requested by the caller
     $override = isset($args['override']) && $args['override'] ? true : false;
-
     $cart_args = array(
-        'item_number' => $item_number,
-        'quantity' => isset($args['quantity']) ? (float)$args['quantity'] : 1,
-        'item_name' => isset($args['item_name']) ? $args['item_name'] : '',
-        'price' => $price,
+        'item_number'   => $item_number,
+        'quantity'      => PP_getVar($args, 'quantity', 'float', 1),
+        'item_name'     => PP_getVar($args, 'item_name', 'string'),
+        'price'         => $price,
         'short_description' => $dscp,
-        'options' => isset($args['options']) ? $args['options'] : array(),
-        'extras' => isset($args['extras']) ? $args['extras'] : array(),
-        'override' => $override,
-        'uid' => PP_getVar($args, 'uid', 'int', 1),
+        'options'       => PP_getVar($args, 'options', 'array'),
+        'extras'        => PP_getVar($args, 'extras', 'array'),
+        'override'      => $override,
+        'uid'           => PP_getVar($args, 'uid', 'int', 1),
     );
-    if (isset($args['tax'])) {
+    if (isset($args['tax'])) {      // tax element not set at all if not present
         $cart_args['tax'] = $args['tax'];
     }
 
