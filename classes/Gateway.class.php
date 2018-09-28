@@ -248,7 +248,10 @@ class Gateway
     *
     *   @return string      Full name of the gateway
     */
-    public function Description()  {   return $this->gw_desc;  }
+    public function Description()
+    {
+        return $this->gw_desc;
+    }
 
 
     /**
@@ -893,6 +896,7 @@ class Gateway
             'button_url' => $this->getCheckoutButton(),
             'cart_id'   => $cart->cartID(),
             'uid'       => $_USER['uid'],
+            'set_final' => $this->_setFinal(),
         ) );
         return $T->parse('', 'btn');
     }
@@ -1072,7 +1076,7 @@ class Gateway
         $doc_url = PAYPAL_getDocUrl('gwhelp_' . $this->gw_name,
                 $_CONF['language']);
         $T->set_var(array(
-            'gw_description' => self::Description(),
+            'gw_description' => $this->gw_desc,
             'gw_id'         => $this->gw_name,
             'orderby'       => $this->orderby,
             'enabled_chk'   => $this->enabled == 1 ? ' checked="checked"' : '',
@@ -1269,6 +1273,19 @@ class Gateway
     protected function _postConfigSave()
     {
         return;
+    }
+
+
+    /**
+     * Check whether to set the order status to "pending" when the final
+     * confirmation button is clicked. This requires a "cancel URL" option
+     * in the gateway to return to the cart, and some gateways don't support this.
+     *
+     * @return  boolean True to set final, False to leave as "cart"
+     */
+    protected function _setFinal()
+    {
+        return true;
     }
 
 }   // class Gateway
