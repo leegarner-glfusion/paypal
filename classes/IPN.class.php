@@ -272,6 +272,7 @@ class IPN
     *   customer by Order::Notify().
     *
     *   @uses   createOrder()
+    *   @return boolean     True if processed successfully, False if not
     */
     protected function handlePurchase()
     {
