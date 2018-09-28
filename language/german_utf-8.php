@@ -408,7 +408,7 @@ $PLG_paypal_MESSAGE04 = 'Fehler beim Durchführen des Plugin-Aktualisierung';
 $PLG_paypal_MESSAGE05 = 'Fehler beim Aktualisieren der Plugin-Versionsnummer';
 $PLG_paypal_MESSAGE06 = 'Plugin ist bereits auf dem aktuellen Stand';
 $PLG_paypal_MESSAGE07 = 'Ungültiger Download-Token gegeben';
-$PLG_paypal_MESSAGE08 = 'There was an error finalizing your order. Please contact the site administrator.',
+$PLG_paypal_MESSAGE08 = 'There was an error finalizing your order. Please contact the site administrator.';
 
 /** Language strings for the plugin configuration section */
 $LANG_configsections['paypal'] = array(
