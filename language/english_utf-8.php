@@ -421,6 +421,7 @@ $PLG_paypal_MESSAGE04 = 'Error performing the plugin upgrade';
 $PLG_paypal_MESSAGE05 = 'Error upgrading the plugin version number';
 $PLG_paypal_MESSAGE06 = 'Plugin is already up to date';
 $PLG_paypal_MESSAGE07 = 'Invalid download token given';
+$PLG_paypal_MESSAGE08 = 'There was an error finalizing your order. Please contact the site administrator.',
 
 /** Language strings for the plugin configuration section */
 $LANG_configsections['paypal'] = array(
