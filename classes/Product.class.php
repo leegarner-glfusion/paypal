@@ -47,6 +47,7 @@ class Product
     public $override_price = false;
     private $_uid = 0;  // user id, for pricing
     private $_view = 'detail';  // type of button to create (list or detail)
+    private $Sale = NULL;
 
     /**
      *  Constructor.
@@ -1036,7 +1037,6 @@ class Product
             $s_desc = COM_highlightQuery($s_desc, $_REQUEST['query']);
         }
 
-        //$onsale = $this->isOnSale();
         $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
@@ -1847,7 +1847,22 @@ class Product
     */
     public function getSalePrice()
     {
-        return Sales::getEffective($this)->calcPrice($this->price);
+        return $this->getSale()->calcPrice($this->price);
+    }
+
+
+    /**
+     * Sets and returns the private Sale object as the current effective
+     * sale.
+     *
+     * @return  object      Sale object
+     */
+    public function getSale()
+    {
+        if ($this->Sale === NULL) {
+            $this->Sale = Sales::getEffective($this);
+        }
+        return $this->Sale;
     }
 
 
