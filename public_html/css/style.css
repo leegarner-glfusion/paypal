@@ -461,7 +461,7 @@ div.ItemOptions {
     font-style: italic;
 }
 
-#paypalOnhand {
+.paypalOnhand {
     margin-top: 1em;
     color: #666666;
     font-size: 120%;
