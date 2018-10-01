@@ -1510,24 +1510,46 @@ function PAYPAL_adminlist_Sales()
             FROM {$_TABLES['paypal.sales']}";
 
     $header_arr = array(
-        array('text' => $LANG_ADMIN['edit'],
-                'field' => 'edit', 'align' => 'center',
+        array(
+            'text' => $LANG_ADMIN['edit'],
+            'field' => 'edit',
+            'align' => 'center',
         ),
-        array('text' => $LANG_PP['item_type'],
-                'field' => 'item_type', 'sort' => false),
-        array('text' => $LANG_PP['name'],
-                'field' => 'item_id', 'sort' => false),
-        array('text' => $LANG_PP['amount'] . '/' . $LANG_PP['percent'],
-                'field' => 'amount', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['start'],
-                'field' => 'start', 'sort' => true,
+        array(
+            'text' => $LANG_PP['item_type'],
+            'field' => 'item_type',
+            'sort' => false,
         ),
-        array('text' => $LANG_PP['end'],
-                'field' => 'end', 'sort' => true,
+        array(
+            'text' => $LANG_PP['name'],
+            'field' => 'name',
+            'sort' => false,
         ),
-        array('text' => $LANG_ADMIN['delete'],
-                'field' => 'delete', 'align' => 'center',
+        array(
+            'text' => $LANG_PP['product'],
+            'field' => 'item_id',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['amount'] . '/' . $LANG_PP['percent'],
+            'field' => 'amount',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['start'],
+            'field' => 'start',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['end'],
+            'field' => 'end',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_ADMIN['delete'],
+            'field' => 'delete',
+            'align' => 'center',
         ),
     );
 

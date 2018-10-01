@@ -54,7 +54,7 @@ action="{site_url}/paypal/index.php" method="post">
     <div>
 {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
-      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      <br /><span class="paypalPrice sale">{sale_name}{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
 {!else}
       <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
 {!endif}

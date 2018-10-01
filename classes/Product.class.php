@@ -1173,6 +1173,7 @@ class Product
             'price'             => Currency::getInstance()->FormatValue($this->getPrice()),
             'orig_price'        => Currency::getInstance()->Format($this->_orig_price),
             'on_sale'           => $this->isOnSale(),
+            'sale_name'         => $this->isOnSale() ? $this->getSale()->name . '&nbsp;' : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => Currency::getInstance()->Pre(),
             'price_postfix'     => Currency::getInstance()->Post(),
