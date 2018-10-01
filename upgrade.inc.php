@@ -543,6 +543,14 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)";
         }
 
+        // Change the IPN log table to use Unix timestamps.
+        if (_PPtableHasColumn('paypal.ipnlog', 'time')) {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD ts int(11) unsigned after `ip_addr`";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.ipnlog']} SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`time`, '+00:00', @@session.time_zone))";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} DROP `time`";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD KEY `ipnlog_ts` (`ts`)";
+        }
+
         if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         if ($add_cat_mptt) {
