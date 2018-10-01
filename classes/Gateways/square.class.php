@@ -429,26 +429,15 @@ class square extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables to display with the IPN log
-    *   This gets the variables from the gateway's IPN data into standard
-    *   array values to be displayed in the IPN log view
-    *
-    *   @param  array   $data       Array of original IPN data
-    *   @return array               Name=>Value array of data for display
-    */
+     * Get the variables to display with the IPN log.
+     * This gateway does not have any particular log values of interest.
+     *
+     * @param  array   $data       Array of original IPN data
+     * @return array               Name=>Value array of data for display
+     */
     public function ipnlogVars($data)
     {
-        if (!is_array($data)) {
-            return array();
-        }
-
-        $retval = array(
-            'pmt_gross'     => $data['mc_gross'] . ' ' . $data['mc_currency'],
-            'verified'      => $data['payer_status'],
-            'pmt_status'    => $data['payment_status'],
-            'buyer_email'   => $data['payer_email'],
-        );
-        return $retval;
+        return array();
     }
 
 
