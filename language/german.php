@@ -378,7 +378,6 @@ $LANG_PP = array (
 'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><br>This will impact the guest experience and should not normally be necessary.</b>',
 'include' => 'Include',
 'exclude' => 'Exclude',
-<<<<<<< HEAD
 'dscp_change_currency' => 'Change prices for products, attributes and shopping cart items to a new currency.<br /><b>This will adjust product prices. You should review all prices for accuracy following this operation.</b>',
 'change_currency' => 'Change Currency',
 'old_currency' => 'Old Currency Setting',
@@ -386,9 +385,8 @@ $LANG_PP = array (
 'q_change_currency' => 'Are you sure you want to change prices and other amounts based on the new currency?',
 'cur_changed' => 'Prices changed from %1$s to %2%s',
 'no_cur_change' => 'No currency conversion was done.',
-=======
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
->>>>>>> develop
+'out_of_stock' => 'This item is currently out of stock.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

@@ -2180,4 +2180,17 @@ function PP_isMinVersion($required = '')
     }
 }
 
+
+/**
+ * Get a datetime display in the local timezone with a popup showing UTC
+ *
+ * @param   object  $Dt     Date object
+ * @return  string          HTML for date display with tooltip
+ */
+function PP_dateTooltip($Dt)
+{
+    return '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
+            . $Dt->toMySQL(true) . '</span>';
+}
+
 ?>

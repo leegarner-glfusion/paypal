@@ -54,6 +54,7 @@ class Sales
             // New entry, set defaults
             $this->id = 0;
             $this->item_type = 'product';
+            $this->name = '';
             $this->item_id = 0;
             $this->start = '';
             $this->end = '';
@@ -95,12 +96,14 @@ class Sales
     */
     public function setVars($A, $fromDB=true)
     {
-        $this->id = $A['id'];
-        $this->item_type = $A['item_type'];
-        $this->discount_type = $A['discount_type'];
-        $this->amount = $A['amount'];
+        $this->id = PP_getVar($A, 'id', 'integer');
+        $this->item_type = PP_getVar($A, 'item_type');
+        $this->discount_type = PP_getVar($A, 'discount_type');
+        $this->amount = PP_getVar($A, 'amount', 'float');
+        $this->name = PP_getVar($A, 'name', 'string');
         if (!$fromDB) {
             // convert to timestamps
+            if (empty($A['end_time'])) $A['end_time'] = '23:59';
             $A['start'] = (trim($A['start'] . ' ' . $A['start_time']));
             $A['end'] = (trim($A['end'] . ' ' . $A['end_time']));
             if ($this->item_type == 'product') {
@@ -254,6 +257,7 @@ class Sales
 
         case 'item_type':
         case 'discount_type':
+        case 'name':
             // String values
             $this->properties[$var] = trim($value);
             break;
@@ -310,6 +314,7 @@ class Sales
         }
         $sql2 = " SET item_type = '" . DB_escapeString($this->item_type) . "',
                 item_id = '{$this->item_id}',
+                name = '" . DB_escapeString($this->name) . "',
                 start = '{$this->start->toUnix()}',
                 end = '{$this->end->toUnix()}',
                 discount_type = '" . DB_escapeString($this->discount_type) . "',
@@ -406,6 +411,7 @@ class Sales
             'it_sel_' . $this->item_type => 'checked="checked"',
             'dt_sel_' . $this->discount_type => 'selected="selected"',
             'item_type'     => $this->item_type,
+            'name'          => $this->name,
             'start_date'    => $st_dt,
             'end_date'      => $end_dt,
             'start_time'    => $st_tm,

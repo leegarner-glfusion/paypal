@@ -57,7 +57,7 @@ class paypal extends \Paypal\Gateway
             'bus_test_email'    => '',
             'micro_test_email'  => '',
             'test_mode'         => 1,
-            'micro_threshold'   => '',
+            'micro_threshold'   => '10',
             'encrypt'           => 0,
             'pp_cert'           => '',
             'pp_cert_id'        => '',

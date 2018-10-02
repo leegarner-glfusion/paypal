@@ -915,18 +915,16 @@ function PAYPAL_adminlist_IPNLog()
         array('text' => $LANG_PP['ip_addr'],
                 'field' => 'ip_addr', 'sort' => false),
         array('text' => $LANG_PP['datetime'],
-                'field' => 'time', 'sort' => true),
+                'field' => 'ts', 'sort' => true),
         array('text' => $LANG_PP['verified'],
                 'field' => 'verified', 'sort' => true),
         array('text' => $LANG_PP['txn_id'],
                 'field' => 'txn_id', 'sort' => true),
-        array('text' => $LANG_PP['pmt_status'],
-                'field' => 'pmt_status', 'sort' => true),
         array('text' => $LANG_PP['gateway'],
                 'field' => 'gateway', 'sort' => true),
     );
 
-    $defsort_arr = array('field' => 'time',
+    $defsort_arr = array('field' => 'ts',
             'direction' => 'desc');
 
     $display .= COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
@@ -970,8 +968,8 @@ function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
     global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
 
     $retval = '';
-
-    $ipn_data = unserialize($A['ipn_data']);
+    static $Dt = NULL;
+    if ($Dt === NULL) $Dt = new Date('now', $_CONF['timezone']);
 
     switch($fieldname) {
     case 'id':
@@ -984,26 +982,15 @@ function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
         $retval = $fieldvalue > 0 ? 'True' : 'False';
         break;
 
-    case 'purchaser':
-        $name = DB_getItem($_TABLES['users'], 'username',
-                            "uid=" . (int)$ipn_data['custom']);
-        $retval = COM_createLink($name,
-                $_CONF['site_url'] .
-                '/users.php?mode=profile&amp;uid=' . $ipn_data['custom']);
-        break;
-
-    case 'pmt_status':
-        if (isset($ipn_data['payment_status'])) {
-            $retval = htmlspecialchars($ipn_data['payment_status'], ENT_QUOTES, COM_getEncodingt());
-        } else {
-            $retval = '';
-        }
-        break;
-
     case 'txn_id':
         $retval = COM_createLink($fieldvalue,
                 PAYPAL_ADMIN_URL .
                 '/index.php?ipnlog=x&amp;op=single&amp;txn_id=' . $fieldvalue);
+        break;
+
+    case 'ts':
+        $Dt->setTimestamp((int)$fieldvalue);
+        $retval = PP_dateTooltip($Dt);
         break;
 
     default:
@@ -1537,24 +1524,46 @@ function PAYPAL_adminlist_Sales()
             FROM {$_TABLES['paypal.sales']}";
 
     $header_arr = array(
-        array('text' => $LANG_ADMIN['edit'],
-                'field' => 'edit', 'align' => 'center',
+        array(
+            'text' => $LANG_ADMIN['edit'],
+            'field' => 'edit',
+            'align' => 'center',
         ),
-        array('text' => $LANG_PP['item_type'],
-                'field' => 'item_type', 'sort' => false),
-        array('text' => $LANG_PP['name'],
-                'field' => 'item_id', 'sort' => false),
-        array('text' => $LANG_PP['amount'] . '/' . $LANG_PP['percent'],
-                'field' => 'amount', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['start'],
-                'field' => 'start', 'sort' => true,
+        array(
+            'text' => $LANG_PP['item_type'],
+            'field' => 'item_type',
+            'sort' => false,
         ),
-        array('text' => $LANG_PP['end'],
-                'field' => 'end', 'sort' => true,
+        array(
+            'text' => $LANG_PP['name'],
+            'field' => 'name',
+            'sort' => false,
         ),
-        array('text' => $LANG_ADMIN['delete'],
-                'field' => 'delete', 'align' => 'center',
+        array(
+            'text' => $LANG_PP['product'],
+            'field' => 'item_id',
+            'sort' => false,
+        ),
+        array(
+            'text' => $LANG_PP['amount'] . '/' . $LANG_PP['percent'],
+            'field' => 'amount',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['start'],
+            'field' => 'start',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['end'],
+            'field' => 'end',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_ADMIN['delete'],
+            'field' => 'delete',
+            'align' => 'center',
         ),
     );
 
@@ -1704,8 +1713,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
     case 'start':
     case 'end':
         $Dt->setTimestamp((int)$fieldvalue);
-        $retval = '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
-            . $Dt->toMySQL(true) . '</span>';
+        $retval = PP_dateTooltipo($Dt);
         break;
 
     case 'item_id':
@@ -2090,8 +2098,7 @@ function getAdminField_coupons($fieldname, $fieldvalue, $A, $icon_arr)
     case 'purchased':
     case 'redeemed':
         $Dt->setTimestamp((int)$fieldvalue);
-        $retval = '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
-            . $Dt->toMySQL(true) . '</span>';
+        $retval = PP_dateTooltip($Dt);
         break;
 
     default:
