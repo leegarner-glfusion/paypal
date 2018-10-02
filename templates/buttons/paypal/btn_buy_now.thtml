@@ -1,6 +1,5 @@
 {# begin {templatelocation} #}
-<form class="frm_buy_now"
-    action="{paypal_url}/cgi-bin/webscr" method="post">
+<form class="frm_buy_now" action="{action_url}" method="{method}">
   {gateway_vars}
 <!--  <input type="image"
     src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_SM.gif"
