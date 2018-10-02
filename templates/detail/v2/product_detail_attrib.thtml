@@ -115,7 +115,7 @@ action="{site_url}/paypal/index.php" method="post">
     </div>
   </form>
 <!-- BEGIN BtnBlock -->
-  <div style="margin-left:30px;">{buy_now_button}</div>
+  <div style="margin-left:50px;">{buy_now_button}</div>
 <!-- END BtnBlock -->
 </div>
 
