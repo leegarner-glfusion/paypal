@@ -59,7 +59,7 @@ if (empty($content)) {
     COM_refresh(PAYPAL_URL);
 }
 if (empty($breadcrumbs)) {
-    $breadcrumbs = COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL);
+    $breadcrumbs = COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL . '/index.php');
 }
 
 $display .= $breadcrumbs;

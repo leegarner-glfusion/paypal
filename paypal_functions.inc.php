@@ -1041,7 +1041,7 @@ function PAYPAL_userMenu($view='')
     $hdr_txt = PP_getVar($LANG_PP, 'user_hdr_' . $view);
     $menu_arr = array(
         array(
-            'url'  => PAYPAL_URL,
+            'url'  => PAYPAL_URL . '/index.php',
             'text' => $LANG_PP['back_to_catalog'],
         ),
     );

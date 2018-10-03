@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 {!if form_url}
-<form id="add_cart_{item_number}" style="display:inline;" action="{pi_url}/index.php" method="post">
+<form id="add_cart_{item_number}" style="display:inline;" action="{action_url}" method="post">
 {!endif}
   <input type="hidden" name="item_name" value="{item_name}" />
   <input type="hidden" name="item_number" value="{item_number}" />

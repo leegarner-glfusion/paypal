@@ -754,12 +754,12 @@ class Product
             'price'         => sprintf('%.2f', $this->price),
             'file'          => htmlspecialchars($this->file, ENT_QUOTES, COM_getEncodingt()),
             'expiration'    => $this->expiration,
-            'pi_admin_url'  => PAYPAL_ADMIN_URL,
+            'action_url'    => PAYPAL_ADMIN_URL . '/index.php',
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
             'cat_select'    => Category::optionList($this->cat_id),
             'currency'      => $_PP_CONF['currency'],
-            'pi_url'        => PAYPAL_URL,
+            //'pi_url'        => PAYPAL_URL,
             'doc_url'       => PAYPAL_getDocURL('product_form',
                                             $_CONF['language']),
             'prod_type'     => $this->prod_type,
@@ -1337,7 +1337,7 @@ class Product
         if ($this->prod_type == PP_PROD_DOWNLOAD && $this->price == 0) {
             // Free, or unexpired downloads for non-anymous
             $T = PP_getTemplate('btn_download', 'download', 'buttons');
-            $T->set_var('pi_url', PAYPAL_URL);
+            $T->set_var('action_url', PAYPAL_URL . '/download.php');
             $T->set_var('id', $this->id);
             $buttons['download'] = $T->parse('', 'download');
             $add_cart = false;
@@ -1372,7 +1372,7 @@ class Product
                 'item_number'   => $this->id,
                 'short_description' => htmlspecialchars($this->short_description),
                 'amount'        => $this->getPrice(),
-                'pi_url'        => PAYPAL_URL,
+                'action_url'    => PAYPAL_URL . '/index.php',
                 //'form_url'  => $this->hasAttributes() ? '' : 'true',
                 //'form_url'  => false,
                 'form_url'  => $this->_view == 'list' ? true : false,

@@ -1,7 +1,7 @@
 {# begin {templatelocation} #}
 <a href="{pi_url}/index.php">{$LANG_PP['browse_cat']}</a>
 <br />
-<form action="{pi_url}/index.php" method="post">
+<form action="{action_url}" method="post">
     <b>{$LANG_PP['search_catalog']}:</b><br />
     {$LANG_PP['by_cat']}<br />
     <select name="category" style="width:140px;">
