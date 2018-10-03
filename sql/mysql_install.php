@@ -475,6 +475,7 @@ $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `item_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `item_id` int(11) unsigned NOT NULL,
+  `name` varchar(40) default '',
   `start` int(11) unsigned DEFAULT NULL,
   `end` int(11) unsigned DEFAULT NULL,
   `discount_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,

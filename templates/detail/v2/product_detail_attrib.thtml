@@ -54,7 +54,7 @@ action="{site_url}/paypal/index.php" method="post">
     <div>
 {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
-      <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      <br /><span class="paypalPrice sale">{sale_name}{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
 {!else}
       <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
 {!endif}
@@ -102,15 +102,20 @@ action="{site_url}/paypal/index.php" method="post">
 <!-- END SpecialFields -->
 
 {!if onhand}
-      <div id="paypalOnhand">
+      <div class="paypalOnhand">
         {onhand} {$LANG_PP['available']}
+      </div>
+{!endif}
+{!if stock_msg}
+      <div class="paypalOnhand">
+        {$LANG_PP['out_of_stock']}
       </div>
 {!endif}
       {add_cart_button}
     </div>
   </form>
 <!-- BEGIN BtnBlock -->
-  <div style="margin-left:30px;">{buy_now_button}</div>
+  <div style="margin-left:50px;">{buy_now_button}</div>
 <!-- END BtnBlock -->
 </div>
 

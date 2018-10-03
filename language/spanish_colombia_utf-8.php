@@ -133,7 +133,7 @@ $LANG_PP = array (
 'saveopt'           => 'Save Option',
 'deletecat'         => 'Delete Category',
 'product_id'        => 'Product ID',
-'other_func'        => 'Other Functions',
+'other_func'        => 'Mantenimiento',
 'q_del_item'        => 'Are you sure you want to delete this item?',
 'clearform'         => 'Reiniciar',
 'delivery_info'     => 'Delivery Information',
@@ -387,6 +387,7 @@ $LANG_PP = array (
 'include' => 'Include',
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
+'out_of_stock' => 'This item is currently out of stock.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -417,6 +418,7 @@ $PLG_paypal_MESSAGE04 = 'Error performing the plugin upgrade';
 $PLG_paypal_MESSAGE05 = 'Error upgrading the plugin version number';
 $PLG_paypal_MESSAGE06 = 'Plugin is already up to date';
 $PLG_paypal_MESSAGE07 = 'Invalid download token given';
+$PLG_paypal_MESSAGE08 = 'There was an error finalizing your order. Please contact the site administrator.';
 
 /** Language strings for the plugin configuration section */
 $LANG_configsections['paypal'] = array(

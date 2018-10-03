@@ -144,8 +144,7 @@ class paypal extends \Paypal\IPN
         }
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->gw->getPostBackUrl() .
-                '/cgi-bin/webscr');
+        curl_setopt($ch, CURLOPT_URL, $this->gw->getPostBackUrl());
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_FAILONERROR, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);

@@ -129,7 +129,7 @@ $LANG_PP = array (
 'saveopt'           => 'Optionen speichern',
 'deletecat'         => 'Kategorie löschen',
 'product_id'        => 'Produkt-ID',
-'other_func'        => 'Sonstiges',
+'other_func'        => 'Instandhaltung',
 'q_del_item'        => 'Sind Sie sicher, dass Sie dieses Produkt löschen möchten?',
 'clearform'         => 'Zurücksetzen',
 'del_item_instr'    => 'Produkte, die keine Käufe haben, können gelöscht werden. Wenn ein Produkt bereits gekauft wurde, kann es nur deaktiviert werden.',
@@ -379,6 +379,7 @@ $LANG_PP = array (
 'include' => 'Include',
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
+'out_of_stock' => 'This item is currently out of stock.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -409,6 +410,7 @@ $PLG_paypal_MESSAGE04 = 'Fehler beim Durchführen des Plugin-Aktualisierung';
 $PLG_paypal_MESSAGE05 = 'Fehler beim Aktualisieren der Plugin-Versionsnummer';
 $PLG_paypal_MESSAGE06 = 'Plugin ist bereits auf dem aktuellen Stand';
 $PLG_paypal_MESSAGE07 = 'Ungültiger Download-Token gegeben';
+$PLG_paypal_MESSAGE08 = 'There was an error finalizing your order. Please contact the site administrator.';
 
 /** Language strings for the plugin configuration section */
 $LANG_configsections['paypal'] = array(

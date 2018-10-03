@@ -438,6 +438,9 @@ function PAYPAL_do_upgrade($dvlp = false)
             $cats = array();
             if ($res) {
                 while ($A = DB_fetchArray($res, false)) {
+                    // Escape string values
+                    $A['cat_name'] = DB_escapeString($A['cat_name']);
+                    $A['description'] = DB_escapeString($A['description']);
                     $cats[] = $A;
                 }
                 $sql_cats = array();
@@ -541,6 +544,14 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} DROP ts_old";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} DROP KEY `order_id`";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.order_log']} ADD KEY `order_id` (`order_id`, `ts`)";
+        }
+
+        // Change the IPN log table to use Unix timestamps.
+        if (_PPtableHasColumn('paypal.ipnlog', 'time')) {
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD ts int(11) unsigned after `ip_addr`";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.ipnlog']} SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`time`, '+00:00', @@session.time_zone))";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} DROP `time`";
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD KEY `ipnlog_ts` (`ts`)";
         }
 
         if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
@@ -663,6 +674,7 @@ function PAYPAL_remove_old_files()
             // 0.6.0
             'language/authorizenetsim_english.php',
             'templates/viewcart.uikit.thtml',
+            'templates/detaul/product_detail_attrib.thtml',
             'templates/detail/v2/product_detail.thtml',
             'templates/detail/v1/product_detail.thtml',
             'templates/list/v1/product_list_item.thtml',

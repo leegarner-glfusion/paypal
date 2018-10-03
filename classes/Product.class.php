@@ -47,6 +47,7 @@ class Product
     public $override_price = false;
     private $_uid = 0;  // user id, for pricing
     private $_view = 'detail';  // type of button to create (list or detail)
+    private $Sale = NULL;
 
     /**
      *  Constructor.
@@ -1036,7 +1037,6 @@ class Product
             $s_desc = COM_highlightQuery($s_desc, $_REQUEST['query']);
         }
 
-        //$onsale = $this->isOnSale();
         $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
@@ -1173,6 +1173,7 @@ class Product
             'price'             => Currency::getInstance()->FormatValue($this->getPrice()),
             'orig_price'        => Currency::getInstance()->Format($this->_orig_price),
             'on_sale'           => $this->isOnSale(),
+            'sale_name'         => $this->isOnSale() ? $this->getSale()->name . '&nbsp;' : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => Currency::getInstance()->Pre(),
             'price_postfix'     => Currency::getInstance()->Post(),
@@ -1180,6 +1181,7 @@ class Product
             'qty_disc'          => $qty_disc_txt,
             'session_id'        => session_id(),
             'shipping_txt'      => $shipping_txt,
+            'stock_msg'         => $this->_OutOfStock(),
         ) );
         $T->set_block('product', 'SpecialFields', 'SF');
         //var_dump($this->special_fields);die;
@@ -1339,11 +1341,8 @@ class Product
             $T->set_var('id', $this->id);
             $buttons['download'] = $T->parse('', 'download');
             $add_cart = false;
-
-        } elseif ($this->track_onhand == 1 && $this->onhand < 1 &&
-                $this->oversell == 1) {
-            // Do nothing but show the download link (see above).
-            // Make sure the add_cart button isn't shown, either.
+        } elseif ($this->_OutOfStock() > 0) {
+            // If out of stock, display but deny purchases
             $add_cart = false;
         } elseif ($_USER['uid'] == 1 && !$_PP_CONF['anon_buy'] &&
                 !$this->hasAttributes() && $this->price > 0) {
@@ -1849,7 +1848,22 @@ class Product
     */
     public function getSalePrice()
     {
-        return Sales::getEffective($this)->calcPrice($this->price);
+        return $this->getSale()->calcPrice($this->price);
+    }
+
+
+    /**
+     * Sets and returns the private Sale object as the current effective
+     * sale.
+     *
+     * @return  object      Sale object
+     */
+    public function getSale()
+    {
+        if ($this->Sale === NULL) {
+            $this->Sale = Sales::getEffective($this);
+        }
+        return $this->Sale;
     }
 
 
@@ -2076,6 +2090,24 @@ class Product
     public function cartCanAccumulate()
     {
         return true;
+    }
+
+
+    /**
+     * Check if this item is out of stock.
+     *
+     * @return  integer     Zero to behave normally, or 1 or 2 if out of stock.
+     */
+    private function _OutOfStock()
+    {
+        if ($this->track_onhand == 0 || $this->onhand > 0) {
+            // Return zero, act normally.
+            return 0;
+        } else {
+            // Return the oversell setting for the callor to act accordinglly
+            // when out of stock
+            return $this->oversell;
+        }
     }
 
 }   // class Product

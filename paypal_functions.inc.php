@@ -934,8 +934,9 @@ function ipnlogSingle($id, $txn_id)
 
     $res = DB_query($sql);
     $A = DB_fetchArray($res, false);
-    if (empty($A))
+    if (empty($A)) {
         return "Nothing Found";
+    }
 
     // Allow all serialized data to be available to the template
     $ipn = @unserialize($A['ipn_data']);
@@ -948,10 +949,11 @@ function ipnlogSingle($id, $txn_id)
         $vals = $gw->ipnlogVars($ipn);
 
         // Display the specified ipnlog row
+        $Dt = new \Date($A['ts'], $_CONF['timezone']);
         $T->set_var(array(
             'id'        => $A['id'],
             'ip_addr'   => $A['ip_addr'],
-            'time'      => $A['time'],
+            'time'      => PP_dateTooltip($Dt),
             'txn_id'    => $A['txn_id'],
             'gateway'   => $A['gateway'],
             //'pmt_gross' => $vals['pmt_gross'],
