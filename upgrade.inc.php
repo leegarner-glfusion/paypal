@@ -438,6 +438,9 @@ function PAYPAL_do_upgrade($dvlp = false)
             $cats = array();
             if ($res) {
                 while ($A = DB_fetchArray($res, false)) {
+                    // Escape string values
+                    $A['cat_name'] = DB_escapeString($A['cat_name']);
+                    $A['description'] = DB_escapeString($A['description']);
                     $cats[] = $A;
                 }
                 $sql_cats = array();
