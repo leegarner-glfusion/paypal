@@ -602,7 +602,7 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
                 'item_name'     => $vars['item_name'],
                 'item_number'   => $vars['item_number'],
                 'amount'        => $vars['amount'],
-                'pi_url'        => PAYPAL_URL,
+                'action_url'    => PAYPAL_URL . '/index.php',
                 'item_type'     => $item_type,
             ) );
             $retval = $T->parse('', 'cart');
@@ -974,7 +974,7 @@ function phpblock_paypal_cart_contents()
             'price'         => $Cur->FormatValue($item->price),
             'quantity'      => $item->quantity,
             'item_total'    => $Cur->FormatValue($item_total),
-            'pi_url'        => PAYPAL_URL,
+//            'pi_url'        => PAYPAL_URL,
             'item_link'     => $P->getLink(),
         ) );
         $T->parse('cRow', 'CartRow', true);
@@ -1005,7 +1005,7 @@ function phpblock_paypal_search()
 
     $T->set_var(array(
         'category_options'  => $category_options,
-        'pi_url'            => PAYPAL_URL,
+        'action_url'        => PAYPAL_URL . '/index.php',
     ) );
     $T->parse('output', 'search');
     return $T->finish($T->get_var('output'));

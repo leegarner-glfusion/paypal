@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<form action="{pi_url}/download.php" method="post">
+<form action="{action_url}" method="post">
   <input type="hidden" name="id" value="{id}">
   <input type="submit" class="paypalButton orange" border="0" 
     name="download" value="{$LANG_PP['download']}" />

@@ -5,7 +5,7 @@
 {!if doc_url}
 <a href="#" onclick="popupWindow('{doc_url}', 'Help', 640, 480, 1);return false;" class="toolbar">{$LANG_PP['clk_help']}</a>
 {!endif}
-<form action="{pi_admin_url}/index.php" method="post" id="ppProductForm"
+<form action="{action_url}" method="post" id="ppProductForm"
     class="uk-form uk-form-horizontal"
     enctype="multipart/form-data" onsubmit='set_postcontent();'>
   <input type="hidden" name="id" value="{product_id}" />
