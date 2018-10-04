@@ -1,3 +1,0 @@
-[submodule "classes/Gateways/square/connect-php-sdk"]
-	path = classes/Gateways/square/connect-php-sdk
-	url = https://github.com/square/connect-php-sdk.git
