@@ -372,7 +372,7 @@ class Coupon extends Product
         if ($price == 0) {
             return $LANG_PP['see_details'];
         } else {
-            return $this->currency->Format($price);
+            return Currency::getInstance()->Format($price);
         }
     }
 
