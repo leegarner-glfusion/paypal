@@ -473,6 +473,7 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
 // since 0.6.0
 $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40),
   `item_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `item_id` int(11) unsigned NOT NULL,
   `name` varchar(40) default '',
@@ -881,6 +882,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.buttons']} ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
     "CREATE TABLE {$_TABLES['paypal.sales']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `name` varchar(40),
       `item_type` varchar(10),
       `item_id` int(11) unsigned NOT NULL,
       `start` int(11) unsigned,
