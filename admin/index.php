@@ -1686,7 +1686,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
     case 'start':
     case 'end':
         $Dt->setTimestamp((int)$fieldvalue);
-        $retval = PP_dateTooltipo($Dt);
+        $retval = PP_dateTooltip($Dt);
         break;
 
     case 'item_id':
