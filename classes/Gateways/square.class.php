@@ -217,7 +217,7 @@ class square extends \Paypal\Gateway
                     $TaxMoney->setCurrency($this->currency_code);
                     $taxObj = new \SquareConnect\Model\OrderLineItemTax(
                         array(
-                            'percentage' => (string)$Cur->toInt($_PP_CONF['tax_rate']),
+                            'percentage' => (string)($_PP_CONF['tax_rate'] * 100),
                             'name' => 'Sales Tax',
                         )
                     );
