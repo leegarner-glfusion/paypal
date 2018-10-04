@@ -241,8 +241,13 @@ class Cart extends Order
             return;
         }
         foreach ($items as $id=>$value) {
-            $value = (float)$value;
-            $this->items[$id]->setQuantity($value);
+            // Make sure the item object exists. This can get out of sync if a
+            // cart has been finalized and the user updates it from another
+            // browser window.
+            if (array_key_exists($id, $this->items)) {
+                $value = (float)$value;
+                $this->items[$id]->setQuantity($value);
+            }
         }
         // Now look for a coupon code to redeem against the user's account.
         if ($_PP_CONF['gc_enabled']) {
