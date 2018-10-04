@@ -1,0 +1,36 @@
+{# begin {templatelocation} #}
+<div id="AmazonPayButton"></div>
+<script type="text/javascript">
+   OffAmazonPayments.Button("AmazonPayButton", "{sellerId}", {
+     type: "hostedPayment",
+
+     hostedParametersProvider: function(done){
+        args = {
+            amount: {amount},
+            currencyCode: "{currencyCode}",
+            sellerNote: "{sellerNote}",
+        }
+        // Call the back end to combine button args with
+        // other seller config param values and sign it.
+        $.getJSON("/generateRequestSignature",
+           args,
+           function(data) {
+              done (data)
+           })
+        },
+        onError: function(errorCode) {
+            // your error handling code
+        }
+    });
+</script>
+{!if 0}
+<form style="display:inline;" class="frm_checkout"
+    action="{amazon_url}" method="post">
+  {gateway_vars}
+  <input type="image"
+    src="http://g-ecx.images-amazon.com/images/G/01/asp/beige_small_paynow_withmsg_whitebg.gif"
+    name="submit" alt="{$LANG_PP['buy_now']}"
+    title="{$LANG_PP['buy_now']}" />
+</form>
+{!endif}
+{# end {templatelocation} #}

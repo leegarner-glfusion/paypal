@@ -1,0 +1,9 @@
+{# begin {templatelocation} #}
+<form style="display:inline;" class="frm_donation"
+    action="{amazon_url}" method="post">
+  {gateway_vars}
+  <input type="image" src="http://g-ecx.images-amazon.com/images/G/01/asp/golden_small_donate_withlogo_lightbg.gif"
+    name="submit" alt="{$LANG_PP['buy_now']}"
+    title="{$LANG_PP['buy_now']}" />
+</form>
+{# end {templatelocation} #}
