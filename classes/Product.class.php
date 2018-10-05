@@ -1080,8 +1080,6 @@ class Product
                         'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
                         'img_url'       => PAYPAL_URL.'/images/products',
                         'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
-                        'tn_width'      => $_PP_CONF['max_thumb_size'],
-                        'tn_height'     => $_PP_CONF['max_thumb_size'],
                         'session_id'    => session_id(),
                         'small_imgfile' => $prow['filename'],
                     ) );

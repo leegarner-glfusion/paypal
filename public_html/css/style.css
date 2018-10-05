@@ -106,6 +106,10 @@ div.paypalProductDetail .ppShortDesc {
     float: left;
     margin-bottom: 10px;
 }
+.paypalProductDetail.v2 .main_img {
+    height: 400px;
+}
+
 .paypalProductDetail h1 {
     font-size: 200%;
 }
@@ -155,6 +159,12 @@ div.paypalProductThumbWrapper {
 div.paypalProductThumb {
     float: left;
     margin-right: .25em;
+}
+div.paypalProductThumb.v1 img {
+    max-height: 150px;
+}
+div.paypalProductThumb.v2 img {
+    max-height: 80px;
 }
 
 div.ppProductListOuter {
@@ -554,7 +564,7 @@ table.paypalViewCartTable {
 }
 #disp_img {
     max-width: 460px;
-    max-height: 400px;
+    /*max-height: 400px;*/
 }
 
 .paypalRatingBar {

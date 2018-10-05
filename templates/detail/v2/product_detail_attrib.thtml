@@ -19,13 +19,13 @@
 <div style="clear:both;margin-top:20px;"></div>
 {!if main_img}
 <div class="paypalProductDetail v2" style="width:40%" id="product-image">
-  <div class="uk-hidden-small uk-responsive-height">
+  <div class="main_img uk-hidden-small">
     <img id="disp_img" class="uk-responsive-width uk-responsive-height"
         src="{site_url}/lglib/img.php?src={main_imgfile}&plugin=paypal&sess={session_id}&width=460&height=460" />
   </div>
   <div class="paypalProductThumbWrapper">
 <!-- BEGIN Thumbnail -->
-    <div class="paypalProductThumb v2" style="width:{tn_width}px; height:{tn_height}px;" >
+    <div class="paypalProductThumb v2">
 {!if thumb_url}
       <a href="{img_url}/{img_file}"
 {!if is_uikit}
@@ -33,7 +33,7 @@ data-uk-lightbox="{group:'product'}">
 {!else}
 target="_blank" rel="slimbox[product]">
 {!endif}
-        <img src="{site_url}/lglib/img.php?src={small_imgfile}&plugin=paypal&sess={session_id}&width=125&height=125" border="0" alt="{$LANG_PP[click_to_enlarge]}" title="{$LANG_PP[click_to_enlarge]}"
+        <img src="{thumb_url}" border="0" alt="{$LANG_PP[click_to_enlarge]}" title="{$LANG_PP[click_to_enlarge]}"
             class="tooltip"
             onmouseover="javascript:PPupdateImage('{small_imgfile}','{lg_img}');" />
       </a>
@@ -119,16 +119,15 @@ action="{site_url}/paypal/index.php" method="post">
 <!-- END BtnBlock -->
 </div>
 
-{!if rating_bar}
-<div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
-{!endif}
 {!if main_img}
 {# with a main image the description goes below the image and price #}
 <div id="paypalProductDesc" class="ppProductDesc v2">
   {description}
 </div>
 {!endif}
-
+{!if rating_bar}
+<div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
+{!endif}
 <div class="paypalComments">
   {usercomments}
 </div>
