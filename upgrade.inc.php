@@ -554,6 +554,13 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD KEY `ipnlog_ts` (`ts`)";
         }
 
+        // Templates now use CSS to limit thumbnail sizes. If the configured max_thumb_size
+        // is still the old default, change it to the new default
+        if ($_PP_CONF['max_thumb_size'] == 100) {
+            $C = config::getInstance();
+            $C->set('max_thumb_size', 250, 'paypal');
+        }
+
         if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
         // Rebuild the tree after the lft/rgt category fields are added.
         if ($add_cat_mptt) {

@@ -10,7 +10,7 @@
       {short_description}
 {!endif}
     </div>
-  <div class="ItemImage" style="width:{img_cell_width}px;">
+  <div class="ItemImage">
 {!if small_pic}
 {!if item_url}
         <a href="{item_url}">

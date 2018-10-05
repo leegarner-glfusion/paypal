@@ -717,13 +717,13 @@ function ProductList($cat_id = 0)
     // glFusion blocks are shown
     if ($_PP_CONF['displayblocks'] > 0) {
         $T->set_var(array(
-            'lg_cols'   => 4,
+            'lg_cols'   => 3,
             'med_cols'  => 3,
         ) );
     } else {
         $T->set_var(array(
-            'lg_cols'   => 5,
-            'med_cols'  => 4,
+            'lg_cols'   => 4,
+            'med_cols'  => 3,
         ) );
     }
 

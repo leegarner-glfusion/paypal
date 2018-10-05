@@ -179,7 +179,8 @@ div.ppProductListOuter {
   clear: both;
 }
 
-.paypalProductListItem.v2 {
+.paypalProductListItem.v2,
+.paypalProductListItem.v3 {
   cursor: pointer;
   position:relative;
   border: 2px solid #ddd;
@@ -190,6 +191,16 @@ div.ppProductListOuter {
   height: 100%;
 }
 
+.paypalProductListItem.v3 {
+    text-align: center;
+    display: block;
+}
+
+.paypalProductListItem.v3 div.ItemImage {
+    height: 145px;
+    display: block;
+}
+
 .paypalProductListItemUrl2 div.ratingbar,
 .ppRatingBar {
   /*position: relative;*/
@@ -197,15 +208,11 @@ div.ppProductListOuter {
   margin-bottom: 4px;
 }
 
-.ppRatingBar.v1 {
-  position: relative;
-  text-align:center;
-  padding-top: 14px;
-  float: left;
-}
-
 .ppRatingBar.list.v1 {
-/*  position: absolute;*/
+    margin-bottom: 9px;
+    position: absolute;
+    display: block;
+    width: 100%;
 }
 
 .ppRatingBar.v2 {
@@ -244,12 +251,22 @@ div.paypalProductListItem.v1 div.ItemImage {
     margin: 0px 10px;
 }
 
+div.paypalProductListItem.v1 div.ItemImage img {
+    max-height: 120px;
+    max-width: 120px;
+}
+
 div.paypalProductListItem.v2 div.ItemImage {
     text-decoration: none;
     border: 5px;
     text-align: center;
     margin: auto;
-    max-height: 120px;
+    max-height: 140px;
+}
+
+div.paypalProductListItem.v2 div.ItemImage img,
+div.paypalProductListItem.v3 div.ItemImage img {
+    max-height: 140px;
 }
 
 div.paypalProductListItem.v1 div.ItemUrl {
@@ -258,6 +275,7 @@ div.paypalProductListItem.v1 div.ItemUrl {
     font-weight: bold;
 }
 
+div.paypalProductListItem.v3 div.ItemUrl,
 div.paypalProductListItem.v2 div.ItemUrl {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -274,8 +292,7 @@ div.paypalProductListItem.v2 div.ItemUrl {
 div.Button.list.v2 {
     margin-top: 13px;
     display:block;
-    float: right;
-    width: 70%;
+    width: 100%;
 }
 
 div.paypalProductListItem.v1 div.ItemButtons {
@@ -435,6 +452,13 @@ div.ItemOptions {
     text-align:center;
 }
 
+.paypalPrice.list.v3 {
+    color: #666666;
+    font-size:inherit;
+    text-align:right;
+    margin-right: 5px;
+}
+
 .paypalPrice.v2 {
     margin-top: 4px;
     text-align: right;
@@ -445,9 +469,18 @@ div.ItemOptions {
     text-decoration:line-through;
 }
 
+.paypalPrice.list.was.v3 {
+    color:#999999;
+    text-decoration:line-through;
+}
+
 .paypalPrice.normal {
     color: #666666;
     font-size:120%;
+}
+
+.paypalDetailAttrib.v2 .paypalPrice {
+    font-size: 140%;
 }
 
 .paypalPrice.sale,

@@ -2,6 +2,8 @@
 
 ## Ver 0.6.0
 Released TBD
+- Thumbnails are sized by CSS. `max_thumb_size` should be large enough for all templates.
+- Added another product list template version
 - Added Admin dvlpupdate.php with idempotent upgrades to assist those tracking development branches.
 - Enable template for Thanks message, allow customization.
 - Support `CUSTOM_paypal_orderID()` function to create custom order IDs.
