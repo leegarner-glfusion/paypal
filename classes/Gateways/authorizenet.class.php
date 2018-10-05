@@ -352,11 +352,11 @@ class authorizenet extends \Paypal\Gateway
                     'unitPrice' => $Cur->FormatValue($Item->price),
                     'taxable' => $Item->taxable ? true : false,
                 );
-                $total_amount += $cart->shipping;
-                $total_amount += $cart->handling;
-                $total_amount += $cart->tax;
                 $total_amount += (float)$Item->price * (float)$Item->quantity;
             }
+            $total_amount += $cart->shipping;
+            $total_amount += $cart->handling;
+            $total_amount += $cart->tax;
         }
 
         $json['getHostedPaymentPageRequest']['transactionRequest']['amount'] = $Cur->FormatValue($total_amount);
