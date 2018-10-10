@@ -244,20 +244,15 @@
 
     <div class="uk-form-row">
       <label class="uk-form-label">{$LANG_PP['shipping_type']}:
-        <span id="shipping_type" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-<!--      <select name="shipping_type" id="shipping"
-            onchange="PP_changeShippingType(this.value);">
-        <option value="0" {ship_sel_0}>{$LANG_PP['no_shipping']}</option>
-        <option value="1" {ship_sel_1}>{$LANG_PP['pp_profile']}</option>
-        <option value="2" {ship_sel_2}>{$LANG_PP['fixed']}</option>
-        <option value="3" {ship_sel_3}>{$LANG_PP['shipping_module']}</option>
-      </select>-->
-        &nbsp;&nbsp;{$LANG_PP['shipping_amt']} ({$LANG_PP['per_item']}):
-        <input type="text" name="shipping_amt" value="{shipping_amt}" /><br />
-        &nbsp;&nbsp;{$LANG_PP['shipping_units']} ({$LANG_PP['per_item']}):
+        {$LANG_PP['shipping_amt']} ({$LANG_PP['per_item']}):
+        <input type="text" name="shipping_amt" value="{shipping_amt}" />
+        <span id="shipping_amt" class="tooltip_cfg tooltipstered"></span>
+        <br />
+        {$LANG_PP['shipping_units']} ({$LANG_PP['per_item']}):
         <input type="text" name="shipping_units" value="{shipping_units}" />
+        <span id="shipping_units" class="tooltip_cfg tooltipstered"></span>
       </div>
     </div>
     </div>
