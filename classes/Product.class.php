@@ -90,6 +90,7 @@ class Product
             $this->votes = 0;
             $this->shipping_type = 0;
             $this->shipping_amt = 0;
+            $this->shipping_units = 0;
             $this->show_random = 1;
             $this->show_popular = 1;
             $this->keywords = '';
@@ -199,6 +200,7 @@ class Product
         case 'rating':
         case 'weight':
         case 'shipping_amt':
+        case 'shipping_units':
         case '_act_price':      // actual price, sale or nonsale
         case '_orig_price':     // original price
             // Float values
@@ -265,6 +267,7 @@ class Product
             if (!self::isPluginItem($value)) {
                 $value = (int)$value;
             }
+
         default:
             // Other value types (array?). Save it as-is.
             $this->properties[$var] = $value;
@@ -316,6 +319,7 @@ class Product
         $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
         $this->shipping_type = PP_getVar($row, 'shipping_type', 'integer');
         $this->shipping_amt = PP_getVar($row, 'shipping_amt', 'float');
+        $this->shipping_units = PP_getVar($row, 'shipping_units', 'float');
         $this->show_random = isset($row['show_random']) ? $row['show_random'] : 0;
         $this->show_popular = isset($row['show_popular']) ? $row['show_popular'] : 0;
         $this->track_onhand = isset($row['track_onhand']) ? $row['track_onhand'] : 0;
@@ -502,7 +506,8 @@ class Product
                 views='" . (int)$this->views. "',
                 taxable='" . (int)$this->taxable . "',
                 shipping_type='" . (int)$this->shipping_type . "',
-                shipping_amt='" . number_format($this->shipping_amt, 2, '.', '') . "',
+                shipping_amt = '{$this->shipping_amt}',
+                shipping_units = '{$this->shipping_units}',
                 comments_enabled='" . (int)$this->comments_enabled . "',
                 rating_enabled='" . (int)$this->rating_enabled . "',
                 show_random='" . (int)$this->show_random . "',
@@ -751,7 +756,7 @@ class Product
             'category'      => $this->cat_id,
             'short_description' => htmlspecialchars($this->short_description, ENT_QUOTES, COM_getEncodingt()),
             'description'   => htmlspecialchars($this->description, ENT_QUOTES, COM_getEncodingt()),
-            'price'         => sprintf('%.2f', $this->price),
+            'price'         => Currency::getInstance()->formatValue($this->price),
             'file'          => htmlspecialchars($this->file, ENT_QUOTES, COM_getEncodingt()),
             'expiration'    => $this->expiration,
             'action_url'    => PAYPAL_ADMIN_URL . '/index.php',
@@ -773,7 +778,8 @@ class Product
             'ship_sel_' . $this->shipping_type => 'selected="selected"',
             'shipping_type' => $this->shipping_type,
             'track_onhand'  => $this->track_onhand,
-            'shipping_amt'  => sprintf('%.2f', $this->shipping_amt),
+            'shipping_amt'  => Currency::getInstance()->formatValue($this->shipping_amt),
+            'shipping_units'  => $this->shipping_units,
             'sel_comment_' . $this->comments_enabled =>
                                     'selected="selected"',
             'rating_chk'    => $this->rating_enabled == 1 ?
@@ -2043,19 +2049,13 @@ class Product
      */
     public function getShipping($qty = 1)
     {
-        global $_PP_CONF;
-
-        if ($_PP_CONF['use_shipping_mod']) {
-            return 0;
-        }
-
         switch ($this->shipping_type) {
         case 2:
             // fixed per-item shipping
             $shipping = (float)$this->shipping_amt * $qty;
             break;
         default:
-            // no shipping, or calculated by gateway
+            // no shipping or calculated for order by shipping module
             $shipping = 0;
         }
         return $shipping;

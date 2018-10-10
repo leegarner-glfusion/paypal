@@ -187,7 +187,7 @@
     <legend>{$LANG_PP['delivery_info']}</legend>
 
     <div class="uk-form-row">
-      <label class="uk-form-label" for="prod_type">{$LANG_PP['prod_type']}:
+      <label class="uk-form-label">{$LANG_PP['prod_type']}:
         <span id="prod_type" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -199,9 +199,9 @@
       </div>
     </div>
 
-    <div id="type_download">
+    <div id="type_download" class="uk-form-row">
     <div class="uk-form-row">
-      <label class="uk-form-label for="file">{$LANG_PP['select_file']}:
+      <label class="uk-form-label">{$LANG_PP['select_file']}:
         <span id="select_file" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -213,7 +213,7 @@
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label for="uploadfile">{$LANG_PP['or_upload_new']}:
+      <label class="uk-form-label">{$LANG_PP['or_upload_new']}:
         <span id="upload_file" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -222,7 +222,7 @@
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label for="expiration">{$LANG_PP['exp_time_days']}:
+      <label class="uk-form-label">{$LANG_PP['exp_time_days']}:
         <span id="expiration" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -232,9 +232,9 @@
     </div>
     </div>
 
-    <div id="type_physical">
+    <div id="type_physical" class="uk-form-row">
     <div class="uk-form-row">
-      <label class="uk-form-label for="weight">{$LANG_PP['weight']}:
+      <label class="uk-form-label">{$LANG_PP['weight']}:
         <span id="weight" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -243,31 +243,27 @@
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label for="shipping">{$LANG_PP['shipping_type']}:
+      <label class="uk-form-label">{$LANG_PP['shipping_type']}:
         <span id="shipping_type" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
-      <select name="shipping_type" id="shipping"
+<!--      <select name="shipping_type" id="shipping"
             onchange="PP_changeShippingType(this.value);">
         <option value="0" {ship_sel_0}>{$LANG_PP['no_shipping']}</option>
         <option value="1" {ship_sel_1}>{$LANG_PP['pp_profile']}</option>
         <option value="2" {ship_sel_2}>{$LANG_PP['fixed']}</option>
         <option value="3" {ship_sel_3}>{$LANG_PP['shipping_module']}</option>
-      </select>
-      <span id="shipping_amount">
+      </select>-->
         &nbsp;&nbsp;{$LANG_PP['shipping_amt']} ({$LANG_PP['per_item']}):
-        <input type="text" name="shipping_amt" value="{shipping_amt}" />
-      </span>
-      <span id="shipping_units">
+        <input type="text" name="shipping_amt" value="{shipping_amt}" /><br />
         &nbsp;&nbsp;{$LANG_PP['shipping_units']} ({$LANG_PP['per_item']}):
-        <input type="text" name="shipping_amt" value="{shipping_amt}" />
-      </span>
+        <input type="text" name="shipping_units" value="{shipping_units}" />
       </div>
     </div>
     </div>
 
     <div class="uk-form-row">
-      <label class="uk-form-label" for="track_onhand">{$LANG_PP['track_onhand']}
+      <label class="uk-form-label">{$LANG_PP['track_onhand']}
         <span id="track_onhand" class="tooltip_cfg tooltipstered"></span>
       </label>
       <div class="uk-form-controls">
@@ -382,7 +378,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
   PP_changeProdType('{prod_type}');
-  PP_changeShippingType('{shipping_type}');
+  //PP_changeShippingType('{shipping_type}');
   PP_showOversell({track_onhand});
 });
 
