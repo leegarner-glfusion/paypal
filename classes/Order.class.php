@@ -22,6 +22,7 @@ class Order
 
     private $isAdmin = false;       // True if viewing via admin interface
     private $properties = array();  // Array of properties (DB fields)
+    private $is_final = false;      // Flag to indicate order is finalized
     protected $isNew = true;        // Flag to indicate a new, empty order
     protected $m_info = array();    // Misc. info used by Cart
     var $no_shipping = 1;           // Tracker if no_shipping can be set
@@ -427,12 +428,12 @@ class Order
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
-        $final = false;
+        $this->is_final = false;
 
         switch ($view) {
         case 'order':
         case 'adminview';
-            $final = true;
+            $this->is_final = true;
         case 'checkout':
             $tplname = 'order';
             break;
@@ -464,8 +465,6 @@ class Order
         $Currency = Currency::getInstance();
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $this->subtotal = 0;
-        $this->shipping = 0;
-        $this->handling = 0;
         foreach ($this->items as $item) {
             $P = $item->getProduct();
             $item_total = $item->price * $item->quantity;
@@ -506,7 +505,7 @@ class Order
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $Currency->Format($this->total),
-            'not_final'     => !$final,
+            'not_final'     => !$this->is_final,
             'order_date'    => $this->order_date->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $this->order_date->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
@@ -986,19 +985,16 @@ class Order
         $this->handling = 0;
         $units = 0;
         foreach ($this->items as $item) {
-            if (!$_PP_CONF['use_shipping_mod']) {
-                $this->shipping += $item->shipping;
-            } else {
-                $units += ($item->getProduct()->shipping_amt * $item->quantity);
-            }
             $this->handling += $item->handling;
+            $this->shipping += $item->getProduct()->getShipping($item->quantity);
+            $units += $item->getProduct()->shipping_units * $item->quantity;
         }
+        // Now get the order shipping, if any, based on product units.
+        $shipper = Shipping::getBestRate($units);
+        $this->ship_method = $shipper->name;
+        $this->shipping += $shipper->best_rate;
+
         $this->calcTax();   // Tax calculation is slightly more complex
-        if ($_PP_CONF['use_shipping_mod']) {
-            $shipper = Shipping::getBestRate($units);
-            $this->ship_method = $shipper->name;
-            $this->shipping = $shipper->best_rate;
-        }
         return $this->tax + $this->shipping + $this->handling;
     }
 
@@ -1041,7 +1037,13 @@ class Order
         foreach ($this->items as $id => $item) {
             $total += ($item->price * $item->quantity);
         }
-        $total += $this->calcTotalCharges();
+        if ($this->is_final) {
+            // Already have the amounts calculated, don't do it again
+            // every time the order is viewed since rates may change.
+            $total += $this->shipping + $this->tax + $this->handling;
+        } else {
+            $total += $this->calcTotalCharges();
+        }
         return round($total, Currency::getInstance()->Decimals());
     }
 
