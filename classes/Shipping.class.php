@@ -61,6 +61,7 @@ class Shipping
                     'rate'  => 5,
                 ),
             );
+            $this->best_rate = 0;
         }
     }
 
@@ -257,10 +258,13 @@ class Shipping
         $shippers = self::getShippers($units);
         $best = NULL;
         foreach ($shippers as $shipper) {
-            //echo ".... checking {$shipper->best_rate} from {$shipper->name}\n";
             if ($best === NULL || ($shipper->best_rate !== NULL && $shipper->best_rate < $best->best_rate)) {
                 $best = $shipper;
             }
+        }
+        if ($best === NULL) {
+            // Create an empty object to provide zero shipping cost
+            $best = new self();
         }
         return $best;
     }
