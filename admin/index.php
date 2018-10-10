@@ -52,7 +52,7 @@ $expected = array(
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
     'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
-    'sales', 'editdiscount', 'editshipping',
+    'sales', 'editdiscount', 'editshipping', 'shipping',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -167,8 +167,10 @@ case 'purgecarts':
     break;
 
 case 'saveshipping':
-    $S = new \Paypal\Shipping();
+    $id = PP_getVar($_POST, 'id', 'integer');
+    $S = new \Paypal\Shipping($id);
     $S->Save($_POST);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?shipping=x');
     break;
 
 case 'gwinstall':
@@ -435,6 +437,10 @@ case 'attributes':
         }
     }
     $content .= PAYPAL_adminlist_Attributes();
+    break;
+
+case 'shipping':
+    $content .= PAYPAL_adminlist_Shipping();
     break;
 
 case 'editattr':
@@ -829,6 +835,11 @@ function PAYPAL_adminMenu($view='')
                             '/index.php?attributes=x',
                     'text' => $LANG_PP['attr_list']);
     }
+
+    $menu_arr[] = array(
+        'url'  => PAYPAL_ADMIN_URL . '/index.php?shipping=x',
+        'text' => $LANG_PP['shipping'],
+    );
 
     if ($view == 'sales') {
         $menu_arr[] = array(
@@ -1234,6 +1245,79 @@ function PAYPAL_adminlist_Attributes()
 
 
 /**
+*   Displays the list of product attributes.
+*
+*   @return string  HTML string containing the contents of the ipnlog
+*/
+function PAYPAL_adminlist_Shipping()
+{
+    global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
+
+    $sql = "SELECT * FROM {$_TABLES['paypal.shipping']}";
+
+    $header_arr = array(
+        array(
+            'text'  => 'ID',
+            'field' => 'id',
+            'sort'  => true,
+        ),
+        array(
+            'text'  => $LANG_PP['edit'],
+            'field' => 'edit',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_PP['enabled'],
+            'field' => 'enabled',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_PP['name'],
+            'field' => 'name',
+        ),
+    );
+
+    $defsort_arr = array(
+        'field' => 'name',
+        'direction' => 'ASC',
+    );
+
+    $display = COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
+
+    $filter = '<button type="submit" name="editshipping" value="0" class="uk-button uk-button-success">' .
+        $LANG_PP['new_ship_method'] . '</button>';
+    $display .= '<form action="' . PAYPAL_ADMIN_URL . '/index.php?editshipping=0" method="get">' .
+        $filter . '</form';
+
+    $query_arr = array(
+        'table' => 'paypal.shipping',
+        'sql' => $sql,
+        'query_fields' => array(),
+        'default_filter' => '',
+    );
+
+    $text_arr = array(
+        //'has_extras' => true,
+        'form_url' => PAYPAL_ADMIN_URL . '/index.php?shipping=x',
+    );
+
+    $options = array('chkdelete' => true, 'chkfield' => 'id');
+
+    if (!isset($_REQUEST['query_limit']))
+        $_GET['query_limit'] = 20;
+
+    $display .= ADMIN_list($_PP_CONF['pi_name'] . '_shiplist',
+            __NAMESPACE__ . '\getAdminField_Shipping',
+            $header_arr, $text_arr, $query_arr, $defsort_arr,
+            $filter, '', $options, '');
+    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+    return $display;
+}
+
+
+/**
 *   Get an individual field for the options admin list.
 *
 *   @param  string  $fieldname  Name of field (from the array, not the db)
@@ -1275,6 +1359,64 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
         $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
                 '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
+            array(
+                'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
+                'title' => 'Delete this item',
+            )
+        );
+        break;
+
+    default:
+        $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
+        break;
+    }
+
+    return $retval;
+}
+
+
+/**
+*   Get an individual field for the shipping profiles
+*
+*   @param  string  $fieldname  Name of field (from the array, not the db)
+*   @param  mixed   $fieldvalue Value of the field
+*   @param  array   $A          Array of all fields from the database
+*   @param  array   $icon_arr   System icon array (not used)
+*   @param  object  $EntryList  This entry list object
+*   @return string              HTML for field display in the table
+*/
+function getAdminField_Shipping($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
+
+    $retval = '';
+
+    switch($fieldname) {
+    case 'edit':
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+                PAYPAL_ADMIN_URL . "/index.php?editshipping={$A['id']}"
+        );
+        break;
+
+    case 'enabled':
+        if ($fieldvalue == '1') {
+                $switch = ' checked="checked"';
+                $enabled = 1;
+        } else {
+                $switch = '';
+                $enabled = 0;
+        }
+        $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
+                id=\"togenabled{$A['id']}\"
+                onclick='PP_toggle(this,\"{$A['id']}\",\"enabled\",".
+                "\"shipping\");' />" . LB;
+        break;
+
+    case 'delete':
+        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                '-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            PAYPAL_ADMIN_URL. '/index.php?delshipping=x&amp;id=' . $A['id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
                 'title' => 'Delete this item',
