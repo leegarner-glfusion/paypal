@@ -36,7 +36,7 @@
 {!else}
       <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
 {!endif}
-{!if shipping_txt}
+{!if Xshipping_txt}
     <br /><span class="ppPlusShipping">{shipping_txt}</span>
 {!endif}
 {!if qty_disc}

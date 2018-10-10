@@ -314,8 +314,8 @@ class Product
         $this->prod_type = isset($row['prod_type']) ? $row['prod_type'] : 0;
         $this->weight = $row['weight'];
         $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
-        $this->shipping_type = $row['shipping_type'];
-        $this->shipping_amt = $row['shipping_amt'];
+        $this->shipping_type = PP_getVar($row, 'shipping_type', 'integer');
+        $this->shipping_amt = PP_getVar($row, 'shipping_amt', 'float');
         $this->show_random = isset($row['show_random']) ? $row['show_random'] : 0;
         $this->show_popular = isset($row['show_popular']) ? $row['show_popular'] : 0;
         $this->track_onhand = isset($row['track_onhand']) ? $row['track_onhand'] : 0;
@@ -2043,13 +2043,22 @@ class Product
      */
     public function getShipping($qty = 1)
     {
-        if ($this->shipping_type == 2) {
-            // fixed per-item shipping
-            return (float)$this->shipping_amt * $qty;
-        } else {
-            // no shipping, or calculated by gateway
+        global $_PP_CONF;
+
+        if ($_PP_CONF['use_shipping_mod']) {
             return 0;
         }
+
+        switch ($this->shipping_type) {
+        case 2:
+            // fixed per-item shipping
+            $shipping = (float)$this->shipping_amt * $qty;
+            break;
+        default:
+            // no shipping, or calculated by gateway
+            $shipping = 0;
+        }
+        return $shipping;
     }
 
 

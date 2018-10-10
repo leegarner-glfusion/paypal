@@ -393,6 +393,14 @@ $LANG_PP = array (
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
 'out_of_stock' => 'This item is currently out of stock.',
+'shipping_module' => 'Shipping Module',
+'shipping_units' => 'Shipping Units',
+'min_ship_units' => 'Min Shipping Units',
+'max_ship_units' => 'Max Shipping Units',
+'rate_table' => 'Rate Table',
+'rate' => 'Parcel Rate',
+'add_rate' => 'Click to add a new rate',
+'new_ship_method' => 'New Shipment Method',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

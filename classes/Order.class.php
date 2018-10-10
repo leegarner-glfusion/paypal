@@ -105,6 +105,7 @@ class Order
         case 'shipping':
         case 'handling':
         case 'by_gc':
+        case 'ship_units':
             $this->properties[$name] = (float)$value;
             break;
 
@@ -472,7 +473,6 @@ class Order
             if ($item->taxable) {
                 $this->tax_items++;       // count the taxable items for display
             }
-            $this->shipping += $P->getShipping($item->quantity);
             $this->handling += $P->getHandling($item->quantity);
             $T->set_var(array(
                 'cart_item_id'  => $item->id,
@@ -500,6 +500,7 @@ class Order
         }
 
         $this->total = $this->getTotal();     // also calls calcTax()
+
         $by_gc = (float)$this->getInfo('apply_gc');
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
@@ -527,6 +528,7 @@ class Order
             'allow_gc'      => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'next_step'     => $step + 1,
             'not_anon'      => !COM_isAnonUser(),
+            'ship_method'   => $this->ship_method,
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
@@ -978,13 +980,25 @@ class Order
      */
     public function calcTotalCharges()
     {
+        global $_PP_CONF;
+
         $this->shipping = 0;
         $this->handling = 0;
+        $units = 0;
         foreach ($this->items as $item) {
-            $this->shipping += $item->shipping;
+            if (!$_PP_CONF['use_shipping_mod']) {
+                $this->shipping += $item->shipping;
+            } else {
+                $units += ($item->getProduct()->shipping_amt * $item->quantity);
+            }
             $this->handling += $item->handling;
         }
         $this->calcTax();   // Tax calculation is slightly more complex
+        if ($_PP_CONF['use_shipping_mod']) {
+            $shipper = Shipping::getBestRate($units);
+            $this->ship_method = $shipper->name;
+            $this->shipping = $shipper->best_rate;
+        }
         return $this->tax + $this->shipping + $this->handling;
     }
 

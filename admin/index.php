@@ -47,12 +47,12 @@ $expected = array(
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
-    'deldiscount', 'savediscount', 'purgecarts',
+    'deldiscount', 'savediscount', 'purgecarts', 'saveshipping',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
     'wfadmin', 'order', 'itemhist', 'reports', 'coupons', 'sendcards_form',
-    'sales', 'editdiscount',
+    'sales', 'editdiscount', 'editshipping',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -164,6 +164,11 @@ case 'purgecarts':
     \Paypal\Cart::Purge();
     COM_setMsg($LANG_PP['carts_purged']);
     COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
+    break;
+
+case 'saveshipping':
+    $S = new \Paypal\Shipping();
+    $S->Save($_POST);
     break;
 
 case 'gwinstall':
@@ -508,6 +513,11 @@ case 'configreport':
         $R = new $actionval();
         $content .= $R->showForm();
     }
+    break;
+
+case 'editshipping':
+    $S = new \Paypal\Shipping($actionval);
+    $content .= $S->Edit();
     break;
 
 default:

@@ -302,7 +302,6 @@ class paypal extends \Paypal\Gateway
                 }
                 $fields['quantity_' . $i] = $item->quantity;
 
-                //if (isset($item->shipping)) {
                 if ($item->shipping > 0) {
                     $fields['shipping_' . $i] = $item->shipping;
                     $shipping += $item->shipping;
@@ -311,6 +310,11 @@ class paypal extends \Paypal\Gateway
                     $weight += $item->weight;
                 }
                 $i++;
+            }
+
+            if ($cart->shipping > 0) {
+                $fields['shipping_1'] = $cart->shipping;
+                $shipping += $cart->shipping;
             }
 
             //$fields['tax_cart'] = (float)$cart->getInfo('tax');

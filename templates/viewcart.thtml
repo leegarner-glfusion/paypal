@@ -70,7 +70,11 @@
 {!endif}
 {!if shipping}
       <tr>
-        <td colspan="2" class="alignright">{$LANG_PP['shipping']}</td>
+        <td colspan="2" class="alignright">{$LANG_PP['shipping']}
+{!if ship_method}
+({ship_method})
+{!endif}
+        </td>
         <td colspan="2" class="alignright">{shipping}</td>
         <td></td>
       </tr>
