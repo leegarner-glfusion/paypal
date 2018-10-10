@@ -739,6 +739,10 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
             );
         break;
 
+    case 'price':
+        $retval = \Paypal\Currency::getInstance()->formatValue($fieldvalue);
+        break;
+
     default:
         $retval = htmlspecialchars($fieldvalue, ENT_QUOTES, COM_getEncodingt());
         break;
