@@ -486,6 +486,17 @@ $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
 ) ENGINE=MyIsam";
 
+// since 0.6.0+
+$_SQL['paypal.shipping'] = "CREATE TABLE `gl_pp_shipping` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `min_units` int(11) unsigned NOT NULL DEFAULT '0',
+  `max_units` int(11) unsigned NOT NULL DEFAULT '0',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `rates` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyIsam";
+
 // Sample data to load up the Paypal gateway configuration
 $_PP_SAMPLEDATA = array(
     "INSERT INTO {$_TABLES['paypal.categories']}
@@ -908,6 +919,17 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
+);
+$PP_UPGRADE['0.7.0'] = array(       // placeholder version
+    "CREATe TABLE `{$_TABLES['paypal.shipping']}` (
+        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        `name` varchar(255) NOT NULL DEFAULT '',
+        `min_units` int(11) unsigned NOT NULL DEFAULT '0',
+        `max_units` int(11) unsigned NOT NULL DEFAULT '0',
+        `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+        `rates` text,
+        PRIMARY KEY (`id`)
+    ) ENGINE=MyIsam",
 );
 
 ?>
