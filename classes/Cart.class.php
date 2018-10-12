@@ -264,6 +264,9 @@ class Cart extends Order
         if (isset($A['by_gc'])) {
             $this->setGC($A['by_gc']);
         }
+        if (isset($_POST['shipper_id'])) {
+            $this->setShipper($_POST['shipper_id']);
+        }
         $this->Save();  // Save cart vars, if changed, and update the timestamp
         return $this->m_cart;
     }
