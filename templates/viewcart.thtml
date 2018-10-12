@@ -199,6 +199,7 @@ function PP_updateShipping(e)
 
     if (typeof(newship_amt) === "number") {
         newship_amt = newship_amt.toFixed({cur_decimals});
+        nonship_total = nonship_total.toFixed({cur_decimals});
         var order_total = (nonship_total * 1) + (newship_amt * 1);
         document.getElementById("ord_total_span").innerHTML = order_total;
         document.getElementById("shipping_cell").innerHTML = newship_amt;
