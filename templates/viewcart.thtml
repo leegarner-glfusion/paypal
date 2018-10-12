@@ -68,14 +68,19 @@
         <td></td>
       </tr>
 {!endif}
-{!if shipping}
+{!if ship_select}
+      <tr>
+        <td colspan="3" class="alignright">{$LANG_PP['shipping']}: {ship_select}</td>
+        <td id="shipping_cell" colspan="1" class="alignright">{shipping}</td>
+      </tr>
+{!elseif shipping}
       <tr>
         <td colspan="2" class="alignright">{$LANG_PP['shipping']}
 {!if ship_method}
 ({ship_method})
 {!endif}
         </td>
-        <td colspan="2" class="alignright">{shipping}</td>
+        <td id="shipping_cell" colspan="2" class="alignright">{shipping}</td>
         <td></td>
       </tr>
 {!endif}
@@ -88,7 +93,13 @@
 {!endif}
       <tr>
         <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
-        <td colspan="2" class="alignright"><b>{total}</b></td>
+        <td colspan="2" class="alignright"><b>
+{!if not_final}
+            {total_prefix}<span id="ord_total_span">{total_num}</span>{total_postfix}
+{!else}
+        {total_sign} {total}
+{!endif}
+        </b></td>
         <td></td>
       </tr>
     </table>
@@ -174,6 +185,24 @@ function mustUpdateCart()
     document.getElementById("updatebtn").classList.remove("uk-button-primary");
     document.getElementById("updatebtn").classList.add("uk-button-success");
     return false;
+}
+function PP_updateShipping(e)
+{
+    if (typeof(e) === "undefined") {
+        return;
+    }
+
+    var nonship_total = {item_total} + {cart_tax} + {handling};
+    var newship = e.options[e.selectedIndex].value;
+    var obj = JSON.parse(shipper_json);
+    newship_amt = obj[newship];
+
+    if (typeof(newship_amt) === "number") {
+        newship_amt = newship_amt.toFixed({cur_decimals});
+        var order_total = (nonship_total * 1) + (newship_amt * 1);
+        document.getElementById("ord_total_span").innerHTML = order_total;
+        document.getElementById("shipping_cell").innerHTML = newship_amt;
+    }
 }
 </script>
 {# end {templatelocation} #}

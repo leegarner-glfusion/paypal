@@ -240,7 +240,8 @@ class OrderItem
             $this->setVars($A);
         }
         $purchase_ts = PAYPAL_now()->toUnix();
-        $shipping = $this->product->getShipping($this->quantity);
+        //$shipping = $this->product->getShipping($this->quantity);
+        $shipping = 0;
         $handling = $this->product->getHandling($this->quantity);
 
         if ($this->id > 0) {
@@ -262,9 +263,9 @@ class OrderItem
                 token = '" . DB_escapeString($this->token) . "',
                 options = '" . DB_escapeString($this->options) . "',
                 options_text = '" . DB_escapeString(@json_encode($this->options_text)) . "',
-                extras = '" . DB_escapeString(json_encode($this->extras)) . "',
-                shipping = {$shipping},
-                handling = {$handling}";
+                extras = '" . DB_escapeString(json_encode($this->extras)) . "'";
+                //shipping = {$shipping},
+                //handling = {$handling},
             // add an expiration date if appropriate
         if ($this->product->expiration > 0) {
             $sql2 .= ", expiration = " . (string)($purchase_ts + ($this->product->expiration * 86400));
@@ -300,7 +301,7 @@ class OrderItem
             $product = $this->getProduct();
             $price = $product->getPrice($this->options, $newqty);
             $this->handling = $product->getHandling($newqty);
-            $this->shipping = $product->getShipping($newqty);
+            //$this->shipping = $product->getShipping($newqty);
             $this->price = $price;
         }
         return $this;
@@ -323,6 +324,28 @@ class OrderItem
 
         // All conditions passed, return true
         return true;
+    }
+
+
+    /**
+     * Get the total number of shipping units for this item
+     *
+     * @return  float       Total shipping units (per-product * quantity)
+     */
+    public function getShippingUnits()
+    {
+        return $this->product->shipping_units * $this->quantity;
+    }
+
+
+    /**
+     * Get the total of all per-item shipping costs for this item
+     *
+     * @return  float       Total fixed shipping cost (per-product * quantity)
+     */
+    public function getShippingAmt()
+    {
+        return $this->product->shipping_amt * $this->quantity;
     }
 
 }

@@ -80,7 +80,7 @@ The primary purpose for this checkbox is to make certain items non-taxable.</dd>
       </dl>
 
       <dl id="desc_buttons">
-        <dt>>Buttons</dt>
+        <dt>Buttons</dt>
         <dd>Select the button types that will be available for this product. To improve performance, especially if encrypted buttons are used, the buttons are created and stored with the product record each time is it updated.<p/>
         If the shopping cart is enabled, the Add to Cart button is always shown.</dd>
       </dl>
@@ -132,7 +132,17 @@ The primary purpose for this checkbox is to make certain items non-taxable.</dd>
         <dd>This field is used to determine shipping charges, if you've set up a shipping schedule in your gateway account setup.  Enter the weight, using the unit of measure that you use in Paypal.  If the weight is set to zero, then no shipping charge will be calculated.</dd>
       </dl>
 
-      <dl id="desc_shipping_type">
+      <dl id="desc_shipping_amt">
+          <dt>Per-Item Shipping Amount</dt>
+          <dd>This is a shipping amount applied to each item shipped. It may represent a handling fee or extra charge for an oversized item, or the only shipping fee for the item. This amount is added to the calculated shipping charge for the order.</dd>
+      </dl>
+
+      <dl id="desc_shipping_units">
+          <dt>Per-Item Shipping Units</dt>
+          <dd>A number of units assigned to this product for shipping calculation. This may be a relative size or weight of the item to indicate how many may be shipped in a single package.</dd>
+      </dl>
+
+<!--      <dl id="desc_shipping_type">
         <dt>Shipping <i>(Physical only)</i></dt>
         <dd>Select the type of shipping charge to be applied to the item.  The options are:
 <ul><li><i>No Shipping</i>: No shipping charge will be added.</li>
@@ -142,7 +152,7 @@ The primary purpose for this checkbox is to make certain items non-taxable.</dd>
 </ul>
 </dd>
       </dl>
-
+-->
       <dl id="desc_expiration">
         <dt>Expiration Time <i>(Downloadable, Virtual Only)</i></dt>
         <dd>Enter the number of days after which a purchase will expire.  This is normally used for downloadable products to allow a buyer to download the item only within a certain period.</dd>

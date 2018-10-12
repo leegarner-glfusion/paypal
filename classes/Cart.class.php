@@ -741,6 +741,18 @@ class Cart extends Order
             $U = new \Paypal\UserInfo();
             $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
             return $U->AddressForm($wf_name, $A, $step);
+/*        case 'shipping_method':
+            // Select the shipping method, if shippers are configured
+            if (Shipping::haveShippers()) {
+                return $this->selectShipping($step);
+            } else {
+                $A = $this->getItemShipping();
+                $this->shipping = $A['amount'];
+                $this->Save();
+                return $this->View(Workflow::getNextView($wf_name)->wf_name, $step++);
+            }
+            break;
+ */
         case 'finalize':
             return $this->View('checkout');
         default:
@@ -807,6 +819,55 @@ class Cart extends Order
     {
         unset($_COOKIE[self::$session_var]);
         SEC_setCookie(self::$session_var, '', time()-3600, '/');
+    }
+
+
+    /**
+     * Select the shipping method for this order.
+     * Displays a list of shippers with the rates for each
+     * @todo    1. Sort by rate
+     *          2. Save shipper selection with the order
+     *
+     *  @param  integer $step   Current step in workflow
+     *  @return string      HTML for shipper selection form
+     */
+    public function selectShipping()
+    {
+        $T = PP_getTemplate('shipping_method', 'form');
+        // Get the total units and fixed per-item shipping charges.
+        $shipping = $this->getItemShipping();
+        // Get all the shippers and rates for the selection
+        $shippers = Shipping::getShippers($shipping['units']);
+        if (empty($shippers)) return '';
+
+        // Get the best or previously-selected shipper for the default choice
+        $shipper_id = $this->getInfo('shipper_id');
+        if ($shipper_id !== NULL && isset($shippers[$shipper_id])) {
+            $best = $shippers[$shipper_id];
+        } else {
+            $best = Shipping::getBestRate($shipping['units']);
+        }
+        $T->set_block('form', 'shipMethodSelect', 'row');
+
+        $ship_rates = array();
+        foreach ($shippers as $shipper) {
+            $sel = $shipper->id == $best->id ? 'selected="selected"' : '';
+            $rate = $shipper->best_rate + (string)Currency::getInstance()->FormatValue($shipping['amount']);
+            $ship_rates[$shipper->id] = $rate;
+            $T->set_var(array(
+                'method_sel'    => $sel,
+                'method_name'   => $shipper->name,
+                'method_rate'   => Currency::getInstance()->Format($rate),
+                'method_id'     => $shipper->id,
+                'order_id'      => $this->order_id,
+                'next_step'     => $step + 1,
+                'multi'         => count($shippers) > 1 ? true : false,
+            ) );
+            $T->parse('row', 'shipMethodSelect', true);
+        }
+        $T->set_var('shipper_json', json_encode($ship_rates));
+        $T->parse('output', 'form');
+        return  $T->finish($T->get_var('output'));
     }
 
 }   // class Cart

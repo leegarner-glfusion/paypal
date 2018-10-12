@@ -45,6 +45,7 @@ $view = '';
         'addcartitem', 'addcartitem_x', 'checkoutcart',
         'processorder', 'thanks', 'do_apply_gc', 'action',
         'redeem',
+        // 'setshipper',
         // Views
         'order', 'view', 'detail', 'printorder', 'orderhist',
         'couponlog',
@@ -99,6 +100,9 @@ case 'checkout':
     }
     if (isset($_POST['payer_email'])) {
         $Cart->buyer_email = $_POST['payer_email'];
+    }
+    if (isset($_POST['shipper_id'])) {
+        $Cart->setShipper($_POST['shipper_id']);
     }
     if (isset($_POST['quantity'])) {
         // Update the cart quantities if coming from the cart view.
@@ -234,6 +238,19 @@ case 'redeem':
     }
     break;
 
+/*case 'setshipper':
+    $s_id = (int)$_POST['shipper_id'];
+    if ($s_id > 0) {
+        $order = \Paypal\Cart::getInstance($_POST['order_id']);
+        $info = $order->getItemShipping();
+        $shippers = \Paypal\Shipping::getShippers($info['units']);
+        $order->setField('shipping', $shippers[$s_id]->best_rate);
+    }
+    $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);
+    $content = \Paypal\Cart::getInstance()->getView($next_step);
+    $view = 'none';
+    break;
+ */
 case 'action':      // catch all the "?action=" urls
     switch ($actionval) {
     case 'thanks':

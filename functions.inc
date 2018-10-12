@@ -2068,6 +2068,8 @@ function PP_getVar($A, $varname, $type = 'string', $default = NULL)
         }
         return $val;
         break;
+    case 'object':
+        return $val;
     case 'string':
     default:
         return (string)$val;

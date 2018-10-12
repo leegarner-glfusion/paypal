@@ -491,7 +491,7 @@ class Order
                 'item_link'     => $P->getLink(),
                 'pi_url'        => PAYPAL_URL,
             ) );
-            if ($P->prod_type == PP_PROD_PHYSICAL) {
+            if ($P->isPhysical()) {
                 $this->no_shipping = 0;
             }
             $T->parse('iRow', 'ItemRow', true);
@@ -527,7 +527,12 @@ class Order
             'allow_gc'      => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'next_step'     => $step + 1,
             'not_anon'      => !COM_isAnonUser(),
-            'ship_method'   => $this->ship_method,
+            'ship_method'   => $this->getInfo('shipper_name'),
+            'ship_select'   => $this->is_final ? NULL : $this->selectShipping(),
+            'total_prefix'  => $Currency->Pre(),
+            'total_postfix' => $Currency->Post(),
+            'total_num'     => $Currency->FormatValue($this->total),
+            'cur_decimals'  => $Currency->Decimals(),
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
@@ -736,21 +741,13 @@ class Order
         $total = (float)0;      // Track total purchase value
         $files = array();       // Array of filenames, for attachments
         $item_total = 0;
-        $shipping = 0;
-        $handling = 0;
-        $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
         $email_extras = array();
 
         $Cur = Currency::getInstance();     // get currency for formatting
 
         foreach ($this->items as $id=>$item) {
-            $shipping += $item->shipping;
-            $handling += $item->handling;
             $P = $item->getProduct();
-            if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL) {
-                $have_physical = 1;
-            }
 
             // Add the file to the filename array, if any. Download
             // links are only included if the order status is 'paid'
@@ -793,7 +790,7 @@ class Order
             if ($x != '') $email_extras[] = $x;
         }
 
-        $total_amount = $item_total + $this->tax + $shipping + $handling;
+        $total_amount = $item_total + $this->tax + $this->shipping + $this->handling;
         $user_name = COM_getDisplayName($this->uid);
         if ($this->billto_name == '') {
             $this->billto_name = $user_name;
@@ -804,10 +801,10 @@ class Order
             'payment_items'     => $Cur->Format($item_total),
             'tax'               => $Cur->FormatValue($this->tax),
             'tax_num'           => $this->tax,
-            'shipping'          => $Cur->FormatValue($shipping),
-            'shipping_num'      => $shipping,
-            'handling'          => $Cur->FormatValue($handling),
-            'handling_num'      => $handling,
+            'shipping'          => $Cur->FormatValue($this->shipping),
+            'shipping_num'      => $this->shipping,
+            'handling'          => $Cur->FormatValue($this->handling),
+            'handling_num'      => $this->handling,
             'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
             'payer_name'        => $this->billto_name,
@@ -971,6 +968,31 @@ class Order
     }
 
 
+    public function calcShipping()
+    {
+        $units = 0;
+        $fixed = 0;
+        foreach ($this->items as $item) {
+            $P = $item->getProduct();
+            if ($P->isPhysical()) {
+                $fixed += $P->getShipping($item->quantity);
+                $units += $P->shipping_units * $item->quantity;
+            }
+        }
+
+        $shipper_id = $this->getInfo('shipper_id');
+        if ($shipper_id !== NULL) {
+            $shippers = Shipping::getShippers($units);
+            $this->shipping = $shippers[$shipper_id]->best_rate + $fixed;
+        } else {
+            // Now get the order shipping, if any, based on product units.
+            $shipper = Shipping::getBestRate($units);
+            $this->ship_method = $shipper->name;
+            $this->shipping = $shipper->best_rate + $fixed;
+        }
+    }
+
+
     /**
      * Calculate total additional charges: tax, shipping and handling..
      * Simply totals the amounts for each item.
@@ -981,20 +1003,14 @@ class Order
     {
         global $_PP_CONF;
 
-        $this->shipping = 0;
         $this->handling = 0;
-        $units = 0;
         foreach ($this->items as $item) {
-            $this->handling += $item->handling;
-            $this->shipping += $item->getProduct()->getShipping($item->quantity);
-            $units += $item->getProduct()->shipping_units * $item->quantity;
+            $P = $item->getProduct();
+            $this->handling += $P->handling * $item->quantity;
         }
-        // Now get the order shipping, if any, based on product units.
-        $shipper = Shipping::getBestRate($units);
-        $this->ship_method = $shipper->name;
-        $this->shipping += $shipper->best_rate;
 
         $this->calcTax();   // Tax calculation is slightly more complex
+        $this->calcShipping();
         return $this->tax + $this->shipping + $this->handling;
     }
 
@@ -1225,7 +1241,7 @@ class Order
     public function hasPhysical()
     {
         foreach ($this->items as $id=>$item) {
-            if (($item->getProduct()->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL) {
+            if ($item->getProduct()->isPhysical()) {
                 return true;
             }
         }
@@ -1248,6 +1264,58 @@ class Order
             return false;
         default:
             return true;
+        }
+    }
+
+
+    /**
+     * Get shipping information for the items to use when selecting a shipper.
+     *
+     * @return  array   Array('units'=>unit_count, 'amount'=> fixed per-item amount)
+     */
+    public function getItemShipping()
+    {
+        $shipping_amt = 0;
+        $shipping_units = 0;
+        foreach ($this->items as $item) {
+            $shipping_amt += $item->getShippingAmt();
+            $shipping_units += $item->getShippingUnits();
+        }
+        return array(
+            'units' => $shipping_units,
+            'amount' => $shipping_amt,
+        );
+    }
+
+
+    public function setField($field, $value)
+    {
+        global $_TABLES;
+
+        $value = DB_escapeString($value);
+        $order_id = DB_escapeString($this->order_id);
+        $sql = "UPDATE {$_TABLES['paypal.orders']}
+            SET $field = '$value'
+            WHERE order_id = '$order_id'";
+        $res = DB_query($sql);
+        if (DB_error()) {
+            COM_errorLog("Order::setField() error executing SQL: $sql");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    public function setShipper($shipper_id)
+    {
+        $ship_info = $this->getItemShipping();
+        $shippers = \Paypal\Shipping::getShippers($ship_info['units']);
+        $shipper = PP_getVar($shippers, $shipper_id, 'object', NULL);
+        if ($shipper !== NULL) {
+            $this->setInfo('shipper_name', $shipper->name);
+            $this->setInfo('shipper_id', $shipper->id);
+            $this->shipping = $shipper->best_rate;
         }
     }
 

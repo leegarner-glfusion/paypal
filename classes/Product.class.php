@@ -448,11 +448,6 @@ class Product
             $this->setVars($A);
         }
 
-        // Zero out the shipping amount if a non-fixed value is chosen
-        if ($this->shipping_type < 2) {
-            $this->shipping_amt = 0;
-        }
-
         // Handle file uploads.  This is done first so we know whether
         // there is a valid filename for a download product
         // No weight or shipping for downloads
@@ -468,10 +463,11 @@ class Product
         }
 
         // For downloadable files, physical product options don't apply
-        if ($this->prod_type == PP_PROD_DOWNLOAD) {
+        if (!$this->isPhysical()) {
             $this->weight = 0;
             $this->shipping_type = 0;
             $this->shipping_amt = 0;
+            $this->shipping_units = 0;
         }
 
         // Serialize the quantity discount array
@@ -674,8 +670,7 @@ class Product
                 // Must have an expiration period for downloads
                 $this->Errors[] = $LANG_PP['err_missing_exp'];
             }
-        } elseif ($this->prod_type == PP_PROD_PHYSICAL &&
-                $this->price < 0.01) {
+        } elseif ($this->isPhysical() && $this->price < 0.01) {
             // Paypal won't accept a zero amount, so non-downloadable items
             // must have a positive price.  Use "Other Virtual" for free items.
             $this->Errors[] = $LANG_PP['err_phys_need_price'];
@@ -2049,16 +2044,7 @@ class Product
      */
     public function getShipping($qty = 1)
     {
-        switch ($this->shipping_type) {
-        case 2:
-            // fixed per-item shipping
-            $shipping = (float)$this->shipping_amt * $qty;
-            break;
-        default:
-            // no shipping or calculated for order by shipping module
-            $shipping = 0;
-        }
-        return $shipping;
+        return $this->shipping_amt * (float)$qty;
     }
 
 
@@ -2115,6 +2101,17 @@ class Product
             // when out of stock
             return $this->oversell;
         }
+    }
+
+
+    /**
+     * Helper function to check if this item has a physical component.
+     *
+     * @return  boolean     True if this is a physical item, False if not.
+     */
+    public function isPhysical()
+    {
+        return ($this->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL;
     }
 
 }   // class Product

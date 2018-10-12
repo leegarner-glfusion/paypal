@@ -150,11 +150,11 @@ class Shipping
             while ($A = DB_fetchArray($res, false)) {
                 $shippers[$A['id']] = $A;
             }
-            Cache::set($cache_key, $shippers);
+            Cache::set($cache_key, $shippers, self::$base_tag);
         }
         $retval = array();
         foreach ($shippers as $shipper) {
-            $retval[] = new self($shipper);
+            $retval[$shipper['id']] = new self($shipper);
         }
         return $retval;
     }
@@ -221,7 +221,7 @@ class Shipping
      * @param   float   $units      Number of units being shipped
      * @return  array               Array of shipper objects
      */
-    public static function getShippers($units)
+    public static function getShippers($units=0)
     {
         $shippers = self::getAll();
         $rates = array();
@@ -230,18 +230,18 @@ class Shipping
                 unset ($shippers[$s_id]);
             }
         }
-        foreach ($shippers as $s_id=>$shipper) {
-            $shipper->best_rate = 1000000;
-            foreach ($shipper->rates as $s_id=>$rate) {
-                //$rate1 = $rate->rate * ceil($units / $rate->units);
-                //$rate2 = self::calcBestFit($shipper, $units);
-                //$shipper->best_rate = min($rate1, $rate2);
-                $rate = $rate->rate * ceil($units / $rate->units);
-                if ($shipper->best_rate === NULL || $shipper->best_rate > $rate) {
-                    $shipper->best_rate = $rate;
+        $shipper->best_rate = 0;
+        if ($units > 0) {
+            foreach ($shippers as $s_id=>$shipper) {
+                $shipper->best_rate = 1000000;
+                foreach ($shipper->rates as $r_id=>$rate) {
+                    $rate = $rate->rate * ceil($units / $rate->units);
+                    if ($shipper->best_rate > $rate) {
+                        $shipper->best_rate = $rate;
+                    }
                 }
+                $rates[$s_id] = $shipper;
             }
-            $rates[] = $shipper;
         }
         return $rates;
     }
@@ -337,12 +337,12 @@ class Shipping
 
 
     /**
-    *   Save the current values to the database.
+    *   Save the current or provided values to the database.
     *
-    *   @param  array   $A      Array of values from $_POST
+    *   @param  array   $A      Optional array of values from $_POST
     *   @return boolean         True if no errors, False otherwise
     */
-    public function Save($A = array())
+    public function Save($A =NULL)
     {
         global $_TABLES, $_PP_CONF;
 
@@ -376,7 +376,7 @@ class Shipping
 
 
     /**
-    *   Delete a single sales record from the database
+    *   Delete a single shipper record from the database
     *
     *   @param  integer $id     Record ID
     *   @return boolean     True on success, False on invalid ID
@@ -432,24 +432,22 @@ class Shipping
 
 
     /**
-    *   Sets a boolean field to the specified value.
+    *   Sets the "enabled" field to the specified value.
     *
-    *   @param  integer $oldvalue   Original value of field
-    *   @param  integer $varname    Name of field to change
+    *   @uses   Attribute::_toggle()
+    *   @param  integer $oldvalue   Original field value
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    private static function _toggle($oldvalue, $varname, $id)
+    public static function toggleEnabled($oldvalue, $id)
     {
-        global $_TABLES;
-
         // Determing the new value (opposite the old)
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $newvalue = $oldvalue == 1 ? 0 : 1;
         $id = (int)$id;
 
         $sql = "UPDATE {$_TABLES['paypal.shipping']}
-                SET $varname=$newvalue
+                SET enabled = $newvalue
                 WHERE id = $id";
         //echo $sql;die;
         DB_query($sql);
@@ -463,16 +461,13 @@ class Shipping
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @uses   Attribute::_toggle()
-    *   @param  integer $oldvalue   Original field value
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
-    public static function toggleEnabled($oldvalue, $id=0)
+     * Shortcut function to see if there are any enabled shippers.
+     *
+     * @return  boolean     True if there is at least one shipper.
+     */
+    public static function haveShippers()
     {
-        return self::_toggle($oldvalue, 'enabled', $id);
+        return count(self::getAll()) > 0 ? true : false;
     }
 
 }   // class Shipping
