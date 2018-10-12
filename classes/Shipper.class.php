@@ -223,16 +223,16 @@ class Shipper
      */
     public static function getShippers($units=0)
     {
-        $shippers = self::getAll();
         $rates = array();
+        if ($units == 0) return $rates;     // no shipping, return empty
+
+        $shippers = self::getAll();
+        $shipper->best_rate = 0;
         foreach ($shippers as $s_id=>$shipper) {
             if ($units < $shipper->min_units || ($shipper->max_units > 0 && $units > $shipper->max_units)) {
-                unset ($shippers[$s_id]);
-            }
-        }
-        $shipper->best_rate = 0;
-        if ($units > 0) {
-            foreach ($shippers as $s_id=>$shipper) {
+                // Skip shippers that don't handle this number of units
+                continue;
+            } else {
                 $shipper->best_rate = 1000000;
                 foreach ($shipper->rates as $r_id=>$rate) {
                     $rate = $rate->rate * ceil($units / $rate->units);
@@ -304,6 +304,7 @@ class Shipper
             break;
 
         case 'min_units':
+            if ($value == 0) $value = .0001;
         case 'max_units':
         case 'best_rate':
             $this->properties[$var] = (float)$value;
@@ -462,12 +463,19 @@ class Shipper
 
     /**
      * Shortcut function to see if there are any enabled shippers.
+     * If the units param is omitted, all enabled shippers are checked,
+     * otherwise only those that can handle the units are checked.
      *
+     * @param   float   $units      Units being shipped, if any
      * @return  boolean     True if there is at least one shipper.
      */
-    public static function haveShippers()
+    public static function haveShippers($units = -1)
     {
-        return count(self::getAll()) > 0 ? true : false;
+        if ($units < 0) {
+            return count(self::getAll()) > 0 ? true : false;
+        } else {
+            return count(self::gertShippers($units)) > 0 ? true : false;
+        }
     }
 
 }   // class Shipper
