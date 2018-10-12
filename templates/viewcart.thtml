@@ -192,7 +192,7 @@ function PP_updateShipping(e)
         return;
     }
 
-    var nonship_total = {item_total} + {cart_tax} + {handling};
+    var nonship_total = {item_subtotal} + {cart_tax} + {handling};
     var newship = e.options[e.selectedIndex].value;
     var obj = JSON.parse(shipper_json);
     newship_amt = obj[newship];

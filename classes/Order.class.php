@@ -533,6 +533,7 @@ class Order
             'total_postfix' => $Currency->Post(),
             'total_num'     => $Currency->FormatValue($this->total),
             'cur_decimals'  => $Currency->Decimals(),
+            'item_subtotal' => $Currency->FormatValue($this->subtotal),
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
@@ -968,6 +969,10 @@ class Order
     }
 
 
+    /**
+     * Calculate the total shipping fee for this order.
+     * Sets $this->shipping, no return value
+     */
     public function calcShipping()
     {
         $units = 0;
