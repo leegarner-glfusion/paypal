@@ -3,7 +3,10 @@
 <script type="text/javascript" src="{site_url}/paypal/js/toggleEnabled.js"></script>
 {!endif}
 {!if title}
-<h2>{title}</h2>
+<h2 style="float:left">{title}</h2>
+{!endif}
+{!if subtitle}
+<h2 style="float:right">{subtitle}</h2>
 {!endif}
 {!if breadcrumbs}
 {breadcrumbs}

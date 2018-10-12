@@ -93,7 +93,7 @@ case 'toggle':
     case 'shipping':
         switch ($_POST['type']) {
         case 'enabled':
-            $newval = \Paypal\Shipping::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = \Paypal\Shipper::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
 
          default:

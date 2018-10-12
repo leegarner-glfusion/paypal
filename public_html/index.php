@@ -243,7 +243,7 @@ case 'redeem':
     if ($s_id > 0) {
         $order = \Paypal\Cart::getInstance($_POST['order_id']);
         $info = $order->getItemShipping();
-        $shippers = \Paypal\Shipping::getShippers($info['units']);
+        $shippers = \Paypal\Shipper::getShippers($info['units']);
         $order->setField('shipping', $shippers[$s_id]->best_rate);
     }
     $next_step = PP_getVar($_POST, 'next_step', 'integer', 0);

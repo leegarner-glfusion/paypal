@@ -168,7 +168,7 @@ case 'purgecarts':
 
 case 'saveshipping':
     $id = PP_getVar($_POST, 'id', 'integer');
-    $S = new \Paypal\Shipping($id);
+    $S = new \Paypal\Shipper($id);
     $S->Save($_POST);
     COM_refresh(PAYPAL_ADMIN_URL . '/index.php?shipping=x');
     break;
@@ -440,7 +440,7 @@ case 'attributes':
     break;
 
 case 'shipping':
-    $content .= PAYPAL_adminlist_Shipping();
+    $content .= PAYPAL_adminlist_Shippers();
     break;
 
 case 'editattr':
@@ -522,7 +522,7 @@ case 'configreport':
     break;
 
 case 'editshipping':
-    $S = new \Paypal\Shipping($actionval);
+    $S = new \Paypal\Shipper($actionval);
     $content .= $S->Edit();
     break;
 
@@ -605,6 +605,13 @@ function PAYPAL_adminlist_Product($cat_id=0)
 
     $display .= COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
+    $display .= COM_createLink($LANG_PP['new_product'],
+        PAYPAL_ADMIN_URL . '/index.php?editproduct=x',
+        array(
+            'class' => 'uk-button uk-button-success',
+            'style' => 'float:left',
+        )
+    );
 
     if ($cat_id > 0) {
         $def_filter = "WHERE c.cat_id='$cat_id'";
@@ -799,8 +806,6 @@ function PAYPAL_adminMenu($view='')
 {
     global $_CONF, $LANG_ADMIN, $LANG_PP, $_PP_CONF;
 
-    $menu_arr[] = array('url'  => $_CONF['site_admin_url'],
-                  'text' => $LANG_ADMIN['admin_home']);
     if (isset($LANG_PP['admin_hdr_' . $view]) &&
         !empty($LANG_PP['admin_hdr_' . $view])) {
         $hdr_txt = $LANG_PP['admin_hdr_' . $view];
@@ -808,72 +813,75 @@ function PAYPAL_adminMenu($view='')
         $hdr_txt = $LANG_PP['admin_hdr'];
     }
 
-    if ($view == 'productlist') {
-        $menu_arr[] = array(
-                    'url'  => PAYPAL_ADMIN_URL . '/index.php?editproduct=x',
-                    'text' => '<span class="ppNewAdminItem">' .
-                            $LANG_PP['new_product']. '</span>');
-    } else {
-        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php',
-                    'text' => $LANG_PP['product_list']);
-    }
-
-    if ($view == 'catlist') {
-        $menu_arr[] = array(
-                    'url'  => PAYPAL_ADMIN_URL . '/index.php?editcat=x',
-                    'text' => '<span class="ppNewAdminItem">' .
-                            $LANG_PP['new_category'], '</span>');
-    } else {
-        $menu_arr[] = array(
-                    'url'  => PAYPAL_ADMIN_URL . '/index.php?catlist=x',
-                    'text' => $LANG_PP['category_list']);
-    }
-
-    if ($view == 'attributes') {
-        $menu_arr[] = array(
-                    'url'  => PAYPAL_ADMIN_URL . '/index.php?editattr=x',
-                    'text' => '<span class="ppNewAdminItem">' .
-                            $LANG_PP['new_attr'] . '</span>');
-    } else {
-        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL .
-                            '/index.php?attributes=x',
-                    'text' => $LANG_PP['attr_list']);
-    }
-
-    $menu_arr[] = array(
-        'url'  => PAYPAL_ADMIN_URL . '/index.php?shipping=x',
-        'text' => $LANG_PP['shipping'],
+    $menu_arr = array(
+        array(
+            'url' => PAYPAL_ADMIN_URL . '/index.php',
+            'text' => $LANG_PP['product_list'],
+            'active' => $view == 'productlist' ? true : false,
+        ),
+        array(
+            'url' => PAYPAL_ADMIN_URL . '/index.php?catlist=x',
+            'text' => $LANG_PP['category_list'],
+            'active' => $view == 'catlist' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?attributes=x',
+            'text' => $LANG_PP['attr_list'],
+            'active' => $view == 'attributes' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?shipping=x',
+            'text' => $LANG_PP['shipping'],
+            'active' => $view == 'shipping' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?sales=x',
+            'text' => $LANG_PP['sale_prices'],
+            'active' => $view == 'sales' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?orderhist=x',
+            'text' => $LANG_PP['purchase_history'],
+            'active' => $view == 'orderhist' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?ipnlog=x',
+            'text' => $LANG_PP['ipnlog'],
+            'active' => $view == 'ipnlog' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?gwadmin=x',
+            'text' => $LANG_PP['gateways'],
+            'active' => $view == 'gwadmin' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?wfadmin=x',
+            'text' => $LANG_PP['workflows'],
+            'active' => $view == 'wfadmin' ? true : false,
+        ),
+        array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?other=x',
+            'text' => $LANG_PP['other_func'],
+            'active' => $view == 'other' ? true : false,
+        ),
+        //      array(
+        //      'url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
+        //                'text' => $LANG_PP['reports'],
+            //'active' => $view == 'reports' ? true : false,
+        //                ),
     );
-
-    if ($view == 'sales') {
-        $menu_arr[] = array(
-                    'url'  => PAYPAL_ADMIN_URL . '/index.php?editdiscount=x',
-                    'text' => '<span class="ppNewAdminItem">' .
-                            $LANG_PP['new_sale'] . '</span>');
-    } else {
-        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?sales=x',
-                    'text' => $LANG_PP['sale_prices']);
-    }
-
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?orderhist=x',
-                    'text' => $LANG_PP['purchase_history']);
-    //$menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?history=x',
-    //                'text' => $LANG_PP['purchase_history']);
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?ipnlog=x',
-                    'text' => $LANG_PP['ipnlog']);
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?gwadmin=x',
-                    'text' => $LANG_PP['gateways']);
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?wfadmin=x',
-                    'text' => $LANG_PP['workflows']);
-    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?other=x',
-                    'text' => $LANG_PP['other_func']);
     if ($_PP_CONF['gc_enabled']) {
         // Show the Coupons menu option only if enabled
-        $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
-                    'text' => $LANG_PP['coupons']);
+        $menu_arr[] = array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?coupons=x',
+            'text' => $LANG_PP['coupons'],
+            'active' => $view == 'coupons' ? true : false,
+        );
     }
-//    $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
-//                    'text' => $LANG_PP['reports']);
+    $menu_arr[] = array(
+        'url'  => $_CONF['site_admin_url'],
+        'text' => $LANG_ADMIN['admin_home'],
+    );
 
     $T = PP_getTemplate('paypal_title', 'title');
     $T->set_var(array(
@@ -1045,6 +1053,13 @@ function PAYPAL_adminlist_Category()
             'direction' => 'asc');
 
     $display .= COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
+    $display .= COM_createLink($LANG_PP['new_category'],
+        PAYPAL_ADMIN_URL . '/index.php?editcat=x',
+        array(
+            'class' => 'uk-button uk-button-success',
+            'style' => 'float:left',
+        )
+    );
 
     $query_arr = array('table' => 'paypal.categories',
         'sql' => $sql,
@@ -1204,7 +1219,13 @@ function PAYPAL_adminlist_Attributes()
             'direction' => 'ASC');
 
     $display = COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
-
+    $display .= COM_createLink($LANG_PP['new_attr'],
+        PAYPAL_ADMIN_URL . '/index.php?editattr=0',
+        array(
+            'style' => 'float:left;',
+            'class' => 'uk-button uk-button-success',
+        )
+    );
     $product_selection = COM_optionList($_TABLES['paypal.products'], 'id, name', $sel_prod_id);
     $filter = "{$LANG_PP['product']}: <select name=\"product_id\"
         onchange=\"this.form.submit();\">
@@ -1253,7 +1274,7 @@ function PAYPAL_adminlist_Attributes()
 *
 *   @return string  HTML string containing the contents of the ipnlog
 */
-function PAYPAL_adminlist_Shipping()
+function PAYPAL_adminlist_Shippers()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
 
@@ -1288,13 +1309,6 @@ function PAYPAL_adminlist_Shipping()
         'direction' => 'ASC',
     );
 
-    $display = COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
-
-    $filter = '<button type="submit" name="editshipping" value="0" class="uk-button uk-button-success">' .
-        $LANG_PP['new_ship_method'] . '</button>';
-    $display .= '<form action="' . PAYPAL_ADMIN_URL . '/index.php?editshipping=0" method="get">' .
-        $filter . '</form';
-
     $query_arr = array(
         'table' => 'paypal.shipping',
         'sql' => $sql,
@@ -1312,8 +1326,13 @@ function PAYPAL_adminlist_Shipping()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
+    $display = COM_startBlock('', '', COM_getBlockTemplate('_admin_block', 'header'));
+    $display .= COM_createLink($LANG_PP['new_ship_method'],
+        PAYPAL_ADMIN_URL . '/index.php?editshipping=0',
+        array('class' => 'uk-button uk-button-success')
+    );
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_shiplist',
-            __NAMESPACE__ . '\getAdminField_Shipping',
+            __NAMESPACE__ . '\getAdminField_Shipper',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
             $filter, '', $options, '');
     $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -1389,7 +1408,7 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 *   @param  object  $EntryList  This entry list object
 *   @return string              HTML for field display in the table
 */
-function getAdminField_Shipping($fieldname, $fieldvalue, $A, $icon_arr)
+function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
 
@@ -1716,7 +1735,10 @@ function PAYPAL_adminlist_Sales()
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
-    $display .= "<h2>{$LANG_PP['sale_prices']}</h2>\n";
+    $display .= '<div>' . COM_createLink($LANG_PP['new_sale'],
+        PAYPAL_ADMIN_URL . '/index.php?editdiscount=x',
+        array('class' => 'uk-button uk-button-success')
+    ) . '</div>';
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_discountlist',
             __NAMESPACE__ . '\getAdminField_Sales',
             $header_arr, $text_arr, $query_arr, $defsort_arr,
@@ -2047,9 +2069,10 @@ function PAYPAL_couponlist()
     $display = COM_startBlock('', '',
                     COM_getBlockTemplate('_admin_block', 'header'));
     $display .= '<h2>' . $LANG_PP['couponlist'] . '</h2>';
-    $display .= '<div><a href="' . PAYPAL_ADMIN_URL .
-        '/index.php?sendcards_form=x' . '"><button class="uk-button uk-button-primary">' .
-        $LANG_PP['send_giftcards'] . '</button></a></div>' . LB;
+    $display .= '<div>' . COM_createLink($LANG_PP['send_giftcards'],
+        PAYPAL_ADMIN_URL . '/index.php?sendcards_form=x',
+        array('class' => 'uk-button uk-button-primary')
+    ) . '</div>';
     $display .= ADMIN_list($_PP_CONF['pi_name'] . '_couponlist',
             __NAMESPACE__ . '\getAdminField_coupons',
             $header_arr, $text_arr, $query_arr, $defsort_arr,

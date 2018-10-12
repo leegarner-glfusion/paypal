@@ -528,7 +528,7 @@ class Order
             'next_step'     => $step + 1,
             'not_anon'      => !COM_isAnonUser(),
             'ship_method'   => $this->getInfo('shipper_name'),
-            'ship_select'   => $this->is_final ? NULL : $this->selectShipping(),
+            'ship_select'   => $this->is_final ? NULL : $this->selectShipper(),
             'total_prefix'  => $Currency->Pre(),
             'total_postfix' => $Currency->Post(),
             'total_num'     => $Currency->FormatValue($this->total),
@@ -982,11 +982,11 @@ class Order
 
         $shipper_id = $this->getInfo('shipper_id');
         if ($shipper_id !== NULL) {
-            $shippers = Shipping::getShippers($units);
+            $shippers = Shipper::getShippers($units);
             $this->shipping = $shippers[$shipper_id]->best_rate + $fixed;
         } else {
             // Now get the order shipping, if any, based on product units.
-            $shipper = Shipping::getBestRate($units);
+            $shipper = Shipper::getBestRate($units);
             $this->ship_method = $shipper->name;
             $this->shipping = $shipper->best_rate + $fixed;
         }
@@ -1310,7 +1310,7 @@ class Order
     public function setShipper($shipper_id)
     {
         $ship_info = $this->getItemShipping();
-        $shippers = \Paypal\Shipping::getShippers($ship_info['units']);
+        $shippers = \Paypal\Shipper::getShippers($ship_info['units']);
         $shipper = PP_getVar($shippers, $shipper_id, 'object', NULL);
         if ($shipper !== NULL) {
             $this->setInfo('shipper_name', $shipper->name);

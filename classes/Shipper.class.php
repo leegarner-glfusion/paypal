@@ -18,7 +18,7 @@ namespace Paypal;
 *   Class for product and category sales
 *   @package paypal
 */
-class Shipping
+class Shipper
 {
     static $base_tag = 'shipping';
 
@@ -452,7 +452,7 @@ class Shipping
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) {
-            COM_errorLog("Shipping::_toggle() SQL error: $sql", 1);
+            COM_errorLog("Shipper::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
             return $newvalue;
@@ -470,6 +470,6 @@ class Shipping
         return count(self::getAll()) > 0 ? true : false;
     }
 
-}   // class Shipping
+}   // class Shipper
 
 ?>

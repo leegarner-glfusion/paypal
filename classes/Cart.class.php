@@ -743,8 +743,8 @@ class Cart extends Order
             return $U->AddressForm($wf_name, $A, $step);
 /*        case 'shipping_method':
             // Select the shipping method, if shippers are configured
-            if (Shipping::haveShippers()) {
-                return $this->selectShipping($step);
+            if (Shipper::haveShippers()) {
+                return $this->selectShipper($step);
             } else {
                 $A = $this->getItemShipping();
                 $this->shipping = $A['amount'];
@@ -831,13 +831,13 @@ class Cart extends Order
      *  @param  integer $step   Current step in workflow
      *  @return string      HTML for shipper selection form
      */
-    public function selectShipping()
+    public function selectShipper()
     {
         $T = PP_getTemplate('shipping_method', 'form');
         // Get the total units and fixed per-item shipping charges.
         $shipping = $this->getItemShipping();
         // Get all the shippers and rates for the selection
-        $shippers = Shipping::getShippers($shipping['units']);
+        $shippers = Shipper::getShippers($shipping['units']);
         if (empty($shippers)) return '';
 
         // Get the best or previously-selected shipper for the default choice
@@ -845,7 +845,7 @@ class Cart extends Order
         if ($shipper_id !== NULL && isset($shippers[$shipper_id])) {
             $best = $shippers[$shipper_id];
         } else {
-            $best = Shipping::getBestRate($shipping['units']);
+            $best = Shipper::getBestRate($shipping['units']);
         }
         $T->set_block('form', 'shipMethodSelect', 'row');
 
