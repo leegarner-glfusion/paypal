@@ -557,7 +557,7 @@ function PAYPAL_do_upgrade($dvlp = false)
         // Templates now use CSS to limit thumbnail sizes. If the configured max_thumb_size
         // is still the old default, change it to the new default
         if ($_PP_CONF['max_thumb_size'] == 100) {
-            $C = config::getInstance();
+            $C = config::get_instance();
             $C->set('max_thumb_size', 250, 'paypal');
         }
 
