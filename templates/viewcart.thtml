@@ -86,7 +86,7 @@
 {!endif}
 {!if handling}
       <tr>
-        <td colspan="2" class="alignright">{$LANG_PP['hangling']}</td>
+        <td colspan="2" class="alignright">{$LANG_PP['handling']}</td>
         <td colspan="2" class="alignright">{handling}</td>
         <td></td>
       </tr>
