@@ -988,7 +988,13 @@ class Order
         $shipper_id = $this->getInfo('shipper_id');
         if ($shipper_id !== NULL) {
             $shippers = Shipper::getShippers($units);
-            $this->shipping = $shippers[$shipper_id]->best_rate + $fixed;
+            if (isset($shippers[$shipper_id])) {
+                $this->shipping = $shippers[$shipper_id]->best_rate + $fixed;
+            } else {
+                $shipper = Shipper::getBestRate($units);
+                $this->ship_method = $shipper->name;
+                $this->shipping = $shipper->best_rate + $fixed;
+            }
         } else {
             // Now get the order shipping, if any, based on product units.
             $shipper = Shipper::getBestRate($units);
