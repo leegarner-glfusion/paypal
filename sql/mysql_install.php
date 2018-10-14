@@ -921,8 +921,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
 );
 $PP_UPGRADE['0.7.0'] = array(       // placeholder version
-    "DROP TABLE IF EXISTS {$_TABLES['paypal.shipping']}",
-    "CREATE TABLE `{$_TABLES['paypal.shipping']}` (
+    "CREATE TABLE IF NOT EXISTS `{$_TABLES['paypal.shipping']}` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `name` varchar(255) NOT NULL DEFAULT '',
         `min_units` int(11) unsigned NOT NULL DEFAULT '0',
@@ -933,6 +932,7 @@ $PP_UPGRADE['0.7.0'] = array(       // placeholder version
     ) ENGINE=MyIsam",
     "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES
         (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'[{\\\"dscp\\\":\\\"Small\\\",\\\"units\\\":\\\"5\\\",\\\"rate\\\":\\\"7.20\\\"},{\\\"dscp\\\":\\\"Medium\\\",\\\"units\\\":\\\"20\\\",\\\"rate\\\":\\\"13.65\\\"},{\\\"dscp\\\":\\\"Large\\\",\\\"units\\\":\\\"50\\\",\\\"rate\\\":\\\"18.90\\\"}]')",
+    "ALTER TABLE {$_TABLES['paypal.products']} ADD `shipping_units` decimal(9,4) unsigned NOT NULL DEFAULT '0' AFTER `shipping_amt`",
 );
 
 ?>
