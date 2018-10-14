@@ -472,7 +472,6 @@ class Order
             if ($item->taxable) {
                 $this->tax_items++;       // count the taxable items for display
             }
-            $this->handling += $P->getHandling($item->quantity);
             $T->set_var(array(
                 'cart_item_id'  => $item->id,
                 'fixed_q'       => $P->getFixedQuantity(),
