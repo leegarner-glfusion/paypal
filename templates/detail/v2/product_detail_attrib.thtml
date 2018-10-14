@@ -45,7 +45,7 @@
 {!endif}
     </div>
 
-    <div id="paypalProductAttrib">
+    <div id="paypalProductAttrib" style="float:right;margin-right:20px;">
 <!-- BEGIN AttrSelect -->
       <div class="uk-form-row">
         <label class="uk-form-label" for="options{opt_id}">{attr_name}:</label>
@@ -93,7 +93,7 @@
     </div>
   </form>
 <!-- BEGIN BtnBlock -->
-  <div style="margin-left:50px;">{buy_now_button}</div>
+  <div style="float:right;margin-right:20px;">{buy_now_button}</div>
 <!-- END BtnBlock -->
 </div>
 
