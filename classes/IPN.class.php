@@ -194,7 +194,7 @@ class IPN
         // Log to database
         $sql = "INSERT INTO {$_TABLES['paypal.ipnlog']} SET
                 ip_addr = '{$_SERVER['REMOTE_ADDR']}',
-                time = '{$this->sql_date}',
+                ts = UNIX_TIMESTAMP(),
                 verified = $verified,
                 txn_id = '" . DB_escapeString($this->pp_data['txn_id']) . "',
                 gateway = '{$this->gw_id}',
