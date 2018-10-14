@@ -195,7 +195,7 @@ $PP_UPGRADE['0.5.4'] = array(
 $_SQL['paypal.ipnlog'] = "CREATE TABLE {$_TABLES['paypal.ipnlog']} (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_addr` varchar(15) NOT NULL,
-  `time` datetime NOT NULL,
+  `ts` int(11) unsigned,
   `verified` tinyint(1) DEFAULT '0',
   `txn_id` varchar(255) DEFAULT NULL,
   `gateway` varchar(25) DEFAULT NULL,
