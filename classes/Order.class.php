@@ -1017,7 +1017,7 @@ class Order
         $this->handling = 0;
         foreach ($this->items as $item) {
             $P = $item->getProduct();
-            $this->handling += $P->handling * $item->quantity;
+            $this->handling += $P->getHandling($item->quantity);
         }
 
         $this->calcTax();   // Tax calculation is slightly more complex
