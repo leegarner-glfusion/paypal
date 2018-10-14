@@ -472,8 +472,6 @@ class Order
             if ($item->taxable) {
                 $this->tax_items++;       // count the taxable items for display
             }
-            $this->shipping += $P->getShipping($item->quantity);
-            $this->handling += $P->getHandling($item->quantity);
             $T->set_var(array(
                 'cart_item_id'  => $item->id,
                 'fixed_q'       => $P->getFixedQuantity(),
@@ -981,8 +979,8 @@ class Order
         $this->shipping = 0;
         $this->handling = 0;
         foreach ($this->items as $item) {
-            $this->shipping += $item->shipping;
-            $this->handling += $item->handling;
+            $this->shipping += $item->getProduct()->getShipping($item->quantity);
+            $this->handling += $item->getProduct()->getHandling($item->quantity);
         }
         $this->calcTax();   // Tax calculation is slightly more complex
         return $this->tax + $this->shipping + $this->handling;
