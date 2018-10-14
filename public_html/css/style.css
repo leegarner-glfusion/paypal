@@ -133,7 +133,7 @@ div.paypalProductDetail .ppShortDesc {
 }
 
 div.paypalDetailAttrib {
-    float:left;
+    float:right;
     margin-bottom: 5px;
 }
 div.paypalDetailAttrib.v2 {
@@ -561,6 +561,7 @@ table.paypalViewCartTable {
 .paypalProductCustomText {
     margin-bottom: 5px;
     line-height: 1.3rem;
+    width: 100%;
 }
 #disp_img {
     max-width: 460px;
