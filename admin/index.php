@@ -843,7 +843,7 @@ function PAYPAL_adminMenu($view='')
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?gwadmin=x',
                     'text' => $LANG_PP['gateways']);
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?wfadmin=x',
-                    'text' => $LANG_PP['workflows']);
+                    'text' => $LANG_PP['mnu_wfadmin']);
     $menu_arr[] = array('url'  => PAYPAL_ADMIN_URL . '/index.php?other=x',
                     'text' => $LANG_PP['other_func']);
     if ($_PP_CONF['gc_enabled']) {

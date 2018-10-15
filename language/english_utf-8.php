@@ -393,6 +393,7 @@ $LANG_PP = array (
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
 'out_of_stock' => 'This item is currently out of stock.',
+'mnu_wfadmin' => 'Workflows/Statuses',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
