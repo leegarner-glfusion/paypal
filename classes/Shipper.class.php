@@ -146,7 +146,9 @@ class Shipper
         $shippers = Cache::get($cache_key);
         if ($shippers === NULL) {
             $shippers = array();
-            $res = DB_query("SELECT * FROM {$_TABLES['paypal.shipping']}");
+            $sql = "SELECT * FROM {$_TABLES['paypal.shipping']}
+                WHERE enabled = 1";
+            $res = DB_query($sql);
             while ($A = DB_fetchArray($res, false)) {
                 $shippers[$A['id']] = $A;
             }
@@ -458,6 +460,7 @@ class Shipper
             COM_errorLog("Shipper::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
+            Cache::clear(self::$base_tag);
             return $newvalue;
         }
     }
