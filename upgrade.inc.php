@@ -529,7 +529,7 @@ function PAYPAL_do_upgrade($dvlp = false)
 
         if (!_PPtableHasColumn('paypal.orderstatus', 'notify_admin')) {
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orderstatus']} ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'";
-            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1 WHERE name = 'paid'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1, notify_buyer = 1 WHERE name = 'paid'";
         }
 
         // Change the log table to use Unix timestamps.
