@@ -121,7 +121,7 @@ div.paypalProductDetail .ppShortDesc {
 }
 
 .frmAddCart.v2 {
-    float:left;
+    float:right;
 }
 
 .paypalProductDetail #paypalProductAttrib {
@@ -132,8 +132,20 @@ div.paypalProductDetail .ppShortDesc {
     padding-bottom: 10px;
 }
 
+.ppDetailAddCart.v2,
+.ppDetailBuyNow.v2 {
+    float: right;
+    /*text-align: right;*/
+    clear: right;
+}
+
+.ppDetailPrice.v2 {
+    float:right;
+    text-align:right;
+}
+
 div.paypalDetailAttrib {
-    float:left;
+    float:right;
     margin-bottom: 5px;
 }
 div.paypalDetailAttrib.v2 {
@@ -561,6 +573,7 @@ table.paypalViewCartTable {
 .paypalProductCustomText {
     margin-bottom: 5px;
     line-height: 1.3rem;
+    width: 100%;
 }
 #disp_img {
     max-width: 460px;

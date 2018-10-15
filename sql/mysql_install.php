@@ -201,7 +201,7 @@ $_SQL['paypal.ipnlog'] = "CREATE TABLE {$_TABLES['paypal.ipnlog']} (
   `gateway` varchar(25) DEFAULT NULL,
   `ipn_data` text NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `ipnlog_time` (`time`),
+  KEY `ipnlog_ts` (`ts`),
   KEY `ipnlog_txnid` (`txn_id`)
 ) ENGINE=MyISAM";
 
