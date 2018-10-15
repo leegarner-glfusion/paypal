@@ -7,6 +7,5 @@ t.php
 deprecate/
 *.orig
 language/custom
-check_lang.php
-public_html/pp*
-public_html/test
+test/
+*/test/
