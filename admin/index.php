@@ -856,7 +856,7 @@ function PAYPAL_adminMenu($view='')
         ),
         array(
             'url'  => PAYPAL_ADMIN_URL . '/index.php?wfadmin=x',
-            'text' => $LANG_PP['workflows'],
+            'text' => $LANG_PP['mnu_wfadmin'],
             'active' => $view == 'wfadmin' ? true : false,
         ),
         array(
