@@ -9,3 +9,4 @@ deprecate/
 language/custom
 check_lang.php
 public_html/pp*
+public_html/test
