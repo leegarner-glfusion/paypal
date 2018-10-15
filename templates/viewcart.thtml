@@ -130,7 +130,7 @@
         </div>
       </div>
     
-      <div class="uk-width-1-4 uk-margin floatleft" id="checkoutButtons">
+      <div class="uk-width-1-4 uk-margin floatright" id="checkoutButtons">
 {!if gateway_radios}
         <input type="hidden" name="next_step" value="{next_step}" />
 {!if is_uikit}
