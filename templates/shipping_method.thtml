@@ -7,7 +7,7 @@
     </select>
 {!else}
 <input type="hidden" name="shipper_id" value="{method_id}" />
-{method_name} : {method_rate}
+{method_name}
 {!endif}
 <script>
 var shipper_json = '{shipper_json}';
