@@ -442,6 +442,8 @@ class Shipper
     */
     public static function toggleEnabled($oldvalue, $id)
     {
+        global $_TABLES;
+
         // Determing the new value (opposite the old)
         $oldvalue = $oldvalue == 0 ? 0 : 1;
         $newvalue = $oldvalue == 1 ? 0 : 1;
