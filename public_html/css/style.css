@@ -121,7 +121,7 @@ div.paypalProductDetail .ppShortDesc {
 }
 
 .frmAddCart.v2 {
-    float:left;
+    float:right;
 }
 
 .paypalProductDetail #paypalProductAttrib {
@@ -130,6 +130,18 @@ div.paypalProductDetail .ppShortDesc {
     margin-right: 30px;
     clear: right;
     padding-bottom: 10px;
+}
+
+.ppDetailAddCart.v2,
+.ppDetailBuyNow.v2 {
+    float: right;
+    /*text-align: right;*/
+    clear: right;
+}
+
+.ppDetailPrice.v2 {
+    float:right;
+    text-align:right;
 }
 
 div.paypalDetailAttrib {
