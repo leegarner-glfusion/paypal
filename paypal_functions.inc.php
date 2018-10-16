@@ -762,8 +762,7 @@ function ProductList($cat_id = 0)
             $T->set_var('rating_bar', '');
         }
 
-        $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
-                "product_id = '{$P->id}'");
+        $pic_filename = $P->getOneImage();
         $T->set_var(array(
             'id'            => $P->id,
             'name'          => htmlspecialchars($P->name),
