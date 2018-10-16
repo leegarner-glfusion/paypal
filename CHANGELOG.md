@@ -2,6 +2,7 @@
 
 ## Ver 0.6.0
 Released TBD
+- Add a basic shipping module allowing for combined shipping.
 - Thumbnails are sized by CSS. `max_thumb_size` should be large enough for all templates.
 - Added another product list template version
 - Added Admin dvlpupdate.php with idempotent upgrades to assist those tracking development branches.
