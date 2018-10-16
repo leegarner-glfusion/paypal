@@ -380,6 +380,16 @@ $LANG_PP = array (
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
 'out_of_stock' => 'This item is currently out of stock.',
+'shipping_method' => 'Shipping Method',
+'shipping_units' => 'Shipping Units',
+'min_ship_units' => 'Min Shipping Units',
+'max_ship_units' => 'Max Shipping Units',
+'rate_table' => 'Rate Table',
+'rate' => 'Parcel Rate',
+'add_rate' => 'Click to add a new rate',
+'new_ship_method' => 'New Shipment Method',
+'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
+'mnu_wfadmin' => 'Workflows/Statuses',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
