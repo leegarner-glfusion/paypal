@@ -1000,9 +1000,13 @@ function phpblock_paypal_search()
     $T = new Template(__DIR__ . '/templates/');
     $T->set_file('search', 'blk_search.thtml');
 
-    $category_options = COM_optionList($_TABLES['paypal.categories'],
-       'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
-
+    $cache_key = 'cat_options_cat_id_cat_name';
+    $category_options = \Paypal\Cache::get($cache_key);
+    if ($category_options === NULL) {
+        $category_options = COM_optionList($_TABLES['paypal.categories'],
+            'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
+        \Paypal\Cache::set($cache_key, $category_options, 'categories');
+    }
     $T->set_var(array(
         'category_options'  => $category_options,
         'action_url'        => PAYPAL_URL . '/index.php',
@@ -1073,26 +1077,35 @@ function phpblock_paypal_categories()
 {
     global $_TABLES;
 
+    $parents = '0, ' . \Paypal\Category::getRoot()->cat_id;
     $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
             WHERE c.cat_id > 0
             AND c.enabled = 1
-            AND c.parent_id = 0 " .
+            AND p.enabled = 1
+            AND c.parent_id IN ($parents) " .
             SEC_buildAccessSql('AND', 'c.grp_access') .
             " GROUP BY c.cat_id
             ORDER BY c.cat_name";
-                //HAVING cnt > 0
     //echo $sql;die;
-    $result = DB_query($sql);
-    if (!$result || DB_numRows($result) == 0)
-        return '';
-
+    $cache_key = md5($sql);
+    $Cats = \Paypal\Cache::get($cache_key);
+    if ($Cats === NULL) {
+        $Cats = array();
+        $res = DB_query($sql);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $Cats[] = $A;
+            }
+        }
+        \Paypal\Cache::set($cache_key, $Cats, array('categories','products'));
+    }
     $T = new Template(__DIR__ . '/templates');
     $T->set_file(array('blk_category' => 'blk_categories.thtml'));
 
-    while ($A = DB_fetchArray($result, false)) {
+    foreach ($Cats as $A) {
         $cnt = (int)$A['cnt'];
         $cnt += PAYPAL_child_cat_product_count($A['cat_id']);
         if ($cnt == 0) continue;
@@ -1310,16 +1323,15 @@ function PAYPAL_phpblock_product($sql)
             'btn_details' => 'buttons/btn_details.thtml',
         ));
 
-        $P = new \Paypal\Product();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
-            $P->Read($A['id']);
+            $P = \Paypal\Product::getInstance($A['id']);
             $T->set_var(array(
                 'name'      => $P->name,
                 'item_url'  => COM_buildUrl(PAYPAL_URL . '/detail.php?id=' .
                                 $A['id']),
                 'descrip'   => $P->short_description,
                 'price'     => $P->price > 0 ?
-                                sprintf("%5.2f", $P->price) : '',
+                                \Paypal\Currency::getInstance()->Format($P->price) : '',
                 'currency'  => $_PP_CONF['currency'],
                 'rec_num'   => $i,      // to separate items by <hr/>
                 'id'        => $A['id'],
@@ -1343,14 +1355,12 @@ function PAYPAL_phpblock_product($sql)
                 }
             }
 
-            $img = DB_getItem($_TABLES['paypal.images'], 'filename',
-                    "product_id='{$A['id']}'");
+            $img = $P->getOneImage();
             if ($img != '') {
                 $T->set_var('img_url', PAYPAL_ImageUrl($img));
             } else {
                 $T->set_var('img_url', '');
             }
-
             $retval .= $T->parse('output', 'blk_random');
         }
 
