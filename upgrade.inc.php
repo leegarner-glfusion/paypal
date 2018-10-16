@@ -554,6 +554,28 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD KEY `ipnlog_ts` (`ts`)";
         }
 
+        if (!DB_checkTableExists('paypal.shipping')) {
+            $rate_table = array(
+                array(
+                    'dscp' => 'Small',
+                    'units' => '5',
+                    'rate' => '7.20',
+                ),
+                array(
+                    'dscp' => 'Medium',
+                    'units' => '20',
+                    'rate' => '13.65',
+                ),
+                array(
+                    'dscp' => 'Large',
+                    'units' => '50',
+                    'rate' => '18.90',
+                ),
+            );
+            $rate_table = DB_escapeString(json_encode($rate_table));
+            $PP_UPGRADE[$current_ver][] = "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'$rate_table')";
+        }
+
         // Templates now use CSS to limit thumbnail sizes. If the configured max_thumb_size
         // is still the old default, change it to the new default
         if ($_PP_CONF['max_thumb_size'] == 100) {

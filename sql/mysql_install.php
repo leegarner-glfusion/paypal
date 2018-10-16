@@ -524,6 +524,8 @@ $_PP_SAMPLEDATA = array(
             (5, 50, 1, 'closed', 0, 0),
             (6, 60, 1, 'refunded', 0, 0)",
     $PP_UPGRADE['0.5.4'][1],
+    "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES
+        (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'[{\\\"dscp\\\":\\\"Small\\\",\\\"units\\\":\\\"5\\\",\\\"rate\\\":\\\"7.20\\\"},{\\\"dscp\\\":\\\"Medium\\\",\\\"units\\\":\\\"20\\\",\\\"rate\\\":\\\"13.65\\\"},{\\\"dscp\\\":\\\"Large\\\",\\\"units\\\":\\\"50\\\",\\\"rate\\\":\\\"18.90\\\"}]')",
 );
 
 
@@ -919,8 +921,6 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
-);
-$PP_UPGRADE['0.7.0'] = array(       // placeholder version
     "CREATE TABLE IF NOT EXISTS `{$_TABLES['paypal.shipping']}` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `name` varchar(255) NOT NULL DEFAULT '',
@@ -930,8 +930,6 @@ $PP_UPGRADE['0.7.0'] = array(       // placeholder version
         `rates` text,
         PRIMARY KEY (`id`)
     ) ENGINE=MyIsam",
-    "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES
-        (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'[{\\\"dscp\\\":\\\"Small\\\",\\\"units\\\":\\\"5\\\",\\\"rate\\\":\\\"7.20\\\"},{\\\"dscp\\\":\\\"Medium\\\",\\\"units\\\":\\\"20\\\",\\\"rate\\\":\\\"13.65\\\"},{\\\"dscp\\\":\\\"Large\\\",\\\"units\\\":\\\"50\\\",\\\"rate\\\":\\\"18.90\\\"}]')",
     "ALTER TABLE {$_TABLES['paypal.products']} ADD `shipping_units` decimal(9,4) unsigned NOT NULL DEFAULT '0' AFTER `shipping_amt`",
 );
 
