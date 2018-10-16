@@ -1498,8 +1498,8 @@ function plugin_runScheduledTask_paypal()
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         PLG_itemDeleted($A['id'], $A['prod_type']);
-        DB_query("UPDATE {$_TABLES['paypal.products']}
-                SET enabled = 0 $where");
+        // Toggle to disabled, also clears the product cache
+        \Paypal\Product::toggleEnabled(1, $A['id']);
     }
 
     // Delete old cached buttons which are keyed by item_id and price.

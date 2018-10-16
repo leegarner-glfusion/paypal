@@ -934,7 +934,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public static function toggleEnabled($oldvalue, $id=0)
+    public static function toggleEnabled($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'enabled', $id);
     }
@@ -948,7 +948,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public static function toggleFeatured($oldvalue, $id=0)
+    public static function toggleFeatured($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'featured', $id);
     }
@@ -963,7 +963,7 @@ class Product
     *
     *   @return boolean True if used, False if not
     */
-    public static function isUsed($item_id = 0)
+    public static function isUsed($item_id)
     {
         global $_TABLES;
 
