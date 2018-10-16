@@ -192,18 +192,10 @@ function PP_updateShipping(e)
         return;
     }
 
-    var nonship_total = {item_subtotal} + {cart_tax} + {handling};
     var newship = e.options[e.selectedIndex].value;
     var obj = JSON.parse(shipper_json);
-    newship_amt = obj[newship];
-
-    if (typeof(newship_amt) === "number") {
-        newship_amt = newship_amt.toFixed({cur_decimals});
-        nonship_total = nonship_total.toFixed({cur_decimals});
-        var order_total = (nonship_total * 1) + (newship_amt * 1);
-        document.getElementById("ord_total_span").innerHTML = order_total;
-        document.getElementById("shipping_cell").innerHTML = newship_amt;
-    }
+    document.getElementById("ord_total_span").innerHTML = obj[newship].total;
+    document.getElementById("shipping_cell").innerHTML = obj[newship].amount;
 }
 </script>
 {# end {templatelocation} #}

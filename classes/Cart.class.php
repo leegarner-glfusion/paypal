@@ -855,12 +855,16 @@ class Cart extends Order
         $ship_rates = array();
         foreach ($shippers as $shipper) {
             $sel = $shipper->id == $best->id ? 'selected="selected"' : '';
-            $rate = $shipper->best_rate + (string)Currency::getInstance()->FormatValue($shipping['amount']);
+            $s_amt = $shipper->best_rate + $shipping['amount'];
+            $rate = array(
+                'amount'    => (string)Currency::getInstance()->FormatValue($s_amt),
+                'total'     => (string)Currency::getInstance()->FormatValue($this->subtotal + $s_amt),
+            );
             $ship_rates[$shipper->id] = $rate;
             $T->set_var(array(
                 'method_sel'    => $sel,
                 'method_name'   => $shipper->name,
-                'method_rate'   => Currency::getInstance()->Format($rate),
+                'method_rate'   => Currency::getInstance()->Format($s_amt),
                 'method_id'     => $shipper->id,
                 'order_id'      => $this->order_id,
                 'next_step'     => $step + 1,
