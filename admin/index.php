@@ -1188,30 +1188,55 @@ function PAYPAL_adminlist_Attributes()
     }
 
     $header_arr = array(
-        array('text' => 'ID',
-                'field' => 'attr_id', 'sort' => true),
-        array('text' => $LANG_PP['edit'],
-                'field' => 'edit', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['enabled'],
-                'field' => 'enabled', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['product'],
-                'field' => 'prod_name', 'sort' => true),
-        array('text' => $LANG_PP['attr_name'],
-                'field' => 'attr_name', 'sort' => true),
-        array('text' => $LANG_PP['attr_value'],
-                'field' => 'attr_value', 'sort' => true),
-        array('text' => $LANG_PP['order'],
-                'field' => 'orderby', 'sort' => true),
-        array('text' => $LANG_PP['attr_price'],
-                'field' => 'attr_price',
-                'align' => 'right',
-                'sort' => true,
+        array(
+            'text' => 'ID',
+            'field' => 'attr_id',
+            'sort' => true,
         ),
-        array('text' => $LANG_ADMIN['delete'],
-                'field' => 'delete', 'sort' => 'false',
-                'align' => 'center'),
+        array(
+            'text' => $LANG_PP['edit'],
+            'field' => 'edit',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['enabled'],
+            'field' => 'enabled',
+            'sort' => false,
+            'align' => 'center',
+        ),
+        array(
+            'text' => $LANG_PP['product'],
+            'field' => 'prod_name',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['attr_name'],
+            'field' => 'attr_name',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['attr_value'],
+            'field' => 'attr_value',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['order'],
+            'field' => 'orderby',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_PP['attr_price'],
+            'field' => 'attr_price',
+            'align' => 'right',
+            'sort' => true,
+        ),
+        array(
+            'text' => $LANG_ADMIN['delete'],
+            'field' => 'delete',
+            'sort' => 'false',
+            'align' => 'center',
+        ),
     );
 
     $defsort_arr = array(
@@ -1387,6 +1412,10 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
                 'title' => 'Delete this item',
             )
         );
+        break;
+
+    case 'attr_price':
+        $retval = \Paypal\Currency::getInstance()->FormatValue($fieldvalue);
         break;
 
     default:
