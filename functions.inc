@@ -1118,9 +1118,7 @@ function phpblock_paypal_categories()
         ) );
         $T->parse('ItemRow', 'row', true);
     }
-    $retval .= $T->parse('output', 'blk_category');
-
-    return $retval;
+    return $T->parse('output', 'blk_category');
 }
 
 
@@ -1300,13 +1298,11 @@ function PAYPAL_phpblock_product($sql)
     $retval = '';
 
     // Check for a recent cached copy of the block to save DB calls
+    $cache_key = md5($sql);
     if ((int)$_PP_CONF['cache_max_age'] > 0) {
-        $key = md5($sql);
-        $cachefile = "{$_CONF['path_data']}/layout_cache/{$cachedir}/__paypal__{$key}";
-        if (is_file($cachefile)) {
-            // Get the HTML file, ignore errors. If empty the query will run anyway
-            $retval = @file_get_contents($cachefile);
-            if (!empty($retval)) return $retval;
+        $retval = \Paypal\Cache::get($cache_key);
+        if ($retval !== NULL) {
+            return $retval;
         }
     }
 
@@ -1364,15 +1360,11 @@ function PAYPAL_phpblock_product($sql)
             }
             $retval .= $T->parse('output', 'blk_random');
         }
-
     }
 
     // Write the cache file if used
     if ((int)$_PP_CONF['cache_max_age'] > 0) {
-        $f = fopen($cachefile, 'w+');
-        if ($f) {
-            fwrite($f, $retval);
-        }
+        \Paypal\Cache::set($cache_key, $retval, array('products','categories'), $_PP_CONF['cache_max_age']);
     }
     return $retval;
 }
