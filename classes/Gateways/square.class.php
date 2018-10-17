@@ -391,7 +391,7 @@ class square extends \Paypal\Gateway
     *
     *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
     */
-    public function SaveConfig($A)
+    public function SaveConfig($A=NULL)
     {
         if (!is_array($A)) return false;
 

@@ -83,13 +83,13 @@ class authorizenet extends \Paypal\Gateway
         if ($this->config['test_mode'] == '1') {
             $this->api_login = $this->config['test_api_login'];
             $this->trans_key = $this->config['test_trans_key'];
-            $this->hash_key = $this->config['test_hash_key'];
+            //$this->hash_key = $this->config['test_hash_key'];
             $this->token_url = 'https://apitest.authorize.net/xml/v1/request.api';
             $this->gw_url = 'https://test.authorize.net/payment/payment';
         } else {
             $this->api_login = $this->config['prod_api_login'];
             $this->trans_key = $this->config['prod_trans_key'];
-            $this->hash_key = $this->config['prod_hash_key'];
+            //$this->hash_key = $this->config['prod_hash_key'];
             $this->token_url = 'https://api.authorize.net/xml/v1/request.api';
             $this->gw_url = 'https://accept.authorize.net/payment/payment';
         }
@@ -519,7 +519,7 @@ class authorizenet extends \Paypal\Gateway
     *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
     *   @return boolean         Results of parent SaveConfig function
     */
-    public function SaveConfig($A)
+    public function SaveConfig($A=NULL)
     {
         if (!is_array($A)) return false;
         foreach ($this->config as $name=>$value) {

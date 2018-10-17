@@ -867,7 +867,6 @@ class Cart extends Order
                 'method_rate'   => Currency::getInstance()->Format($s_amt),
                 'method_id'     => $shipper->id,
                 'order_id'      => $this->order_id,
-                'next_step'     => $step + 1,
                 'multi'         => count($shippers) > 1 ? true : false,
             ) );
             $T->parse('row', 'shipMethodSelect', true);

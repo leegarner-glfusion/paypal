@@ -226,6 +226,7 @@ class Shipper
         if ($units == 0) return $rates;     // no shipping, return empty
 
         $shippers = self::getAll();
+        $shipper = new \stdClass();
         $shipper->best_rate = 0;
         foreach ($shippers as $s_id=>$shipper) {
             if ($units < $shipper->min_units || ($shipper->max_units > 0 && $units > $shipper->max_units)) {

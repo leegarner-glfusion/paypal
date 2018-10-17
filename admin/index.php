@@ -1322,7 +1322,7 @@ function PAYPAL_adminlist_Shippers()
     );
 
     $options = array('chkdelete' => true, 'chkfield' => 'id');
-
+    $filter = '';
     if (!isset($_REQUEST['query_limit']))
         $_GET['query_limit'] = 20;
 
