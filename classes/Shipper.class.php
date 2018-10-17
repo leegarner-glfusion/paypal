@@ -118,14 +118,13 @@ class Shipper
                 if (!empty($txt) && !empty($A['rateUnits'][$id]) && !empty($A['rateRate'][$id])) {
                     $rates[] = array(
                         'dscp' => $txt,
-                        'units' => $A['rateUnits'][$id],
-                        'rate' => $A['rateRate'][$id],
+                        'units' => (float)$A['rateUnits'][$id],
+                        'rate' => (float)$A['rateRate'][$id],
                     );
                 }
             }
             $this->rates = $rates;
         } else {
-            //$rates = json_decode($A['rates'], true);
             $rates = json_decode($A['rates']);
             if ($rates === NULL) $rates = array();
             $this->rates = $rates;
@@ -209,9 +208,7 @@ class Shipper
         );
         $retval = array();
         foreach ($shippers as $shipper) {
-           // var_dump($shipper);die;
             $retval[] = new self($shipper);
-        //    var_dump($retval);die;
         }
         return $retval;
     }

@@ -558,18 +558,18 @@ function PAYPAL_do_upgrade($dvlp = false)
             $rate_table = array(
                 array(
                     'dscp' => 'Small',
-                    'units' => '5',
-                    'rate' => '7.20',
+                    'units' => 5,
+                    'rate' => 7.20,
                 ),
                 array(
                     'dscp' => 'Medium',
-                    'units' => '20',
-                    'rate' => '13.65',
+                    'units' => 20,
+                    'rate' => 13.65,
                 ),
                 array(
                     'dscp' => 'Large',
-                    'units' => '50',
-                    'rate' => '18.90',
+                    'units' => 50,
+                    'rate' => 18.90,
                 ),
             );
             $rate_table = DB_escapeString(json_encode($rate_table));
