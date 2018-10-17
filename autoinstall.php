@@ -160,6 +160,7 @@ $tables = array(
     'products', 'categories', 'purchases', 'ipnlog', 'orders', 'sales',
     'prod_attr', 'images', 'gateways', 'address', 'userinfo', 'workflows',
     'buttons', 'orderstatus', 'order_log', 'currency', 'coupons', 'coupon_log',
+    'shipping',
 );
 foreach ($tables as $table) {
     $INSTALL_plugin['paypal'][] = array(

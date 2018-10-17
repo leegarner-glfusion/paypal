@@ -477,7 +477,6 @@ $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `name` varchar(40),
   `item_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `item_id` int(11) unsigned NOT NULL,
-  `name` varchar(40) default '',
   `start` int(11) unsigned DEFAULT NULL,
   `end` int(11) unsigned DEFAULT NULL,
   `discount_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -525,7 +524,7 @@ $_PP_SAMPLEDATA = array(
             (6, 60, 1, 'refunded', 0, 0)",
     $PP_UPGRADE['0.5.4'][1],
     "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES
-        (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'[{\\\"dscp\\\":\\\"Small\\\",\\\"units\\\":\\\"5\\\",\\\"rate\\\":\\\"7.20\\\"},{\\\"dscp\\\":\\\"Medium\\\",\\\"units\\\":\\\"20\\\",\\\"rate\\\":\\\"13.65\\\"},{\\\"dscp\\\":\\\"Large\\\",\\\"units\\\":\\\"50\\\",\\\"rate\\\":\\\"18.90\\\"}]')",
+        (1,'USPS Priority Flat Rate',0.0001,50.0000,0,'[{\"dscp\":\"Small\",\"units\":5,\"rate\":7.2},{\"dscp\":\"Medium\",\"units\":20,\"rate\":13.65},{\"dscp\":\"Large\",\"units\":50,\"rate\":18.9}]')",
 );
 
 
@@ -930,7 +929,6 @@ $PP_UPGRADE['0.6.0'] = array(
         `rates` text,
         PRIMARY KEY (`id`)
     ) ENGINE=MyIsam",
-    "ALTER TABLE {$_TABLES['paypal.products']} ADD `shipping_units` decimal(9,4) unsigned NOT NULL DEFAULT '0' AFTER `shipping_amt`",
 );
 
 ?>

@@ -813,6 +813,7 @@ function plugin_autouninstall_paypal ()
                 'paypal.coupons',
                 'paypal.coupon_log',
                 'paypal.sales',
+                'paypal.shipping',
                 // deprecated, leave here to facilitate rollbacks
                 'paypal.cart',
         ),
