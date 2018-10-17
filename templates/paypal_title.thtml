@@ -12,7 +12,7 @@
 {breadcrumbs}
 {!endif}
 {!if todo}
-<div class="uk-alert uk-alert-danger">{todo}</div>
+<div style="clear:both" class="uk-alert uk-alert-danger">{todo}</div>
 {!endif}
 <div style="margin-top: 10px;clear:both;"></div>
 {# end {templatelocation} #}
