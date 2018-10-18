@@ -2,7 +2,7 @@
 {!if rec_num}
   <hr />
 {!endif}
-<a href="{item_url}"><b>{name}</b>
+<a href="{item_url}">
 {!if img_url}
 <div style="height:150px;margin-top:5px">
   <img style="height:100%" src="{img_url}" />
