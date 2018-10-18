@@ -1,21 +1,18 @@
 {# begin {templatelocation} #}
-<a href="{pi_url}/index.php">{$LANG_PP['browse_cat']}</a>
-<br />
 <form action="{action_url}" method="post">
-    <b>{$LANG_PP['search_catalog']}:</b><br />
-    {$LANG_PP['by_cat']}<br />
-    <select name="category" style="width:140px;">
-        <option value="" selected="selected">-- {$LANG_PP['any']} --</option>
-        {category_options}
-    </select>
-    <br /><br />
-    {$LANG_PP['by_name']}
-    <br />
-    <input type="text" name="query" style="width:135px;" />
-    <br />
-    <div align="center">
-      <input type="submit" class="paypalButton orange" name="searchcat" 
-        value="{$LANG_PP['search']}" />
+    <div>
+        {$LANG_PP['by_cat']}<br />
+        <select name="category" style="width:140px;">
+            <option value="" selected="selected">-- {$LANG_PP['any']} --</option>
+            {category_options}
+        </select>
+    </div>
+    <div style="margin-top:1rem">
+        {$LANG_PP['by_name']}<br />
+        <input type="text" name="query" style="width:135px;" />
+    </div>
+    <div style="text-align:center;margin-top:.5rem">
+          <input type="submit" class="paypalButton orange" name="searchcat" value="{$LANG_PP['search']}" />
     </div>
 </form>
 {# begin {templatelocation} #}
