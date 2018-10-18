@@ -758,9 +758,11 @@ function PAYPAL_remove_old_files()
         ),
     );
 
-    if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
-        // Files that were renamed, changing case only.
-        // Only delete thes on non-windows systems.
+    // Files that were renamed, changing case only.
+    // Only delete thes on non-case-sensitive systems.
+    $user_agent = getenv("HTTP_USER_AGENT");
+    if (strpos($user_agent, "Win") === FALSE &&
+        strpos($user_agent, "Mac") === FALSE) {
         $files = array(
             'classes/attribute.class.php',
             'classes/cart.class.php',
@@ -774,7 +776,7 @@ function PAYPAL_remove_old_files()
         $paths[__DIR__] = array_merge($paths[__DIR__], $files);
 
         // The gateways class dir has been renamed to Gatways for better namespacing.
-        // Remove the old class dir and files, only if not on Windows
+        // Remove the old class dir and files, only if not on Windows or Mac
         $dir = __DIR__ . '/classes/gateways';
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), array('.','..'));
