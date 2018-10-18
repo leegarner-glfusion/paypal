@@ -65,6 +65,7 @@ class Order
             $this->token = self::_createToken();
             $this->shipping = 0;
             $this->handling = 0;
+            $this->by_gc = 0;
         }
     }
 
@@ -398,7 +399,7 @@ class Order
         );
         foreach (array('billto', 'shipto') as $type) {
             $fld = $type . '_id';
-            $fields[] = "$fld = '{$this->$fld}'";
+            $fields[] = "$fld = " . (int)$this->$fld;
             foreach ($this->_addr_fields as $name) {
                 $fld = $type . '_' . $name;
                 $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
