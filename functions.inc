@@ -551,12 +551,10 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
-    global $_PLUGINS, $_PP_CONF;
+    global $_PLUGINS;
 
     // If this plugin or a required plugin isn't available, abort gracefully
-    if (!in_array($_PP_CONF['pi_name'], $_PLUGINS) ||
-        !in_array('lglib', $_PLUGINS) ||
-        !SEC_hasRights($rights, 'OR')) {
+    if (!in_array('lglib', $_PLUGINS) || !SEC_hasRights($rights, 'OR')) {
         COM_404();
         exit;
     }
