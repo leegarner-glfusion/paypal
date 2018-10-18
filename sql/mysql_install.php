@@ -512,7 +512,7 @@ $_PP_SAMPLEDATA = array(
         VALUES
             (1, 'viewcart', 10, 3, 0),
             (2, 'billto', 20, 0, 1),
-            (3, 'shipto', 30, 0, 1)",
+            (3, 'shipto', 30, 2, 1)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
             (id, orderby, enabled, name, notify_buyer, notify_admin)
         VALUES
