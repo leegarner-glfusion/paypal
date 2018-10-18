@@ -90,6 +90,7 @@ class test extends \Paypal\Gateway
             '<input type="hidden" name="cart_id" value="' . $cart->CartID() . '" />',
             '<input type="hidden" name="custom" value=\'' . @serialize($cust) . '\' />',
             '<input type="hidden" name="payment_status" value="Completed" />',
+            '<input type="hidden" name="pmt_gross" value="' . $cart->getTotal() . '" />',
         );
         if (COM_isAnonUser()) {
             //$T->set_var('need_email', true);
