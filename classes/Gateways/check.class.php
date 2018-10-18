@@ -425,7 +425,7 @@ class check extends \Paypal\Gateway
     *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
     *   @return boolean         Results of parent SaveConfig function
     */
-    public function SaveConfig($A)
+    public function SaveConfig($A=NULL)
     {
         if (!is_array($A)) return false;
         foreach ($this->config as $name=>$value) {

@@ -6,8 +6,8 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    paypal
-*   @version    0.5.12
-*   @since      version 0.5.0
+*   @version    0.6.0
+*   @since      0.5.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource

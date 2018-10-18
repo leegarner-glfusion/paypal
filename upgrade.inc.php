@@ -438,6 +438,9 @@ function PAYPAL_do_upgrade($dvlp = false)
             $cats = array();
             if ($res) {
                 while ($A = DB_fetchArray($res, false)) {
+                    // Escape string values
+                    $A['cat_name'] = DB_escapeString($A['cat_name']);
+                    $A['description'] = DB_escapeString($A['description']);
                     $cats[] = $A;
                 }
                 $sql_cats = array();
@@ -526,7 +529,7 @@ function PAYPAL_do_upgrade($dvlp = false)
 
         if (!_PPtableHasColumn('paypal.orderstatus', 'notify_admin')) {
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orderstatus']} ADD `notify_admin` TINYINT(1) NOT NULL DEFAULT '0'";
-            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1 WHERE name = 'paid'";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orderstatus']} SET notify_admin = 1, notify_buyer = 1 WHERE name = 'paid'";
         }
 
         if (!_PPtableHasColumn('paypal.orders', 'currency')) {
@@ -564,6 +567,35 @@ function PAYPAL_do_upgrade($dvlp = false)
             $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.ipnlog']} SET ts = UNIX_TIMESTAMP(CONVERT_TZ(`time`, '+00:00', @@session.time_zone))";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} DROP `time`";
             $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.ipnlog']} ADD KEY `ipnlog_ts` (`ts`)";
+        }
+
+        if (!DB_checkTableExists('paypal.shipping')) {
+            $rate_table = array(
+                array(
+                    'dscp' => 'Small',
+                    'units' => 5,
+                    'rate' => 7.20,
+                ),
+                array(
+                    'dscp' => 'Medium',
+                    'units' => 20,
+                    'rate' => 13.65,
+                ),
+                array(
+                    'dscp' => 'Large',
+                    'units' => 50,
+                    'rate' => 18.90,
+                ),
+            );
+            $rate_table = DB_escapeString(json_encode($rate_table));
+            $PP_UPGRADE[$current_ver][] = "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES (1,'USPS Priority Flat Rate',0.0001,50.0000,1,'$rate_table')";
+        }
+
+        // Templates now use CSS to limit thumbnail sizes. If the configured max_thumb_size
+        // is still the old default, change it to the new default
+        if ($_PP_CONF['max_thumb_size'] == 100) {
+            $C = config::get_instance();
+            $C->set('max_thumb_size', 250, 'paypal');
         }
 
         if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
@@ -741,9 +773,11 @@ function PAYPAL_remove_old_files()
         ),
     );
 
-    if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
-        // Files that were renamed, changing case only.
-        // Only delete thes on non-windows systems.
+    // Files that were renamed, changing case only.
+    // Only delete thes on non-case-sensitive systems.
+    $user_agent = getenv("HTTP_USER_AGENT");
+    if (strpos($user_agent, "Win") === FALSE &&
+        strpos($user_agent, "Mac") === FALSE) {
         $files = array(
             'classes/attribute.class.php',
             'classes/cart.class.php',
@@ -757,7 +791,7 @@ function PAYPAL_remove_old_files()
         $paths[__DIR__] = array_merge($paths[__DIR__], $files);
 
         // The gateways class dir has been renamed to Gatways for better namespacing.
-        // Remove the old class dir and files, only if not on Windows
+        // Remove the old class dir and files, only if not on Windows or Mac
         $dir = __DIR__ . '/classes/gateways';
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), array('.','..'));

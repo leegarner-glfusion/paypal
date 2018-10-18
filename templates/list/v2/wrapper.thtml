@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 <div class="ppProductListOuter {tpl_ver}">
-<ul class="uk-grid uk-grid-width-small-1-3 uk-grid-width-medium-1-{med_cols} uk-grid-width-large-1-{lg_cols} uk-margin-right">
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-{med_cols} uk-grid-width-large-1-{lg_cols} uk-margin-right">
 <!-- BEGIN ProductItems -->
 <li class="uk-vertical-align-top ppProductListItem v2 uk-margin-bottom">
 <a href="{item_url}">

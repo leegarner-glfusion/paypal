@@ -23,7 +23,6 @@ case 'delAddress':          // Remove a shipping address
     if ($uid < 2) break;    // Not available to anonymous
     $id = (int)$_GET['id']; // Sanitize address ID
     \Paypal\UserInfo::deleteAddress($id);
-    //DB_delete($_TABLES['paypal.address'], array('id','uid'), array($id,$uid));
     break;
 
 case 'getAddress':
@@ -31,7 +30,6 @@ case 'getAddress':
     $id = (int)$_GET['id'];
     $res = DB_query("SELECT * FROM {$_TABLES['paypal.address']} WHERE id=$id",1);
     $A = DB_fetchArray($res, false);
-    //if (!empty($A)) {
     break;
 
 case 'addcartitem':
@@ -46,8 +44,8 @@ case 'addcartitem':
         exit;
     }
     $Cart = \Paypal\Cart::getInstance();
-    if (isset($_POST['_unique']) && $_POST['_unique'] &&
-        $Cart->Contains($_POST['item_number']) !== false) {
+    $unique = PP_getVar($_POST, '_unique', 'integer');
+    if ($unique && $Cart->Contains($_POST['item_number']) !== false) {
         // Do nothing if only one item instance may be added
         break;
     }
@@ -68,7 +66,7 @@ case 'addcartitem':
         'statusMessage' => $LANG_PP['msg_item_added'],
         'ret_url' => isset($_POST['_ret_url']) && !empty($_POST['_ret_url']) ?
                 $_POST['_ret_url'] : '',
-        'unique' => isset($_POST['_unique']) ? true : false,
+        'unique' => $unique ? true : false,
     );
     echo json_encode($A);
     exit;

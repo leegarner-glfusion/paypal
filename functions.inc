@@ -551,12 +551,10 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
-    global $_PLUGINS, $_PP_CONF;
+    global $_PLUGINS;
 
     // If this plugin or a required plugin isn't available, abort gracefully
-    if (!in_array($_PP_CONF['pi_name'], $_PLUGINS) ||
-        !in_array('lglib', $_PLUGINS) ||
-        !SEC_hasRights($rights, 'OR')) {
+    if (!in_array('lglib', $_PLUGINS) || !SEC_hasRights($rights, 'OR')) {
         COM_404();
         exit;
     }
@@ -602,7 +600,7 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
                 'item_name'     => $vars['item_name'],
                 'item_number'   => $vars['item_number'],
                 'amount'        => $vars['amount'],
-                'pi_url'        => PAYPAL_URL,
+                'action_url'    => PAYPAL_URL . '/index.php',
                 'item_type'     => $item_type,
             ) );
             $retval = $T->parse('', 'cart');
@@ -813,6 +811,7 @@ function plugin_autouninstall_paypal ()
                 'paypal.coupons',
                 'paypal.coupon_log',
                 'paypal.sales',
+                'paypal.shipping',
                 // deprecated, leave here to facilitate rollbacks
                 'paypal.cart',
         ),
@@ -974,7 +973,7 @@ function phpblock_paypal_cart_contents()
             'price'         => $Cur->FormatValue($item->price),
             'quantity'      => $item->quantity,
             'item_total'    => $Cur->FormatValue($item_total),
-            'pi_url'        => PAYPAL_URL,
+//            'pi_url'        => PAYPAL_URL,
             'item_link'     => $P->getLink(),
         ) );
         $T->parse('cRow', 'CartRow', true);
@@ -1000,12 +999,16 @@ function phpblock_paypal_search()
     $T = new Template(__DIR__ . '/templates/');
     $T->set_file('search', 'blk_search.thtml');
 
-    $category_options = COM_optionList($_TABLES['paypal.categories'],
-       'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
-
+    $cache_key = 'cat_options_cat_id_cat_name';
+    $category_options = \Paypal\Cache::get($cache_key);
+    if ($category_options === NULL) {
+        $category_options = COM_optionList($_TABLES['paypal.categories'],
+            'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
+        \Paypal\Cache::set($cache_key, $category_options, 'categories');
+    }
     $T->set_var(array(
         'category_options'  => $category_options,
-        'pi_url'            => PAYPAL_URL,
+        'action_url'        => PAYPAL_URL . '/index.php',
     ) );
     $T->parse('output', 'search');
     return $T->finish($T->get_var('output'));
@@ -1073,26 +1076,35 @@ function phpblock_paypal_categories()
 {
     global $_TABLES;
 
+    $parents = '0, ' . \Paypal\Category::getRoot()->cat_id;
     $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt
             FROM {$_TABLES['paypal.products']} p
             LEFT JOIN {$_TABLES['paypal.categories']} c
                 ON p.cat_id = c.cat_id
             WHERE c.cat_id > 0
             AND c.enabled = 1
-            AND c.parent_id = 0 " .
+            AND p.enabled = 1
+            AND c.parent_id IN ($parents) " .
             SEC_buildAccessSql('AND', 'c.grp_access') .
             " GROUP BY c.cat_id
             ORDER BY c.cat_name";
-                //HAVING cnt > 0
     //echo $sql;die;
-    $result = DB_query($sql);
-    if (!$result || DB_numRows($result) == 0)
-        return '';
-
+    $cache_key = md5($sql);
+    $Cats = \Paypal\Cache::get($cache_key);
+    if ($Cats === NULL) {
+        $Cats = array();
+        $res = DB_query($sql);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $Cats[] = $A;
+            }
+        }
+        \Paypal\Cache::set($cache_key, $Cats, array('categories','products'));
+    }
     $T = new Template(__DIR__ . '/templates');
     $T->set_file(array('blk_category' => 'blk_categories.thtml'));
 
-    while ($A = DB_fetchArray($result, false)) {
+    foreach ($Cats as $A) {
         $cnt = (int)$A['cnt'];
         $cnt += PAYPAL_child_cat_product_count($A['cat_id']);
         if ($cnt == 0) continue;
@@ -1104,9 +1116,7 @@ function phpblock_paypal_categories()
         ) );
         $T->parse('ItemRow', 'row', true);
     }
-    $retval .= $T->parse('output', 'blk_category');
-
-    return $retval;
+    return $T->parse('output', 'blk_category');
 }
 
 
@@ -1286,13 +1296,11 @@ function PAYPAL_phpblock_product($sql)
     $retval = '';
 
     // Check for a recent cached copy of the block to save DB calls
+    $cache_key = md5($sql);
     if ((int)$_PP_CONF['cache_max_age'] > 0) {
-        $key = md5($sql);
-        $cachefile = "{$_CONF['path_data']}/layout_cache/{$cachedir}/__paypal__{$key}";
-        if (is_file($cachefile)) {
-            // Get the HTML file, ignore errors. If empty the query will run anyway
-            $retval = @file_get_contents($cachefile);
-            if (!empty($retval)) return $retval;
+        $retval = \Paypal\Cache::get($cache_key);
+        if ($retval !== NULL) {
+            return $retval;
         }
     }
 
@@ -1310,16 +1318,15 @@ function PAYPAL_phpblock_product($sql)
             'btn_details' => 'buttons/btn_details.thtml',
         ));
 
-        $P = new \Paypal\Product();
         for ($i = 0; $A = DB_fetchArray($res, false); $i++) {
-            $P->Read($A['id']);
+            $P = \Paypal\Product::getInstance($A['id']);
             $T->set_var(array(
                 'name'      => $P->name,
                 'item_url'  => COM_buildUrl(PAYPAL_URL . '/detail.php?id=' .
                                 $A['id']),
                 'descrip'   => $P->short_description,
                 'price'     => $P->price > 0 ?
-                                sprintf("%5.2f", $P->price) : '',
+                                \Paypal\Currency::getInstance()->Format($P->price) : '',
                 'currency'  => $_PP_CONF['currency'],
                 'rec_num'   => $i,      // to separate items by <hr/>
                 'id'        => $A['id'],
@@ -1343,25 +1350,19 @@ function PAYPAL_phpblock_product($sql)
                 }
             }
 
-            $img = DB_getItem($_TABLES['paypal.images'], 'filename',
-                    "product_id='{$A['id']}'");
+            $img = $P->getOneImage();
             if ($img != '') {
                 $T->set_var('img_url', PAYPAL_ImageUrl($img));
             } else {
                 $T->set_var('img_url', '');
             }
-
             $retval .= $T->parse('output', 'blk_random');
         }
-
     }
 
     // Write the cache file if used
     if ((int)$_PP_CONF['cache_max_age'] > 0) {
-        $f = fopen($cachefile, 'w+');
-        if ($f) {
-            fwrite($f, $retval);
-        }
+        \Paypal\Cache::set($cache_key, $retval, array('products','categories'), $_PP_CONF['cache_max_age']);
     }
     return $retval;
 }
@@ -1488,8 +1489,8 @@ function plugin_runScheduledTask_paypal()
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         PLG_itemDeleted($A['id'], $A['prod_type']);
-        DB_query("UPDATE {$_TABLES['paypal.products']}
-                SET enabled = 0 $where");
+        // Toggle to disabled, also clears the product cache
+        \Paypal\Product::toggleEnabled(1, $A['id']);
     }
 
     // Delete old cached buttons which are keyed by item_id and price.
@@ -2068,6 +2069,8 @@ function PP_getVar($A, $varname, $type = 'string', $default = NULL)
         }
         return $val;
         break;
+    case 'object':
+        return $val;
     case 'string':
     default:
         return (string)$val;

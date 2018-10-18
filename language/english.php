@@ -138,7 +138,7 @@ $LANG_PP = array (
 'saveopt'           => 'Save Option',
 'deletecat'         => 'Delete Category',
 'product_id'        => 'Product ID',
-'other_func'        => 'Other Functions',
+'other_func'        => 'Maintenance',
 'q_del_item'        => 'Are you sure you want to delete this item?',
 'clearform'         => 'Reset Form',
 'del_item_instr'    => 'Items that have no purchases can be deleted. If an item has been purchased it can only be disabled.',
@@ -391,6 +391,7 @@ $LANG_PP = array (
 'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><b>This will impact the guest experience and should not normally be necessary.</b>',
 'include' => 'Include',
 'exclude' => 'Exclude',
+<<<<<<< HEAD
 'dscp_change_currency' => 'Change prices for products, attributes and shopping cart items to a new currency.<br /><b>This will adjust product prices. You should review all prices for accuracy following this operation.</b>',
 'change_currency' => 'Change Currency',
 'old_currency' => 'Old Currency Setting',
@@ -399,7 +400,20 @@ $LANG_PP = array (
 'cur_changed' => 'Prices changed from %1$s to %2%s',
 'no_cur_change' => 'No currency conversion was done.',
 'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
+=======
+'buy_x_save' => 'Buy %1$d, save %2$s%%',
+>>>>>>> develop
 'out_of_stock' => 'This item is currently out of stock.',
+'shipping_method' => 'Shipping Method',
+'shipping_units' => 'Shipping Units',
+'min_ship_units' => 'Min Shipping Units',
+'max_ship_units' => 'Max Shipping Units',
+'rate_table' => 'Rate Table',
+'rate' => 'Parcel Rate',
+'add_rate' => 'Click to add a new rate',
+'new_ship_method' => 'New Shipment Method',
+'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
+'mnu_wfadmin' => 'Workflows/Statuses',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -419,6 +433,7 @@ $LANG_PP_HELP = array(
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
 'recipient_email' => 'The gift card will be emailed to this address. If left blank, the gift card will be emailed to you.',
 'orderlist_total' => 'This is the total of items on the order, excluding taxes and fees. Hover over an amount to see all charges.',
+'sender_name' => 'Optionally enter your name to be shown to the recipient.',
 );
 
 $LANG_MYACCOUNT['pe_paypal'] = 'Shopping';

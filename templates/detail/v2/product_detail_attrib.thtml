@@ -7,67 +7,56 @@
 {!if can_edit}
 <div class="floatright">
   <a href="{pi_admin_url}/index.php?editproduct=x&amp;id={id}">
-    {!if is_uikit}
     <i class="uk-icon uk-icon-pencil uk-icon-small"></i>
-    {!else}
-    <img src="{layout_url}/images/admin/edit.png" />
-    {!endif}
   </a>
 </div>
 {!endif}
 
-<div style="clear:both;margin-top:20px;"></div>
+<div class="uk-grid" style="clear:both;margin-top:20px;">
+<div class="paypalProductDetail v2 uk-width-large-2-3 uk-width-medium-1-2 uk-width-small-1-1" id="product-image">
 {!if main_img}
-<div class="paypalProductDetail v2" style="width:40%" id="product-image">
-  <div class="uk-hidden-small uk-responsive-height">
+  <div class="main_img uk-hidden-small">
     <img id="disp_img" class="uk-responsive-width uk-responsive-height"
         src="{site_url}/lglib/img.php?src={main_imgfile}&plugin=paypal&sess={session_id}&width=460&height=460" />
   </div>
-  <div class="paypalProductThumbWrapper">
-<!-- BEGIN Thumbnail -->
-    <div class="paypalProductThumb v2" style="width:{tn_width}px; height:{tn_height}px;" >
-{!if thumb_url}
-      <a href="{img_url}/{img_file}"
-{!if is_uikit}
-data-uk-lightbox="{group:'product'}">
 {!else}
-target="_blank" rel="slimbox[product]">
+<div id="paypalProductDesc" class="ppProductDesc v2">{description}</div>
 {!endif}
-        <img src="{site_url}/lglib/img.php?src={small_imgfile}&plugin=paypal&sess={session_id}&width=125&height=125" border="0" alt="{$LANG_PP[click_to_enlarge]}" title="{$LANG_PP[click_to_enlarge]}"
-            class="tooltip"
-            onmouseover="javascript:PPupdateImage('{small_imgfile}','{lg_img}');" />
-      </a>
-{!endif}
-    </div>
-<!-- END Thumbnail -->
-  </div>
 </div>
-{!else}
-<div class="paypalProductDetail" id="product-image">{description}</div>
-{!endif}
 
-<div class="paypalDetailAttrib v2" style="width:30%;float:right">
+<div class="paypalDetailAttrib v2 uk-width-large-1-3 uk-width-medium-1-2 uk-width-small-1-1">
   <form class="uk-form" method="post" id="add_cart_{id}" action="javascript:void()">
 {!if 0}
-action="{site_url}/paypal/index.php" method="post">
+    action="{site_url}/paypal/index.php" method="post">
 {!endif}
-    <div>
+    <div class="ppDetailPrice v2">
 {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
-      <br /><span class="paypalPrice sale">{sale_name}{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      <div class="paypalPrice sale">{sale_name}</div>
+      <div>
+        <span class="paypalPrice sale">{price_prefix}</span>
+        <span class="paypalPrice sale" id="price" name="price">{init_price}</span>
+        <span class="paypalPrice sale">{price_postfix}</span>
+      </div>
 {!else}
-      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
+      <div>
+      <span class="paypalPrice normal">{price_prefix}</span>
+      <span class="paypalPrice normal" id="price" name="price">{init_price}</span>
+      <span class="paypalPrice normal">{price_postfix}</span>
+      </div>
 {!endif}
-{!if shipping_txt}
-    <br /><span class="ppPlusShipping">{shipping_txt}</span>
+{!if Xshipping_txt}
+        <div class="ppPlusShipping">{shipping_txt}</div>
 {!endif}
+<!-- BEGIN qtyDiscTxt -->
+        <div class="paypalQtyDisc">{qty_disc}</div>
+<!-- END qtyDiscTxt -->
 {!if qty_disc}
-      <br /><span class="paypalQtyDisc">{qty_disc}</span>
-      <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
+        <div class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</div>
 {!endif}
     </div>
 
-    <div id="paypalProductAttrib">
+    <div id="paypalProductAttrib" class="ppDetailAddCart v2">
 <!-- BEGIN AttrSelect -->
       <div class="uk-form-row">
         <label class="uk-form-label" for="options{opt_id}">{attr_name}:</label>
@@ -115,20 +104,31 @@ action="{site_url}/paypal/index.php" method="post">
     </div>
   </form>
 <!-- BEGIN BtnBlock -->
-  <div style="margin-left:30px;">{buy_now_button}</div>
+  <div class="ppDetailBuyNow v2">{buy_now_button}</div>
 <!-- END BtnBlock -->
 </div>
+
+{!if main_img}
+  <div class="paypalProductThumbWrapper">
+<!-- BEGIN Thumbnail -->
+    <div class="paypalProductThumb v2">
+{!if thumb_url}
+      <a href="{img_url}/{img_file}" data-uk-lightbox="{group:'product'}">
+        <img src="{thumb_url}" border="0" alt="{$LANG_PP[click_to_enlarge]}" title="{$LANG_PP[click_to_enlarge]}"
+            class="tooltip"
+            onmouseover="javascript:PPupdateImage('{small_imgfile}','{lg_img}');" />
+      </a>
+{!endif}
+    </div>
+<!-- END Thumbnail -->
+  </div>
+</div>
+<div id="paypalProductDesc" class="ppProductDesc v2">{description}</div>
+{!endif}
 
 {!if rating_bar}
 <div class="ppRatingBar detail v2" style="clear:both;">{rating_bar}</div>
 {!endif}
-{!if main_img}
-{# with a main image the description goes below the image and price #}
-<div id="paypalProductDesc" class="ppProductDesc v2">
-  {description}
-</div>
-{!endif}
-
 <div class="paypalComments">
   {usercomments}
 </div>

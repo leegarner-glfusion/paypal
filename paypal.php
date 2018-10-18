@@ -50,6 +50,7 @@ $_TABLES['paypal.currency']     = $_PP_table_prefix . 'currency';
 $_TABLES['paypal.coupons']      = $_PP_table_prefix . 'coupons';
 $_TABLES['paypal.coupon_log']   = $_PP_table_prefix . 'coupon_log';
 $_TABLES['paypal.sales']        = $_PP_table_prefix . 'sales';
+$_TABLES['paypal.shipping']     = $_PP_table_prefix . 'shipping';
 
 // Deprecated tables
 $_TABLES['paypal.prodXcat']     = $_PP_table_prefix . 'prodXcat';

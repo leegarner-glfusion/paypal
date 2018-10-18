@@ -275,7 +275,7 @@ $paypalConfigData = array(
     ),
     array(
         'name' => 'max_thumb_size',
-        'default_value' => '100',
+        'default_value' => '250',
         'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 10,

@@ -16,18 +16,22 @@
       </h1>
       {name}&nbsp;&nbsp;{edit_icon}
       <p />
+    <div class="ppDetailPrice v1">
       <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>
-      {!if on_sale}
+{!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
       <span class="paypalPrice sale">{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{price}</span><span class="paypalPrice sale">{price_postfix}</span>
-      {!else}
+{!else}
       <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
       <!--<span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{price}</span><span class="paypalPrice normal">{price_postfix}</span>-->
-      {!endif}
-      {!if qty_disc}
-      <br /><span class="paypalQtyDisc">{qty_disc_txt}</span>
-      <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
-      {!endif}
+{!endif}
+    </div>
+<!-- BEGIN qtyDiscTxt -->
+      <div class="paypalQtyDisc">{qty_disc}</div>
+<!-- END qtyDiscTxt -->
+{!if qty_disc}
+      <div class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</div>
+{!endif}
     </div>
 
     <div id="paypalProductAttrib">

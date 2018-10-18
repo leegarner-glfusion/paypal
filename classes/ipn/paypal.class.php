@@ -144,8 +144,7 @@ class paypal extends \Paypal\IPN
         }
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->gw->getPostBackUrl() .
-                '/cgi-bin/webscr');
+        curl_setopt($ch, CURLOPT_URL, $this->gw->getPostBackUrl());
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_FAILONERROR, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);
@@ -261,7 +260,8 @@ class paypal extends \Paypal\IPN
         case 'cart':
             // shopping cart
             // Create a cart and read the info from the cart table.
-            $this->Order = Cart::getInstance(0, $this->pp_data['invoice']);
+            $uid = PP_getVar($this->pp_data['custom'], 'uid', 'integer');
+            $this->Order = Cart::getInstance($uid, $this->pp_data['invoice']);
             if ($this->Order->isNew) {
                 $this->handleFailure(NULL, "Order ID {$this->pp_data['invlice']} not found for cart purchases");
                 return false;

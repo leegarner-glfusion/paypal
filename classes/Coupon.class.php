@@ -242,15 +242,22 @@ class Coupon extends Product
         if ($uid < 2) return 0;
         $coupons = self::getUserCoupons($uid);
         $remain = (float)$amount;
+        $applied = 0;
         foreach ($coupons as $coupon) {
             $bal = (float)$coupon['balance'];
             if ($bal > $remain) {
                 $bal -= $remain;
+                $applied += $remain;
                 $remain = 0;
             } else {
                 $remain -= $bal;
+                $applied += $bal;
                 $bal = 0;
             }
+            if ($remain == 0) break;
+        }
+        // Log only the total applied, if any.
+        if ($applied > 0) {
             $code = DB_escapeString($coupon['code']);
             $order_id = '';
             if ($Order !== NULL) {
@@ -260,9 +267,8 @@ class Coupon extends Product
             $sql = "UPDATE {$_TABLES['paypal.coupons']}
                     SET balance = $bal
                     WHERE code = '$code';";
-            self::writeLog($code, $uid, $amount, 'gc_applied', $order_id);
+            self::writeLog($code, $uid, $applied, 'gc_applied', $order_id);
             DB_query($sql);
-            if ($remain == 0) break;
         }
         Cache::delete('coupons_' . $uid);
         return $remain;     // Return unapplied balance
@@ -348,7 +354,7 @@ class Coupon extends Product
         $s = '';
         if (!empty($code)) {
             $s = sprintf($LANG_PP['apply_gc_email'],
-                PAYPAL_URL . '/index.php?redeem=x&code=' . $code,
+                PAYPAL_URL . '/index.php?apply_gc=x&code=' . $code,
                 PAYPAL_URL . '/index.php?apply_gc&code=' . $code,
                 PAYPAL_URL . '/index.php?apply_gc&code=' . $code);
         }
@@ -372,7 +378,7 @@ class Coupon extends Product
         if ($price == 0) {
             return $LANG_PP['see_details'];
         } else {
-            return $this->currency->Format($price);
+            return Currency::getInstance()->Format($price);
         }
     }
 

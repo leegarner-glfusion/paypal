@@ -195,13 +195,13 @@ $PP_UPGRADE['0.5.4'] = array(
 $_SQL['paypal.ipnlog'] = "CREATE TABLE {$_TABLES['paypal.ipnlog']} (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_addr` varchar(15) NOT NULL,
-  `time` datetime NOT NULL,
+  `ts` int(11) unsigned,
   `verified` tinyint(1) DEFAULT '0',
   `txn_id` varchar(255) DEFAULT NULL,
   `gateway` varchar(25) DEFAULT NULL,
   `ipn_data` text NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `ipnlog_time` (`time`),
+  KEY `ipnlog_ts` (`ts`),
   KEY `ipnlog_txnid` (`txn_id`)
 ) ENGINE=MyISAM";
 
@@ -229,6 +229,7 @@ $_SQL['paypal.products'] = "CREATE TABLE {$_TABLES['paypal.products']} (
   `taxable` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `shipping_type` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `shipping_amt` decimal(9,4) unsigned NOT NULL DEFAULT '0.0000',
+  `shipping_units` decimal(9,4) unsigned NOT NULL DEFAULT '0.0000',
   `show_random` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `show_popular` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `options` text,
@@ -352,16 +353,16 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `shipto_zip` varchar(40) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `buyer_email` varchar(255) DEFAULT NULL,
-  `tax` decimal(5,2) unsigned DEFAULT NULL,
-  `shipping` decimal(5,2) unsigned DEFAULT NULL,
-  `handling` decimal(5,2) unsigned DEFAULT NULL,
-  `by_gc` decimal(5,2) unsigned DEFAULT NULL,
+  `tax` decimal(9,4) unsigned DEFAULT NULL,
+  `shipping` decimal(9,4) unsigned DEFAULT NULL,
+  `handling` decimal(9,4) unsigned DEFAULT NULL,
+  `by_gc` decimal(12,4) unsigned DEFAULT NULL,
   `status` varchar(25) DEFAULT 'pending',
   `pmt_method` varchar(20) DEFAULT NULL,
   `pmt_txn_id` varchar(255) DEFAULT NULL,
   `instructions` text,
   `token` varchar(20) DEFAULT NULL,
-  `tax_rate` decimal(6,5) NOT NULL DEFAULT '0.00000',
+  `tax_rate` decimal(7,5) NOT NULL DEFAULT '0.00000',
   `info` text,
   `currency` varchar(3) NOT NULL DEFAULT '',
   PRIMARY KEY (`order_id`),
@@ -474,15 +475,26 @@ $_SQL['paypal.coupon_log'] = "CREATE TABLE {$_TABLES['paypal.coupon_log']} (
 // since 0.6.0
 $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40),
   `item_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `item_id` int(11) unsigned NOT NULL,
-  `name` varchar(40) default '',
   `start` int(11) unsigned DEFAULT NULL,
   `end` int(11) unsigned DEFAULT NULL,
   `discount_type` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `amount` decimal(6,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `item_type` (`item_type`,`item_id`,`start`,`end`)
+) ENGINE=MyIsam";
+
+// since 0.6.0+
+$_SQL['paypal.shipping'] = "CREATE TABLE `gl_pp_shipping` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `min_units` int(11) unsigned NOT NULL DEFAULT '0',
+  `max_units` int(11) unsigned NOT NULL DEFAULT '0',
+  `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `rates` text,
+  PRIMARY KEY (`id`)
 ) ENGINE=MyIsam";
 
 // Sample data to load up the Paypal gateway configuration
@@ -501,7 +513,7 @@ $_PP_SAMPLEDATA = array(
         VALUES
             (1, 'viewcart', 10, 3, 0),
             (2, 'billto', 20, 0, 1),
-            (3, 'shipto', 30, 0, 1)",
+            (3, 'shipto', 30, 2, 1)",
     "INSERT INTO {$_TABLES['paypal.orderstatus']}
             (id, orderby, enabled, name, notify_buyer, notify_admin)
         VALUES
@@ -512,6 +524,8 @@ $_PP_SAMPLEDATA = array(
             (5, 50, 1, 'closed', 0, 0),
             (6, 60, 1, 'refunded', 0, 0)",
     $PP_UPGRADE['0.5.4'][1],
+    "INSERT INTO `{$_TABLES['paypal.shipping']}` VALUES
+        (1,'USPS Priority Flat Rate',0.0001,50.0000,0,'[{\"dscp\":\"Small\",\"units\":5,\"rate\":7.2},{\"dscp\":\"Medium\",\"units\":20,\"rate\":13.65},{\"dscp\":\"Large\",\"units\":50,\"rate\":18.9}]')",
 );
 
 
@@ -882,6 +896,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.buttons']} ADD PRIMARY KEY (`pi_name`, `item_id`,`gw_name`,`btn_key`)",
     "CREATE TABLE {$_TABLES['paypal.sales']} (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `name` varchar(40),
       `item_type` varchar(10),
       `item_id` int(11) unsigned NOT NULL,
       `start` int(11) unsigned,
@@ -898,16 +913,27 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE weight weight decimal(9,4) NOT NULL DEFAULT 0",
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE shipping_amt shipping_amt decimal(9,4) NOT NULL DEFAULT 0",
     "ALTER TABLE {$_TABLES['paypal.products']} CHANGE price price decimal(12,4) NOT NULL DEFAULT 0",
+    "ALTER TABLE {$_TABLES['paypal.products']} ADD shipping_units decimal(9,4) NOT NULL DEFAULT 0 AFTER shipping_amt",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `info` text",
     "ALTER TABLE {$_TABLES['paypal.orders']} CHANGE last_mod last_mod timestamp",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} DROP user_id",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD currency varchar(3) NOT NULL DEFAULT ''",
     "ALTER TABLE {$_TABLES['paypal.coupons']} ADD currency varchar(3) NOT NULL DEFAULT ''",
     "ALTER TABLE {$_TABLES['paypal.coupon_log']} ADD currency varchar(3) NOT NULL DEFAULT ''",
+    "CREATE TABLE IF NOT EXISTS `{$_TABLES['paypal.shipping']}` (
+        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        `name` varchar(255) NOT NULL DEFAULT '',
+        `min_units` int(11) unsigned NOT NULL DEFAULT '0',
+        `max_units` int(11) unsigned NOT NULL DEFAULT '0',
+        `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+        `rates` text,
+        PRIMARY KEY (`id`)
+    ) ENGINE=MyIsam",
 );
 
 ?>

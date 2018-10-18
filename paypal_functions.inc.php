@@ -714,13 +714,13 @@ function ProductList($cat_id = 0)
     // glFusion blocks are shown
     if ($_PP_CONF['displayblocks'] > 0) {
         $T->set_var(array(
-            'lg_cols'   => 4,
+            'lg_cols'   => 3,
             'med_cols'  => 3,
         ) );
     } else {
         $T->set_var(array(
-            'lg_cols'   => 5,
-            'med_cols'  => 4,
+            'lg_cols'   => 4,
+            'med_cols'  => 3,
         ) );
     }
 
@@ -759,8 +759,7 @@ function ProductList($cat_id = 0)
             $T->set_var('rating_bar', '');
         }
 
-        $pic_filename = DB_getItem($_TABLES['paypal.images'], 'filename',
-                "product_id = '{$P->id}'");
+        $pic_filename = $P->getOneImage();
         $T->set_var(array(
             'id'            => $P->id,
             'name'          => htmlspecialchars($P->name),
@@ -1038,7 +1037,7 @@ function PAYPAL_userMenu($view='')
     $hdr_txt = PP_getVar($LANG_PP, 'user_hdr_' . $view);
     $menu_arr = array(
         array(
-            'url'  => PAYPAL_URL,
+            'url'  => PAYPAL_URL . '/index.php',
             'text' => $LANG_PP['back_to_catalog'],
         ),
     );

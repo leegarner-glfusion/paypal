@@ -6,6 +6,11 @@ Released TBD
   - Uses free.currencyconverterapi.com to get conversion rates
   - Updates values for product and attribute prices, shopping carts, and gift carts not fully applied.
   - Does now update paid orders or fully-applied gift cards.
+- Add an internal test-only payment gateway.
+  - DO NOT enable on a live site!!
+- Add a basic shipping module allowing for combined shipping.
+- Thumbnails are sized by CSS. `max_thumb_size` should be large enough for all templates.
+- Added another product list template version
 - Added Admin dvlpupdate.php with idempotent upgrades to assist those tracking development branches.
 - Enable template for Thanks message, allow customization.
 - Support `CUSTOM_paypal_orderID()` function to create custom order IDs.

@@ -87,10 +87,10 @@ class paypal extends \Paypal\Gateway
         // Set the gateway URL depending on whether we're in test mode or not
         if ($this->config['test_mode'] == 1) {
             $this->gw_url = $this->config['sandbox_url'];
-            $this->postback_url = 'https://ipnpb.sandbox.paypal.com';
+            $this->postback_url = 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr';
         } else {
             $this->gw_url = $this->config['prod_url'];
-            $this->postback_url = 'https://ipnpb.paypal.com';
+            $this->postback_url = 'https://ipnpb.paypal.com/cgi-bin/webscr';
         }
 
         // If the configured currency is not one of the supported ones,
@@ -118,7 +118,25 @@ class paypal extends \Paypal\Gateway
     *   @return string      Gateway's home page
     */
     public function getMainUrl()
-    {   return 'https://www.paypal.com';    }
+    {
+        return $this->gw_url;
+    }
+
+
+    /**
+    *   Get the form action URL.
+    *   This function may be overridden by the child class.
+    *   The default is to simply return the configured URL
+    *
+    *   This is public so that if it is not declared by the child class,
+    *   it can be called during IPN processing.
+    *
+    *   @return string      URL to payment processor
+    */
+    public function getActionUrl()
+    {
+        return $this->gw_url . '/cgi-bin/webscr';
+    }
 
 
     /**
@@ -284,7 +302,6 @@ class paypal extends \Paypal\Gateway
                 }
                 $fields['quantity_' . $i] = $item->quantity;
 
-                //if (isset($item->shipping)) {
                 if ($item->shipping > 0) {
                     $fields['shipping_' . $i] = $item->shipping;
                     $shipping += $item->shipping;
@@ -293,6 +310,11 @@ class paypal extends \Paypal\Gateway
                     $weight += $item->weight;
                 }
                 $i++;
+            }
+
+            if ($cart->shipping > 0) {
+                $fields['shipping_1'] = $cart->shipping;
+                $shipping += $cart->shipping;
             }
 
             //$fields['tax_cart'] = (float)$cart->getInfo('tax');
@@ -335,21 +357,6 @@ class paypal extends \Paypal\Gateway
 
         $gateway_vars = implode("\n", $gatewayVars);
         return $gateway_vars;
-    }
-
-
-    /**
-    *   Get the checkout button
-    *
-    *   @param  object  $cart   Shoppping cart
-    *   @return string      HTML for checkout button
-    */
-    public function XgetCheckoutButton()
-    {
-        return '<input type="image"
-            src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png"
-            alt="Check out with PayPal"
-            class="tooltip" title="Check out with Paypal" />';
     }
 
 
@@ -611,10 +618,13 @@ class paypal extends \Paypal\Gateway
                 $LANG_PP['buttons'][$btn_type] : $LANG_PP['buy_now'];
         }
         $T = PP_getTemplate('btn_' . $btn_info['tpl'], 'btn', 'buttons/' . $this->gw_name);
-        $T->set_var('paypal_url', $this->getActionUrl());
-        $T->set_var('btn_text', $btn_text);
-        $T->set_var('gateway_vars', $gateway_vars);
-        $T->set_var('iconset', $_PP_CONF['_iconset']);
+        $T->set_var(array(
+            'action_url'    => $this->getActionUrl(),
+            'btn_text'      => $btn_text,
+            'gateway_vars'  => $gateway_vars,
+            'iconset'       => $_PP_CONF['_iconset'],
+            'method'        => $this->getMethod(),
+        ) );
         $retval = $T->parse('', 'btn');
         return $retval;
     }
@@ -741,9 +751,13 @@ class paypal extends \Paypal\Gateway
             $gateway_vars .= '<input type="hidden" name="' . $name .
                         '" value="' . $value . '" />' . "\n";
         }
-        $T->set_var('paypal_url', $this->getActionUrl());
-        $T->set_var('btn_text', $btn_text);
-        $T->set_var('gateway_vars', $gateway_vars);
+        $T->set_var(array(
+            'action_url'    => $this->getActionUrl(),
+            'btn_text'      => $btn_text,
+            'gateway_vars'  => $gateway_vars,
+            'method'        => $this->getMethod(),
+            'iconset'       => $_PP_CONF['_iconset'],
+        ) );
         $retval = $T->parse('', 'btn');
         return $retval;
     }
@@ -854,29 +868,28 @@ class paypal extends \Paypal\Gateway
     *
     *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
     */
-    function SaveConfig($A)
+    public function SaveConfig($A = NULL)
     {
-        if (!is_array($A)) return false;
-
-        foreach ($this->config as $name=>$value) {
-            switch ($name) {
-            case 'encrypt':
-                // Check if the "encrypt" value has changed.  If so, clear the
-                // button cache
-                $encrypt = isset($A['encrypt']) ? 1 : 0;
-                if ($encrypt != $this->config['encrypt'])
-                    $this->ClearButtonCache();
-                $this->config['encrypt'] = $encrypt;
-                break;
-            case 'test_mode':
-                $this->config[$name] = isset($A[$name]) ? 1 : 0;
-                break;
-            default:
-                $this->config[$name] = $A[$name];
-                break;
+        if (is_array($A)) {
+            foreach ($this->config as $name=>$value) {
+                switch ($name) {
+                case 'encrypt':
+                    // Check if the "encrypt" value has changed.  If so, clear the
+                    // button cache
+                    $encrypt = isset($A['encrypt']) ? 1 : 0;
+                    if ($encrypt != $this->config['encrypt'])
+                        $this->ClearButtonCache();
+                    $this->config['encrypt'] = $encrypt;
+                    break;
+                case 'test_mode':
+                    $this->config[$name] = isset($A[$name]) ? 1 : 0;
+                    break;
+                default:
+                    $this->config[$name] = $A[$name];
+                    break;
+                }
             }
         }
-
         return parent::SaveConfig($A);
     }
 

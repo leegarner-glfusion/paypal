@@ -309,13 +309,15 @@ class Gateway
     *   @param  array   $A      Array of config items, e.g. $_POST
     *   @return boolean         True if saved successfully, False if not
     */
-    protected function SaveConfig($A)
+    public function SaveConfig($A = NULL)
     {
         global $_TABLES;
 
-        $this->enabled = isset($A['enabled']) ? 1 : 0;
-        $this->orderby = (int)$A['orderby'];
-        $services = PP_getVar($A, 'service', 'array');
+        if (is_array($A)) {
+            $this->enabled = isset($A['enabled']) ? 1 : 0;
+            $this->orderby = (int)$A['orderby'];
+            $services = PP_getVar($A, 'service', 'array');
+        }
         $config = @serialize($this->config);
         if (!$config) return false;
 
@@ -615,8 +617,12 @@ class Gateway
             $langfile = $this->gw_name . '_english.php';
         }
         global $LANG_PP_gateway;
-        include_once PAYPAL_PI_PATH . '/language/' . $langfile;
-        return $LANG_PP_gateway;
+        if (is_file(PAYPAL_PI_PATH . '/language/' . $langfile)) {
+            include_once PAYPAL_PI_PATH . '/language/' . $langfile;
+            return $LANG_PP_gateway;
+        } else {
+            return array();
+        }
     }
 
 
@@ -1286,6 +1292,18 @@ class Gateway
     protected function _setFinal()
     {
         return true;
+    }
+
+
+    /**
+     * Set a configuration value
+     *
+     * @param   string  $key    Name of configuration item
+     * @param   mixed   $value  Value to set
+     */
+    public function setConfig($key, $value)
+    {
+        $this->config[$key] = $value;
     }
 
 }   // class Gateway

@@ -3,9 +3,9 @@
 {!if is_admin}
 {!else}
   <p>
-    <div style="display:inline-block;"><a href="{site_url}/paypal/">{$LANG_PP['back_to_catalog']}</a></div>
+    <div style="display:inline-block;"><a href="{site_url}/paypal/index.php">{$LANG_PP['back_to_catalog']}</a></div>
 {!if not_anon}
-    <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/?orderhist=x">{$LANG_PP['my_account']}</a></div>
+    <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/index.php?orderhist=x">{$LANG_PP['my_account']}</a></div>
 {!endif}
   </p>
 {!endif}
@@ -13,7 +13,7 @@
 {!if not_final}
 {!else}
   <div class="floatright">
-    <a href="{pi_url}/index.php?printorder={order_number}&token={token}" target="_blank"
+    <a href="{site_url}/paypal/index.php?printorder={order_number}&token={token}" target="_blank"
         title="{$LANG_PP['print']}"><i class="{iconset}-print tooltip" title="{$LANG_PP['print_order']}"></i>
     </a>
   </div>
@@ -153,7 +153,11 @@
 {!endif}
 {!if shipping}
         <tr>
-          <td colspan="3" class="alignright">{$LANG_PP['shipping']}</td>
+          <td colspan="3" class="alignright">{$LANG_PP['shipping']}
+{!if ship_method}
+({ship_method})
+{!endif}
+          </td>
           <td class="alignright">{shipping}</td>
           <td></td>
         </tr>
@@ -203,13 +207,13 @@
         value="{$LANG_PP['update_cart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['update_cart']}</button>
       <button type="submit" class="uk-button uk-button-danger" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';">{$LANG_PP['empty_cart']}</button>
+        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart=x';">{$LANG_PP['empty_cart']}</button>
 {!else}
       <input class="paypalButton blue" type="submit" name="viewcart"
         value="{$LANG_PP['update_cart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';" />
   <input type="submit" class="paypalButton red" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart';" />
+        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart=x';" />
 {!endif}
     </div>
     <div class="paypalOrderButtons">

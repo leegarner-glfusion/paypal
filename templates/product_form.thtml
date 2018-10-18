@@ -2,7 +2,7 @@
 {!if show_htmleditor}
 {wysiwyg}
 {!endif}
-<form action="{pi_admin_url}/index.php" method="post" 
+<form action="{action_url}" method="post" 
     class="paypalForm paypalProductForm"
     enctype="multipart/form-data" onsubmit='set_postcontent();'>
 

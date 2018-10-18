@@ -48,6 +48,7 @@ class Product
     private $_uid = 0;  // user id, for pricing
     private $_view = 'detail';  // type of button to create (list or detail)
     private $Sale = NULL;
+    private $Images = array();
 
     /**
      *  Constructor.
@@ -90,6 +91,7 @@ class Product
             $this->votes = 0;
             $this->shipping_type = 0;
             $this->shipping_amt = 0;
+            $this->shipping_units = 0;
             $this->show_random = 1;
             $this->show_popular = 1;
             $this->keywords = '';
@@ -106,6 +108,9 @@ class Product
             if (!$this->Read()) {
                 $this->id = 0;
             }
+        }
+        if ($this->id > 0) {
+            $this->getImages();
         }
         $this->isAdmin = plugin_ismoderator_paypal() ? 1 : 0;
     }
@@ -199,6 +204,7 @@ class Product
         case 'rating':
         case 'weight':
         case 'shipping_amt':
+        case 'shipping_units':
         case '_act_price':      // actual price, sale or nonsale
         case '_orig_price':     // original price
             // Float values
@@ -265,6 +271,7 @@ class Product
             if (!self::isPluginItem($value)) {
                 $value = (int)$value;
             }
+
         default:
             // Other value types (array?). Save it as-is.
             $this->properties[$var] = $value;
@@ -314,8 +321,9 @@ class Product
         $this->prod_type = isset($row['prod_type']) ? $row['prod_type'] : 0;
         $this->weight = $row['weight'];
         $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
-        $this->shipping_type = $row['shipping_type'];
-        $this->shipping_amt = $row['shipping_amt'];
+        $this->shipping_type = PP_getVar($row, 'shipping_type', 'integer');
+        $this->shipping_amt = PP_getVar($row, 'shipping_amt', 'float');
+        $this->shipping_units = PP_getVar($row, 'shipping_units', 'float');
         $this->show_random = isset($row['show_random']) ? $row['show_random'] : 0;
         $this->show_popular = isset($row['show_popular']) ? $row['show_popular'] : 0;
         $this->track_onhand = isset($row['track_onhand']) ? $row['track_onhand'] : 0;
@@ -409,7 +417,7 @@ class Product
     {
         global $_TABLES;
 
-        $cache_key = 'prod_attr_' . $this->id;
+        $cache_key = self::_makeCacheKey($this->id, 'attr');
         $this->options = Cache::get($cache_key);
         if ($this->options === NULL) {
             $sql = "SELECT * FROM {$_TABLES['paypal.prod_attr']}
@@ -424,13 +432,14 @@ class Product
                     'attr_price' => $A['attr_price'],
                 );
             }
-            Cache::set($cache_key, $this->options, array('product', $this->id));
+            Cache::set($cache_key, $this->options, array('products', $this->id));
         }
     }
 
 
     /**
      *  Save the current values to the database.
+     *  Does not save values from $this->Images.
      *  Appends error messages to the $Errors property.
      *
      *  @param  array   $A      Optional array of values from $_POST
@@ -442,11 +451,6 @@ class Product
 
         if (is_array($A)) {
             $this->setVars($A);
-        }
-
-        // Zero out the shipping amount if a non-fixed value is chosen
-        if ($this->shipping_type < 2) {
-            $this->shipping_amt = 0;
         }
 
         // Handle file uploads.  This is done first so we know whether
@@ -464,10 +468,11 @@ class Product
         }
 
         // For downloadable files, physical product options don't apply
-        if ($this->prod_type == PP_PROD_DOWNLOAD) {
+        if (!$this->isPhysical()) {
             $this->weight = 0;
             $this->shipping_type = 0;
             $this->shipping_amt = 0;
+            $this->shipping_units = 0;
         }
 
         // Serialize the quantity discount array
@@ -502,7 +507,8 @@ class Product
                 views='" . (int)$this->views. "',
                 taxable='" . (int)$this->taxable . "',
                 shipping_type='" . (int)$this->shipping_type . "',
-                shipping_amt='" . number_format($this->shipping_amt, 2, '.', '') . "',
+                shipping_amt = '{$this->shipping_amt}',
+                shipping_units = '{$this->shipping_units}',
                 comments_enabled='" . (int)$this->comments_enabled . "',
                 rating_enabled='" . (int)$this->rating_enabled . "',
                 show_random='" . (int)$this->show_random . "',
@@ -529,10 +535,8 @@ class Product
             $status = false;
         }
 
-        Cache::delete('prod_attr_' . $this->id);
         Cache::clear('products');
 
-        //PAYPAL_debug('Status of last update: ' . print_r($status,true));
         if ($status) {
             // Handle image uploads.  This is done last because we need
             // the product id to name the images filenames.
@@ -577,22 +581,16 @@ class Product
         if ($this->id <= 0 || self::isUsed($this->id))
             return false;
 
-        // Locate and delete photos
-        $sql = "SELECT img_id, filename
-            FROM {$_TABLES['paypal.images']}
-            WHERE product_id='". $this->id . "'";
-        //echo $sql;
-        $photo= DB_query($sql);
-        if ($photo) {
-            while ($prow = DB_fetchArray($photo, false)) {
-                self::deleteImage($prow['img_id'], $prow['filename']);
-            }
+        foreach ($this->Images as $prow) {
+            self::deleteImage($prow['img_id'], $prow['filename']);
         }
         DB_delete($_TABLES['paypal.products'], 'id', $this->id);
         DB_delete($_TABLES['paypal.prod_attr'], 'item_id', $this->id);
         self::deleteButtons($this->id);
+        Cache::clear('products');
         PLG_itemDeleted($this->id, $_PP_CONF['pi_name']);
         $this->id = 0;
+        $this->isNew = true;
         return true;
     }
 
@@ -618,6 +616,7 @@ class Product
     *   standalone function.
     *
     *   @param  integer $img_id     DB ID of image to delete
+    *   @param  string  $filename   Filename, provided when called from Delete()
     *   @param  string  $filename   Filename, if known
     */
     public static function deleteImage($img_id, $filename='')
@@ -632,10 +631,14 @@ class Product
                 "img_id=$img_id");
         }
 
-        if (is_file("{$_PP_CONF['image_dir']}/{$filename}"))
-                unlink("{$_PP_CONF['image_dir']}/{$filename}");
+        if (is_file("{$_PP_CONF['image_dir']}/{$filename}")) {
+            // Ignore errors due to file permissions, etc.
+            @unlink("{$_PP_CONF['image_dir']}/{$filename}");
+        }
 
         DB_delete($_TABLES['paypal.images'], 'img_id', $img_id);
+        // This is broad, but the specific product ID isn't provided here.
+        Cache::clear('products');
     }
 
 
@@ -669,8 +672,7 @@ class Product
                 // Must have an expiration period for downloads
                 $this->Errors[] = $LANG_PP['err_missing_exp'];
             }
-        } elseif ($this->prod_type == PP_PROD_PHYSICAL &&
-                $this->price < 0.01) {
+        } elseif ($this->isPhysical() && $this->price < 0.01) {
             // Paypal won't accept a zero amount, so non-downloadable items
             // must have a positive price.  Use "Other Virtual" for free items.
             $this->Errors[] = $LANG_PP['err_phys_need_price'];
@@ -747,19 +749,20 @@ class Product
 
         $T->set_var(array(
             //'post_options'  => $post_options,
+            'product_id'    => $this->id,
             'name'          => htmlspecialchars($this->name, ENT_QUOTES, COM_getEncodingt()),
             'category'      => $this->cat_id,
             'short_description' => htmlspecialchars($this->short_description, ENT_QUOTES, COM_getEncodingt()),
             'description'   => htmlspecialchars($this->description, ENT_QUOTES, COM_getEncodingt()),
-            'price'         => sprintf('%.2f', $this->price),
+            'price'         => Currency::getInstance()->formatValue($this->price),
             'file'          => htmlspecialchars($this->file, ENT_QUOTES, COM_getEncodingt()),
             'expiration'    => $this->expiration,
-            'pi_admin_url'  => PAYPAL_ADMIN_URL,
+            'action_url'    => PAYPAL_ADMIN_URL . '/index.php',
             'file_selection' => $this->FileSelector(),
             'keywords'      => htmlspecialchars($this->keywords, ENT_QUOTES, COM_getEncodingt()),
             'cat_select'    => Category::optionList($this->cat_id),
             'currency'      => $_PP_CONF['currency'],
-            'pi_url'        => PAYPAL_URL,
+            //'pi_url'        => PAYPAL_URL,
             'doc_url'       => PAYPAL_getDocURL('product_form',
                                             $_CONF['language']),
             'prod_type'     => $this->prod_type,
@@ -773,7 +776,8 @@ class Product
             'ship_sel_' . $this->shipping_type => 'selected="selected"',
             'shipping_type' => $this->shipping_type,
             'track_onhand'  => $this->track_onhand,
-            'shipping_amt'  => sprintf('%.2f', $this->shipping_amt),
+            'shipping_amt'  => Currency::getInstance()->formatValue($this->shipping_amt),
+            'shipping_units'  => $this->shipping_units,
             'sel_comment_' . $this->comments_enabled =>
                                     'selected="selected"',
             'rating_chk'    => $this->rating_enabled == 1 ?
@@ -829,49 +833,20 @@ class Product
             $T->set_var('candelete', 'true');
         }
 
-        // Set up the photo fields.  Use $photocount defined above.
-        // If there are photos, read the $photo result.  Otherwise,
-        // or if this is a new ad, just clear the photo area
-        $T->set_block('product', 'PhotoRow', 'PRow');
-        $i = 0;
-
-        // Get the existing photos.  Will only have photos with an
-        // existing product entry.
-        $photocount = 0;
-        if ($this->id != NULL) {
-            $sql = "SELECT img_id, filename
-                FROM {$_TABLES['paypal.images']}
-                WHERE product_id='" . $this->id . "'";
-            $photo = DB_query($sql);
-
-            // save the count of photos for later use
-            if ($photo) {
-                $photocount = DB_numRows($photo);
-            }
-
-            // While we're checking the ID, set it as a hidden value
-            // for updating this record
-            $T->set_var('product_id', $this->id);
-        } else {
-            $T->set_var('product_id', '');
-        }
-
         // If there are any images, retrieve and display the thumbnails.
-        if ($photocount > 0) {
-            while ($prow = DB_fetchArray($photo)) {
-                $i++;
-                $T->set_var('img_url',
-                    PAYPAL_URL . "/images/products/{$prow['filename']}");
-                $T->set_var('thumb_url', PAYPAL_ImageUrl($prow['filename']));
-                $T->set_var('seq_no', $i);
-                $T->set_var('del_img_url', PAYPAL_ADMIN_URL . '/index.php' .
-                        '?delete_img=x' .
-                        '&img_id=' . $prow['img_id'] .
-                        '&id=' . $this->id );
-                $T->parse('PRow', 'PhotoRow', true);
-            }
-        } else {
-            $T->parse('PRow', '');
+        $T->set_block('product', 'PhotoRow', 'PRow');
+        $i = 0;     // initialize $i in case there are no images
+        foreach ($this->Images as $i=>$prow) {
+            $T->set_var(array(
+                'img_url'   => PAYPAL_URL . "/images/products/{$prow['filename']}",
+                'thumb_url' => PAYPAL_ImageUrl($prow['filename']),
+                'seq_no'    => $i,
+                'del_img_url' => PAYPAL_ADMIN_URL . '/index.php' .
+                    '?delete_img=x' .
+                    '&img_id=' . $prow['img_id'] .
+                    '&id=' . $this->id,
+            ) );
+            $T->parse('PRow', 'PhotoRow', true);
         }
 
         // add upload fields for unused images
@@ -897,7 +872,7 @@ class Product
             $DT->set_block('stable', 'SaleList', 'SL');
             foreach ($Disc as $D) {
                 if ($D->discount_type == 'amount') {
-                    $amount = Currency::getInstance()->format($D->amount);
+                    $amount = Currency::getInstance()->Format($D->amount);
                 } else {
                     $amount = $D->amount;
                 }
@@ -947,6 +922,7 @@ class Product
             COM_errorLog("Product::_toggle() SQL error: $sql", 1);
             return $oldvalue;
         } else {
+            Cache::clear('products');
             return $newvalue;
         }
     }
@@ -960,7 +936,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public static function toggleEnabled($oldvalue, $id=0)
+    public static function toggleEnabled($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'enabled', $id);
     }
@@ -974,7 +950,7 @@ class Product
     *   @param  integer $id         ID number of element to modify
     *   @return         New value, or old value upon failure
     */
-    public static function toggleFeatured($oldvalue, $id=0)
+    public static function toggleFeatured($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'featured', $id);
     }
@@ -989,7 +965,7 @@ class Product
     *
     *   @return boolean True if used, False if not
     */
-    public static function isUsed($item_id = 0)
+    public static function isUsed($item_id)
     {
         global $_TABLES;
 
@@ -1040,8 +1016,10 @@ class Product
         $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
+        $T->set_block('product', 'qtyDiscTxt', 'disc');
         foreach ($this->qty_discounts as $qty=>$pct) {
-            $qty_disc_txt .= sprintf($LANG_PP['buy_x_save'], $qty, $pct) . '<br />';
+            $T->set_var('qty_disc', sprintf($LANG_PP['buy_x_save'], $qty, $pct));
+            $T->parse('disc', 'qtyDiscTxt', true);
         }
 
         // Get custom text input fields
@@ -1058,35 +1036,26 @@ class Product
         }
 
         // Retrieve the photos and put into the template
-        $sql = "SELECT img_id, filename
-                FROM {$_TABLES['paypal.images']}
-                WHERE product_id='$prod_id'";
-        //echo $sql;die;
-        $img_res = DB_query($sql);
-        $photo_detail = '';
-        if ($img_res && DB_numRows($img_res) > 0) {
-            for ($i = 0; $prow = DB_fetchArray($img_res, false); $i++) {
-                if ($prow['filename'] != '' &&
-                    file_exists("{$_PP_CONF['image_dir']}/{$prow['filename']}")) {
-                    if ($i == 0) {
-                        $T->set_var('main_img', PAYPAL_ImageUrl($prow['filename'], 0, 0));
-                        $T->set_var('main_imgfile', $prow['filename']);
-                    }
-                    $T->set_block('product', 'Thumbnail', 'PBlock');
-                    $T->set_var(array(
-                        'is_uikit' => $_PP_CONF['_is_uikit'],
-                        'img_file'      => $prow['filename'],
-                        'disp_img'      => PAYPAL_ImageUrl($prow['filename'], 0, 0),
-                        'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
-                        'img_url'       => PAYPAL_URL.'/images/products',
-                        'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
-                        'tn_width'      => $_PP_CONF['max_thumb_size'],
-                        'tn_height'     => $_PP_CONF['max_thumb_size'],
-                        'session_id'    => session_id(),
-                        'small_imgfile' => $prow['filename'],
-                    ) );
-                    $T->parse('PBlock', 'Thumbnail', true);
+        foreach ($this->Images as $i=>$prow) {
+            if ($prow['filename'] != '' &&
+                file_exists("{$_PP_CONF['image_dir']}/{$prow['filename']}")) {
+                if ($i == 0) {
+                    $T->set_var('main_img', PAYPAL_ImageUrl($prow['filename'], 0, 0));
+                    $T->set_var('main_imgfile', $prow['filename']);
                 }
+                $T->set_block('product', 'Thumbnail', 'PBlock');
+                $T->set_var(array(
+                    'is_uikit' => $_PP_CONF['_is_uikit'],
+                    'img_file'      => $prow['filename'],
+                    'disp_img'      => PAYPAL_ImageUrl($prow['filename'], 0, 0),
+                    'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
+                    'img_url'       => PAYPAL_URL.'/images/products',
+                    'thumb_url'     => PAYPAL_ImageUrl($prow['filename']),
+                    'session_id'    => session_id(),
+                    'small_imgfile' => $prow['filename'],
+                ) );
+
+                $T->parse('PBlock', 'Thumbnail', true);
             }
         }
 
@@ -1173,12 +1142,12 @@ class Product
             'price'             => Currency::getInstance()->FormatValue($this->getPrice()),
             'orig_price'        => Currency::getInstance()->Format($this->_orig_price),
             'on_sale'           => $this->isOnSale(),
-            'sale_name'         => $this->isOnSale() ? $this->getSale()->name . '&nbsp;' : '',
+            'sale_name'         => $this->isOnSale() ? $this->getSale()->name : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => Currency::getInstance()->Pre(),
             'price_postfix'     => Currency::getInstance()->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
-            'qty_disc'          => $qty_disc_txt,
+            'qty_disc'          => count($this->qty_discounts),
             'session_id'        => session_id(),
             'shipping_txt'      => $shipping_txt,
             'stock_msg'         => $this->_OutOfStock(),
@@ -1337,7 +1306,7 @@ class Product
         if ($this->prod_type == PP_PROD_DOWNLOAD && $this->price == 0) {
             // Free, or unexpired downloads for non-anymous
             $T = PP_getTemplate('btn_download', 'download', 'buttons');
-            $T->set_var('pi_url', PAYPAL_URL);
+            $T->set_var('action_url', PAYPAL_URL . '/download.php');
             $T->set_var('id', $this->id);
             $buttons['download'] = $T->parse('', 'download');
             $add_cart = false;
@@ -1372,7 +1341,7 @@ class Product
                 'item_number'   => $this->id,
                 'short_description' => htmlspecialchars($this->short_description),
                 'amount'        => $this->getPrice(),
-                'pi_url'        => PAYPAL_URL,
+                'action_url'    => PAYPAL_URL . '/index.php',
                 //'form_url'  => $this->hasAttributes() ? '' : 'true',
                 //'form_url'  => false,
                 'form_url'  => $this->_view == 'list' ? true : false,
@@ -1797,29 +1766,21 @@ class Product
         $new_id = $this->id;
 
         // Copy all the image files
-        $sql = "SELECT * FROM {$_TABLES['paypal.images']}
-                WHERE product_id = $old_id;";
-        $res = DB_query($sql);
-        if ($res) {
-            while ($A = DB_fetchArray($res, false)) {
-                $parts = explode('_', $A['filename']);
-                $new_fname = "{$new_id}_$parts[1]";
-                $src_f = $_PP_CONF['image_dir'] . '/' . $A['filename'];
-                $dst_f = $_PP_CONF['image_dir'] . '/' . $new_fname;
-                if (@copy($src_f, $dst_f)) {
-                    // copy successful, insert record into table
-                    $sql = "INSERT INTO {$_TABLES['paypal.images']}
-                                (product_id, filename)
-                            VALUES ('$new_id', '" . DB_escapeString($new_fname) . "')";
-                    DB_query($sql);
-                } else {
-                    COM_errorLog("Error copying file $src_f to $dst_f, continuing", 1);
-                }
+        foreach ($this->Images as $A) {
+            $parts = explode('_', $A['filename']);
+            $new_fname = "{$new_id}_{$parts[1]}";
+            $src_f = $_PP_CONF['image_dir'] . '/' . $A['filename'];
+            $dst_f = $_PP_CONF['image_dir'] . '/' . $new_fname;
+            if (@copy($src_f, $dst_f)) {
+                // copy successful, insert record into table
+                $sql = "INSERT INTO {$_TABLES['paypal.images']}
+                            (product_id, filename)
+                        VALUES ('$new_id', '" . DB_escapeString($new_fname) . "')";
+                DB_query($sql);
+            } else {
+                COM_errorLog("Error copying file $src_f to $dst_f, continuing", 1);
             }
-        } else {
-            COM_errorLog("Bad image query for product $old_id, continuing", 1);
         }
-
         return true;
     }
 
@@ -1965,12 +1926,14 @@ class Product
     *   Helper function to create the cache key.
     *
     *   @since  0.6.0
+    *   @param  string  $type   Optional item type
     *   @return string  Cache key
     */
-    private static function _makeCacheKey($id)
+    private static function _makeCacheKey($id, $type='')
     {
         $id = (int)$id;
-        return 'product_' . $id;
+        if ($type != '') $type .= '_';
+        return 'product_' . $type . $id;
     }
 
 
@@ -1989,7 +1952,7 @@ class Product
 
 
     /**
-    *   Get the product name. Allows for an override
+    *   Get the product name. Allows for an override.
     *
     *   @since  0.6.0
     *   @param  string  $overrride  Optional name override
@@ -2002,7 +1965,7 @@ class Product
 
 
     /**
-    *   Get the product shoryt description. Allows for an override
+    *   Get the product short description. Allows for an override.
     *
     *   @since  0.6.0
     *   @param  string  $overrride  Optional description override
@@ -2027,7 +1990,7 @@ class Product
 
 
     /**
-    *   Get additional text to add to the buyer's recipt for a product
+    *   Get additional text to add to the buyer's receipt for a product
     *
     *   @since  0.6.0
     */
@@ -2041,17 +2004,11 @@ class Product
      * Get the total shipping amount for this item based on quantity purchased
      *
      * @param   integer $qty    Quantity purchased
-     * @return  float           Total item shipping charge
+     * @return  float           Total item fixed shipping charge
      */
     public function getShipping($qty = 1)
     {
-        if ($this->shipping_type == 2) {
-            // fixed per-item shipping
-            return (float)$this->shipping_amt * $qty;
-        } else {
-            // no shipping, or calculated by gateway
-            return 0;
-        }
+        return $this->shipping_amt * (float)$qty;
     }
 
 
@@ -2084,6 +2041,7 @@ class Product
     /**
      * Determine if like items can be accumulated in the cart under a single
      * line item.
+     * Normal products can be accumulated but some plugin products may not.
      *
      * @return  boolean     True if items can be accumulated, False if not
      */
@@ -2131,9 +2089,63 @@ class Product
             // Return zero, act normally.
             return 0;
         } else {
-            // Return the oversell setting for the callor to act accordinglly
+            // Return the oversell setting for the caller to act accordingly
             // when out of stock
             return $this->oversell;
+        }
+    }
+
+
+    /**
+     * Helper function to check if this item has a physical component.
+     *
+     * @return  boolean     True if this is a physical item, False if not.
+     */
+    public function isPhysical()
+    {
+        return ($this->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL;
+    }
+
+
+    /**
+     * Get the images for this product.
+     * Checks the cache first.
+     * Also sets $this->Images
+     *
+     * @return  array   Array of images
+     */
+    public function getImages()
+    {
+        global $_TABLES;
+
+        $cache_key = self::_makeCacheKey($this->id, 'img');
+        $this->Images = Cache::get($cache_key);
+        if ($this->Images === NULL) {
+            $this->Images = array();
+            $sql = "SELECT img_id, filename
+                FROM {$_TABLES['paypal.images']}
+                WHERE product_id='". $this->id . "'";
+            $res = DB_query($sql);
+            while ($prow = DB_fetchArray($res, false)) {
+                $this->Images[] = $prow;
+            }
+            Cache::set($cache_key, $this->Images, 'products');
+        }
+        return $this->Images;
+    }
+
+
+    /**
+     * Get a single image to display in a block or product list.
+     *
+     * @return  string      Image filename, or empty string if there is none.
+     */
+    public function getOneImage()
+    {
+        if (isset($this->Images[0]['filename'])) {
+            return $this->Images[0]['filename'];
+        } else {
+            return '';
         }
     }
 

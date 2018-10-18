@@ -133,7 +133,7 @@ $LANG_PP = array (
 'saveopt'           => 'Save Option',
 'deletecat'         => 'Delete Category',
 'product_id'        => 'Product ID',
-'other_func'        => 'Other Functions',
+'other_func'        => 'Mantenimiento',
 'q_del_item'        => 'Are you sure you want to delete this item?',
 'clearform'         => 'Reiniciar',
 'delivery_info'     => 'Delivery Information',
@@ -393,8 +393,18 @@ $LANG_PP = array (
 'q_change_currency' => 'Are you sure you want to change prices and other amounts based on the new currency?',
 'cur_changed' => 'Prices changed from %1$s to %2%s',
 'no_cur_change' => 'No currency conversion was done.',
-'buy_x_save' => 'Buy %1$d, save %2$.02f%%',
+'buy_x_save' => 'Buy %1$d, save %2$s%%',
 'out_of_stock' => 'This item is currently out of stock.',
+'shipping_method' => 'Shipping Method',
+'shipping_units' => 'Shipping Units',
+'min_ship_units' => 'Min Shipping Units',
+'max_ship_units' => 'Max Shipping Units',
+'rate_table' => 'Rate Table',
+'rate' => 'Parcel Rate',
+'add_rate' => 'Click to add a new rate',
+'new_ship_method' => 'New Shipment Method',
+'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
+'mnu_wfadmin' => 'Workflows/Statuses',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -414,6 +424,7 @@ $LANG_PP_HELP = array(
 'hlp_prod_delete' => 'Only products that have never been puchased may be deleted',
 'recipient_email' => 'The gift card will be emailed to this address. If left blank, the gift card will be emailed to you.',
 'orderlist_total' => 'This is the total of items on the order, excluding taxes and fees. Hover over an amount to see all charges.',
+'sender_name' => 'Optionally enter your name to be shown to the recipient.',
 );
 
 $LANG_MYACCOUNT['pe_paypal'] = 'Shopping';

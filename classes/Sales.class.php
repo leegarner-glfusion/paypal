@@ -77,7 +77,6 @@ class Sales
         $sql = "SELECT *
                 FROM {$_TABLES['paypal.sales']}
                 WHERE id = $id";
-        //echo $sql;die;
         $res = DB_query($sql);
         if ($res) {
             $A = DB_fetchArray($res, false);
@@ -103,9 +102,16 @@ class Sales
         $this->name = PP_getVar($A, 'name', 'string');
         if (!$fromDB) {
             // convert to timestamps
-            if (empty($A['end_time'])) $A['end_time'] = '23:59';
-            $A['start'] = (trim($A['start'] . ' ' . $A['start_time']));
-            $A['end'] = (trim($A['end'] . ' ' . $A['end_time']));
+            if (empty($A['start'])) {
+                $A['start'] = self::MIN_DATETIME;
+            } else {
+                $A['start'] = (trim($A['start'] . ' ' . $A['start_time']));
+            }
+            if (empty($A['end'])) {
+                $A['end'] = self::MAX_DATETIME;
+            } else {
+                $A['end'] = (trim($A['end'] . ' ' . $A['end_time']));
+            }
             if ($this->item_type == 'product') {
                 $this->item_id = $A['item_id'];
             } else {

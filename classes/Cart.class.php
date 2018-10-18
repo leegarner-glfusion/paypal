@@ -241,8 +241,13 @@ class Cart extends Order
             return;
         }
         foreach ($items as $id=>$value) {
-            $value = (float)$value;
-            $this->items[$id]->setQuantity($value);
+            // Make sure the item object exists. This can get out of sync if a
+            // cart has been finalized and the user updates it from another
+            // browser window.
+            if (array_key_exists($id, $this->items)) {
+                $value = (float)$value;
+                $this->items[$id]->setQuantity($value);
+            }
         }
         // Now look for a coupon code to redeem against the user's account.
         if ($_PP_CONF['gc_enabled']) {
@@ -258,6 +263,9 @@ class Cart extends Order
         }
         if (isset($A['by_gc'])) {
             $this->setGC($A['by_gc']);
+        }
+        if (isset($_POST['shipper_id'])) {
+            $this->setShipper($_POST['shipper_id']);
         }
         $this->Save();  // Save cart vars, if changed, and update the timestamp
         return $this->m_cart;
@@ -736,6 +744,18 @@ class Cart extends Order
             $U = new \Paypal\UserInfo();
             $A = isset($_POST['address1']) ? $_POST : \Paypal\Cart::getInstance()->getAddress($wf_name);
             return $U->AddressForm($wf_name, $A, $step);
+/*        case 'shipping_method':
+            // Select the shipping method, if shippers are configured
+            if (Shipper::haveShippers()) {
+                return $this->selectShipper($step);
+            } else {
+                $A = $this->getItemShipping();
+                $this->shipping = $A['amount'];
+                $this->Save();
+                return $this->View(Workflow::getNextView($wf_name)->wf_name, $step++);
+            }
+            break;
+ */
         case 'finalize':
             return $this->View('checkout');
         default:
@@ -802,6 +822,58 @@ class Cart extends Order
     {
         unset($_COOKIE[self::$session_var]);
         SEC_setCookie(self::$session_var, '', time()-3600, '/');
+    }
+
+
+    /**
+     * Select the shipping method for this order.
+     * Displays a list of shippers with the rates for each
+     * @todo    1. Sort by rate
+     *          2. Save shipper selection with the order
+     *
+     *  @param  integer $step   Current step in workflow
+     *  @return string      HTML for shipper selection form
+     */
+    public function selectShipper()
+    {
+        $T = PP_getTemplate('shipping_method', 'form');
+        // Get the total units and fixed per-item shipping charges.
+        $shipping = $this->getItemShipping();
+        // Get all the shippers and rates for the selection
+        $shippers = Shipper::getShippers($shipping['units']);
+        if (empty($shippers)) return '';
+
+        // Get the best or previously-selected shipper for the default choice
+        $shipper_id = $this->getInfo('shipper_id');
+        if ($shipper_id !== NULL && isset($shippers[$shipper_id])) {
+            $best = $shippers[$shipper_id];
+        } else {
+            $best = Shipper::getBestRate($shipping['units']);
+        }
+        $T->set_block('form', 'shipMethodSelect', 'row');
+
+        $ship_rates = array();
+        foreach ($shippers as $shipper) {
+            $sel = $shipper->id == $best->id ? 'selected="selected"' : '';
+            $s_amt = $shipper->best_rate + $shipping['amount'];
+            $rate = array(
+                'amount'    => (string)Currency::getInstance()->FormatValue($s_amt),
+                'total'     => (string)Currency::getInstance()->FormatValue($this->subtotal + $s_amt),
+            );
+            $ship_rates[$shipper->id] = $rate;
+            $T->set_var(array(
+                'method_sel'    => $sel,
+                'method_name'   => $shipper->name,
+                'method_rate'   => Currency::getInstance()->Format($s_amt),
+                'method_id'     => $shipper->id,
+                'order_id'      => $this->order_id,
+                'multi'         => count($shippers) > 1 ? true : false,
+            ) );
+            $T->parse('row', 'shipMethodSelect', true);
+        }
+        $T->set_var('shipper_json', json_encode($ship_rates));
+        $T->parse('output', 'form');
+        return  $T->finish($T->get_var('output'));
     }
 
 }   // class Cart

@@ -1,0 +1,39 @@
+{# begin {templatelocation} #}
+<div class="ppProductListOuter {tpl_ver}">
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-{med_cols} uk-grid-width-large-1-{lg_cols} uk-margin-right">
+<!-- BEGIN ProductItems -->
+<li class="uk-vertical-align-top ppProductListItem v3 uk-margin-bottom">
+<a href="{item_url}">
+<div class="paypalProductListItem v3">
+  <figure class="uk-overlay uk-overlay-hover" style="width:100%">
+  <div class="ItemImage">
+    {!if small_pic}
+        <img src="{small_pic}" alt="{name}" />
+    {!else}
+        &nbsp;
+   {!endif}
+  </div>
+  <div class="ItemUrl">
+    <div class="shortdescription">{short_description}</div>
+    {!if price}
+       <div class="paypalPrice list normal v3">
+        {!if on_sale}
+          <span class="paypalPrice list was v3">{orig_price}</span>
+          <span class="paypalPrice list sale v3" id="price" name="price">{price}</span>
+        {!else}
+          {price}
+        {!endif}
+      </div>
+    {!endif}
+  </div>
+  <figcaption class="uk-overlay-panel uk-overlay-background uk-overlay-bottom uk-overlay-slide-bottom">
+    {$LANG_PP['see_details']}
+  </figcaption>
+  </figure>
+</div>
+</a>
+</li>
+<!-- END ProductItems -->
+</ul>
+</div>
+{# end {templatelocation} #}

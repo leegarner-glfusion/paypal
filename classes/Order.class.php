@@ -22,6 +22,7 @@ class Order
 
     private $isAdmin = false;       // True if viewing via admin interface
     private $properties = array();  // Array of properties (DB fields)
+    private $is_final = false;      // Flag to indicate order is finalized
     protected $isNew = true;        // Flag to indicate a new, empty order
     protected $m_info = array();    // Misc. info used by Cart
     var $no_shipping = 1;           // Tracker if no_shipping can be set
@@ -65,6 +66,7 @@ class Order
             $this->shipping = 0;
             $this->handling = 0;
             $this->currency = $_PP_CONF['currency'];
+            $this->by_gc = 0;
         }
     }
 
@@ -106,6 +108,7 @@ class Order
         case 'shipping':
         case 'handling':
         case 'by_gc':
+        case 'ship_units':
             $this->properties[$name] = (float)$value;
             break;
 
@@ -401,7 +404,7 @@ class Order
         );
         foreach (array('billto', 'shipto') as $type) {
             $fld = $type . '_id';
-            $fields[] = "$fld = '{$this->$fld}'";
+            $fields[] = "$fld = " . (int)$this->$fld;
             foreach ($this->_addr_fields as $name) {
                 $fld = $type . '_' . $name;
                 $fields[] = $fld . "='" . DB_escapeString($this->$fld) . "'";
@@ -431,12 +434,12 @@ class Order
 
         // canView should be handled by the caller
         if (!$this->canView()) return '';
-        $final = false;
+        $this->is_final = false;
 
         switch ($view) {
         case 'order':
         case 'adminview';
-            $final = true;
+            $this->is_final = true;
         case 'checkout':
             $tplname = 'order';
             break;
@@ -468,8 +471,6 @@ class Order
         $Currency = Currency::getInstance($this->currency);
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $this->subtotal = 0;
-        $this->shipping = 0;
-        $this->handling = 0;
         foreach ($this->items as $item) {
             $P = $item->getProduct();
             $item_total = $item->price * $item->quantity;
@@ -477,8 +478,6 @@ class Order
             if ($item->taxable) {
                 $this->tax_items++;       // count the taxable items for display
             }
-            $this->shipping += $P->getShipping($item->quantity);
-            $this->handling += $P->getHandling($item->quantity);
             $T->set_var(array(
                 'cart_item_id'  => $item->id,
                 'fixed_q'       => $P->getFixedQuantity(),
@@ -497,7 +496,7 @@ class Order
                 'item_link'     => $P->getLink(),
                 'pi_url'        => PAYPAL_URL,
             ) );
-            if ($P->prod_type == PP_PROD_PHYSICAL) {
+            if ($P->isPhysical()) {
                 $this->no_shipping = 0;
             }
             $T->parse('iRow', 'ItemRow', true);
@@ -505,12 +504,13 @@ class Order
         }
 
         $this->total = $this->getTotal();     // also calls calcTax()
+
         $by_gc = (float)$this->getInfo('apply_gc');
         $T->set_var(array(
             'pi_url'        => PAYPAL_URL,
             'pi_admin_url'  => PAYPAL_ADMIN_URL,
             'total'         => $Currency->Format($this->total),
-            'not_final'     => !$final,
+            'not_final'     => !$this->is_final,
             'order_date'    => $this->order_date->format($_PP_CONF['datetime_fmt'], true),
             'order_date_tip' => $this->order_date->format($_PP_CONF['datetime_fmt'], false),
             'order_number' => $this->order_id,
@@ -532,6 +532,13 @@ class Order
             'allow_gc'      => $_PP_CONF['gc_enabled']  && !COM_isAnonUser() ? true : false,
             'next_step'     => $step + 1,
             'not_anon'      => !COM_isAnonUser(),
+            'ship_method'   => $this->getInfo('shipper_name'),
+            'ship_select'   => $this->is_final ? NULL : $this->selectShipper(),
+            'total_prefix'  => $Currency->Pre(),
+            'total_postfix' => $Currency->Post(),
+            'total_num'     => $Currency->FormatValue($this->total),
+            'cur_decimals'  => $Currency->Decimals(),
+            'item_subtotal' => $Currency->FormatValue($this->subtotal),
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
@@ -740,21 +747,13 @@ class Order
         $total = (float)0;      // Track total purchase value
         $files = array();       // Array of filenames, for attachments
         $item_total = 0;
-        $shipping = 0;
-        $handling = 0;
-        $have_physical = 0;     // Assume no physical items.
         $dl_links = '';         // Start with empty download links
         $email_extras = array();
 
         $Cur = Currency::getInstance($this->currency);     // get currency for formatting
 
         foreach ($this->items as $id=>$item) {
-            $shipping += $item->shipping;
-            $handling += $item->handling;
             $P = $item->getProduct();
-            if ($P->prod_type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL) {
-                $have_physical = 1;
-            }
 
             // Add the file to the filename array, if any. Download
             // links are only included if the order status is 'paid'
@@ -797,7 +796,7 @@ class Order
             if ($x != '') $email_extras[] = $x;
         }
 
-        $total_amount = $item_total + $this->tax + $shipping + $handling;
+        $total_amount = $item_total + $this->tax + $this->shipping + $this->handling;
         $user_name = COM_getDisplayName($this->uid);
         if ($this->billto_name == '') {
             $this->billto_name = $user_name;
@@ -808,10 +807,10 @@ class Order
             'payment_items'     => $Cur->Format($item_total),
             'tax'               => $Cur->FormatValue($this->tax),
             'tax_num'           => $this->tax,
-            'shipping'          => $Cur->FormatValue($shipping),
-            'shipping_num'      => $shipping,
-            'handling'          => $Cur->FormatValue($handling),
-            'handling_num'      => $handling,
+            'shipping'          => $Cur->FormatValue($this->shipping),
+            'shipping_num'      => $this->shipping,
+            'handling'          => $Cur->FormatValue($this->handling),
+            'handling_num'      => $this->handling,
             'payment_date'      => PAYPAL_now()->toMySQL(true),
             'payer_email'       => $this->buyer_email,
             'payer_name'        => $this->billto_name,
@@ -976,6 +975,41 @@ class Order
 
 
     /**
+     * Calculate the total shipping fee for this order.
+     * Sets $this->shipping, no return value
+     */
+    public function calcShipping()
+    {
+        $units = 0;
+        $fixed = 0;
+        foreach ($this->items as $item) {
+            $P = $item->getProduct();
+            if ($P->isPhysical()) {
+                $fixed += $P->getShipping($item->quantity);
+                $units += $P->shipping_units * $item->quantity;
+            }
+        }
+
+        $shipper_id = $this->getInfo('shipper_id');
+        if ($shipper_id !== NULL) {
+            $shippers = Shipper::getShippers($units);
+            if (isset($shippers[$shipper_id])) {
+                $this->shipping = $shippers[$shipper_id]->best_rate + $fixed;
+            } else {
+                $shipper = Shipper::getBestRate($units);
+                $this->ship_method = $shipper->name;
+                $this->shipping = $shipper->best_rate + $fixed;
+            }
+        } else {
+            // Now get the order shipping, if any, based on product units.
+            $shipper = Shipper::getBestRate($units);
+            $this->ship_method = $shipper->name;
+            $this->shipping = $shipper->best_rate + $fixed;
+        }
+    }
+
+
+    /**
      * Calculate total additional charges: tax, shipping and handling..
      * Simply totals the amounts for each item.
      *
@@ -983,13 +1017,16 @@ class Order
      */
     public function calcTotalCharges()
     {
-        $this->shipping = 0;
+        global $_PP_CONF;
+
         $this->handling = 0;
         foreach ($this->items as $item) {
-            $this->shipping += $item->shipping;
-            $this->handling += $item->handling;
+            $P = $item->getProduct();
+            $this->handling += $P->getHandling($item->quantity);
         }
+
         $this->calcTax();   // Tax calculation is slightly more complex
+        $this->calcShipping();
         return $this->tax + $this->shipping + $this->handling;
     }
 
@@ -1214,7 +1251,7 @@ class Order
     public function hasPhysical()
     {
         foreach ($this->items as $id=>$item) {
-            if (($item->getProduct()->prod_type & PP_PROD_PHYSICAL) == PP_PROD_PHYSICAL) {
+            if ($item->getProduct()->isPhysical()) {
                 return true;
             }
         }
@@ -1275,6 +1312,58 @@ class Order
             return false;
         default:
             return true;
+        }
+    }
+
+
+    /**
+     * Get shipping information for the items to use when selecting a shipper.
+     *
+     * @return  array   Array('units'=>unit_count, 'amount'=> fixed per-item amount)
+     */
+    public function getItemShipping()
+    {
+        $shipping_amt = 0;
+        $shipping_units = 0;
+        foreach ($this->items as $item) {
+            $shipping_amt += $item->getShippingAmt();
+            $shipping_units += $item->getShippingUnits();
+        }
+        return array(
+            'units' => $shipping_units,
+            'amount' => $shipping_amt,
+        );
+    }
+
+
+    public function setField($field, $value)
+    {
+        global $_TABLES;
+
+        $value = DB_escapeString($value);
+        $order_id = DB_escapeString($this->order_id);
+        $sql = "UPDATE {$_TABLES['paypal.orders']}
+            SET $field = '$value'
+            WHERE order_id = '$order_id'";
+        $res = DB_query($sql);
+        if (DB_error()) {
+            COM_errorLog("Order::setField() error executing SQL: $sql");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    public function setShipper($shipper_id)
+    {
+        $ship_info = $this->getItemShipping();
+        $shippers = \Paypal\Shipper::getShippers($ship_info['units']);
+        $shipper = PP_getVar($shippers, $shipper_id, 'object', NULL);
+        if ($shipper !== NULL) {
+            $this->setInfo('shipper_name', $shipper->name);
+            $this->setInfo('shipper_id', $shipper->id);
+            $this->shipping = $shipper->best_rate;
         }
     }
 

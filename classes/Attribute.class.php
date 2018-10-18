@@ -222,7 +222,7 @@ class Attribute
             }
             $this->ReOrder();
             //Cache::delete('prod_attr_' . $this->item_id);
-            Cache::clear('product');
+            Cache::clear('products');
             return true;
         } else {
             $this->AddError($err);
@@ -246,7 +246,7 @@ class Attribute
             return false;
 
         DB_delete($_TABLES['paypal.prod_attr'], 'attr_id', $attr_id);
-        Cache::clear('product');
+        Cache::clear('products');
         return true;
     }
 

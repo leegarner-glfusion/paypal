@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<a href="{pi_url}">{$LANG_PP['back_to_catalog']}</a>
+<a href="{pi_url}/index.php">{$LANG_PP['back_to_catalog']}</a>
 <div style="text-align:center; margin-left:auto;">
   <h1>{$LANG_PP['cart_blocktitle']}</h1>
   <form action="{pi_url}/index.php" method="post" class="ppViewCart" id="ppCartForm">
@@ -68,23 +68,38 @@
         <td></td>
       </tr>
 {!endif}
-{!if shipping}
+{!if ship_select}
       <tr>
-        <td colspan="2" class="alignright">{$LANG_PP['shipping']}</td>
-        <td colspan="2" class="alignright">{shipping}</td>
+        <td colspan="3" class="alignright">{$LANG_PP['shipping']}: {ship_select}</td>
+        <td id="shipping_cell" colspan="1" class="alignright">{shipping}</td>
+      </tr>
+{!elseif shipping}
+      <tr>
+        <td colspan="2" class="alignright">{$LANG_PP['shipping']}
+{!if ship_method}
+({ship_method})
+{!endif}
+        </td>
+        <td id="shipping_cell" colspan="2" class="alignright">{shipping}</td>
         <td></td>
       </tr>
 {!endif}
 {!if handling}
       <tr>
-        <td colspan="2" class="alignright">{$LANG_PP['hangling']}</td>
+        <td colspan="2" class="alignright">{$LANG_PP['handling']}</td>
         <td colspan="2" class="alignright">{handling}</td>
         <td></td>
       </tr>
 {!endif}
       <tr>
         <td colspan="2" class="alignright"><b>{$LANG_PP['total']}</b></td>
-        <td colspan="2" class="alignright"><b>{total}</b></td>
+        <td colspan="2" class="alignright"><b>
+{!if not_final}
+            {total_prefix}<span id="ord_total_span">{total_num}</span>{total_postfix}
+{!else}
+        {total_sign} {total}
+{!endif}
+        </b></td>
         <td></td>
       </tr>
     </table>
@@ -130,7 +145,7 @@
         </div>
       </div>
     
-      <div class="uk-width-1-4 uk-margin floatleft" id="checkoutButtons">
+      <div class="uk-width-1-4 uk-margin floatright" id="checkoutButtons">
 {!if gateway_radios}
         <input type="hidden" name="next_step" value="{next_step}" />
 {!if is_uikit}
@@ -170,6 +185,17 @@ function mustUpdateCart()
     document.getElementById("updatebtn").classList.remove("uk-button-primary");
     document.getElementById("updatebtn").classList.add("uk-button-success");
     return false;
+}
+function PP_updateShipping(e)
+{
+    if (typeof(e) === "undefined") {
+        return;
+    }
+
+    var newship = e.options[e.selectedIndex].value;
+    var obj = JSON.parse(shipper_json);
+    document.getElementById("ord_total_span").innerHTML = obj[newship].total;
+    document.getElementById("shipping_cell").innerHTML = obj[newship].amount;
 }
 </script>
 {# end {templatelocation} #}
