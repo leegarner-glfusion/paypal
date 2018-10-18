@@ -139,6 +139,11 @@ div.paypalProductDetail .ppShortDesc {
     clear: right;
 }
 
+.ppDetailAddCart.v2 {
+    margin-top: 10px;
+    width: 100%;
+}
+
 .ppDetailPrice.v2 {
     float:right;
     text-align:right;

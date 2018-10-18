@@ -13,7 +13,7 @@
 {!endif}
 
 <div class="uk-grid" style="clear:both;margin-top:20px;">
-<div class="paypalProductDetail v2 uk-width-medium-7-10 uk-width-small-1-1" id="product-image">
+<div class="paypalProductDetail v2 uk-width-large-2-3 uk-width-medium-1-2 uk-width-small-1-1" id="product-image">
 {!if main_img}
   <div class="main_img uk-hidden-small">
     <img id="disp_img" class="uk-responsive-width uk-responsive-height"
@@ -24,7 +24,7 @@
 {!endif}
 </div>
 
-<div class="paypalDetailAttrib v2 uk-width-medium-3-10 uk-width-small-1-1">
+<div class="paypalDetailAttrib v2 uk-width-large-1-3 uk-width-medium-1-2 uk-width-small-1-1">
   <form class="uk-form" method="post" id="add_cart_{id}" action="javascript:void()">
 {!if 0}
     action="{site_url}/paypal/index.php" method="post">
