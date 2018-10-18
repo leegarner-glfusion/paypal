@@ -2,6 +2,8 @@
 
 ## Ver 0.6.0
 Released TBD
+- Add an internal test-only payment gateway.
+  - DO NOT enable on a live site!!
 - Add a basic shipping module allowing for combined shipping.
 - Thumbnails are sized by CSS. `max_thumb_size` should be large enough for all templates.
 - Added another product list template version

@@ -132,6 +132,11 @@ class internal extends \Paypal\IPN
                 $by_gc = Coupon::getUserBalance($uid);
             }
             if ($by_gc < $total) return false;
+            // This only handles fully-paid items
+            $this->pp_data['pmt_gross'] = 0;
+            break;
+        case 'test':
+            $this->pp_data['pmt_gross'] = PP_getVar($_POST, 'pmt_gross', 'float');
             break;
         }
         $this->pp_data['status'] = 'paid';
@@ -229,7 +234,6 @@ class internal extends \Paypal\IPN
             $total_shipping += $item->shipping;
             $total_handling += $item->handling;
         }
-        $this->pp_data['pmt_gross'] = 0;    // This only handles fully-paid items
         $this->pp_data['pmt_shipping'] = $total_shipping;
         $this->pp_data['pmt_handling'] = $total_handling;
         return $this->handlePurchase();
