@@ -918,6 +918,7 @@ $PP_UPGRADE['0.6.0'] = array(
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `billto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD `shipto_id` int(11) unsigned NOT NULL DEFAULT '0'",
     "ALTER TABLE {$_TABLES['paypal.purchases']} DROP purchase_date",
+    "ALTER TABLE {$_TABLES['paypal.purchases']} DROP user_id",
     "DROP TABLE IF EXISTS {$_TABLES['paypal.cart']}",
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE attr_price `attr_price` decimal(9,4) default '0.00'",
     "CREATE TABLE IF NOT EXISTS `{$_TABLES['paypal.shipping']}` (
