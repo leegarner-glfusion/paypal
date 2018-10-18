@@ -835,6 +835,7 @@ class Product
 
         // If there are any images, retrieve and display the thumbnails.
         $T->set_block('product', 'PhotoRow', 'PRow');
+        $i = 0;     // initialize $i in case there are no images
         foreach ($this->Images as $i=>$prow) {
             $T->set_var(array(
                 'img_url'   => PAYPAL_URL . "/images/products/{$prow['filename']}",
@@ -1015,8 +1016,10 @@ class Product
         $this->_act_price = $this->getSalePrice();
 
         $qty_disc_txt = '';
+        $T->set_block('product', 'qtyDiscTxt', 'disc');
         foreach ($this->qty_discounts as $qty=>$pct) {
-            $qty_disc_txt .= sprintf($LANG_PP['buy_x_save'], $qty, $pct) . '<br />';
+            $T->set_var('qty_disc', sprintf($LANG_PP['buy_x_save'], $qty, $pct));
+            $T->parse('disc', 'qtyDiscTxt', true);
         }
 
         // Get custom text input fields
@@ -1139,12 +1142,12 @@ class Product
             'price'             => Currency::getInstance()->FormatValue($this->getPrice()),
             'orig_price'        => Currency::getInstance()->Format($this->_orig_price),
             'on_sale'           => $this->isOnSale(),
-            'sale_name'         => $this->isOnSale() ? $this->getSale()->name . '&nbsp;' : '',
+            'sale_name'         => $this->isOnSale() ? $this->getSale()->name : '',
             'img_cell_width'    => ($_PP_CONF['max_thumb_size'] + 20),
             'price_prefix'      => Currency::getInstance()->Pre(),
             'price_postfix'     => Currency::getInstance()->Post(),
             'onhand'            => $this->track_onhand ? $this->onhand : '',
-            'qty_disc'          => $qty_disc_txt,
+            'qty_disc'          => count($this->qty_discounts),
             'session_id'        => session_id(),
             'shipping_txt'      => $shipping_txt,
             'stock_msg'         => $this->_OutOfStock(),

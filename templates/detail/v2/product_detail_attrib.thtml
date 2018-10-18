@@ -32,16 +32,27 @@
     <div class="ppDetailPrice v2">
 {!if on_sale}
       <span class="paypalPrice was">{orig_price}</span>
-      <br /><span class="paypalPrice sale">{sale_name}{price_prefix}</span><span class="paypalPrice sale" id="price" name="price">{init_price}</span><span class="paypalPrice sale">{price_postfix}</span>
+      <div class="paypalPrice sale">{sale_name}</div>
+      <div>
+        <span class="paypalPrice sale">{price_prefix}</span>
+        <span class="paypalPrice sale" id="price" name="price">{init_price}</span>
+        <span class="paypalPrice sale">{price_postfix}</span>
+      </div>
 {!else}
-      <span class="paypalPrice normal">{price_prefix}</span><span class="paypalPrice normal" id="price" name="price">{init_price}</span><span class="paypalPrice normal">{price_postfix}</span>
+      <div>
+      <span class="paypalPrice normal">{price_prefix}</span>
+      <span class="paypalPrice normal" id="price" name="price">{init_price}</span>
+      <span class="paypalPrice normal">{price_postfix}</span>
+      </div>
 {!endif}
 {!if Xshipping_txt}
-    <br /><span class="ppPlusShipping">{shipping_txt}</span>
+        <div class="ppPlusShipping">{shipping_txt}</div>
 {!endif}
+<!-- BEGIN qtyDiscTxt -->
+        <div class="paypalQtyDisc">{qty_disc}</div>
+<!-- END qtyDiscTxt -->
 {!if qty_disc}
-      <br /><span class="paypalQtyDisc">{qty_disc}</span>
-      <span class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</span>
+        <div class="paypalQtyDiscText">{$LANG_PP['qty_disc_text']}</div>
 {!endif}
     </div>
 
