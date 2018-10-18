@@ -139,124 +139,6 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the custom string properly formatted for the gateway.
-    *
-    *   @return string      Formatted custom string
-    */
-    protected function XPrepareCustom()
-    {
-        if (is_array($this->custom)) {
-            $tmp = array();
-            foreach ($this->custom as $key => $value) {
-                $tmp[] = $key . ':' . $value;
-            }
-            return implode(';', $tmp);
-         }else
-            return '';
-    }
-
-
-    /**
-    *   Get a "buy now" button for a catalog item
-    *
-    *   @uses   _addItem()
-    *   @uses   _getButton()
-    *   @uses   getActionUrl()
-    *   @param  object  $P      Product Object
-    *   @return string          HTML for button
-    */
-    public function XProductButton($P)
-    {
-        global $_PP_CONF, $LANG_PP_authorizenet;
-
-        // If this is a physical item, instruct the gateway to collect
-        // the shipping address.
-        $type = $P->prod_type;
-        if ($type & PP_PROD_PHYSICAL == PP_PROD_PHYSICAL) {
-            $this->get_shipping = 1;
-        }
-            /*$this->_addItem($item_id, $item['name'] , $item['descrip'],
-                        $item['price'],
-                        $item['quantity'], $item['shipping'], $item['taxable']);*/
-        $vars = array(
-            'name'          => htmlspecialchars($P->name),
-            'descrip'       => htmlspecialchars($P->short_description),
-            'price'         => $P->price,
-            'options'       => array(),
-            'weight'        => $P->weight,
-            'taxable'       => $P->taxable ? 'Y' : 'N',
-            'type'          => $P->prod_type,
-            'quantity'      => 1,
-        );
-        $this->_addItem($P->id, $vars);
-        /*$this->_addItem($P->id, $P->name,
-                $P->short_description, $P->price,
-                $P->tax, $P->shipping_amt);*/
-        //        $gateway_vars = $this->_getButton($P->btn_type);
-        $gateway_vars = '';
-
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
-                $this->gw_name); 
-        $T->set_file(array('btn' => 
-                'btn_' . self::gwButtonType($P->btn_type) . '.thtml'));
-        $T->set_var('action_url', $this->getActionUrl());
-        $T->set_var('gateway_vars', $gateway_vars);
-        $T->set_var('btn_text', $LANG_PP_authorizenet['buy_now']);
-        $retval = $T->parse('', 'btn');
-
-        return $retval;
-    }
-
-
-    /**
-    *   Get a button for an external (plugin) item.
-    *   Only supports a "buy now" button since we don't necessarily know
-    *   what type of button the item uses.  Assumes a quantity of one.
-    *
-    *   @uses   _addItem()
-    *   @uses   _getButton()
-    *   @uses   getActionUrl()
-    *   @uses   PaymentGw::AddCustom()
-    *   @param  array   $attribs    Attribute array (item_number, price)
-    *   @param  string  $btn_type   Button type
-    *   @return string              HTML for button
-    */
-    public function XExternalButton($attribs = array(), $btn_type = 'buy_now')
-    {
-        // Add options, if present.  Only 2 are supported, and the amount must
-        // already be included in the $amount above.
-        $item_number = $attribs['item_number'];
-        if (isset($attribs['options']) && is_array($attribs['options'])) {
-            $item_number .= '|' . implode(',', $attribs['options']);
-        } else {
-            $attribs['options'] = array();
-        }
-        $vars = array(
-            'name'      => $attribs['item_number'],
-            'descrip'   => $attribs['item_name'],
-            'price'     => $attribs['amount'],
-            'options'   => $attribs['options'],
-            'weight'    => isset($attribs['weight']) ? $attribs['weight'] : 0,
-            'taxable'   => (isset($attribs['tax']) && $attribs['tax'] > 0) ? 'Y' : 'N',
-            'type'      => isset($attribs['type']) ? $attribs['type'] : PP_PROD_VIRTUAL,
-            'quantity'  => isset($attibs['quantity']) ? $attribs['quantity'] : 1,
-        );
-        $this->_addItem($item_number, $vars);
-        $gateway_vars = $this->_getButton($btn_type);
-
-        $T = new \Template(PAYPAL_PI_PATH . '/templates/buttons/' .
-                $this->gw_name); 
-        $T->set_file(array('btn' => 'btn_buy_now.thtml'));
-        $T->set_var('action_url', $this->getActionUrl());
-        $T->set_var('gw_name', $this->gw_name);
-        $T->set_var('gateway_vars', $gateway_vars);
-
-        $retval = $T->parse('', 'btn');
-        return $retval;
-    }
-
-
-    /**
      *  Get the gateway variables to put in the checkout button.
      *
      *  @param  object      $cart   Shopping Cart Object
@@ -401,43 +283,6 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Generates a fingerprint needed for a hosted order form or DPM.
-    *
-    *   @param  string  $api_login_id    Login ID.
-    *   @param  string  $transaction_key API key.
-    *   @param  string  $amount          Amount of transaction.
-    *   @param  string  $fp_sequence     An invoice number or random number.
-    *   @param  string  $fp_timestamp    Timestamp.
-    *   @param  string  $currency        Currency code, USD, GBP, etc.
-    *
-    *   @return string      The fingerprint.
-    */
-    public static function XgetFingerprint($api_login_id, $transaction_key,
-            $amount, $fp_sequence, $fp_timestamp, $currency)
-    {
-        $field_str = $api_login_id . '^' . $fp_sequence . '^' . $fp_timestamp . '^'
-            . $amount . '^' . $currency;
-        if (function_exists('hash_hmac')) {
-            return hash_hmac('md5', $field_str, $transaction_key);
-        } else {
-            return bin2hex(mhash(MHASH_MD5, $field_str, $transaction_key));
-        }
-    }
-
-
-    /**
-    *   Get the action url for the payment button.
-    *   Overridden from the parent since we need to append to the url.
-    *
-    *   @return string      Payment URL
-    */ 
-    public function XgetActionUrl()
-    {
-        return $this->gw_url;
-    }
-
-
-    /**
     *   Get the variables from the return URL to display a "thank-you"
     *   message to the buyer.
     *
@@ -452,27 +297,6 @@ class authorizenet extends \Paypal\Gateway
             'gateway_name'  => $this->gw_provider,
         );
         return $R;
-    }
-
-
-    /**
-    *   Make sure that the button type is one of our valid types
-    *
-    *   @param  string  $btn_type   Button type, typically from product record
-    *   @return string              Valid button type
-    */
-    private function XgwButtonType($btn_type)
-    {
-        switch ($btn_type) {
-        case 'donation':
-        case 'buy_now':
-            $retval = $btn_type;
-            break;
-        default:
-            $retval = 'buy_now';
-            break;
-        }
-        return $retval;
     }
 
 
@@ -533,37 +357,6 @@ class authorizenet extends \Paypal\Gateway
             }
         }
         return parent::SaveConfig($A);
-    }
-
-
-    /**
-    *   Add a single item to our item array.
-    *   The description needs its tags stripped to appear right on the
-    *   gateway's payment form.
-    *
-    *   @param  mixed   $item_id    ID of item, including options
-    *   @param  string  $item_name  Short item name
-    *   @param  string  $descrip    Item description
-    *   @param  float   $price      Item price
-    *   @param  integer $qty        Quantity
-    *   @param  float   $shippin    Per-item shipping
-    */
-    //private function _addItem($item_id, $item_name, $descrip,
-    //            $price, $qty=0, $shipping=0)
-    private function X_addItem($item_id, $vars)
-    {
-        $qty = PP_getVar($vars, 'quantity', 'float', 1);
-        if ($vars['quantity'] == 0) $vars['quantity'] = 1;
-        $this->items[] = array(
-            'item_id' => $item_id,
-            'item_name' => PP_getVar($vars, 'name'),
-            'description' => strip_tags(PP_getVar($vars, 'descrip')),
-            'price' => PP_getVar($vars, 'price', 'float'),
-            'quantity' => $qty,
-            'shipping' => PP_getVar($vars, 'shipping', 'float'),
-            'weight' => PP_getVar($vars, 'weight', 'float'),
-            'taxable' => PP_getVar($vars, 'taxable', 'integer'),
-        );
     }
 
 

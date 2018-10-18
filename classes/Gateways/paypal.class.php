@@ -361,21 +361,6 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the checkout button
-    *
-    *   @param  object  $cart   Shoppping cart
-    *   @return string      HTML for checkout button
-    */
-    public function XgetCheckoutButton()
-    {
-        return '<input type="image"
-            src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png"
-            alt="Check out with PayPal"
-            class="tooltip" title="Check out with Paypal" />';
-    }
-
-
-    /**
     *   Create encrypted buttons.
     *
     *   Requires that the plugin is configured to do so, and that the key files

@@ -161,59 +161,6 @@ class Shipper
     }
 
 
-    public static function XgetAll()     // dummy test func
-    {
-        $shippers = array(
-            array(
-                'id' => 1,
-                'name' => 'Flat Rate',
-                'min_units' => 1,
-                'max_units' => 100,
-                'rates' => json_encode(array(
-                    /*20 => 11.95,
-                    5 => 5.95,
-                    50 => 29.95,
-                )),*/
-                    array(
-                        'units' => 5, 'rate' => 7.2,
-                    ),
-                    array(
-                        'units' => 20, 'rate' => 13.65,
-                    ),
-                    array(
-                        'units' => 50, 'rate' => 18.90,
-                    ),
-                )),
-            ),
-            array(
-                'id' => 2,
-                'name' => 'UPS Ground',
-                'min_units' => 1,
-                'max_units' => 30,
-                'rates' => json_encode(array(
-                    /*10 => 6.50,
-                    20 => 10.50,
-                )),*/
-
-                    array(
-                        'units' => 10,
-                        'rate' => 6.50,
-                    ),
-                    array(
-                        'units' => 20,
-                        'rate' => 10.50,
-                    ),
-                )),
-            ),
-        );
-        $retval = array();
-        foreach ($shippers as $shipper) {
-            $retval[] = new self($shipper);
-        }
-        return $retval;
-    }
-
-
     /**
      * Get all the shippers and rates for shippers that can handle X units.
      *
