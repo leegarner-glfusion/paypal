@@ -309,7 +309,7 @@ class Gateway
     *   @param  array   $A      Array of config items, e.g. $_POST
     *   @return boolean         True if saved successfully, False if not
     */
-    protected function SaveConfig($A = NULL)
+    public function SaveConfig($A = NULL)
     {
         global $_TABLES;
 
@@ -617,8 +617,12 @@ class Gateway
             $langfile = $this->gw_name . '_english.php';
         }
         global $LANG_PP_gateway;
-        include_once PAYPAL_PI_PATH . '/language/' . $langfile;
-        return $LANG_PP_gateway;
+        if (is_file(PAYPAL_PI_PATH . '/language/' . $langfile)) {
+            include_once PAYPAL_PI_PATH . '/language/' . $langfile;
+            return $LANG_PP_gateway;
+        } else {
+            return array();
+        }
     }
 
 

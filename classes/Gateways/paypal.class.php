@@ -883,7 +883,7 @@ class paypal extends \Paypal\Gateway
     *
     *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
     */
-    function SaveConfig($A = NULL)
+    public function SaveConfig($A = NULL)
     {
         if (is_array($A)) {
             foreach ($this->config as $name=>$value) {
