@@ -14,7 +14,7 @@
         </a>
       {!endif}
       </h1>
-      {name}&nbsp;&nbsp;{edit_icon}
+      {name}
       <p />
     <div class="ppDetailPrice v1">
       <b>{$LANG_PP['price']}:&nbsp;&nbsp;</b>

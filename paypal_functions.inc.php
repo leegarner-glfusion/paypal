@@ -772,8 +772,6 @@ function ProductList($cat_id = 0)
             $T->set_var(array(
                 'is_admin'  => 'true',
                 'pi_admin_url' => PAYPAL_ADMIN_URL,
-                'edit_icon' =>
-                    "{$_CONF['layout_url']}/images/edit.$_IMAGE_TYPE",
             ) );
         }
 

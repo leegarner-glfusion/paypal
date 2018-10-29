@@ -1004,6 +1004,8 @@ function phpblock_paypal_search()
     if ($category_options === NULL) {
         $category_options = COM_optionList($_TABLES['paypal.categories'],
             'cat_id, cat_name', '', 1, SEC_buildAccessSql(''));
+        // Configured cache age is not used since the cache will be
+        // cleared when categories are changed.
         \Paypal\Cache::set($cache_key, $category_options, 'categories');
     }
     $T->set_var(array(
