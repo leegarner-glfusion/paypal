@@ -120,13 +120,24 @@ $paypalConfigData = array(
         'group' => 'paypal',
     ),
     array(
+        'name' => 'item_columns',
+        'default_value' => '5',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 80,
+        'set' => true,
+        'group' => 'paypal',
+    ),
+    array(
         'name' => 'show_plugins',
         'default_value' => '0',
         'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 80,
+        'sort' => 90,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -137,7 +148,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 90,
+        'sort' => 100,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -148,7 +159,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 100,
+        'sort' => 110,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -159,7 +170,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 110,
+        'sort' => 120,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -170,7 +181,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 13,
-        'sort' => 120,
+        'sort' => 130,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -181,7 +192,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 130,
+        'sort' => 140,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -192,7 +203,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 2,
-        'sort' => 140,
+        'sort' => 150,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -203,7 +214,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 15,
-        'sort' => 150,
+        'sort' => 160,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -214,7 +225,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 0,
-        'sort' => 160,
+        'sort' => 170,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -225,7 +236,7 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 0,
-        'sort' => 170,
+        'sort' => 180,
         'set' => true,
         'group' => 'paypal',
     ),
@@ -236,10 +247,11 @@ $paypalConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 0,
-        'sort' => 180,
+        'sort' => 190,
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_paths',               // Paths fieldset
         'default_value' => NULL,
@@ -317,6 +329,7 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_prod_defaults',   // Products Defaults and Views
         'default_value' => NULL,
@@ -416,6 +429,7 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_blocks',   // Plugin block control
         'default_value' => NULL,
@@ -471,6 +485,7 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_debug',   // Debugging settings
         'default_value' => NULL,
@@ -504,6 +519,7 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_addresses',   // Address Collection
         'default_value' => NULL,
@@ -704,6 +720,7 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+
     array(
         'name' => 'fs_gc_format',       // Gift Card Formatting
         'default_value' => NULL,

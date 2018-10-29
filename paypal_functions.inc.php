@@ -701,6 +701,7 @@ function ProductList($cat_id = 0)
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
         'sortby_options' => $sortby_options,
         'sortby'        => $sortby,
+        'table_columns' => $_PP_CONF['item_columns'],
     ) );
 
     if (!empty($cat_name)) {
@@ -711,20 +712,6 @@ function ProductList($cat_id = 0)
         ) );
     } else {
         $T->set_var('title', $LANG_PP['blocktitle']);
-    }
-
-    // Adjust the number of product block columns depending on whether
-    // glFusion blocks are shown
-    if ($_PP_CONF['displayblocks'] > 0) {
-        $T->set_var(array(
-            'lg_cols'   => 3,
-            'med_cols'  => 3,
-        ) );
-    } else {
-        $T->set_var(array(
-            'lg_cols'   => 4,
-            'med_cols'  => 3,
-        ) );
     }
 
     $display .= $T->parse('', 'start');
