@@ -120,7 +120,7 @@ $paypalConfigData = array(
         'group' => 'paypal',
     ),
     array(
-        'name' => 'item_columns',
+        'name' => 'catalog_columns',
         'default_value' => '5',
         'type' => 'text',
         'subgroup' => 0,

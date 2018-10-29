@@ -701,7 +701,7 @@ function ProductList($cat_id = 0)
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
         'sortby_options' => $sortby_options,
         'sortby'        => $sortby,
-        'table_columns' => $_PP_CONF['item_columns'],
+        'table_columns' => $_PP_CONF['catalog_columns'],
     ) );
 
     if (!empty($cat_name)) {
