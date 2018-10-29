@@ -146,7 +146,7 @@ function USES_paypal_class_report($name='')
 */
 function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 {
-    global $_PP_CONF;
+    global $_PP_CONF, $LANG_PP;
 
     $display = '';
 
