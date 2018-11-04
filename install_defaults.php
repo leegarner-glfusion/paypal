@@ -19,6 +19,7 @@ if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
 
+global $paypalConfigData;
 $paypalConfigData = array(
     array(
         'name' => 'sg_main',
@@ -831,6 +832,8 @@ function plugin_initconfig_paypal($group_id = 0)
         foreach ($paypalConfigData AS $cfgItem) {
             _addConfigItem($cfgItem);
         }
+    } else {
+        COM_errorLog('initconfig error: Paypal config group already exists');
     }
     return true;
 }
