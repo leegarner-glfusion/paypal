@@ -1,7 +1,7 @@
 # Paypal plugin for glFusion - Changelog
 
 ## Ver 0.6.0
-Released TBD
+Released 2018-11-04
 - Add an internal test-only payment gateway.
   - DO NOT enable on a live site!!
 - Add a basic shipping module allowing for combined shipping.
