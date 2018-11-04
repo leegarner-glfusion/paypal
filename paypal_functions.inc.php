@@ -565,7 +565,11 @@ function ProductList($cat_id = 0)
         }
     }
 
-    $sortby = isset($_REQUEST['sortby']) ? $_REQUEST['sortby'] : $_PP_CONF['order'];
+    if (isset($_REQUEST['sortby'])) {
+        $sortby = $_REQUEST['sortby'];
+    } else {
+        $sortby = PP_getVar($_PP_CONF, 'order', 'string', 'name');
+    }
     switch ($sortby){
     case 'price_l2h':   // price, low to high
         $sql_sortby = 'price';
@@ -584,12 +588,9 @@ function ProductList($cat_id = 0)
         $sql_sortdir = 'DESC';
         break;
     case 'name':
-        $sql_sortby = 'short_description';
-        $sql_sortdir = 'ASC';
-        break;
     default:
-        $sortby = $_PP_CONF['order'];
-        $sql_sortby = $sortby;
+        $sortby = 'name';
+        $sql_sortby = 'short_description';
         $sql_sortdir = 'ASC';
         break;
     }
