@@ -593,7 +593,7 @@ function PAYPAL_do_upgrade($dvlp = false)
 
     PAYPAL_update_config();
     if (!COM_checkVersion($current_ver, $installed_ver)) {
-        if (!PAYPAL_do_set_version($current_ver)) return false;
+        if (!PAYPAL_do_set_version($installed_ver)) return false;
     }
     \Paypal\Cache::clear();
     PAYPAL_remove_old_files();
