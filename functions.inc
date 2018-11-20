@@ -214,7 +214,6 @@ function plugin_commentsupport_paypal()
 /**
 *   Save a comment
 *
-*   @param  string  $type       Plugin to save comment
 *   @param  string  $title      Comment title
 *   @param  string  $comment    Comment text
 *   @param  string  $id         Item id to which $cid belongs

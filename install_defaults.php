@@ -1,24 +1,25 @@
 <?php
 /**
-*   Configuration Defaults Paypal plugin for glFusion.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*
-*   Based on the gl-paypal Plugin for Geeklog CMS.
-*   @copyright Copyright (C) 2005-2006 Vincent Furia <vinny01@users.sourceforge.net>
-*/
+ * Configuration Defaults Paypal plugin for glFusion.
+ * Based on the gl-paypal Plugin for Geeklog CMS.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (C) 2005-2006 Vincent Furia <vinny01@users.sourceforge.net>
+ * @package     paypal
+ * @version     0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ *
+ */
 
 // This file can't be used on its own
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
 
+/** @var global config data */
 global $paypalConfigData;
 $paypalConfigData = array(
     array(
