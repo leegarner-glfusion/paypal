@@ -1,39 +1,41 @@
 <?php
 /**
-*   Shopping cart class for the Paypal plugin.
-*   The cart is saved in the cart table with an ID based on the session_id.
-*   For anonymous users, the cart ID is stored in a cookie so it can be merged
-*   into the user cart at login.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*
-*   Based partially on work done for the unreleased "ecommerce" plugin
-*       by Josh Pendergrass <cendent AT syndicate-gaming DOT com>
-*/
+ * Shopping cart class for the Paypal plugin.
+ *
+ * Based partially on work done for the unreleased "ecommerce" plugin
+ * by Josh Pendergrass <cendent AT syndicate-gaming DOT com>
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ *
+ */
 namespace Paypal;
 
 /**
-*   Shopping cart class
-*   @package paypal
-*/
+ * Shopping cart class.
+ * @package paypal
+ */
 class Cart extends Order
 {
-    /** Holder for custom information
-    *   @var array */
+    /** Holder for custom information.
+     * @var array */
     public $custom_info = array();
 
     /**
-    *   Constructor.
-    *   Reads the cart contents from the "cart" table, if available.
-    *   Does not read from the userinfo table- that's up to the uesr
-    *   login and logout functions.
-    */
+     * Read the cart contents from the "cart" table, if available.
+     * Does not read from the userinfo table- that's up to the uesr
+     * login and logout functions.
+     * `$interactive` is set to false if the cart is instantiated for a system
+     * call such as an IPN notification.
+     *
+     * @param   string  $cart_id    ID of an existing cart to read
+     * @param   boolean $interactive    True if this is an interactive session
+     */
     public function __construct($cart_id='', $interactive=true)
     {
         global $_TABLES, $_PP_CONF, $_USER;
@@ -53,10 +55,12 @@ class Cart extends Order
 
 
     /**
-    *   Get the cart for the current user
-    *
-    *   @return object  Cart object
-    */
+     * Get the cart for the current user.
+     *
+     * @param   integer $uid        User ID, current user by default
+     * @param   string  $cart_id    Specific cart ID to read
+     * @return  object  Cart object
+     */
     public static function getInstance($uid = 0, $cart_id = '')
     {
         global $_TABLES, $_USER;
@@ -86,10 +90,10 @@ class Cart extends Order
 
 
     /**
-    *   Get the cart contents as an array of items
-    *
-    *   @return array   Current cart contents
-    */
+     * Get the cart contents as an array of items.
+     *
+     * @return  array   Current cart contents
+     */
     public function Cart()
     {
         return $this->items;
@@ -98,9 +102,9 @@ class Cart extends Order
 
     /**
      * Merge the saved cart for Anonymous into the current user's cart.
-     * Saves the updated cart to the database
+     * Saves the updated cart to the database.
      *
-     * @param   string  $anon_cart      Anonymous cart ID
+     * @param   string  $cart_id    ID of cart being merged into this one
      * @return  array       Current cart contents
      */
     public function Merge($cart_id)
@@ -198,13 +202,13 @@ class Cart extends Order
 
 
     /**
-    *   Update an existing cart item.
-    *   This only works where items are unique since the caller has no access
-    *   to the cart ID.
-    *
-    *   @param  string  $item_number    Product ID of item to update
-    *   @param  array   $updates        Array (field=>value) of new values
-    */
+     * Update an existing cart item.
+     * This only works where items are unique since the caller has no access
+     * to the cart ID.
+     *
+     * @param   string  $item_number    Product ID of item to update
+     * @param   array   $updates        Array (field=>value) of new values
+     */
     public function updateItem($item_number, $updates)
     {
         // Search through the cart for the item number
@@ -222,15 +226,15 @@ class Cart extends Order
 
 
     /**
-    *   Update the quantity for all cart items.
-    *   Called from the View Cart form to update any quantities that have
-    *   changed.
-    *   Also applies a coupon code, if entered.
-    *
-    *   @see    Cart::UpdateQty()
-    *   @param  array   $items  Array if items as itemID=>newQty
-    *   @return array           Updated cart contents
-    */
+     * Update the quantity for all cart items.
+     * Called from the View Cart form to update any quantities that have
+     * changed.
+     * Also applies a coupon code, if entered.
+     *
+     * @see     Cart::UpdateQty()
+     * @param   array   $A  Array if items as itemID=>newQty
+     * @return  array       Updated cart contents
+     */
     public function Update($A)
     {
         global $_PP_CONF;
@@ -300,12 +304,12 @@ class Cart extends Order
 
 
     /**
-    *   Remove an item from the cart.
-    *   Saves the updated cart after removal.
-    *
-    *   @param  string  $id     Item ID to remove
-    *   @return array           Current cart contents
-    */
+     * Remove an item from the cart.
+     * Saves the updated cart after removal.
+     *
+     * @param   string  $id     Item ID to remove
+     * @return  array           Current cart contents
+     */
     public function Remove($id)
     {
         global $_TABLES;
@@ -320,11 +324,11 @@ class Cart extends Order
 
 
     /**
-    *   Empty and destroy the cart
-    *
-    *   @param  boolean $del_order  True to delete any related order
-    *   @return array       Empty cart array
-    */
+     * Empty and destroy the cart.
+     *
+     * @param   boolean $del_order  True to delete any related order
+     * @return  array       Empty cart array
+     */
     public function Clear($del_order = true)
     {
         global $_TABLES, $_USER;
@@ -341,12 +345,12 @@ class Cart extends Order
 
 
     /**
-    *   Create a fake checkout button to be used when the order value is zero
-    *   due to coupons. This takes the user directly to the internal IPN processor.
-    *
-    *   @param  object  $gw Selected Payment Gateway
-    *   @return string      HTML for final checkout button
-    */
+     * Create a fake checkout button to be used when the order value is zero due to coupons.
+     * This takes the user directly to the internal IPN processor.
+     *
+     * @param  object  $gw Selected Payment Gateway
+     * @return string      HTML for final checkout button
+     */
     public function checkoutButton($gw)
     {
         global $_PP_CONF, $_USER;
@@ -387,11 +391,11 @@ class Cart extends Order
 
 
     /**
-    *   Get the payment gateway checkout buttons.
-    *
-    *   @uses   PaymentGw::CheckoutButton()
-    *   @return string      HTML for checkout buttons
-    */
+     * Get the payment gateway checkout buttons.
+     *
+     * @uses    Gateway::CheckoutButton()
+     * @return  string      HTML for checkout buttons
+     */
     public function getCheckoutButtons()
     {
         global $_PP_CONF;
@@ -414,14 +418,14 @@ class Cart extends Order
 
 
     /**
-    *   Get the payment gateway checkout buttons.
-    *   If there is only one possible gateway, pre-select it. If more than one
-    *   then leave all unselected, unless m_info['gateway'] has already been
-    *   set for this order.
-    *
-    *   @uses   PaymentGw::CheckoutButton()
-    *   @return string      HTML for checkout buttons
-    */
+     * Get the payment gateway checkout buttons.
+     * If there is only one possible gateway, pre-select it. If more than one
+     * then leave all unselected, unless m_info['gateway'] has already been
+     * set for this order.
+     *
+     * @uses    Gateway::CheckoutButton()
+     * @return  string      HTML for checkout buttons
+     */
     public function getCheckoutRadios()
     {
         global $_PP_CONF;
@@ -467,10 +471,10 @@ class Cart extends Order
 
 
     /**
-    *   Check if there are any items in the cart
-    *
-    *   @return boolean     True if cart is NOT empty, False if it is
-    */
+     * Check if there are any items in the cart.
+     *
+     * @return  boolean     True if cart is NOT empty, False if it is
+     */
     public function hasItems()
     {
         return empty($this->items) ? false : true;
@@ -478,12 +482,12 @@ class Cart extends Order
 
 
     /**
-    *   Get the cart ID.
-    *   Returns either the native cart ID, or a version escaped for SQL
-    *
-    *   @param  boolean $escape True to escape return value for DB
-    *   @return string      Cart ID string
-    */
+     * Get the cart ID.
+     * Returns either the native cart ID, or a version escaped for SQL
+     *
+     * @param   boolean $escape True to escape return value for DB
+     * @return  string      Cart ID string
+     */
     public function cartID($escape=false)
     {
         if ($escape)
@@ -494,11 +498,11 @@ class Cart extends Order
 
 
     /**
-    *   Set the address values for a single address
-    *
-    *   @param  array   $A      Array of address elements
-    *   @param  string  $type   Type of address, billing or shipping
-    */
+     * Set the address values for a single address.
+     *
+     * @param   array   $A      Array of address elements
+     * @param   string  $type   Type of address, billing or shipping
+     */
     public function setAddress($A, $type = 'billto')
     {
         switch ($type) {
@@ -513,11 +517,11 @@ class Cart extends Order
 
 
     /**
-    *   Get the requested address array.
-    *
-    *   @param  string  $type   Type of address, billing or shipping
-    *   @return array           Array of address elements
-    */
+     * Get the requested address array.
+     *
+     * @param   string  $type   Type of address, billing or shipping
+     * @return  array           Array of address elements
+     */
     public function getAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
@@ -532,10 +536,13 @@ class Cart extends Order
 
 
     /**
-    *   Get a cart for a given user
-    *   Gets the latest cart, and cleans up extra carts that may accumulate
-    *   due to expired sessions
-    */
+     * Get a cart ID for a given user.
+     * Gets the latest cart, and cleans up extra carts that may accumulate
+     * due to expired sessions.
+     *
+     * @param   integer $uid    User ID
+     * @return  string          Cart ID
+     */
     public static function getCart($uid = 0)
     {
         global $_USER, $_TABLES, $_PP_CONF, $_PLUGIN_INFO;
@@ -563,11 +570,11 @@ class Cart extends Order
 
 
     /**
-    *   Add a session variable.
-    *
-    *   @param  string  $key    Name of variable
-    *   @param  mixed   $value  Value to set
-    */
+     * Add a session variable.
+     *
+     * @param   string  $key    Name of variable
+     * @param   mixed   $value  Value to set
+     */
     public static function setSession($key, $value)
     {
         if (!isset($_SESSION[self::$session_var])) {
@@ -578,11 +585,11 @@ class Cart extends Order
 
 
     /**
-    *   Retrieve a session variable
-    *
-    *   @param  string  $key    Name of variable
-    *   @return mixed       Variable value, or NULL if it is not set
-    */
+     * Retrieve a session variable.
+     *
+     * @param   string  $key    Name of variable
+     * @return  mixed       Variable value, or NULL if it is not set
+     */
     public static function getSession($key)
     {
         if (isset($_SESSION[self::$session_var][$key])) {
@@ -594,10 +601,10 @@ class Cart extends Order
 
 
     /**
-    *   Remove a session variable
-    *
-    *   @param  string  $key    Name of variable
-    */
+     * Remove a session variable.
+     *
+     * @param   string  $key    Name of variable
+     */
     public static function clearSession($key)
     {
         unset($_SESSION[self::$session_var][$key]);
@@ -605,10 +612,11 @@ class Cart extends Order
 
 
     /**
-    *   Delete any cart(s) for a user.
-    *
-    *   @param  integer $uid    User ID
-    */
+     * Delete any cart(s) for a user.
+     *
+     * @param   integer $uid    User ID
+     * @param   string  $save   Optional order ID to preserve
+     */
     public static function deleteUser($uid = 0, $save = '')
     {
         global $_TABLES, $_USER;
@@ -631,12 +639,12 @@ class Cart extends Order
 
 
     /**
-    *   Set the anonymous user's cart ID.
-    *   Used so the anonymous cart can be located and merged when a user
-    *   logs in.
-    *
-    *   @param  string  $cart_id    Cart ID
-    */
+     * Set the anonymous user's cart ID.
+     * Used so the anonymous cart can be located and merged when a user
+     * logs in.
+     *
+     * @param  string  $cart_id    Cart ID
+     */
     public static function setAnonCartID($cart_id)
     {
         self::_setCookie($cart_id);
@@ -644,10 +652,10 @@ class Cart extends Order
 
 
     /**
-    *   Delete the anonymous user's cart.
-    *   This is done after merging the cart during login to prevent it from
-    *   being left behind and possibly re-merged during a subsequent login
-    */
+     * Delete the anonymous user's cart.
+     * This is done after merging the cart during login to prevent it from
+     * being left behind and possibly re-merged during a subsequent login
+     */
     public static function delAnonCart()
     {
         global $_TABLES;
@@ -664,10 +672,10 @@ class Cart extends Order
 
 
     /**
-    *   Get the anonymous user's cart ID from the cookie
-    *
-    *   @return mixed   Cart ID, or Null if not set
-    */
+     * Get the anonymous user's cart ID from the cookie.
+     *
+     * @return  mixed   Cart ID, or Null if not set
+     */
     public static function getAnonCartID()
     {
         if (isset($_COOKIE[self::$session_var]) && !empty($_COOKIE[self::$session_var])) {
@@ -679,15 +687,13 @@ class Cart extends Order
 
 
     /**
-    *   Set the order status to indicate that this is no longer a cart and has
-    *   been submitted for payment.
-    *   Pass $status = false to revert back to a cart, e.g. if the purchase is
-    *   cancelled.
-    *   Also removes the cart_id cookie for anonymous users.
-    *
-    *   @param  string  $cart_id    Cart ID to update
-    *   @param  boolean $status     Status to set, currently only "true"
-    */
+     * Set the order status to indicate that this is no longer a cart and has been submitted for payment.
+     * Pass $status = false to revert back to a cart, e.g. if the purchase is cancelled.
+     * Also removes the cart_id cookie for anonymous users.
+     *
+     * @param   string  $cart_id    Cart ID to update
+     * @param   boolean $status     Status to set, currently only "true"
+     */
     public static function setFinal($cart_id, $status=true)
     {
         global $_TABLES, $LANG_PP;
@@ -721,7 +727,7 @@ class Cart extends Order
 
 
     /**
-     * Get the order view based on the current step in the checkout process
+     * Get the order view based on the current step in the checkout process.
      *
      * @param   integer $step   Checkout step
      * @return  string          Order view page
@@ -793,8 +799,9 @@ class Cart extends Order
 
 
     /**
-    *   Delete all carts.
-    */
+     * Delete all carts.
+     * Called from the special administrative functions, may be needed after upgrading.
+     */
     public static function Purge()
     {
         global $_TABLES;

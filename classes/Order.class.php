@@ -1,47 +1,85 @@
 <?php
 /**
-*   Order class for the Paypal plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Order class for the Paypal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Order class
-*   @package    paypal
-*/
+ * Order class.
+ * @package paypal
+ */
 class Order
 {
+    /** Session variable name for storing cart info.
+     * @var string */
     protected static $session_var = 'ppGCart';
 
-    private $isAdmin = false;       // True if viewing via admin interface
-    private $properties = array();  // Array of properties (DB fields)
-    private $is_final = false;      // Flag to indicate order is finalized
-    protected $isNew = true;        // Flag to indicate a new, empty order
-    protected $m_info = array();    // Misc. info used by Cart
-    var $no_shipping = 1;           // Tracker if no_shipping can be set
-    protected $_addr_fields = array(    // Address field names
+    /** Flag to indicate that administrative actions are being done.
+     * @var boolean */
+    private $isAdmin = false;
+
+    /** Internal properties set via `__set()` and `__get()`.
+     * @var array */
+    private $properties = array();
+
+    /** Flag to indicate that this order has been finalized.
+     * @var boolean */
+    private $is_final = false;
+
+    /** Flag to indicate that this is a new record.
+     * @var boolean */
+    protected $isNew = true;
+
+    /** Miscellaneious information values used by the Cart class.
+     * @var array */
+    protected $m_info = array();
+
+    /** Flag to indicate that "no shipping" should be set.
+     * @deprecated ?
+     * @var boolean */
+    var $no_shipping = 1;
+
+    /** Address field names.
+     * @var array */
+    protected $_addr_fields = array(
         'name', 'company', 'address1', 'address2',
         'city', 'state', 'country', 'zip',
     );
-    protected $items = array();       // Array of OrderItem objects
-    protected $subtotal = 0;        // item subtotal
-    protected $total = 0;           // final total
-    protected $tax_items = 0;       // count items having sales tax
-    protected $Currency;            // Currency object, used for formatting
+
+    /** OrderItem objects.
+     * @var array */
+    protected $items = array();
+
+    /** Order item total.
+     * @var float */
+    protected $subtotal = 0;
+
+    /** Order final total, incl. shipping, handling, etc.
+     * @var float */
+    protected $total = 0;
+
+    /** Number of taxable line items on the order.
+     * @var integer */
+    protected $tax_items = 0;
+
+    /** Currency object, used for formatting amounts.
+     * @var object */
+    protected $Currency;
+
 
     /**
-    *   Constructor
-    *   Set internal variables and read the existing order if an id is provided
-    *
-    *   @param  string  $id     Optional order ID to read
-    */
+     * Set internal variables and read the existing order if an id is provided.
+     *
+     * @param   string  $id     Optional order ID to read
+     */
     public function __construct($id='')
     {
         global $_USER, $_PP_CONF;
@@ -71,11 +109,11 @@ class Order
 
 
     /**
-    *   Get an object instance for an order.
-    *
-    *   @param  string  $id     Order ID
-    *   @return object          Order object
-    */
+     * Get an object instance for an order.
+     *
+     * @param   string  $id     Order ID
+     * @return  object          Order object
+     */
     public static function getInstance($id)
     {
         static $orders = array();
@@ -87,12 +125,11 @@ class Order
 
 
     /**
-    *   Magic setter function
-    *   Set a property value
-    *
-    *   @param  string  $name   Name of property to set
-    *   @param  mixed   $value  Value to set
-    */
+     * Set a property value.
+     *
+     * @param   string  $name   Name of property to set
+     * @param   mixed   $value  Value to set
+     */
     function __set($name, $value)
     {
         switch ($name) {
@@ -119,12 +156,11 @@ class Order
 
 
     /**
-    *   Magic getter function
-    *   Return the value of a property, or NULL if the property is not set
-    *
-    *   @param  string  $name   Name of property to retrieve
-    *   @return mixed           Value of property
-    */
+     * Return the value of a property, or NULL if the property is not set.
+     *
+     * @param   string  $name   Name of property to retrieve
+     * @return  mixed           Value of property
+     */
     function __get($name)
     {
         if (array_key_exists($name, $this->properties)) {
@@ -136,11 +172,11 @@ class Order
 
 
     /**
-    *   Load the order information from the database
-    *
-    *   @param  string  $id     Order ID
-    *   @return boolean     True on success, False if order not found
-    */
+     * Load the order information from the database.
+     *
+     * @param   string  $id     Order ID
+     * @return  boolean     True on success, False if order not found
+     */
     public function Load($id = '')
     {
         global $_TABLES;
@@ -184,13 +220,13 @@ class Order
 
 
     /**
-    *   Add a single item to this order
-    *   Extracts item information from the provided $data variable, and
-    *   reads the item information from the database as well.  The entire
-    *   item record is added to the $items array as 'data'
-    *
-    *   @param  array   $args   Array of item data
-    */
+     * Add a single item to this order.
+     * Extracts item information from the provided $data variable, and
+     * reads the item information from the database as well.  The entire
+     * item record is added to the $items array as 'data'
+     *
+     * @param   array   $args   Array of item data
+     */
     public function addItem($args)
     {
         if (!is_array($args)) return;
@@ -203,10 +239,10 @@ class Order
 
 
     /**
-    *   Set the billing address.
-    *
-    *   @param  array   $A      Array of info, such as from $_POST
-    */
+     * Set the billing address.
+     *
+     * @param   array   $A      Array of info, such as from $_POST
+     */
     public function setBilling($A)
     {
         $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
@@ -233,10 +269,10 @@ class Order
 
 
     /**
-    *   Set shipping address
-    *
-    *   @param  array   $A      Array of info, such as from $_POST
-    */
+     * Set the shipping address.
+     *
+     * @param   array   $A      Array of info, such as from $_POST
+     */
     public function setShipping($A)
     {
         $addr_id = PP_getVar($A, 'useaddress', 'integer', 0);
@@ -262,10 +298,10 @@ class Order
 
 
     /**
-    *   Set all class variables, from a form or a database item
-    *
-    *   @param  array   $A      Array of items
-    */
+     * Set all class variables, from a form or a database item
+     *
+     * @param   array   $A      Array of items
+     */
     function SetVars($A)
     {
         global $_USER, $_CONF;
@@ -317,10 +353,10 @@ class Order
 
 
     /**
-    *   API function to delete an entire order record
-    *
-    *   @param  stirng  $order_id       Order ID, taken from $_SESSION if empty
-    */
+     * API function to delete an entire order record.
+     *
+     * @param   stirng  $order_id       Order ID, taken from $_SESSION if empty
+     */
     public static function Delete($order_id = '')
     {
         global $_TABLES;
@@ -416,12 +452,12 @@ class Order
 
 
     /**
-    *   View the current order summary
-    *
-    *   @param  string  $view       View to display (cart, final order, etc.)
-    *   @param  integer $step       Current step, for updating next_step in the form
-    *   @return string      HTML for order view
-    */
+     * View or print the current order.
+     *
+     * @param  string  $view       View to display (cart, final order, etc.)
+     * @param  integer $step       Current step, for updating next_step in the form
+     * @return string      HTML for order view
+     */
     public function View($view = 'order', $step = 0)
     {
         global $_PP_CONF, $_USER, $LANG_PP, $LANG_ADMIN, $_TABLES, $_CONF,
@@ -604,17 +640,17 @@ class Order
 
 
     /**
-    *   Update the order's status flag to a new value
-    *   If the new status isn't really new, the order is unchanged and "true"
-    *   is returned.  If this is called by some automated process, $log can
-    *   be set to "false" to avoid logging the change, such as during order
-    *   creation.
-    *
-    *   @uses   Log()
-    *   @param  string  $newstatus      New order status
-    *   @param  boolean $log            True to log the change, False to not
-    *   @return boolean                 True on success or no change
-    */
+     * Update the order's status flag to a new value.
+     * If the new status isn't really new, the order is unchanged and "true"
+     * is returned.  If this is called by some automated process, $log can
+     * be set to "false" to avoid logging the change, such as during order
+     * creation.
+     *
+     * @uses    Order::Log()
+     * @param   string  $newstatus      New order status
+     * @param   boolean $log            True to log the change, False to not
+     * @return  boolean                 True on success or no change
+     */
     public function updateStatus($newstatus, $log = true)
     {
         global $_TABLES, $LANG_PP;
@@ -648,15 +684,15 @@ class Order
 
 
     /**
-    *   Log a message related to this order.
-    *   Typically used to log status changes.  If this is called for an
-    *   order object, the local "log_user" variable can be preset to the
-    *   log user name.  Otherwise, the current user's display name will be
-    *   associated with the log entry.
-    *
-    *   @param  string  $msg        Log message
-    *   @param  string  $log_user   Optional log username
-    */
+     * Log a message related to this order.
+     * Typically used to log status changes.  If this is called for an
+     * order object, the local "log_user" variable can be preset to the
+     * log user name.  Otherwise, the current user's display name will be
+     * associated with the log entry.
+     *
+     * @param   string  $msg        Log message
+     * @param   string  $log_user   Optional log username
+     */
     public function Log($msg, $log_user = '')
     {
         global $_TABLES, $_USER;
@@ -684,12 +720,12 @@ class Order
 
 
     /**
-    *   Get the last log entry.
-    *   Called from admin ajax to display the log after the status is updated.
-    *   Resets the "ts" field to the formatted timestamp.
-    *
-    *   @return array   Array of DB fields.
-    */
+     * Get the last log entry.
+     * Called from admin ajax to display the log after the status is updated.
+     * Resets the "ts" field to the formatted timestamp.
+     *
+     * @return  array   Array of DB fields.
+     */
     public function getLastLog()
     {
         global $_TABLES, $_PP_CONF, $_USER;
@@ -711,11 +747,11 @@ class Order
 
 
     /**
-    *   Send an email to the buyer
-    *
-    *   @param  string  $status     Order status (pending, paid, etc.)
-    *   @param  string  $msg        Optional message to include with email
-    */
+     * Send an email to the buyer.
+     *
+     * @param   string  $status     Order status (pending, paid, etc.)
+     * @param   string  $gw_msg     Optional gateway message to include with email
+     */
     public function Notify($status='', $gw_msg='')
     {
         global $_CONF, $_PP_CONF, $LANG_PP;
@@ -880,11 +916,11 @@ class Order
 
 
     /**
-    *   Get the miscellaneous charges on this order.
-    *   Just a shortcut to adding up the non-item charges.
-    *
-    *   @return float   Total "other" charges, e.g. tax, shipping, etc.
-    */
+     * Get the miscellaneous charges on this order.
+     * Just a shortcut to adding up the non-item charges.
+     *
+     * @return  float   Total "other" charges, e.g. tax, shipping, etc.
+     */
     public function miscCharges()
     {
         return $this->shipping + $this->handling + $this->tax;
@@ -892,9 +928,9 @@ class Order
 
 
     /**
-     *  Check the user's permission to view this order or cart.
+     * Check the user's permission to view this order or cart.
      *
-     *  @return boolean     True if allowed to view, False if denied.
+     * @return  boolean     True if allowed to view, False if denied.
      */
     public function canView()
     {
@@ -918,10 +954,10 @@ class Order
 
 
     /**
-    *   Get all the log entries for this order.
-    *
-    *   @return array   Array of log entries
-    */
+     * Get all the log entries for this order.
+     *
+     * @return  array   Array of log entries
+     */
     public function getLog()
     {
         global $_TABLES, $_CONF;
@@ -944,11 +980,11 @@ class Order
 
 
     /**
-    *   Calculate the tax on this order.
-    *   Sets the tax and tax_items properties and returns the tax amount.
-    *
-    *   @return float   Sales Tax amount
-    */
+     * Calculate the tax on this order.
+     * Sets the tax and tax_items properties and returns the tax amount.
+     *
+     * @return  float   Sales Tax amount
+     */
     public function calcTax()
     {
         if ($this->tax_rate == 0) {
@@ -971,7 +1007,7 @@ class Order
 
     /**
      * Calculate the total shipping fee for this order.
-     * Sets $this->shipping, no return value
+     * Sets $this->shipping, no return value.
      */
     public function calcShipping()
     {
@@ -1027,11 +1063,11 @@ class Order
 
 
     /**
-    *   Create a random token string for this order to allow anonymous users
-    *   to view the order from an email link.
-    *
-    *   @return string      Token string
-    */
+     * Create a random token string for this order to allow anonymous users
+     * to view the order from an email link.
+     *
+     * @return  string      Token string
+     */
     private static function _createToken()
     {
         $len = 13;
@@ -1054,10 +1090,10 @@ class Order
 
 
     /**
-    *   Get the order total, including tax, shipping and handling
-    *
-    *   @return float   Total order amount
-    */
+     * Get the order total, including tax, shipping and handling.
+     *
+     * @return  float   Total order amount
+     */
     public function getTotal()
     {
         $total = 0;
@@ -1087,14 +1123,14 @@ class Order
 
 
     /**
-    *   Create the order ID.
-    *   Since it's transmitted in cleartext, it'd be a good idea to
-    *   use something more "encrypted" than just the session ID.
-    *   On the other hand, it can't be too random since it needs to be
-    *   repeatable.
-    *
-    *   @return string  Cart ID
-    */
+     * Create the order ID.
+     * Since it's transmitted in cleartext, it'd be a good idea to
+     * use something more "encrypted" than just the session ID.
+     * On the other hand, it can't be too random since it needs to be
+     * repeatable.
+     *
+     * @return  string  Order ID
+     */
     protected static function _createID()
     {
         global $_TABLES;
@@ -1111,15 +1147,15 @@ class Order
 
 
     /**
-    *   Check if an item already exists in the cart.
-    *   This can be used to determine whether to add the item or not.
-    *   Check for "false" return value as the return may be zero for the
-    *   first item in the cart.
-    *
-    *   @param  string  $item_id    Item ID to check, e.g. "1|2,3,4"
-    *   @param  array   $extras     Option custom values, e.g. text fields
-    *   @return mixed       Item cart ID if item exists in cart, False if not
-    */
+     * Check if an item already exists in the cart.
+     * This can be used to determine whether to add the item or not.
+     * Check for "false" return value as the return may be zero for the
+     * first item in the cart.
+     *
+     * @param   string  $item_id    Item ID to check, e.g. "1|2,3,4"
+     * @param   array   $extras     Option custom values, e.g. text fields
+     * @return  mixed       Item cart ID if item exists in cart, False if not
+     */
     public function Contains($item_id, $extras=array())
     {
         foreach ($this->items as $id=>$info) {
@@ -1139,12 +1175,13 @@ class Order
 
 
     /**
-    *   Get the requested address array.
-    *
-    *   @param  string  $type   Type of address, billing or shipping
-    *   @return array           Array of name=>value address elements
-    */
-    public function getAddress($type)
+     * Get the requested address array.
+     *
+     * @deprecated
+     * @param   string  $type   Type of address, billing or shipping
+     * @return  array           Array of name=>value address elements
+     */
+    public function XgetAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
         $fields = array();
@@ -1201,22 +1238,21 @@ class Order
 
 
     /**
-    *   Get the gift card amount applied to this cart
-    *
-    *   @return float   Gift card amount
-    */
+     * Get the gift card amount applied to this cart.
+     *
+     * @return  float   Gift card amount
+     */
     public function getGC()
     {
-        return $this->m_info['apply_gc'];
+        return (float)$this->getInfo('apply_gc');
     }
 
 
     /**
-    *   Apply a gift card amount to this cart
-    *
-    *   @param  float   $amt    Amount of credit to apply
-    *   @param  boolean $save   True to immediately save the order
-    */
+     * Apply a gift card amount to this cart.
+     *
+     * @param   float   $amt    Amount of credit to apply
+     */
     public function setGC($amt)
     {
         global $_TABLES;
@@ -1231,24 +1267,24 @@ class Order
 
 
     /**
-    *   Set the chosen payment gateway into the cart information.
-    *   Used so the gateway will be pre-selected if the buyer returns to the
-    *   cart update page.
-    *
-    *   @param  string  $gw_name    Gateway name
-    */
+     * Set the chosen payment gateway into the cart information.
+     * Used so the gateway will be pre-selected if the buyer returns to the
+     * cart update page.
+     *
+     * @param   string  $gw_name    Gateway name
+     */
     public function setGateway($gw_name)
     {
-        $this->m_info['gateway'] = $gw_name;
+        $this->setInfo('gateway', $gw_name);
     }
 
 
     /**
-    *   Check if this cart has any physical items.
-    *   Used to adapt workflows based on product types
-    *
-    *   @return boolean     True if at least one physical product is present
-    */
+     * Check if this order has any physical items.
+     * Used to adapt workflows based on product types.
+     *
+     * @return  boolean     True if at least one physical product is present
+     */
     public function hasPhysical()
     {
         foreach ($this->items as $id=>$item) {
@@ -1299,6 +1335,14 @@ class Order
     }
 
 
+    /**
+     * Set an order record field to a given value.
+     *
+     * @deprecated
+     * @param   string  $field  Field name.
+     * @param   mixed   $value  Field value.
+     * @return  boolean     True on success, False on DB error.
+     */
     public function setField($field, $value)
     {
         global $_TABLES;
@@ -1318,6 +1362,11 @@ class Order
     }
 
 
+    /**
+     * Set shipper information in the info array, including the best rate.
+     *
+     * @param   integer $shipper_id     Shipper record ID
+     */
     public function setShipper($shipper_id)
     {
         $ship_info = $this->getItemShipping();
