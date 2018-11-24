@@ -1,5 +1,9 @@
 # Paypal plugin for glFusion - Changelog
 
+## Ver 0.6.1
+Release TBD
+- Set `is_final` flag when printing an order.
+
 ## Ver 0.6.0
 Released 2018-11-04
 - Add an internal test-only payment gateway.
