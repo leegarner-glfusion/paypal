@@ -831,58 +831,6 @@ class Cart extends Order
         SEC_setCookie(self::$session_var, '', time()-3600, '/');
     }
 
-
-    /**
-     * Select the shipping method for this order.
-     * Displays a list of shippers with the rates for each
-     * @todo    1. Sort by rate
-     *          2. Save shipper selection with the order
-     *
-     *  @param  integer $step   Current step in workflow
-     *  @return string      HTML for shipper selection form
-     */
-    public function selectShipper()
-    {
-        $T = PP_getTemplate('shipping_method', 'form');
-        // Get the total units and fixed per-item shipping charges.
-        $shipping = $this->getItemShipping();
-        // Get all the shippers and rates for the selection
-        $shippers = Shipper::getShippers($shipping['units']);
-        if (empty($shippers)) return '';
-
-        // Get the best or previously-selected shipper for the default choice
-        $shipper_id = $this->getInfo('shipper_id');
-        if ($shipper_id !== NULL && isset($shippers[$shipper_id])) {
-            $best = $shippers[$shipper_id];
-        } else {
-            $best = Shipper::getBestRate($shipping['units']);
-        }
-        $T->set_block('form', 'shipMethodSelect', 'row');
-
-        $ship_rates = array();
-        foreach ($shippers as $shipper) {
-            $sel = $shipper->id == $best->id ? 'selected="selected"' : '';
-            $s_amt = $shipper->best_rate + $shipping['amount'];
-            $rate = array(
-                'amount'    => (string)Currency::getInstance()->FormatValue($s_amt),
-                'total'     => (string)Currency::getInstance()->FormatValue($this->subtotal + $s_amt),
-            );
-            $ship_rates[$shipper->id] = $rate;
-            $T->set_var(array(
-                'method_sel'    => $sel,
-                'method_name'   => $shipper->name,
-                'method_rate'   => Currency::getInstance()->Format($s_amt),
-                'method_id'     => $shipper->id,
-                'order_id'      => $this->order_id,
-                'multi'         => count($shippers) > 1 ? true : false,
-            ) );
-            $T->parse('row', 'shipMethodSelect', true);
-        }
-        $T->set_var('shipper_json', json_encode($ship_rates));
-        $T->parse('output', 'form');
-        return  $T->finish($T->get_var('output'));
-    }
-
 }   // class Cart
 
 ?>
