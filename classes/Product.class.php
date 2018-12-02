@@ -1559,8 +1559,10 @@ class Product
         $opts = array();
 
         // Get attributes selected from the available options
-        if (!empty($item->options)) {
-            $options = explode(',', $item->options);
+        // Use item_options since the class var doesn't work with empty()
+        $item_options = $item->options;
+        if (!empty($item_options)) {
+            $options = explode(',', $item_options);
             foreach ($options as $option) {
                 $opts[] = array(
                     'opt_name'  => $this->options[$option]['attr_name'],
