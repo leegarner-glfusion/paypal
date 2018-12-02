@@ -38,7 +38,8 @@ function ProcessForm(opt)
     emsg="";
     frm = document.getElementById("add_cart_{id}");
     if (frm === null) return;
-    price = {price};
+    //price = {price};
+    price = frm.amount.value;
     //options = frm.elements['options[]'];
     options = opt;
 
