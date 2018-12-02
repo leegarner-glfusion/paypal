@@ -266,15 +266,17 @@ case 'attrcopy':
             WHERE item_id = $src_prod";
         DB_query($sql);
     }
+    \Paypal\Cache::clear();
     echo COM_refresh(PAYPAL_ADMIN_URL . '/index.php?attributes=x');
     break;
 
 case 'runreport':
-    $reportname = isset($_POST['reportname']) ? $_POST['reportname'] : '';
-    if (USES_paypal_class_Report($reportname)) {
-        $R = new $reportname();
-        $content .= $R->Render();
-        exit;
+    $reportname = PP_getVar($_POST, 'reportname');
+    if ($reportname != '') {
+        $R = \Paypal\Report::getInstance($reportname);
+        if ($R) {
+            $content .- $R->Render();
+        }
     }
     break;
 
@@ -446,7 +448,6 @@ case 'shipping':
 case 'editattr':
     $attr_id = PP_getVar($_GET, 'attr_id');
     $Attr = new \Paypal\Attribute($attr_id);
-    $Attr->item_id = PP_getVar($_GET, 'item_id');
     $content .= $Attr->Edit();
     break;
 
@@ -510,13 +511,12 @@ case 'wfadmin':
     break;
 
 case 'reports':
-    USES_paypal_reports();
-    $content .= PAYPAL_reportsList();
+    $content .= \Paypal\Report::getList();
     break;
 
 case 'configreport':
-    if (USES_paypal_class_Report($actionval)) {
-        $R = new $actionval();
+    $R = \Paypal\Report::getInstance($actionval);
+    if ($R !== NULL) {
         $content .= $R->showForm();
     }
     break;
@@ -864,12 +864,14 @@ function PAYPAL_adminMenu($view='')
             'text' => $LANG_PP['other_func'],
             'active' => $view == 'other' ? true : false,
         ),
-        //      array(
-        //      'url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
-        //                'text' => $LANG_PP['reports'],
-            //'active' => $view == 'reports' ? true : false,
-        //                ),
     );
+    if (isset($_PP_CONF['reports_enabled'])) { // TODO: Remove for release
+        $menu_arr[] = array(
+            'url'  => PAYPAL_ADMIN_URL . '/index.php?reports=x',
+            'text' => $LANG_PP['reports'],
+            'active' => $view == 'reports' ? true : false,
+        );
+    }
     if ($_PP_CONF['gc_enabled']) {
         // Show the Coupons menu option only if enabled
         $menu_arr[] = array(
