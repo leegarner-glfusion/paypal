@@ -1,29 +1,29 @@
 <?php
 /**
-*   Plugin-specific functions for the Paypal plugin for glFusion.
-*   Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2018 Lee Garner
-*   @copyright  Copyright (C) 2005-2006 Vincent Furia
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Plugin-specific functions for the Paypal plugin for glFusion.
+ * Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      Vincent Furia <vinny01@users.sourceforge.net
+ * @copyright   Copyright (c) 2009-2018 Lee Garner
+ * @copyright   Copyright (C) 2005-2006 Vincent Furia
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Order History View.
-*   Displays the purchase history for the current user.  Admins
-*   can view any user's histor, or all users
-*
-*   @param  boolean $admin  True if called for admin access, False otherwise
-*   @param  integer $uid    User ID to view, current user by default
-*   @return string          HTML for order list
-*/
+ * Order History View.
+ * Displays the purchase history for the current user.  Admins
+ * can view any user's histor, or all users
+ *
+ * @param   boolean $admin  True if called for admin access, False otherwise
+ * @param   integer $uid    User ID to view, current user by default
+ * @return  string          HTML for order list
+ */
 function listOrders($admin = false, $uid = 0)
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_PP_HELP;
@@ -160,6 +160,7 @@ function listOrders($admin = false, $uid = 0)
  * Gift Card activity list
  * Allow users to view gift card redemption and application
  *
+ * @param   integer $uid    Optional user ID to view a single user
  * @return  string      HTML for activity listing
  */
 function CouponLog($uid = 0)
@@ -225,15 +226,14 @@ function CouponLog($uid = 0)
 
 
 /**
-*   Get an individual field for the gift cart activity screen.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the gift cart activity screen.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getCouponLogField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
@@ -282,15 +282,14 @@ function getCouponLogField($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Get an individual field for the history screen.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the history screen.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_USER;
@@ -436,11 +435,11 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Diaplay the product catalog items.
-*
-*   @param  integer $cat_id     Optional category ID to limit display
-*   @return string      HTML for product catalog.
-*/
+ * Diaplay the product catalog items.
+ *
+ * @param   integer $cat_id     Optional category ID to limit display
+ * @return  string      HTML for product catalog.
+ */
 function ProductList($cat_id = 0)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER, $_PLUGINS,
@@ -904,11 +903,11 @@ function ProductList($cat_id = 0)
 
 
 /**
- *  Display a single row from the IPN log.
+ * Display a single row from the IPN log.
  *
- *  @param  integer $id     Log Entry ID
- *  @param  string  $txn_id Transaction ID from Paypal
- *  @return string          HTML of the ipnlog row specified by $id
+ * @param  integer $id     Log Entry ID
+ * @param  string  $txn_id Transaction ID from Paypal
+ * @return string          HTML of the ipnlog row specified by $id
  */
 function ipnlogSingle($id, $txn_id)
 {
@@ -979,15 +978,15 @@ function ipnlogSingle($id, $txn_id)
 
 
 /**
-*   Display an error message.
-*   Uses glFusion's typography to display an "alert" type message.
-*   The provided message may be a single message string or array of strings.
-*   An array will be formatted as an unnumbered list.
-*
-*   @param  array|string    $msg    Single message string or array
-*   @param  string          $title  Optional title string, shown above list
-*   @return string          Complete error message
-*/
+ * Display an error message.
+ * Uses glFusion's typography to display an "alert" type message.
+ * The provided message may be a single message string or array of strings.
+ * An array will be formatted as an unnumbered list.
+ *
+ * @param   array|string    $msg    Single message string or array
+ * @param   string          $title  Optional title string, shown above list
+ * @return  string          Complete error message
+ */
 function PAYPAL_errMsg($msg = array(), $title = '')
 {
     if (empty($msg)) return '';
@@ -1012,11 +1011,11 @@ function PAYPAL_errMsg($msg = array(), $title = '')
 
 
 /**
-*   Create the user menu
-*
-*   @param  string  $view   View being shown, so set the help text
-*   @return string      Administrator menu
-*/
+ * Create the user menu.
+ *
+ * @param   string  $view   View being shown, so set the help text
+ * @return  string      Administrator menu
+ */
 function PAYPAL_userMenu($view='')
 {
     global $_CONF, $LANG_PP, $_PP_CONF;
@@ -1052,12 +1051,12 @@ function PAYPAL_userMenu($view='')
 
 
 /**
-*   Display the site header, with or without blocks according to configuration.
-*
-*   @param  string  $title  Title to put in header
-*   @param  string  $meta   Optional header code
-*   @return string          HTML for site header, from COM_siteHeader()
-*/
+ * Display the site header, with or without blocks according to configuration.
+ *
+ * @param   string  $title  Title to put in header
+ * @param   string  $meta   Optional header code
+ * @return  string          HTML for site header, from COM_siteHeader()
+ */
 function siteHeader($title='', $meta='')
 {
     global $_PP_CONF, $LANG_PP;
@@ -1082,10 +1081,10 @@ function siteHeader($title='', $meta='')
 
 
 /**
-*   Display the site footer, with or without blocks as configured.
-*
-*   @return string      HTML for site footer, from COM_siteFooter()
-*/
+ * Display the site footer, with or without blocks as configured.
+ *
+ * @return  string      HTML for site footer, from COM_siteFooter()
+ */
 function siteFooter()
 {
     global $_PP_CONF;

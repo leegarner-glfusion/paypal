@@ -1,17 +1,16 @@
 <?php
 /**
-*   This file contains the Paypal IPN class, it provides an interface to
-*   deal with IPN transactions from Paypal.
-*   Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner
-*   @package    paypal
-*   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * This file contains the Paypal IPN class to deal with IPN transactions from Paypal.
+ * Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner
+ * @package     paypal
+ * @version     v0.5.7
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\ipn;
 
 use \Paypal\Cart;
@@ -30,24 +29,22 @@ define('PAYPAL_FAILURE_EMAIL', 4);
 define('PAYPAL_FAILURE_FUNDS', 5);
 
 /**
-*   Class to deal with IPN transactions from Paypal.
-*
-*   @since 0.5.0
-*   @package paypal
-*/
+ * Class to deal with IPN transactions from Paypal.
+ * @since   v0.5.0
+ * @package paypal
+ */
 class paypal extends \Paypal\IPN
 {
-    /**
-    *   Variable to hold unserialized custom data
-    *   @var array */
+    /** Variable to hold unserialized custom data
+     * @var array */
     private $custom = array();
 
 
     /**
-    *   Constructor.  Set up variables received from Paypal.
-    *
-    *   @param  array   $A      $_POST'd variables from Paypal
-    */
+     * Constructor.  Set up variables received from Paypal.
+     *
+     * @param   array   $A      $_POST'd variables from Paypal
+     */
     function __construct($A=array())
     {
         $this->gw_id = 'paypal';
@@ -118,13 +115,12 @@ class paypal extends \Paypal\IPN
 
 
     /**
-    *   Verify the transaction with Paypal
-    *   Validate transaction by posting data back to the paypal webserver.
-    *   The response from paypal should include 'VERIFIED' on a line by itself.
-    *
-    *   @uses   paypal::getActionUrl()
-    *   @return boolean         true if successfully validated, false otherwise
-    */
+     * Verify the transaction with Paypal.
+     * Validate transaction by posting data back to the paypal webserver.
+     * The response from paypal should include 'VERIFIED' on a line by itself.
+     *
+     * @return  boolean         true if successfully validated, false otherwise
+     */
     private function Verify()
     {
         if ($this->gw->getConfig('test_mode')) {
@@ -159,50 +155,52 @@ class paypal extends \Paypal\IPN
 
 
     /**
-    *   Confirms that payment status is complete.
-    *   (not 'denied', 'failed', 'pending', etc.)
-    *
-    *   @param  string  $payment_status     Payment status to verify
-    *   @return boolean                     True if complete, False otherwise
-    */
-    private function isStatusCompleted($payment_status) {
+     * Confirms that payment status is complete.
+     * Complete means not 'denied', 'failed', 'pending', etc.
+     *
+     * @param   string  $payment_status     Payment status to verify
+     * @return  boolean                     True if complete, False otherwise
+     */
+    private function isStatusCompleted($payment_status)
+    {
         return ($payment_status == 'Completed');
     }
 
 
     /**
-    *   Checks if payment status is reversed or refunded.
-    *   For example, some sort of cancelation.
-    *
-    *   @param  string  $payment_status     Payment status to check
-    *   @return boolean                     True if reversed or refunded
-    */
-    private function isStatusReversed($payment_status) {
+     * Checks if payment status is reversed or refunded.
+     * For example, some sort of cancelation.
+     *
+     * @param   string  $payment_status     Payment status to check
+     * @return  boolean                     True if reversed or refunded
+     */
+    private function isStatusReversed($payment_status)
+    {
         return ($payment_status == 'Reversed' || $payment_status == 'Refunded');
     }
 
 
     /**
-    *   Process an incoming IPN transaction
-    *   Do the following:
-    *       1. Verify IPN
-    *       2. Log IPN
-    *       3. Check that transaction is complete
-    *       4. Check that transaction is unique
-    *       5. Check for valid receiver email address
-    *       6. Process IPN
-    *
-    *   @uses   BaseIPN::AddItem()
-    *   @uses   BaseIPN::handleFailure()
-    *   @uses   BaseIPN::handlePurchase()
-    *   @uses   BaseIPN::isUniqueTxnId()
-    *   @uses   BaseIPN::isSufficientFunds()
-    *   @uses   BaseIPN::Log()
-    *   @uses   Verify()
-    *   @uses   isStatusCompleted()
-    *   @param  array   $in     POST variables of transaction
-    *   @return boolean true if processing valid and completed, false otherwise
-    */
+     * Process an incoming IPN transaction.
+     * Do the following:
+     * - Verify IPN
+     * - Log IPN
+     * - Check that transaction is complete
+     * - Check that transaction is unique
+     * - Check for valid receiver email address
+     * - Process IPN
+     *
+     * @uses    BaseIPN::AddItem()
+     * @uses    BaseIPN::handleFailure()
+     * @uses    BaseIPN::handlePurchase()
+     * @uses    BaseIPN::isUniqueTxnId()
+     * @uses    BaseIPN::isSufficientFunds()
+     * @uses    BaseIPN::Log()
+     * @uses    Verify()
+     * @uses    isStatusCompleted()
+     * @param   array   $in     POST variables of transaction
+     * @return  boolean true if processing valid and completed, false otherwise
+     */
     public function Process()
     {
         // If no data has been received, then there's nothing to do.

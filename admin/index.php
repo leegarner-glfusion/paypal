@@ -1,18 +1,18 @@
 <?php
 /**
-*   Admin index page for the paypal plugin.
-*   By default, lists products available for editing.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     Vincent Furia <vinny01@users.sourceforge.net>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner
-*   @copyright  Copyright (c) 2005-2006 Vincent Furia
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Admin index page for the paypal plugin.
+ * By default, lists products available for editing.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      Vincent Furia <vinny01@users.sourceforge.net>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner
+ * @copyright   Copyright (c) 2005-2006 Vincent Furia
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import Required glFusion libraries */
 require_once('../../../lib-common.php');
@@ -560,11 +560,11 @@ exit;
 
 
 /**
-*  Product Admin List View.
-*
-*   @param  integer $cat_id     Optional category ID to limit listing
-*   @return string      HTML for the product list.
-*/
+ * Product Admin List View.
+ *
+ * @param   integer $cat_id     Optional category ID to limit listing
+ * @return  string      HTML for the product list.
+ */
 function PAYPAL_adminlist_Product($cat_id=0)
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $LANG_PP_HELP;
@@ -664,15 +664,14 @@ function PAYPAL_adminlist_Product($cat_id=0)
 
 
 /**
-*   Get an individual field for the history screen.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the history screen.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
@@ -786,11 +785,11 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Get the to-do list to display at the top of the admin screen.
-*   There's probably a less sql-expensive way to do this.
-*
-*   @return array   Array of strings (the to-do list)
-*/
+ * Get the to-do list to display at the top of the admin screen.
+ * There's probably a less sql-expensive way to do this.
+ *
+ * @return  array   Array of strings (the to-do list)
+ */
 function PAYPAL_adminTodo()
 {
     global $_TABLES, $LANG_PP;
@@ -807,11 +806,11 @@ function PAYPAL_adminTodo()
 
 
 /**
-*   Create the administrator menu
-*
-*   @param  string  $view   View being shown, so set the help text
-*   @return string      Administrator menu
-*/
+ * Create the administrator menu.
+ *
+ * @param   string  $view   View being shown, so set the help text
+ * @return  string      Administrator menu
+ */
 function PAYPAL_adminMenu($view='')
 {
     global $_CONF, $LANG_ADMIN, $LANG_PP, $_PP_CONF;
@@ -972,15 +971,14 @@ function PAYPAL_adminlist_IPNLog()
 
 
 /**
-*   Get an individual field for the IPN Log screen.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the IPN Log screen.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES;
@@ -1021,10 +1019,10 @@ function getAdminField_IPNLog($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Category Admin List View.
-*
-*   @return string      HTML for the category listing
-*/
+ * Category Admin List View.
+ *
+ * @return  string      HTML for the category listing
+ */
 function PAYPAL_adminlist_Category()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $LANG_PP_HELP;
@@ -1098,15 +1096,14 @@ function PAYPAL_adminlist_Category()
 
 
 /**
-*   Get an individual field for the category admin list.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the category admin list.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $_TABLES, $LANG_ADMIN;
@@ -1178,10 +1175,10 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Displays the list of product attributes.
-*
-*   @return string  HTML string containing the contents of the ipnlog
-*/
+ * Displays the list of product attributes.
+ *
+ * @return  string  HTML string containing the contents of the ipnlog
+ */
 function PAYPAL_adminlist_Attributes()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
@@ -1308,10 +1305,10 @@ function PAYPAL_adminlist_Attributes()
 
 
 /**
-*   Displays the list of product attributes.
-*
-*   @return string  HTML string containing the contents of the ipnlog
-*/
+ * Displays the list of product attributes.
+ *
+ * @return  string  HTML string containing the contents of the ipnlog
+ */
 function PAYPAL_adminlist_Shippers()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN, $_SYSTEM;
@@ -1379,15 +1376,14 @@ function PAYPAL_adminlist_Shippers()
 
 
 /**
-*   Get an individual field for the options admin list.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the options admin list.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
@@ -1452,15 +1448,14 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Get an individual field for the shipping profiles
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the shipping profiles.
+ *
+ * @param  string  $fieldname  Name of field (from the array, not the db)
+ * @param  mixed   $fieldvalue Value of the field
+ * @param  array   $A          Array of all fields from the database
+ * @param  array   $icon_arr   System icon array (not used)
+ * @return string              HTML for field display in the table
+ */
 function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
@@ -1510,10 +1505,10 @@ function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Payment Gateway Admin View.
-*
-*   @return string      HTML for the gateway listing
-*/
+ * Payment Gateway Admin View.
+ *
+ * @return  string      HTML for the gateway listing
+ */
 function PAYPAL_adminList_Gateway()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN,
@@ -1598,15 +1593,14 @@ function PAYPAL_adminList_Gateway()
 
 
 /**
-*   Get an individual field for the options admin list.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the options admin list.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
@@ -1667,10 +1661,10 @@ function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*  Workflow Admin List View.
-*
-*   @return string      HTML for the product list.
-*/
+ * Workflow Admin List View.
+ *
+ * @return  string      HTML for the product list.
+ */
 function PAYPAL_adminlist_Workflow()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
@@ -1731,10 +1725,10 @@ function PAYPAL_adminlist_Workflow()
 
 
 /**
-*   Sale Pricing Admin List View.
-*
-*   @return string      HTML for the product list.
-*/
+ * Sale Pricing Admin List View.
+ *
+ * @return  string      HTML for the product list.
+ */
 function PAYPAL_adminlist_Sales()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
@@ -1821,10 +1815,10 @@ function PAYPAL_adminlist_Sales()
 
 
 /**
-*   Order Status Admin List View.
-*
-*   @return string      HTML for the product list.
-*/
+ * Order Status Admin List View.
+ *
+ * @return  string      HTML for the product list.
+ */
 function PAYPAL_adminlist_OrderStatus()
 {
     global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $LANG_ADMIN;
@@ -1898,15 +1892,14 @@ function PAYPAL_adminlist_OrderStatus()
 
 
 /**
-*   Get an individual field for the Sales admin list.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the Sales admin list.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP, $LANG_ADMIN;
@@ -1983,15 +1976,14 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Get an individual field for the options admin list.
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the options admin list.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP;
@@ -2061,11 +2053,11 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Display the purchase history for a single item.
-*
-*   @param  mixed   $item_id    Numeric or string item ID
-*   @return string      Display HTML
-*/
+ * Display the purchase history for coupons.
+ *
+ * @param   mixed   $item_id    Numeric or string item ID
+ * @return  string      Display HTML
+ */
 function PAYPAL_couponlist()
 {
     global $_TABLES, $LANG_PP, $_PP_CONF;
@@ -2154,11 +2146,11 @@ function PAYPAL_couponlist()
 
 
 /**
-*   Display the purchase history for a single item.
-*
-*   @param  mixed   $item_id    Numeric or string item ID
-*   @return string      Display HTML
-*/
+ * Display the purchase history for a single item.
+ *
+ * @param   mixed   $item_id    Numeric or string item ID
+ * @return  string      Display HTML
+ */
 function PAYPAL_itemhist($item_id = '')
 {
     global $_TABLES, $LANG_PP, $_PP_CONF;
@@ -2221,15 +2213,14 @@ function PAYPAL_itemhist($item_id = '')
 
 
 /**
-*   Get an individual field for the item purchase history
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the item purchase history.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP;
@@ -2278,15 +2269,14 @@ function getAdminField_itemhist($fieldname, $fieldvalue, $A, $icon_arr)
 
 
 /**
-*   Get an individual field for the coupon listing
-*
-*   @param  string  $fieldname  Name of field (from the array, not the db)
-*   @param  mixed   $fieldvalue Value of the field
-*   @param  array   $A          Array of all fields from the database
-*   @param  array   $icon_arr   System icon array (not used)
-*   @param  object  $EntryList  This entry list object
-*   @return string              HTML for field display in the table
-*/
+ * Get an individual field for the coupon listing.
+ *
+ * @param   string  $fieldname  Name of field (from the array, not the db)
+ * @param   mixed   $fieldvalue Value of the field
+ * @param   array   $A          Array of all fields from the database
+ * @param   array   $icon_arr   System icon array (not used)
+ * @return  string              HTML for field display in the table
+ */
 function getAdminField_coupons($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $_PP_CONF, $LANG_PP;

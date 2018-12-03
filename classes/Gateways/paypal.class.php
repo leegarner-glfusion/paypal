@@ -1,38 +1,38 @@
 <?php
 /**
-*   Gateway implementation for PayPal.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Gateway implementation for PayPal.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\Gateways;
 
 /**
-*   Class for Paypal payment gateway
-*   @since 0.5.0
-*   @package paypal
-*/
+ * Class for Paypal payment gateway
+ * @since   v0.5.0
+ * @package paypal
+ */
 class paypal extends \Paypal\Gateway
 {
 
-    /** Business e-mail to be used for creating buttons
-    *   @var string */
+    /** Business e-mail to be used for creating buttons.
+     * @var string */
     private $receiver_email;
 
-    /** PayPal-assigned certificate ID to be used for encrypted buttons
-    *   @var string */
+    /** PayPal-assigned certificate ID to be used for encrypted buttons.
+    * @var string */
     private $cert_id;
 
 
     /**
-    *   Constructor.
-    *   Set gateway-specific items and call the parent constructor.
-    */
+     * Constructor.
+     * Set gateway-specific items and call the parent constructor.
+     */
     public function __construct()
     {
         global $_PP_CONF, $_USER;
@@ -111,12 +111,12 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the main gateway url.
-    *   This is used to tell the buyer where they can log in to check their
-    *   purchase.  For PayPal this is the same as the production action URL.
-    *
-    *   @return string      Gateway's home page
-    */
+     * Get the main gateway url.
+     * This is used to tell the buyer where they can log in to check their
+     * purchase.  For PayPal this is the same as the production action URL.
+     *
+     * @return  string      Gateway's home page
+     */
     public function getMainUrl()
     {
         return $this->gw_url;
@@ -124,15 +124,15 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the form action URL.
-    *   This function may be overridden by the child class.
-    *   The default is to simply return the configured URL
-    *
-    *   This is public so that if it is not declared by the child class,
-    *   it can be called during IPN processing.
-    *
-    *   @return string      URL to payment processor
-    */
+     * Get the form action URL.
+     * This function may be overridden by the child class.
+     * The default is to simply return the configured URL
+     *
+     * This is public so that if it is not declared by the child class,
+     * it can be called during IPN processing.
+     *
+     * @return  string      URL to payment processor
+     */
     public function getActionUrl()
     {
         return $this->gw_url . '/cgi-bin/webscr';
@@ -140,12 +140,12 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Magic "setter" function
-    *
-    *   @see    Gateway::__get()
-    *   @param  string  $key    Name of property to set
-    *   @param  mixed   $value  New value for property
-    */
+     * Magic "setter" function.
+     *
+     * @see     Gateway::__get()
+     * @param   string  $key    Name of property to set
+     * @param   mixed   $value  New value for property
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -191,14 +191,14 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the form variables for the cart checkout button.
-    *
-    *   @uses   Gateway::_Supports()
-    *   @uses   _encButton()
-    *   @uses   getActionUrl()
-    *   @param  object      $cart   Shopping Cart Object
-    *   @return string      Gateay variable input fields
-    */
+     * Get the form variables for the cart checkout button.
+     *
+     * @uses    Gateway::_Supports()
+     * @uses    self::_encButton()
+     * @uses    self::getActionUrl()
+     * @param   object      $cart   Shopping Cart Object
+     * @return  string      Gateay variable input fields
+     */
     public function gatewayVars($cart)
     {
         global $_PP_CONF, $_USER, $_TABLES, $LANG_PP;
@@ -361,16 +361,16 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Create encrypted buttons.
-    *
-    *   Requires that the plugin is configured to do so, and that the key files
-    *   are set up correctly.  If an error is encountered, an empty string
-    *   is returned so the caller can proceed with an un-encrypted button.
-    *
-    *   @since  version 0.4.0
-    *   @param  array   $fields     Array of data to encrypt into buttons
-    *   @return string              Encrypted_value, or empty string on error
-    */
+     * Create encrypted buttons.
+     *
+     * Requires that the plugin is configured to do so, and that the key files
+     * are set up correctly.  If an error is encountered, an empty string
+     * is returned so the caller can proceed with an un-encrypted button.
+     *
+     * @since   v0.4.0
+     * @param   array   $fields     Array of data to encrypt into buttons
+     * @return  string              Encrypted_value, or empty string on error
+     */
     private function _encButton($fields)
     {
         global $_CONF, $_PP_CONF;
@@ -492,17 +492,17 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get a buy-now button for a catalog product.
-    *   Checks the button table to see if a button exists, and if not
-    *   a new button will be created.
-    *
-    *   @uses   gwButtonType()
-    *   @uses   PrepareCustom()
-    *   @uses   Gateway::_ReadButton()
-    *   @uses   Gateway::_SaveButton()
-    *   @param  object  $P      Product Item object
-    *   @return string          HTML code for the button.
-    */
+     * Get a buy-now button for a catalog product.
+     * Checks the button table to see if a button exists, and if not
+     * a new button will be created.
+     *
+     * @uses    gwButtonType()
+     * @uses    PrepareCustom()
+     * @uses    Gateway::_ReadButton()
+     * @uses    Gateway::_SaveButton()
+     * @param   object  $P      Product Item object
+     * @return  string          HTML code for the button.
+     */
     public function ProductButton($P)
     {
         global $_PP_CONF, $LANG_PP;
@@ -631,15 +631,15 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get a button for an external item, not one of our catalog items.
-    *
-    *   @uses   getActionUrl()
-    *   @uses   AddCustom()
-    *   @uses   setReceiver()
-    *   @param  array   $attribs    Array of standard item attributes
-    *   @param  string  $type       Type of button (buy_now, etc.)
-    *   @return string              HTML for button
-    */
+     * Get a button for an external item, not one of our catalog items.
+     *
+     * @uses    getActionUrl()
+     * @uses    AddCustom()
+     * @uses    setReceiver()
+     * @param   array   $attribs    Array of standard item attributes
+     * @param   string  $type       Type of button (buy_now, etc.)
+     * @return  string              HTML for button
+     */
     public function ExternalButton($attribs = array(), $type = 'buy_now')
     {
         global $_PP_CONF, $LANG_PP;
@@ -764,11 +764,11 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the command value and template name for the requested button type.
-    *
-    *   @param  string  $btn_type   Type of button being created
-    *   @return array       Array ('cmd'=>command, 'tpl'=>template name
-    */
+     * Get the command value and template name for the requested button type.
+     *
+     * @param   string  $btn_type   Type of button being created
+     * @return  array       Array ('cmd'=>command, 'tpl'=>template name
+     */
     private function gwButtonType($btn_type='')
     {
         switch ($btn_type) {
@@ -787,13 +787,12 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the values to show in the "Thank You" message when a customer
-    *   returns to our site.
-    *
-    *   @uses   getMainUrl()
-    *   @uses   Gateway::Description()
-    *   @return array       Array of name=>value pairs
-    */
+     * Get the values to show in the "Thank You" message when a customer returns to our site.
+     *
+     * @uses    getMainUrl()
+     * @uses    Gateway::Description()
+     * @return  array       Array of name=>value pairs
+     */
     public function thanksVars()
     {
         $R = array(
@@ -805,12 +804,12 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Verify that a given email address is one of our business addresses.
-    *   Called during IPN validation.
-    *
-    *   @param  string  $email  Email address to check (receiver_email)
-    *   @return boolean         True if valid, False if not.
-    */
+     * Verify that a given email address is one of our business addresses.
+     * Called during IPN validation.
+     *
+     * @param   string  $email  Email address to check (receiver_email)
+     * @return  boolean         True if valid, False if not.
+     */
     public function isBusinessEmail($email)
     {
         switch ($email) {
@@ -829,10 +828,10 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get all the configuration fields specifiec to this gateway
-    *
-    *   @return array   Array of fields (name=>field_info)
-    */
+     * Get all the configuration fields specifiec to this gateway.
+     *
+     * @return  array   Array of fields (name=>field_info)
+     */
     protected function getConfigFields()
     {
         $fields = array();
@@ -862,12 +861,12 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Prepare to save the configuraiton.
-    *   This copies the new config values into our local variables, then
-    *   calls the parent function to save to the database.
-    *
-    *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
-    */
+     * Prepare to save the configuraiton.
+     * This copies the new config values into our local variables, then
+     * calls the parent function to save to the database.
+     *
+     * @param   array   $A      Array of name=>value pairs (e.g. $_POST)
+     */
     public function SaveConfig($A = NULL)
     {
         if (is_array($A)) {
@@ -895,10 +894,10 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the custom string properly formatted for the gateway.
-    *
-    *   @return string      Formatted custom string
-    */
+     * Get the custom string properly formatted for the gateway.
+     *
+     * @return  string      Formatted custom string
+     */
     protected function PrepareCustom()
     {
         return str_replace('"', '\'', serialize($this->custom));
@@ -906,12 +905,10 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Sets the gateway values based on the order amount and testing status.
-    *
-    *   Sets the receiver_email and cert_id properties.
-    *
-    *   @param  float   $amount     Total puchase amount.
-    */
+     * Sets the receiver_email and cert_id properties.
+     *
+     * @param   float   $amount     Total puchase amount.
+     */
     private function setReceiver($amount)
     {
         // Available receiver_email addresses
@@ -940,13 +937,13 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables to display with the IPN log
-    *   This gets the variables from the gateway's IPN data into standard
-    *   array values to be displayed in the IPN log view
-    *
-    *   @param  array   $data       Array of original IPN data
-    *   @return array               Name=>Value array of data for display
-    */
+     * Get the variables to display with the IPN log.
+     * This gets the variables from the gateway's IPN data into standard
+     * array values to be displayed in the IPN log view.
+     *
+     * @param   array   $data       Array of original IPN data
+     * @return  array               Name=>Value array of data for display
+     */
     public function ipnlogVars($data)
     {
         if (!is_array($data)) {
@@ -964,11 +961,11 @@ class paypal extends \Paypal\Gateway
 
 
     /**
-    *   Get a logo image to show on the order as the payment method.
-    *
-    *   @since  0.6.0
-    *   @return string      HTML for logo image
-    */
+     * Get a logo image to show on the order as the payment method.
+     *
+     * @since   v0.6.0
+     * @return  string      HTML for logo image
+     */
     public function getLogo()
     {
         return $this->button_url;

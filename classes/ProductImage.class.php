@@ -1,41 +1,43 @@
 <?php
 /**
-*   Class to handle images
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle images.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 // Import core glFusion upload functions
-USES_class_upload();
+//USES_class_upload();
 
 /**
-*   Image-handling class
-*   @package paypal
-*/
+ * Image-handling class.
+ * @package paypal
+ */
 class ProductImage extends \upload
 {
-    /** Path to actual image (without filename)
-     *  @var string */
+    /** Path to actual image (without filename).
+     * @var string */
     var $pathImage;
 
-    /** ID of the current ad
-     *  @var string */
+    /** ID of the current product.
+     * @var string */
     var $product_id;
 
-    /** Array of the names of successfully uploaded files
-     *  @var array */
+    /** Array of the names of successfully uploaded files.
+     * @var array */
     var $goodfiles = array();
 
     /**
-     *  Constructor
-     *  @param string $name Optional image filename
+     * Constructor.
+     *
+     * @param   integer $product_id Product ID number
+     * @param   string  $varname    Name of form field
      */
     function __construct($product_id, $varname='photo')
     {
@@ -73,11 +75,10 @@ class ProductImage extends \upload
 
 
     /**
-    *   Perform the file upload
-    *
-    *   Calls the parent function to upload the files, then calls
-    *   MakeThumbs() to create thumbnails.
-    */
+     * Perform the file upload.
+     * Calls the parent function to upload the files, then calls
+     * MakeThumbs() to create thumbnails.
+     */
     public function uploadFiles()
     {
         global $_TABLES;
@@ -105,15 +106,15 @@ class ProductImage extends \upload
 
 
     /**
-    *   Calculate the new dimensions needed to keep the image within
-    *   the provided width & height while preserving the aspect ratio.
-    *
-    *   @deprecated
-    *   @param string  $srcfile     Source filepath/name
-    *   @param integer $width       New width, in pixels
-    *   @param integer $height      New height, in pixels
-    *   @return array  $newwidth, $newheight
-    */
+     * Calculate the new dimensions needed to keep the image within
+     * the provided width & height while preserving the aspect ratio.
+     *
+     * @deprecated
+     * @param   string  $srcfile     Source filepath/name
+     * @param   integer $width       New width, in pixels
+     * @param   integer $height      New height, in pixels
+     * @return   array  $newwidth, $newheight
+     */
     function reDim($srcfile, $width=0, $height=0)
     {
         list($s_width, $s_height) = @getimagesize($srcfile);
@@ -138,11 +139,12 @@ class ProductImage extends \upload
         return array($newwidth, $newheight);
     }
 
+
     /**
-    *   Seed the image cache with the product image thumbnails.
+    * Seed the image cache with the product image thumbnails.
     *
-    *   @uses   LGLIB_ImageUrl()
-    *   @return string      Blank, error messages are now in parent::_errors
+    * @uses     LGLIB_ImageUrl()
+    * @return   string      Blank, error messages are now in parent::_errors
     */
     private function MakeThumbs()
     {
@@ -168,8 +170,8 @@ class ProductImage extends \upload
 
 
     /**
-     *  Delete an image from disk.  Called by Entry::Delete if disk
-     *  deletion is requested.
+     * Delete an image from disk.
+     * Called by Entry::Delete if disk deletion is requested.
      */
     public function Delete()
     {
@@ -178,28 +180,29 @@ class ProductImage extends \upload
         if ($this->filename == '') {
             return;
         }
-
         $this->_deleteOneImage($this->pathImage);
     }
 
+
     /**
-     *  Delete a single image using the current name and supplied path
-     *  @access private
-     *  @param string $imgpath Path to file
+     * Delete a single image using the current name and supplied path.
+     *
+     * @param   string  $imgpath    Path to file
      */
-    function _deleteOneImage($imgpath)
+    private function _deleteOneImage($imgpath)
     {
         if (file_exists($imgpath . '/' . $this->filename))
             unlink($imgpath . '/' . $this->filename);
     }
 
+
     /**
-    *   @deprecated
-     *  Handles the physical file upload and storage.
-     *  If the image isn't validated, the upload doesn't happen.
-     *  @param array $file $_FILES array
+     * Handles the physical file upload and storage.
+     * If the image isn't validated, the upload doesn't happen.
+     * @deprecated
+     * @param array $file $_FILES array
      */
-    function Upload($file)
+    public function XUpload($file)
     {
         if (!is_array($file))
             return "Invalid file given to Upload()";
@@ -224,12 +227,12 @@ class ProductImage extends \upload
 
 
     /**
-    *   @deprecated
-     *  Validate the uploaded image, checking for size constraints and other errors
-     *  @param array $file $_FILES array
-     *  @return boolean True if valid, False otherwise
+     * Validate the uploaded image, checking for size constraints and other errors
+     * @deprecated
+     * @param array $file $_FILES array
+     * @return boolean True if valid, False otherwise
      */
-    function Validate($file)
+    public function XValidate($file)
     {
         if (!is_array($file))
             return;

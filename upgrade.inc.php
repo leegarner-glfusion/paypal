@@ -621,7 +621,6 @@ function PAYPAL_do_upgrade($dvlp = false)
  * @since   v0.4.0
  * @param   string  $version    Version being upgraded TO
  * @param   boolean $ignore_error   True to ignore SQL errors.
- * @param   array   $sql        Array of SQL statement(s) to execute
  * @return  boolean     True on success, False on failure
  */
 function PAYPAL_do_upgrade_sql($version, $ignore_error = false)

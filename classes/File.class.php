@@ -1,14 +1,14 @@
 <?php
 /**
- *  Class to handle file uploads for downloadable products
+ * Class to handle file uploads for downloadable products.
  *
- *  @author     Lee Garner <lee@leegarner.com>
- *  @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
- *  @package    paypal
- *  @version    0.4.0
- *  @license    http://opensource.org/licenses/gpl-2.0.php
- *  GNU Public License v2 or later
- *  @filesource
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.4.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
  */
 namespace Paypal;
 
@@ -16,22 +16,22 @@ namespace Paypal;
 USES_class_upload();
 
 /**
- *  Image-handling class
- *  @package paypal
+ * Image-handling class.
+ * @package paypal
  */
 class File extends \upload
 {
-    //var $properties;
-
+    /** Array of uploaded filenames.
+     * @var array */
     var $filenames;
 
-    /** Array of the names of successfully uploaded files
-     *  @var array */
+    /** Array of the names of successfully uploaded files.
+     * @var array */
     var $goodfiles = array();
 
     /**
-     *  Constructor
-     *  @param  string  $varname        Optional form variable name
+     * Constructor.
+     * @param   string  $varname        Optional form variable name
      */
     function __construct($varname='uploadfile')
     {
@@ -73,12 +73,12 @@ class File extends \upload
 
 
     /**
-    *   Actually handle the file upload.
-    *   Currently, all this does is return the filename so it can be
-    *   updated in the product record.
-    *
-    *   @return string      Name of uploaded file
-    */
+     * Actually handle the file upload.
+     * Currently, all this does is return the filename so it can be
+     * updated in the product record.
+     *
+     * @return  string      Name of uploaded file
+     */
     function uploadFiles()
     {
         parent::uploadFiles();
@@ -87,11 +87,9 @@ class File extends \upload
 
 
     /**
-     *  Delete a single image using the current name and supplied path
-     *  @access private
-     *  @param string $imgpath Path to file
+     * Delete this image using the current name and supplied path.
      */
-    function Delete()
+    public function Delete()
     {
         if (file_exists($this->getPath() . '/' . $this->filename))
             unlink($this->getPath() . '/' . $this->filename);

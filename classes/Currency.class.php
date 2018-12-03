@@ -1,30 +1,32 @@
 <?php
 /**
-*   Class to handle currency display
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2014-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*              GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle currency display.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2014-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
- * @class   Currency
+ * Class to handle currencies.
  * @package paypal
  */
 class Currency
 {
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties = array();
 
     /**
-    *   Constructor. Simply sets an initial default currency.
-    *
-    *   @param  mixed   $code   Currency code, or DB record as an array
-    */
+     * Constructor. Simply sets an initial default currency.
+     *
+     * @param   mixed   $code   Currency code, or DB record as an array
+     */
     public function __construct($code = NULL)
     {
         global $_PP_CONF, $_TABLES;
@@ -44,13 +46,13 @@ class Currency
 
 
     /**
-    *   Get an instance of a currency.
-    *   Caches in a static variable for quick repeated retrivals,
-    *   and also caches using glFusion caching if available.
-    *
-    *   @param  string  $code   Currency Code
-    *   @return array           Array of information
-    */
+     * Get an instance of a currency.
+     * Caches in a static variable for quick repeated retrivals,
+     * and also caches using glFusion caching if available.
+     *
+     * @param   string  $code   Currency Code
+     * @return  array           Array of information
+     */
     public static function getInstance($code = NULL)
     {
         global $_PP_CONF;
@@ -71,11 +73,11 @@ class Currency
 
 
     /**
-    *   Set all the record values into properties
-    *
-    *   @since  0.6.0
-    *   @param  array   $A      Array of key->value pairs
-    */
+     * Set all the record values into properties.
+     *
+     * @since   v0.6.0
+     * @param   array   $A      Array of key->value pairs
+     */
     public function setVars($A)
     {
         $fields = array(
@@ -93,12 +95,12 @@ class Currency
 
 
     /**
-    *   Set a property value
-    *
-    *   @since  0.6.0
-    *   @param  string  $key    Property Name
-    *   @param  mixed   $value  Property Value
-    */
+     * Set a property value.
+     *
+     * @since   v0.6.0
+     * @param   string  $key    Property Name
+     * @param   mixed   $value  Property Value
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -130,12 +132,12 @@ class Currency
 
 
     /**
-    *   Get a property value
-    *
-    *   @since  0.6.0
-    *   @param  string  $key    Property Name
-    *   @return mixed           Property Value, NULL if not set
-    */
+     * Get a property value
+     *
+     * @since   v0.6.0
+     * @param   string  $key    Property Name
+     * @return  mixed           Property Value, NULL if not set
+     */
     public function __get($key)
     {
         if (array_key_exists($key, $this->properties)) {
@@ -147,10 +149,10 @@ class Currency
 
 
     /**
-    *   Return the number of decimal places associated with a currency
-    *
-    *   @return integer     Number of decimal places used for the currency
-    */
+     * Return the number of decimal places associated with a currency.
+     *
+     * @return  integer     Number of decimal places used for the currency
+     */
     public function Decimals()
     {
         return $this->decimals;
@@ -158,10 +160,10 @@ class Currency
 
 
     /**
-    *   Return the prefix, if any, for a currency
-    *
-    *   @return string      Prefix, e.g. dollar sign
-    */
+     * Return the prefix, if any, for a currency.
+     *
+     * @return  string      Prefix, e.g. dollar sign
+     */
     public function Pre()
     {
         static $prefix = NULL;  // cache for repeated use
@@ -180,10 +182,10 @@ class Currency
 
 
     /**
-    *   Return the postfix, if any, for a currency
-    *
-    *   @return string      Postfix, e.g. Euro sign
-    */
+     * Return the postfix, if any, for a currency.
+     *
+     * @return  string      Postfix, e.g. Euro sign
+     */
     public function Post()
     {
         static $postfix = NULL;     // cache for repeated use
@@ -202,12 +204,11 @@ class Currency
 
  
     /**
-    *   Get the formatted string for an amount.
-    *   e.g. "$ 125.00"
-    *
-    *   @param  float   $amount Dollar amount
-    *   @return string      Formatted string for display
-    */
+     * Get the formatted string for an amount, e.g. "$ 125.00".
+     *
+     * @param   float   $amount Dollar amount
+     * @return  string      Formatted string for display
+     */
     public function Format($amount)
     {
         $val = $this->_Format($amount);
@@ -216,12 +217,11 @@ class Currency
 
 
     /**
-    *   Get just the numeric part of the formatted price
-    *   e.g. "125.00" for "125"
-    *
-    *   @param  float   $amount Dollar amount
-    *   @return float       Formatted numeric value
-    */
+     * Get just the numeric part of the formatted price, e.g. "125.00" for "125".
+     *
+     * @param   float   $amount Dollar amount
+     * @return  float       Formatted numeric value
+     */
     public function FormatValue($amount)
     {
         $val = $this->_Format($amount);
@@ -230,13 +230,12 @@ class Currency
 
 
     /**
-    * Formats a price for a particular currency.
-    *
-    * @param    float   $amount A numeric price amount value.
-    * @param    string  $code   The three character code of the currency.
-    *
-    * @return   array   Array of prefix, number, postfix
-    */
+     * Formats a price for a particular currency.
+     *
+     * @param   float   $amount A numeric price amount value.
+     * @param   string  $code   The three character code of the currency.
+     * @return  array   Array of prefix, number, postfix
+     */
     private function _Format($amount, $code='')
     {
         static $amounts = array();
@@ -257,15 +256,15 @@ class Currency
 
 
     /**
-    *   Rounds a price amount for the specified currency.
-    *
-    *   Rounding of the minor unit with a currency specific step size. For example,
-    *   Swiss Francs are rounded using a step size of 0.05. This means a price of
-    *   10.93 is converted to 10.95.
-    *
-    *   @param  float   $amount The numeric amount value of the price to be rounded.
-    *   @return string          The rounded numeric amount value for the price.
-    */
+     * Rounds a price amount for the specified currency.
+     *
+     * Rounding of the minor unit with a currency specific step size. For example,
+     * Swiss Francs are rounded using a step size of 0.05. This means a price of
+     * 10.93 is converted to 10.95.
+     *
+     * @param   float   $amount The numeric amount value of the price to be rounded.
+     * @return  string          The rounded numeric amount value for the price.
+     */
     private function currencyRound($amount)
     {
         if ($this->rounding_step < .01) {
@@ -277,23 +276,17 @@ class Currency
 
 
     /**
-    * Converts a price amount from a currency to the target currency based on the
-    *   current currency conversion rates.
-    *
-    * To convert an amount from one currency to another, we simply take the amount
-    * value and multiply it by the current currency's conversion rate divided by
-    * the target currency's conversion rate.
-    *
-    * @param $amount
-    *   The numeric amount value of the price to be rounded.
-    * @param $currency_code
-    *   The currency code for the current currency of the price.
-    * @param $target_currency_code
-    *   The currency code for the target currency of the price.
-    *
-    * @return
-    *   The numeric amount value converted to its equivalent in the target currency.
-    */
+     * Converts a price amount from the current currency to the target currency.
+     *
+     * To convert an amount from one currency to another, we simply take the amount
+     * value and multiply it by the current currency's conversion rate divided by
+     * the target currency's conversion rate.
+     *
+     * @param   float   $amount         The numeric value to be converted
+     * @param   string  $toCurrency     Target currency code
+     * @param   string  $fromCurrency   Source currency override
+     * @return  float       The converted amount
+     */
     public function Convert($amount, $toCurrency, $fromCurrency='')
     {
        return $amount * $this->ConversionRate($toCurrency, $fromCurrency);
@@ -301,13 +294,13 @@ class Currency
 
 
     /**
-    *   Get the conversion rate between currencies.
-    *   If $from is not specified, uses the current default. $to must be given.
-    *
-    *   @param  string  $toCurrency     Destination currency code
-    *   @param  string  $fromCurrency   Starting currency code
-    *   @return float       Conversion rate to get $from to $to
-    */
+     * Get the conversion rate between currencies.
+     * If $from is not specified, uses the current default. $to must be given.
+     *
+     * @param   string  $toCurrency     Destination currency code
+     * @param   string  $fromCurrency   Starting currency code
+     * @return  float       Conversion rate to get $from to $to
+     */
     public static function ConversionRate($toCurrency, $fromCurrency='')
     {
         global $_PP_CONF;
@@ -339,12 +332,11 @@ class Currency
 
  
     /**
-    *   Get all currency info.
-    *   Used by the plugin configuration to create a dropdown list
-    *   of currencies.
-    *
-    *   @return array   Array of all DB records
-    */
+     * Get all currency info.
+     * Used by the plugin configuration to create a dropdown list of currencies.
+     *
+     * @return  array   Array of all DB records
+     */
     public static function getAll()
     {
         global $_TABLES;
@@ -366,7 +358,7 @@ class Currency
      * Example: $1.95 US becomes 195
      *
      * @param   float   $amount     Money amount to convert
-     * @return  int                 Integer version of the amount
+     * @return  integer             Integer version of the amount
      */
     public function toInt($amount)
     {
@@ -378,8 +370,8 @@ class Currency
      * Convert an amount to an integer based on the number of decimals.
      * Example: 195 becomes 1.95
      *
-     * @param   int     $amount     Integer version of the amount
-     * @return  float                Money amount to convert
+     * @param   integer $intval     Integer version of the amount
+     * @return  float               Money amount to convert
      */
     public function fromInt($intval)
     {

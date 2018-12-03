@@ -1,18 +1,18 @@
 <?php
 /**
-*   glFusion API functions for the Paypal plugin.
-*   Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2018 Lee Garner
-*   @copyright  Copyright (c) 2005-2006 Vincent Furia
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * glFusion API functions for the Paypal plugin.
+ * Based on the gl-paypal Plugin for Geeklog CMS by Vincent Furia.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      Vincent Furia <vinny01@users.sourceforge.net
+ * @copyright   Copyright (c) 2009-2018 Lee Garner
+ * @copyright   Copyright (c) 2005-2006 Vincent Furia
+ * @package     paypal
+ * @version     0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 // this file can't be used on its own
 if (!defined ('GVERSION')) {
@@ -116,6 +116,7 @@ spl_autoload_register(function ($class)
 function USES_paypal_functions()
 {   require_once __DIR__ . '/paypal_functions.inc.php'; }
 
+/** Import report functions */
 function USES_paypal_reports()
 {   require_once __DIR__ . '/reports.inc.php';  }
 
@@ -124,6 +125,11 @@ function USES_paypal_reports()
 $_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
 $_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon uk-icon' : 'fa fa';
 
+/**
+ * Import a specific report class.
+ *
+ * @param   string  $name   Report class basename
+ */
 function USES_paypal_class_report($name='')
 {
     $classfile = __DIR__ . '/classes/reports/' . $name . '.class.php';
@@ -137,13 +143,13 @@ function USES_paypal_class_report($name='')
 
 
 /**
-*   Show the product catalog in the centerblock.
-*
-*   @param  integer $where  Where to show the block (only after featured story)
-*   @param  integer $page   Which page (Home page only)
-*   @param  string  $topic  Which topics to show with (All)
-*   @return string      HTML code for submission form
-*/
+ * Show the product catalog in the centerblock.
+ *
+ * @param   integer $where  Where to show the block (only after featured story)
+ * @param   integer $page   Which page (Home page only)
+ * @param   string  $topic  Which topics to show with (All)
+ * @return  string      HTML code for submission form
+ */
 function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 {
     global $_PP_CONF, $LANG_PP;
@@ -166,10 +172,10 @@ function plugin_centerblock_paypal($where = 1, $page = 1, $topic = '')
 
 
 /**
-*   Upgrade the plugin to the currently-installed version.
-*
-*   @return mixed   True if successful, error message number otherwise
-*/
+ * Upgrade the plugin to the currently-installed version.
+ *
+ * @return  boolean     True on success, False on failure
+ */
 function plugin_upgrade_paypal()
 {
     require_once __DIR__ . '/upgrade.inc.php';
@@ -212,15 +218,15 @@ function plugin_commentsupport_paypal()
 
 
 /**
-*   Save a comment
-*
-*   @param  string  $title      Comment title
-*   @param  string  $comment    Comment text
-*   @param  string  $id         Item id to which $cid belongs
-*   @param  integer $pid        Comment parent
-*   @param  string  $postmode   'html' or 'text'
-*   @return mixed   false for failure, HTML string (redirect?) for success
-*/
+ * Save a comment.
+ *
+ * @param   string  $title      Comment title
+ * @param   string  $comment    Comment text
+ * @param   string  $id         Item id to which $cid belongs
+ * @param   integer $pid        Comment parent
+ * @param   string  $postmode   'html' or 'text'
+ * @return  mixed   false for failure, HTML string (redirect?) for success
+ */
 function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 {
     global $LANG03, $_PP_CONF;
@@ -250,17 +256,17 @@ function plugin_savecomment_paypal($title,$comment,$id,$pid,$postmode)
 
 
 /**
-*   How the plugin will display specific comments.
-*
-*   @param   string  $id     Unique idenifier for item comment belongs to
-*   @param   int     $cid    Comment id to display
-*   @param   string  $title  Page/comment title
-*   @param   string  $order  'ASC' or 'DSC' or blank
-*   @param   string  $format 'threaded', 'nested', or 'flat'
-*   @param   int     $page   Page number of comments to display
-*   @param   boolean $view   True to view comment (by cid), false to display (by $pid)
-*   @return  mixed   results of calling the plugin_displaycomment_ function
-*/
+ * How the plugin will display specific comments.
+ *
+ * @param   string  $id     Unique idenifier for item comment belongs to
+ * @param   integer $cid    Comment id to display
+ * @param   string  $title  Page/comment title
+ * @param   string  $order  'ASC' or 'DSC' or blank
+ * @param   string  $format 'threaded', 'nested', or 'flat'
+ * @param   integer $page   Page number of comments to display
+ * @param   boolean $view   True to view comment (by cid), false to display (by $pid)
+ * @return  mixed   Results of calling the plugin_displaycomment_ function
+ */
 function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, $view)
 {
     global $_USER, $LANG_ACCESS, $_PP_CONF;
@@ -295,12 +301,12 @@ function plugin_displaycomment_paypal($id, $cid, $title, $order,$format, $page, 
 
 
 /**
-*   Delete a single comment.
-*
-*   @param  int     $cid    Comment to be deleted
-*   @param  string  $id     Item id to which $cid belongs
-*   @return mixed   false for failure, HTML string (redirect?) for success
-*/
+ * Delete a single comment.
+ *
+ * @param   integer $cid    Comment to be deleted
+ * @param   string  $id     Item id to which $cid belongs
+ * @return  mixed   false for failure, HTML string (redirect?) for success
+ */
 function plugin_deletecomment_paypal($cid, $id)
 {
     global $_CONF, $_TABLES, $_PP_CONF;
@@ -326,13 +332,13 @@ function plugin_deletecomment_paypal($cid, $id)
 
 
 /**
-*   Handle any post-processing for an edited comment.
-*   Just redirects back to the product detail page.  The comment is actually
-*   saved in comment.php.
-*
-*   @param  integer $cid    Comment ID
-*   @param  mixed   $id     Item ID
-*/
+ * Handle any post-processing for an edited comment.
+ * Just redirects back to the product detail page.
+ * The comment is actually saved in comment.php.
+ *
+ * @param   integer $cid    Comment ID
+ * @param   mixed   $id     Item ID
+ */
 function plugin_editcomment_paypal($cid, $id)
 {
     echo COM_refresh(PAYPAL_URL . '/detail.php?id=' . $id);
@@ -341,10 +347,10 @@ function plugin_editcomment_paypal($cid, $id)
 
 
 /**
-*   Returns the URL of the plugin's icon.
-*
-*   @return string      URL of the icon
-*/
+ * Returns the URL of the plugin's icon.
+ *
+ * @return  string      URL of the icon
+ */
 function plugin_geticon_paypal()
 {
     return PAYPAL_URL . '/images/paypal.png';
@@ -352,12 +358,12 @@ function plugin_geticon_paypal()
 
 
 /**
-*   Check if this is a plugin administrator.
-*   There is no "moderator" for the Paypal plugin.
-*   Saves a static value to conserve calls to SEC_hasRights()
-*
-*   @return boolean     True for admins, False for regular users
-*/
+ * Check if this is a plugin administrator.
+ * There is no "moderator" for the Paypal plugin.
+ * Saves a static value to conserve calls to SEC_hasRights()
+ *
+ * @return  boolean     True for admins, False for regular users
+ */
 function plugin_ismoderator_paypal()
 {
     static $isadmin = NULL;
@@ -369,9 +375,9 @@ function plugin_ismoderator_paypal()
 
 
 /**
- *  Add an option for the plugin in the command and control area.
+ * Add an option for the plugin in the command and control area.
  *
- *  @return array   Array containing (pi_name, admin_url, icon_url)
+ * @return  array   Array containing (pi_name, admin_url, icon_url)
  */
 function plugin_cclabel_paypal()
 {
@@ -386,9 +392,9 @@ function plugin_cclabel_paypal()
 
 
 /**
- *  Adds the paypal plugin to the Admin menu.
+ * Adds the paypal plugin to the Admin menu.
  *
- *  @return array   Array containing (pi_name, pi_admin_url, # of items or '')
+ * @return  array   Array containing (pi_name, pi_admin_url, # of items or '')
  */
 function plugin_getadminoption_paypal()
 {
@@ -403,11 +409,10 @@ function plugin_getadminoption_paypal()
 
 
 /**
-*   Returns the user option for this plugin
-*   Adds the plugin to the user menu
-*
-*   @return   array   Array containing (plugin name, plugin user url, 0)
-*/
+ * Returns the user menu option for this plugin.
+ *
+ * @return  array   Array containing (plugin name, plugin user url, 0)
+ */
 function plugin_getuseroption_paypal()
 {
     global $LANG_PP, $_TABLES, $_USER;
@@ -429,9 +434,9 @@ function plugin_getuseroption_paypal()
 
 
 /**
- *  Returns the current version of the paypal plugin.
+ * Returns the current version of the paypal plugin.
  *
- *  @return string  Plugin version
+ * @return  string  Plugin version
  */
 function plugin_chkVersion_paypal()
 {
@@ -442,12 +447,12 @@ function plugin_chkVersion_paypal()
 
 
 /**
-*   Performs operations when a user (or admin) deletes an account
-*   - Anonymize user data in orders
-*   - Delete user address info
-*
-*   @param  int $uid    User ID that is being deleted
-*/
+ * Performs operations when a user (or admin) deletes an account.
+ * - Anonymize user data in orders
+ * - Delete user address info
+ *
+ * @param   integer $uid    User ID that is being deleted
+ */
 function plugin_user_delete_paypal($uid)
 {
     global $_TABLES;
@@ -463,11 +468,11 @@ function plugin_user_delete_paypal($uid)
 
 
 /**
-*   Support merging local accounts into remote accounts
-*
-*   @param  integer $origUID    Original (remote) user ID
-*   @param  integer $destUID    Merged (local) user ID
-*/
+ * Support merging local accounts into remote accounts.
+ *
+ * @param   integer $origUID    Original (remote) user ID
+ * @param   integer $destUID    Merged (local) user ID
+ */
 function plugin_user_move_paypal($origUID, $destUID)
 {
     global $_TABLES;
@@ -485,17 +490,17 @@ function plugin_user_move_paypal($origUID, $destUID)
 
 
 /**
-*   Implements the [paypal:] autotag.
-*
-*   Currently only allows for a single product ID, which will generate
-*   a link to that product's detail page.
-*
-*   @since  version 0.4.0
-*   @param  string  $op         Operation to perform (tagname or parse)
-*   @param  string  $content    Content in which to replace autotag
-*   @param  array   $autotag    Autotag details
-*   @return string              Updated $content
-*/
+ * Implements the [paypal:] autotag.
+ *
+ * Currently only allows for a single product ID, which will generate
+ * a link to that product's detail page.
+ *
+ * @since   v0.4.0
+ * @param   string  $op         Operation to perform (tagname or parse)
+ * @param   string  $content    Content in which to replace autotag
+ * @param   array   $autotag    Autotag details
+ * @return  string              Updated $content
+ */
 function plugin_autotags_paypal ($op, $content = '', $autotag = '')
 {
     global $_CONF, $_TABLES, $_PP_CONF;
@@ -540,13 +545,13 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
 
 
 /**
- *  Checks to see if the user has sufficient rights to view the page.
+ * Checks to see if the user has sufficient rights to view the page.
  *
- *  Check if the current user has rights (at least one of) specified by
- *  $rights.  If not log the error, display a generic access denied message
- *  and exit.
+ * Check if the current user has rights (at least one of) specified by
+ * $rights.  If not log the error, display a generic access denied message
+ * and exit.
  *
- *  @param  string  $rights     Comma-separated list of allowable rights
+ * @param   string  $rights     Comma-separated list of allowable rights
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
@@ -561,22 +566,22 @@ function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 
 
 /**
-*   Generate a single buy-now button for the first enabled payment gateway.
-*   This function is deprecated, but is kept to avoid completely breaking
-*   if some plugin that calls this function is still in place.
-*
-*   Plugins should call LGLIB_invokeService('paypal, 'genButton'...) instead.
-*
-*   Provided $vars should include:
-*       'item_number', 'item_name', 'amount', and optionally 'item_type'
-*
-*   @deprecated version 0.5.0
-*   @uses   Gateway::ExternalButton()
-*   @param  string  $btn_type   Type of button (buy_now, add_to_cart, etc.)
-*   @param  array   $vars       Associative array of input variables
-*   @param  string  $item_type  Optional type indicator (physical, virtual)
-*   @return string          HTML of requested button
-*/
+ * Generate a single buy-now button for the first enabled payment gateway.
+ * This function is deprecated, but is kept to avoid completely breaking
+ * if some plugin that calls this function is still in place.
+ *
+ * Plugins should call LGLIB_invokeService('paypal, 'genButton'...) instead.
+ *
+ * Provided $vars should include:
+ *  'item_number', 'item_name', 'amount', and optionally 'item_type'
+ *
+ * @deprecated  v0.5.0
+ * @uses    Gateway::ExternalButton()
+ * @param   string  $btn_type   Type of button (buy_now, add_to_cart, etc.)
+ * @param   array   $vars       Associative array of input variables
+ * @param   string  $item_type  Optional type indicator (physical, virtual)
+ * @return  string          HTML of requested button
+ */
 function PAYPAL_genButton($btn_type, $vars, $item_type=0)
 {
     global $_CONF, $_PP_CONF, $_USER, $LANG_configselects;
@@ -615,10 +620,10 @@ function PAYPAL_genButton($btn_type, $vars, $item_type=0)
 
 
 /**
-*   Return the types to list in the search types selection.
-*
-*   @return array   Associative array (typename => title)
-*/
+ * Return the types to list in the search types selection.
+ *
+ * @return  array   Associative array (typename => title)
+ */
 function plugin_searchtypes_paypal()
 {
     global $_PP_CONF, $LANG_PP;
@@ -628,16 +633,16 @@ function plugin_searchtypes_paypal()
 
 
 /**
-*   Create a plugin search object to search this plugin
-*
-*   @param  string  $query      Search query string
-*   @param  string  $datestart  Starting date for search
-*   @param  string  $dateend    Ending date for search
-*   @param  string  $topic      Topic selected for search
-*   @param  string  $type       Type selected during search
-*   @param  string  $author     Limit results to this author (not used)
-*   @return object              Search object to be processed by Search class
-*/
+ * Create a plugin search object to search this plugin.
+ *
+ * @param   string  $query      Search query string
+ * @param   string  $datestart  Starting date for search
+ * @param   string  $dateend    Ending date for search
+ * @param   string  $topic      Topic selected for search
+ * @param   string  $keyType    Type selected during search
+ * @param   string  $author     Limit results to this author (not used)
+ * @return  object              Search object to be processed by Search class
+ */
 function plugin_dopluginsearch_paypal(
     $query, $datestart, $dateend, $topic, $keyType, $author
 )
@@ -680,10 +685,10 @@ function plugin_dopluginsearch_paypal(
 
 
 /**
-*   Get additional Javascript files to import in the header
-*
-*   @return array   Array of filenames to import
-*/
+ * Get additional Javascript files to import in the header.
+ *
+ * @return  array   Array of filenames to import
+ */
 function plugin_getheaderjs_paypal()
 {
     $files = array(
@@ -695,11 +700,11 @@ function plugin_getheaderjs_paypal()
 
 
 /**
-*   Get additional CSS into the site header.
-*   Checks first for layout-specific version, gets the plugin default if none.
-*
-*   @return array   List of paths to CSS files
-*/
+ * Get additional CSS into the site header.
+ * Checks first for layout-specific version, gets the plugin default if none.
+ *
+ * @return  array   List of paths to CSS files
+ */
 function plugin_getheadercss_paypal()
 {
     global $_CONF, $_PP_CONF;
@@ -725,13 +730,13 @@ function plugin_getheadercss_paypal()
 
 
 /**
-*   Get the URL to the localized configuration help file.
-*
-*   @uses   PAYPAL_getDocURL()
-*   @param  string  $option     Configuration option to display
-*   @param  string  $doclang    Documentation language requested
-*   @return array   Array of (url, window_type)
-*/
+ * Get the URL to the localized configuration help file.
+ *
+ * @uses    PAYPAL_getDocURL()
+ * @param   string  $option     Configuration option to display
+ * @param   string  $doclang    Documentation language requested
+ * @return  array   Array of (url, window_type)
+ */
 function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 {
     $doc_url = PAYPAL_getDocURL('config', $doclang);
@@ -747,16 +752,15 @@ function plugin_getconfigelementhelp_paypal($option, $doclang='english')
 
 
 /**
-*   Get the link to a documentation file.
-*
-*   Returns the URL to the file, or to the directory if no file requested.
-*
-*   @see    plugin_getconfigelementhelp_paypal()
-*   @see    \Paypal\Product::showForm()
-*   @param  string  $file       HTML file
-*   @param  string  $doclang    Documentation language
-*   @return string              URL to document directory or file
-*/
+ * Get the link to a documentation file.
+ * Returns the URL to the file, or to the directory if no file requested.
+ *
+ * @see    plugin_getconfigelementhelp_paypal()
+ * @see    \Paypal\Product::showForm()
+ * @param  string  $file       HTML file
+ * @param  string  $doclang    Documentation language
+ * @return string              URL to document directory or file
+ */
 function PAYPAL_getDocURL($file='', $doclang='english')
 {
     $doc_path = __DIR__ . "/docs/$doclang/";
@@ -783,10 +787,10 @@ function PAYPAL_getDocURL($file='', $doclang='english')
 
 
 /**
-*   Return the items that should be removed with the plugin.
-*
-*   @return array   Array of items to be removed.
-*/
+ * Return the items that should be removed with the plugin.
+ *
+ * @return  array   Array of items to be removed.
+ */
 function plugin_autouninstall_paypal ()
 {
     $out = array (
@@ -841,13 +845,13 @@ function plugin_autouninstall_paypal ()
 
 
 /**
-*   Disable this plugin's blocks when the plugin is changed.
-*
-*   Acts on all blocks with a phpblock function similar to the specified
-*   functions.  Blocks are not enabled automatically when enabling the plugin.
-*
-*   @param  boolean $enabled    Plugin's new "enabled" state
-*/
+ * Disable this plugin's blocks when the plugin is changed.
+ *
+ * Acts on all blocks with a phpblock function similar to the specified
+ * functions.  Blocks are not enabled automatically when enabling the plugin.
+ *
+ * @param   boolean $enabled    Plugin's new "enabled" state
+ */
 function plugin_enablestatechange_paypal($enabled)
 {
     global $_TABLES, $_PLUGINS, $_PP_CONF;
@@ -875,11 +879,11 @@ function plugin_enablestatechange_paypal($enabled)
 
 
 /**
-*   Receives notification of another plugin's deletion
-*
-*   @param  mixed   $id     Item ID
-*   @param  string  $type   Plugin Name
-*/
+ * Receives notification of another plugin's deletion.
+ *
+ * @param  mixed   $id     Item ID
+ * @param  string  $type   Plugin Name
+ */
 function plugin_itemdeleted_paypal($id, $type)
 {
     global $_TABLES, $_PP_CONF;
@@ -901,10 +905,10 @@ function plugin_itemdeleted_paypal($id, $type)
 
 
 /**
-*   Get comment url and unique id fieldname.
-*
-*   @return array   Array containing main plugin URL and the unqiue id name
-*/
+ * Get comment url and unique id fieldname.
+ *
+ * @return  array   Array containing main plugin URL and the unqiue id name
+ */
 function plugin_getcommenturlid_paypal()
 {
     return array(COM_buildUrl(PAYPAL_URL . '/detail.php'), 'product');
@@ -912,11 +916,11 @@ function plugin_getcommenturlid_paypal()
 
 
 /**
-*   Creates the shopping cart block, if the cart is not empty.
-*
-*   @uses   phpblock_paypal_cart_contents()
-*   @return string      HTML for the shopping cart block.
-*/
+ * Creates the shopping cart block, if the cart is not empty.
+ *
+ * @uses    phpblock_paypal_cart_contents()
+ * @return  string      HTML for the shopping cart block.
+ */
 function phpblock_paypal_cart()
 {
     if (!PP_isMinVersion()) return '';
@@ -935,15 +939,15 @@ function phpblock_paypal_cart()
 
 
 /**
-*   Supplies the actual content for the shopping cart block.
-*   Used to allow AJAX updates to the cart display
-*
-*   Each item in the cart is shown along with its quantity, and links
-*   to view the cart or check out.
-*
-*   @see    phpblock_paypal_cart()
-*   @return string      HTML for the shopping cart block.
-*/
+ * Supplies the actual content for the shopping cart block.
+ * Used to allow AJAX updates to the cart display
+ *
+ * Each item in the cart is shown along with its quantity, and links
+ * to view the cart or check out.
+ *
+ * @see     phpblock_paypal_cart()
+ * @return  string      HTML for the shopping cart block.
+ */
 function phpblock_paypal_cart_contents()
 {
     global $_PP_CONF, $LANG_PP;
@@ -987,10 +991,10 @@ function phpblock_paypal_cart_contents()
 
 
 /**
-*   Catalog search block
-*
-*   @return string  HTML for search form
-*/
+ * Catalog search block.
+ *
+ * @return  string  HTML for search form
+ */
 function phpblock_paypal_search()
 {
     global $_TABLES;
@@ -1017,13 +1021,13 @@ function phpblock_paypal_search()
 
 
 /**
-*   Create a random product block.
-*   Shows a single product selected from all enabled products.
-*
-*   @uses   PAYPAL_phpblock_product_sql()
-*   @param  string  $cat    Optional single category
-*   @return string          HTML for the block
-*/
+ * Create a random product block.
+ * Shows a single product selected from all enabled products.
+ *
+ * @uses    PAYPAL_phpblock_product_sql()
+ * @param   string  $cat    Optional single category
+ * @return  string          HTML for the block
+ */
 function phpblock_paypal_random($cat='')
 {
     global $_PP_CONF;
@@ -1042,13 +1046,13 @@ function phpblock_paypal_random($cat='')
 
 
 /**
-*   Create a featured product block.
-*   Shows a single product selected from all enabled featured products.
-*
-*   @uses   PAYPAL_phpblock_product_sql()
-*   @param  string  $cat    Optional single category
-*   @return string          HTML for the block
-*/
+ * Create a featured product block.
+ * Shows a single product selected from all enabled featured products.
+ *
+ * @uses    PAYPAL_phpblock_product_sql()
+ * @param   string  $cat    Optional single category
+ * @return  string          HTML for the block
+ */
 function phpblock_paypal_featured($cat='')
 {
     global $_PP_CONF;
@@ -1067,12 +1071,12 @@ function phpblock_paypal_featured($cat='')
 
 
 /**
-*   Create a category-list block.
-*   Returns HTML for a list of category names and the number of
-*   products under each one.
-*
-*   @return     HTML for the block
-*/
+ * Create a category-list block.
+ * Returns HTML for a list of category names and the number of
+ * products under each one.
+ *
+ * @return  string  HTML for the block
+ */
 function phpblock_paypal_categories()
 {
     global $_TABLES;
@@ -1122,11 +1126,11 @@ function phpblock_paypal_categories()
 
 
 /**
-*   Create a block showing one or more "popular" products.
-*   Popularity is determined by counting purchase records.
-*
-*   @return string              HTML for "Popular Items" block
-*/
+ * Create a block showing one or more "popular" products.
+ * Popularity is determined by counting purchase records.
+ *
+ * @return  string              HTML for "Popular Items" block
+ */
 function phpblock_paypal_popular()
 {
     global $_TABLES, $_PP_CONF;
@@ -1157,13 +1161,13 @@ function phpblock_paypal_popular()
 
 
 /**
-*   Create a "New Products" block.
-*   Shows most recently-added products
-*
-*   @uses   PAYPAL_phpblock_product_sql()
-*   @param  string  $cat    Optional single category
-*   @return string          HTML for the block
-*/
+ * Create a "New Products" block.
+ * Shows most recently-added products
+ *
+ * @uses    PAYPAL_phpblock_product_sql()
+ * @param   string  $cat    Optional single category
+ * @return  s tring          HTML for the block
+ */
 function phpblock_paypal_recent($cat='')
 {
     global $_TABLES, $_PP_CONF;
@@ -1194,15 +1198,15 @@ function phpblock_paypal_recent($cat='')
 
 
 /**
-*   Display a formatted error message.
-*   This returns the provided message formatted using glFusion's
-*   typography options.
-*
-*   @param  string $msg     Error message to display
-*   @param  string $type    Type of message, used for style and header
-*   @param  string $header  Optional header text.
-*   @return string          HTML for formatted error message
-*/
+ * Display a formatted error message.
+ * This returns the provided message formatted using glFusion's
+ * typography options.
+ *
+ * @param   string $msg     Error message to display
+ * @param   string $type    Type of message, used for style and header
+ * @param   string $header  Optional header text.
+ * @return  string          HTML for formatted error message
+ */
 function PAYPAL_errorMessage($msg = '', $type = '', $header = '')
 {
     global $LANG_PP;
@@ -1241,13 +1245,13 @@ function PAYPAL_errorMessage($msg = '', $type = '', $header = '')
 
 
 /**
-*   Create the SQL for a product block and return the block contents
-*
-*   @uses   PAYPAL_phpblock_product()
-*   @param  string  $where  Search condition, starting with AND
-*   @param  integer $limit  Number of items to show.
-*   @return string      HTML for the random-product block
-*/
+ * Create the SQL for a product block and return the block contents.
+ *
+ * @uses    PAYPAL_phpblock_product()
+ * @param   string  $where  Search condition, starting with AND
+ * @param   integer $limit  Number of items to show.
+ * @return  string      HTML for the random-product block
+ */
 function PAYPAL_phpblock_product_sql($where, $limit=1)
 {
     global $_TABLES, $_PP_CONF, $LANG_PP;
@@ -1281,14 +1285,14 @@ function PAYPAL_phpblock_product_sql($where, $limit=1)
 
 
 /**
-*   Create a product block.
-*   Takes the supplied SQL and executes the query, formatting the block
-*   and returning the HTML.
-*   Only the product ID needs to be selected in the query.
-*
-*   @param  string  $sql    Complete SQL query to be executed.
-*   @return string          HTML for the product block.
-*/
+ * Create a product block.
+ * Takes the supplied SQL and executes the query, formatting the block
+ * and returning the HTML.
+ * Only the product ID needs to be selected in the query.
+ *
+ * @param   string  $sql    Complete SQL query to be executed.
+ * @return  string          HTML for the product block.
+ */
 function PAYPAL_phpblock_product($sql)
 {
     global $_PP_CONF, $_TABLES, $_CONF;
@@ -1370,14 +1374,14 @@ function PAYPAL_phpblock_product($sql)
 
 
 /**
-*   Updates the product table with the new rating and vote count.
-*   Requires glFusion 1.1.7 or higher.
-*
-*   @since  version 0.4.0
-*   @param  mixed   $id     Product ID
-*   @param  float   $rating Rating Value
-*   @param  integer $votes  Number of votes cast
-*/
+ * Updates the product table with the new rating and vote count.
+ * Requires glFusion 1.1.7 or higher.
+ *
+ * @since   v0.4.0
+ * @param   mixed   $id     Product ID
+ * @param   float   $rating Rating Value
+ * @param   integer $votes  Number of votes cast
+ */
 function plugin_itemrated_paypal($id, $rating, $votes)
 {
     global $_TABLES;
@@ -1392,15 +1396,15 @@ function plugin_itemrated_paypal($id, $rating, $votes)
 
 
 /**
-*   Determine if the current user is allowed to rate an item.
-*   Curretly, all logged-in users can rate (even admin).
-*   Requires glFusion 1.1.7 or higher.
-*
-*   @since  version 0.4.0
-*   @param  mixed   $item_id    ID of product to be rated
-*   @param  integer $uid        User ID of the one doing the rating
-*   @return boolean             True if user is allowed, false if not
-*/
+ * Determine if the current user is allowed to rate an item.
+ * Curretly, all logged-in users can rate (even admin).
+ * Requires glFusion 1.1.7 or higher.
+ *
+ * @since   v0.4.0
+ * @param   mixed   $item_id    ID of product to be rated
+ * @param   integer $uid        User ID of the one doing the rating
+ * @return  boolean             True if user is allowed, false if not
+ */
 function plugin_canuserrate_paypal($item_id, $uid)
 {
     global $_PP_CONF;
@@ -1418,11 +1422,11 @@ function plugin_canuserrate_paypal($item_id, $uid)
 
 
 /**
-*   Handle actions needed when the current user logs in.
-*   Merges the saved cart with any values added while browsing anonymously
-*
-*   @param  integer $uid    User ID
-*/
+ * Handle actions needed when the current user logs in.
+ * Merges the saved cart with any values added while browsing anonymously
+ *
+ * @param   integer $uid    User ID
+ */
 function plugin_user_login_paypal($uid)
 {
     global $_PP_CONF;
@@ -1437,10 +1441,10 @@ function plugin_user_login_paypal($uid)
 
 
 /**
-*   Run scheduled tasks.
-*   1. Delete old carts that aren't assigned to any user.
-*   2. Call PLG_itemDeleted to notify plugins that an item is not available
-*/
+ * Run scheduled tasks.
+ * - Delete old carts that aren't assigned to any user.
+ * - Call PLG_itemDeleted to notify plugins that an item is not available
+ */
 function plugin_runScheduledTask_paypal()
 {
     global $_PP_CONF, $_TABLES, $_CONF;
@@ -1507,10 +1511,10 @@ function plugin_runScheduledTask_paypal()
 
 
 /**
-*   Return false since this plugin doesn't support webservices
-*
-*   @return boolean     True, if webservices are supported
-*/
+ * Return false since this plugin doesn't support webservices.
+ *
+ * @return  boolean     True, if webservices are supported
+ */
 function plugin_wsEnabled_paypal()
 {
     return false;
@@ -1518,15 +1522,15 @@ function plugin_wsEnabled_paypal()
 
 
 /**
-*   Determine if a given item number belongs to a plugin.
-*   For now, this simply checks whether the item number is numeric.  If
-*   it is, it's assumed to be a catalog item.  If it's non-numeric, it's
-*   assumed to be a plugin-supplied item where the item number is
-*   formated as "pi_name:item_number:other_opts"
-*
-*   @param  mixed   $item_number    Item Number to check
-*   @return boolean     True if it's a plugin item, false if it's ours
-*/
+ * Determine if a given item number belongs to a plugin.
+ * For now, this simply checks whether the item number is numeric.  If
+ * it is, it's assumed to be a catalog item.  If it's non-numeric, it's
+ * assumed to be a plugin-supplied item where the item number is
+ * formated as "pi_name:item_number:other_opts"
+ *
+ * @param   mixed   $item_number    Item Number to check
+ * @return  boolean     True if it's a plugin item, false if it's ours
+ */
 function PAYPAL_is_plugin_item($item_number)
 {
     if (!is_numeric($item_number)) {
@@ -1538,13 +1542,13 @@ function PAYPAL_is_plugin_item($item_number)
 
 
 /**
-*   Helper function to get image urls from LGLIB_ImageUrl()
-*
-*   @param  string  $imgname    Image name, no path
-*   @param  integer $width      Optional width, assume thumbnail
-*   @param  integer $height     Optional height, assume thumbnail
-*   @return string      URL to resized image
-*/
+ * Helper function to get image urls from LGLIB_ImageUrl().
+ *
+ * @param   string  $imgname    Image name, no path
+ * @param   integer $width      Optional width, assume thumbnail
+ * @param   integer $height     Optional height, assume thumbnail
+ * @return  string      URL to resized image
+ */
 function PAYPAL_ImageUrl($imgname, $width=0, $height=0)
 {
     global $_PP_CONF;
@@ -1556,14 +1560,14 @@ function PAYPAL_ImageUrl($imgname, $width=0, $height=0)
 
 
 /**
-*   Send debug info to the error log.
-*
-*   If the plugin configuration is set to log messages indicated by $type,
-*   then the message is logged.
-*
-*   @param  string  $msg    Text message to display, may be blank.
-*   @param  string  $type   Type of message
-*/
+ * Send debug info to the error log.
+ *
+ * If the plugin configuration is set to log messages indicated by $type,
+ * then the message is logged.
+ *
+ * @param   string  $msg    Text message to display, may be blank.
+ * @param   string  $type   Type of message
+ */
 function PAYPAL_debug($msg, $type = 'debug')
 {
     global $_PP_CONF;
@@ -1584,10 +1588,10 @@ function PAYPAL_debug($msg, $type = 'debug')
 
 
 /**
-*   Select the template to use for product detail pages, by default
-*
-*   @return array   $option => path
-*/
+ * Select the template to use for product detail pages, by default.
+ *
+ * @return  array   $option => path
+ */
 function plugin_configmanager_select_product_tpl_ver_paypal()
 {
     $A = array();
@@ -1602,10 +1606,10 @@ function plugin_configmanager_select_product_tpl_ver_paypal()
 
 
 /**
-*   Select the template to use for product list pages
-*
-*   @return array   $option => path
-*/
+ * Select the template to use for product list pages.
+ *
+ * @return  array   $option => path
+ */
 function plugin_configmanager_select_list_tpl_ver_paypal()
 {
     $A = array();
@@ -1620,10 +1624,10 @@ function plugin_configmanager_select_list_tpl_ver_paypal()
 
 
 /**
-*   Create a currency dropdown list for selecting the default currency.
-*
-*   @return array   Array of description => value
-*/
+ * Create a currency dropdown list for selecting the default currency.
+ *
+ * @return  array   Array of description => value
+ */
 function plugin_configmanager_select_currency_paypal()
 {
     $A = array();
@@ -1636,13 +1640,13 @@ function plugin_configmanager_select_currency_paypal()
 
 
 /**
-*   Display variables related to the shop in Account Settings
-*
-*   @param  integer $uid        User ID
-*   @param  string  $panel      Panel being populated
-*   @param  string  $fieldset   Name of fieldset being populated
-*   @return string              HTML for edit form. Never NULL.
-*/
+ * Display variables related to the shop in Account Settings.
+ *
+ * @param   integer $uid        User ID
+ * @param   string  $panel      Panel being populated
+ * @param   string  $fieldset   Name of fieldset being populated
+ * @return  string              HTML for edit form. Never NULL.
+ */
 function plugin_profileedit_paypal($uid, $panel, $fieldset)
 {
     global $_PP_CONF, $_USER, $_TABLES, $LANG_PP;
@@ -1687,8 +1691,10 @@ function plugin_profileedit_paypal($uid, $panel, $fieldset)
 
 
 /**
-*   Save the Paypal profile settings when updated from Account Settings
-*/
+ * Save the Paypal profile settings when updated from Account Settings.
+ *
+ * @param   integer $uid    ID of user being saved
+ */
 function plugin_profilesave_paypal($uid=0)
 {
     global $_USER;
@@ -1711,12 +1717,12 @@ function plugin_profilesave_paypal($uid=0)
 
 
 /**
-*   Get all parent categories and a product count.
-*   Recurses through all child categories.
-*
-*   @param  integer $parent_cat Parent category ID to check
-*   @return integer             Product count for all child categories
-*/
+ * Get all parent categories and a product count.
+ * Recurses through all child categories.
+ *
+ * @param   integer $parent_cat Parent category ID to check
+ * @return  integer             Product count for all child categories
+ */
 function PAYPAL_child_cat_product_count($parent_cat)
 {
     global $_TABLES;
@@ -1746,14 +1752,14 @@ function PAYPAL_child_cat_product_count($parent_cat)
 
 
 /**
-*   Explode a full item ID into item_id and options
-*   If $opt_string is set then the option string is returned
-*   unchanged, otherwise option IDs are returned as an array
-*
-*   @param  string  $item   Original item ID, e.g. "4|20,17"
-*   @param  boolean $opt_string True to return options as a string
-*   @return array       Array of (item_id, options)
-*/
+ * Explode a full item ID into item_id and options.
+ * If $opt_string is set then the option string is returned
+ * unchanged, otherwise option IDs are returned as an array.
+ *
+ * @param   string  $item   Original item ID, e.g. "4|20,17"
+ * @param   boolean $opt_string True to return options as a string
+ * @return  array       Array of (item_id, options)
+ */
 function PAYPAL_explode_opts($item, $opt_string = false)
 {
     if (strpos($item, '|')) {
@@ -1775,12 +1781,12 @@ function PAYPAL_explode_opts($item, $opt_string = false)
 
 
 /**
-*   Get a date object corresponding to "now".
-*   Used to avoid creating a lot of Date objects or cluttering
-*   the global variables
-*
-*   @return object      Date object
-*/
+ * Get a date object corresponding to "now".
+ * Used to avoid creating a lot of Date objects or cluttering
+ * the global variables
+ *
+ * @return  object      Date object
+ */
 function PAYPAL_now()
 {
     global $_CONF;
@@ -1792,6 +1798,11 @@ function PAYPAL_now()
 }
 
 
+/**
+ * Get a DateTimeZone object for the current timezone.
+ *
+ * @return  object  DateTimeZone object
+ */
 function PAYPAL_timezone()
 {
     global $_CONF;
@@ -1804,12 +1815,12 @@ function PAYPAL_timezone()
 
 
 /**
-*   Get an icon from the CSS icon set, either UIkit or FontAwesome
-*
-*   @param  string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
-*   @param  string  $style  Style name from local CSS
-*   @return string      Class names for icon
-*/
+ * Get an icon from the CSS icon set, either UIkit or FontAwesome.
+ *
+ * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
+ * @param   string  $style  Style name from local CSS
+ * @return  string      Class names for icon
+ */
 function PP_getIcon($name, $style='info')
 {
     global $_PP_CONF;
@@ -1822,14 +1833,14 @@ function PP_getIcon($name, $style='info')
 require_once __DIR__ . '/services.inc.php';
 
 /**
-*   Provides the getItemInfo function for products
-*
-*   @param  string  $id         Product ID
-*   @param  string  $fields     Comma-separated list of fields to return
-*   @param  integer $uid        User ID
-*   @param  array   $options    Not used
-*   @return array           Array of product information
-*/
+ * Provides the getItemInfo function for products.
+ *
+ * @param   string  $id         Product ID
+ * @param   string  $what       Comma-separated list of fields to return
+ * @param   integer $uid        User ID
+ * @param   array   $options    Not used
+ * @return  array           Array of product information
+ */
 function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
 {
     global $_TABLES, $_CONF, $LANG_PP;
@@ -1982,14 +1993,14 @@ function plugin_getiteminfo_paypal($id, $what, $uid=0, $options=array())
 
 
 /**
-*   Export user data when requested.
-*
-*   @param  integer $uid        User ID
-*   @param  string  $email      User Email Address (not used)
-*   @param  string  $username   User Name (not used)
-*   @param  string  $ip         IP address (not used)
-*   @return string              XML-formatted data
-*/
+ * Export user data when requested.
+ *
+ * @param   integer $uid        User ID
+ * @param   string  $email      User Email Address (not used)
+ * @param   string  $username   User Name (not used)
+ * @param   string  $ip         IP address (not used)
+ * @return  string              XML-formatted data
+ */
 function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 {
     $U = \Paypal\UserInfo::getInstance($uid);
@@ -2014,13 +2025,13 @@ function plugin_privacy_export_paypal($uid, $email='', $username='', $ip='')
 
 
 /**
-*   Actions to perform when notified by a plugin that an item has been saved.
-*   - Delete cached encrypted buttons
-*
-*   @param  string  $id     Item ID
-*   @param  string  $type   Item Type, e.g. plugin name
-*   @param  string  $old_id Old ID, in case the ID was changed
-*/
+ * Actions to perform when notified by a plugin that an item has been saved.
+ * - Delete cached encrypted buttons
+ *
+ * @param  string  $id     Item ID
+ * @param  string  $type   Item Type, e.g. plugin name
+ * @param  string  $old_id Old ID, in case the ID was changed
+ */
 function plugin_itemsaved_paypal($id, $type, $old_id = '')
 {
     global $_TABLES;
@@ -2036,14 +2047,14 @@ function plugin_itemsaved_paypal($id, $type, $old_id = '')
 
 
 /**
-*   Get an array variable, first checking whether it's set
-*
-*   @param  array   $A          Array where var should be
-*   @param  string  $varname    Name of array element
-*   @param  string  $type       Type of return value
-*   @param  mixed   $default    Default value, if any
-*   @return     Array element or NULL, cast to $type
-*/
+ * Get an array variable, first checking whether it's set.
+ *
+ * @param   array   $A          Array where var should be
+ * @param   string  $varname    Name of array element
+ * @param   string  $type       Type of return value
+ * @param   mixed   $default    Default value, if any
+ * @return  array       Array element or NULL, cast to $type
+ */
 function PP_getVar($A, $varname, $type = 'string', $default = NULL)
 {
     if (!isset($A[$varname])) {
@@ -2081,11 +2092,11 @@ function PP_getVar($A, $varname, $type = 'string', $default = NULL)
 
 
 /**
-*   Get the sales tax rate to charge.
-*   Currently just returns the globally-configured rate
-*
-*   @return float   Tax Rate
-*/
+ * Get the sales tax rate to charge.
+ * Currently just returns the globally-configured rate.
+ *
+ * @return  float   Tax Rate
+ */
 function PP_getTaxRate()
 {
     global $_PP_CONF;
@@ -2095,11 +2106,11 @@ function PP_getTaxRate()
 
 
 /**
-*   Get the sales tax for a taxable amount
-*
-*   @param  float   $amount     Taxable amount
-*   @return float               Sales Tax
-*/
+ * Get the sales tax for a taxable amount.
+ *
+ * @param   float   $amount     Taxable amount
+ * @return  float               Sales Tax
+ */
 function PP_getTax($amount)
 {
     return round($amount * PP_getTaxRate(), 2);
@@ -2107,15 +2118,15 @@ function PP_getTax($amount)
 
 
 /**
-*   Helper function to get a template object.
-*   If a name is supplied as a string with no ID, an empty template
-*   object will be returned with the default path set.
-*
-*   @param  string  $name   Base name of template file, e.g. "editor"
-*   @param  string  $id     ID of template, e.g. "editform"
-*   @param  string  $path   Optional path if not "templates/"
-*   @return string      Full filename, e.g. "editor.uikit.thtml"
-*/
+ * Helper function to get a template object.
+ * If a name is supplied as a string with no ID, an empty template
+ * object will be returned with the default path set.
+ *
+ * @param   string  $name   Base name of template file, e.g. "editor"
+ * @param   string  $id     ID of template, e.g. "editform"
+ * @param   string  $path   Optional path if not "templates/"
+ * @return  s tring      Full filename, e.g. "editor.uikit.thtml"
+ */
 function PP_getTemplate($name, $id='', $path='')
 {
     global $_PP_CONF;
@@ -2151,13 +2162,13 @@ function PP_getTemplate($name, $id='', $path='')
 
 
 /**
-*   Check that the currently installed version matches the code version.
-*   This is to disable functions that might not work due to a mismatch.
-*   Just check the major.minor.revision values.  Any fourth element is ignored.
-*
-*   @param  string  $required   Required version, default to code version
-*   @return boolean     True if current >= installed version, False if not
-*/
+ * Check that the currently installed version matches the code version.
+ * This is to disable functions that might not work due to a mismatch.
+ * Just check the major.minor.revision values.  Any fourth element is ignored.
+ *
+ * @param   string  $required   Required version, default to code version
+ * @return  boolean     True if current >= installed version, False if not
+ */
 function PP_isMinVersion($required = '')
 {
     global $_PP_CONF, $_PLUGIN_INFO;

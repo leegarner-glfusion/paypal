@@ -1,27 +1,35 @@
 <?php
 /**
-*   Class to manage order items
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage order line items.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @since       v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 namespace Paypal;
 
 /**
- * Class for order items.
+ * Class for order line items.
  * @package paypal
  */
 class OrderItem
 {
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties = array();
+
+    /** Product object.
+     * @var object */
     private $product = NULL;
+
+    /** Fields for an OrderItem record.
+     * @var array */
     private static $fields = array('id', 'order_id', 'product_id',
             'description', 'quantity', 'txn_id', 'txn_type',
             'status', 'expiration', 'price', 'token',
@@ -30,11 +38,12 @@ class OrderItem
     );
 
     /**
-    *   Constructor.
-    *   Initializes the array of orderstatus.
-    *
-    *   @uses   Load()
-    */
+     * Constructor.
+     * Initializes the array of orderstatus.
+     *
+     * @param   integer $item   OrderItem record ID
+     * @uses    self::Load()
+     */
     function __construct($item = 0)
     {
         if (is_numeric($item) && $item > 0) {
@@ -56,10 +65,10 @@ class OrderItem
 
 
     /**
-    *   Load the item information
+    * Load the item information.
     *
-    *   @param  integer $rec_id     DB record ID of item
-    *   @return boolean     True on success, False on failure
+    * @param    integer $rec_id     DB record ID of item
+    * @return   boolean     True on success, False on failure
     */
     public function Read($rec_id)
     {
@@ -81,11 +90,11 @@ class OrderItem
 
 
     /**
-    *   Set the object variables from an array
-    *
-    *   @param  array   $A      Array of values
-    *   @return boolean     True on success, False if $A is not an array
-    */
+     * Set the object variables from an array.
+     *
+     * @param   array   $A      Array of values
+     * @return  boolean     True on success, False if $A is not an array
+     */
     public function setVars($A)
     {
         if (!is_array($A)) return false;
@@ -100,7 +109,7 @@ class OrderItem
 
 
     /**
-     * Setter function
+     * Setter function.
      *
      * @param   string  $key    Name of property to set
      * @param   mixed   $value  Value to set for property
@@ -137,7 +146,7 @@ class OrderItem
 
 
     /**
-     * Getter function
+     * Getter function.
      *
      * @param   string  $key    Property to retrieve
      * @return  mixed           Value of property, NULL if undefined
@@ -153,7 +162,7 @@ class OrderItem
 
 
     /**
-     * Get the order object related to this item
+     * Get the order object related to this item.
      *
      * @return  object  Order Object
      */
@@ -164,10 +173,10 @@ class OrderItem
 
 
     /**
-    *   Public function to get the Product object for this item
-    *
-    *   @return object      Product object
-    */
+     * Public function to get the Product object for this item.
+     *
+     * @return  object      Product object
+     */
     public function getProduct()
     {
         return $this->product;
@@ -175,10 +184,10 @@ class OrderItem
 
 
     /**
-    *   Get the short description. Return the long descr if not defined
-    *
-    *   @return string  Description string
-    */
+     * Get the short description. Return the long descr if not defined.
+     *
+     * @return  string  Description string
+     */
     public function getShortDscp()
     {
         if ($this->short_description == '') {
@@ -190,13 +199,13 @@ class OrderItem
 
 
     /**
-    *   Add an option text item to the order item.
-    *   This allows products to add additional information when purchased,
-    *   beyond the standard options selected.
-    *
-    *   @param  string  $text   Text to add
-    *   @param  boolean $save   True to immediately save the item
-    */
+     * Add an option text item to the order item.
+     * This allows products to add additional information when purchased,
+     * beyond the standard options selected.
+     *
+     * @param   string  $text   Text to add
+     * @param   boolean $save   True to immediately save the item
+     */
     public function addOptionText($text, $save=true)
     {
         $opts = $this->options_text;
@@ -207,14 +216,14 @@ class OrderItem
 
 
     /**
-    *   Add a special text element to an order item.
-    *   This allows products to add additional information when purchased,
-    *   beyond the items entered at purchase.
-    *
-    *   @param  string  $name   Name of element
-    *   @param  string  $value  Value of element
-    *   @param  boolean $save   True to immediately save the item
-    */
+     * Add a special text element to an order item.
+     * This allows products to add additional information when purchased,
+     * beyond the items entered at purchase.
+     *
+     * @param   string  $name   Name of element
+     * @param   string  $value  Value of element
+     * @param   boolean $save   True to immediately save the item
+     */
     public function addSpecial($name, $value, $save=true)
     {
         // extras is set by __set so it has to be extracted to get at
@@ -227,11 +236,11 @@ class OrderItem
 
 
     /**
-    *   Save an order item to the database.
-    *
-    *   @param  array   $A  Optional array of data to save
-    *   @return boolean     True on success, False on DB error
-    */
+     * Save an order item to the database.
+     *
+     * @param   array   $A  Optional array of data to save
+     * @return  boolean     True on success, False on DB error
+     */
     public function Save($A= NULL)
     {
         global $_TABLES;
@@ -287,12 +296,12 @@ class OrderItem
 
 
     /**
-     *   Update the quantity for a cart item.
-     *   Does not save the item since Order::Save() must be called
-     *   anyway to update shipping, tax, etc.
+     * Update the quantity for a cart item.
+     * Does not save the item since Order::Save() must be called
+     * anyway to update shipping, tax, etc.
      *
-     *   @param  integer $newqty New quantity
-     *   @return object          Updated item object
+     * @param   integer $newqty New quantity
+     * @return  object          Updated item object
      */
     public function setQuantity($newqty)
     {
@@ -310,7 +319,6 @@ class OrderItem
 
     /**
      * Check if the buyer can download a file from the order view.
-     *
      */
     public function canDownload()
     {

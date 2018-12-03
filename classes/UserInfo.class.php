@@ -1,46 +1,59 @@
 <?php
 /**
-*   Class to handle user account info for the Classifieds plugin
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to handle user account info for the Paypal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for user info such as addresses
-*   @since  0.5.0
-*   @package paypal
-*/
+ * Class for user info such as addresses.
+ * @since   v0.5.0
+ * @package paypal
+ */
 class UserInfo
 {
     /** User ID
-    *   @var integer */
+    * @var integer */
     var $uid;
 
     /** Addresses stored for this user
-    *   @var array */
+    * @var array */
     var $addresses = array();
 
+    /**  Flag to indicate that this is a new record.
+     * @var boolean */
     private $isNew = true;
+
+    /** Internal properties accessed via `__set()` and `__get()`.
+     * @var array */
     private $properties = array();
+
+    /** Form action URL when saving profile information.
+     * @var string */
     private $formaction = NULL;
+
+    /** Extra form variables added depending on how the profile is being edited.
+     * @var array */
     private $extravars = array();
 
+    /** Array to cache user profiles.
+     * @var array */
     private static $users = array();
 
     /**
-    *   Constructor.
-    *   Reads in the specified user, if $id is set.  If $id is zero,
-    *   then the current user is used.
-    *
-    *   @param  integer     $uid    Optional user ID
-    */
+     * Constructor.
+     * Reads in the specified user, if $id is set.  If $id is zero,
+     * then the current user is used.
+     *
+     * @param   integer     $uid    Optional user ID
+     */
     function __construct($uid=0)
     {
         global $_USER;
@@ -55,11 +68,11 @@ class UserInfo
 
 
     /**
-    *   Set a property's value
-    *
-    *   @param  string  $key    Name of property to set
-    *   @param  mixed   $value  Value to set
-    */
+     * Set a property's value.
+     *
+     * @param   string  $key    Name of property to set
+     * @param   mixed   $value  Value to set
+     */
     public function __set($key, $value)
     {
         switch ($key) {
@@ -77,11 +90,11 @@ class UserInfo
 
 
     /**
-    *   Get a property's value
-    *
-    *   @param  string  $key    Name of property to retrieve
-    *   @return mixed       Value of property, NULL if not set
-    */
+     * Get a property's value.
+     *
+     * @param   string  $key    Name of property to retrieve
+     * @return  mixed       Value of property, NULL if not set
+     */
     public function __get($key)
     {
         if (isset($this->properties[$key])) {
@@ -93,10 +106,10 @@ class UserInfo
 
 
     /**
-    *   Read one user from the database
-    *
-    *   @param  integer $uid Optional User ID.  Current user if zero.
-    */
+     * Read one user from the database.
+     *
+     * @param   integer $uid    Optional User ID.  Current user if zero.
+     */
     private function ReadUser($uid = 0)
     {
         global $_TABLES;
@@ -130,11 +143,11 @@ class UserInfo
 
 
     /**
-    *   Get an address
-    *
-    *   @param  integer $add_id     DB Id of address
-    *   @return array               Array of address values
-    */
+     * Get an address.
+     *
+     * @param   integer $add_id     DB Id of address
+     * @return  array               Array of address values
+     */
     public static function getAddress($add_id)
     {
         global $_TABLES;
@@ -147,13 +160,13 @@ class UserInfo
 
 
     /**
-    *   Get the default billing or shipping address.
-    *   If no default found, return the first address available.
-    *   If no addresses are defined, return NULL
-    *
-    *   @param  string  $type   Type of address to get
-    *   @return mixed   Address array (name, street, city, etc.), or NULL
-    */
+     * Get the default billing or shipping address.
+     * If no default found, return the first address available.
+     * If no addresses are defined, return NULL
+     *
+     * @param   string  $type   Type of address to get
+     * @return  mixed   Address array (name, street, city, etc.), or NULL
+     */
     public function getDefaultAddress($type='billto')
     {
         if ($type != 'billto') $type = 'shipto';
@@ -170,12 +183,12 @@ class UserInfo
 
 
     /**
-    *   Save the current values to the database.
-    *
-    *   @param  array   $A      Array of data ($_POST)
-    *   @param  string  $type   Type of address (billing or shipping)
-    *   @return array       Array of DB record ID, -1 for failure and message
-    */
+     * Save the current values to the database.
+     *
+     * @param   array   $A      Array of data ($_POST)
+     * @param   string  $type   Type of address (billing or shipping)
+     * @return  array       Array of DB record ID, -1 for failure and message
+     */
     public function SaveAddress($A, $type='')
     {
         global $_TABLES, $_USER;
@@ -231,10 +244,10 @@ class UserInfo
 
 
     /**
-    *   Save the usr information
-    *
-    *   @return boolean     True on success, False on failure
-    */
+     * Save the usr information.
+     *
+     * @return  boolean     True on success, False on failure
+     */
     public function SaveUser()
     {
         global $_TABLES;
@@ -258,12 +271,12 @@ class UserInfo
 
 
     /**
-    *   Delete all information for a user.
-    *   Called from plugin_user_deleted_paypal() when a user account is
-    *   removed.
-    *
-    *   @param  integer $uid    User ID
-    */
+     * Delete all information for a user.
+     * Called from plugin_user_deleted_paypal() when a user account is
+     * removed.
+     *
+     * @param   integer $uid    User ID
+     */
     public static function deleteUser($uid)
     {
         global $_TABLES;
@@ -276,9 +289,11 @@ class UserInfo
 
 
     /**
-    *   Delete an address by id.
-    *   Called when the user deletes one of their billing or shipping addresses.
-    */
+     * Delete an address by id.
+     * Called when the user deletes one of their billing or shipping addresses.
+     *
+     * @param   integer $id     Record ID of address to delete
+     */
     public static function deleteAddress($id)
     {
         global $_TABLES;
@@ -291,12 +306,11 @@ class UserInfo
 
 
     /**
-    *   Validate the address components
-    *
-    *   @param  array   $A      Array of parameters, e.g. $_POST
-    *   @param  string  $type   Type of address (billing or shipping)
-    *   @return string      List of invalid items, or empty string for success
-    */
+     * Validate the address components.
+     *
+     * @param   array   $A      Array of parameters, e.g. $_POST
+     * @return  string      List of invalid items, or empty string for success
+     */
     public static function isValidAddress($A)
     {
         global $LANG_PP, $_PP_CONF;
@@ -330,13 +344,14 @@ class UserInfo
 
 
     /**
-    *   Creates the address edit form.
-    *   Pre-fills values from another address if supplied
-    *
-    *   @param  string  $type   Address type (billing or shipping)
-    *   @param  array   $A      Optional values to pre-fill form
-    *   @return string          HTML for edit form
-    */
+     * Creates the address edit form.
+     * Pre-fills values from another address if supplied
+     *
+     * @param   string  $type   Address type (billing or shipping)
+     * @param   array   $A      Optional values to pre-fill form
+     * @param   integer $step   Current step number
+     * @return  string          HTML for edit form
+     */
     public function AddressForm($type='billto', $A=array(), $step)
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_USER;
@@ -438,10 +453,10 @@ class UserInfo
 
 
     /**
-    *   Provide a public method to set the private formaction variable
-    *
-    *   @param  string  $action     Value to set as form action
-    */
+     * Provide a public method to set the private formaction variable
+     *
+     * @param   string  $action     Value to set as form action
+     */
     public function setFormAction($action)
     {
         $this->formaction = $action;
@@ -449,11 +464,11 @@ class UserInfo
 
 
     /**
-    *   Add a hidden form value
-    *
-    *   @param  string  $name   Name of form variable
-    *   @param  string  $value  Value of variable
-    */
+     * Add a hidden form value.
+     *
+     * @param   string  $name   Name of form variable
+     * @param   string  $value  Value of variable
+     */
     public function addFormVar($name, $value)
     {
         $this->extravars[] = '<input type="hidden" name="' . $name .
@@ -462,11 +477,11 @@ class UserInfo
 
 
     /**
-    *   Get the instance of a UserInfo object for the specified user.
-    *
-    *   @param  integer $uid    User ID
-    *   @return object          UserInfo object for the user
-    */
+     * Get the instance of a UserInfo object for the specified user.
+     *
+     * @param   integer $uid    User ID
+     * @return  object          UserInfo object for the user
+     */
     public static function getInstance($uid = 0)
     {
         global $_USER;
@@ -487,11 +502,11 @@ class UserInfo
 
 
     /**
-    *   Get an array of field names used by this class.
-    *   May be used when constructing forms and SQL statements.
-    *
-    *   @return array   Array of field names
-    */
+     * Get an array of field names used by this class.
+     * May be used when constructing forms and SQL statements.
+     *
+     * @return  array   Array of field names
+     */
     public static function Fields()
     {
         return array('name', 'company', 'address1', 'address2',

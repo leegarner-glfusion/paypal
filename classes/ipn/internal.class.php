@@ -1,17 +1,17 @@
 <?php
 /**
-*   This file contains the Dummy IPN class.
-*   It is used with orders that have zero balances and thus don't go through
-*   an actual payment processor.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * This file contains the Dummy IPN class.
+ * It is used with orders that have zero balances and thus don't go through
+ * an actual payment processor.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\ipn;
 
 use \Paypal\Cart;
@@ -24,23 +24,23 @@ if (!defined ('GVERSION')) {
 }
 
 /**
- *  Class to provide IPN for internal-only transactions,
- *  such as zero-balance orders.
+ * Class to provide IPN for internal-only transactions, such as zero-balance orders.
  *
- *  @since 0.6.0
- *  @package paypal
+ * @since   v0.6.0
+ * @package paypal
  */
 class internal extends \Paypal\IPN
 {
-
-    private $custom;    // holder for custom data
+    /** Holder for custom order data.
+     * @var array */
+    private $custom;
 
     /**
-    *   Constructor.
-    *   Fake payment gateway variables.
-    *
-    *   @param  array   $A      $_POST'd variables from Paypal
-    */
+     * Constructor.
+     * Fake payment gateway variables.
+     *
+     * @param   array   $A      $_POST'd variables from Paypal
+     */
     function __construct($A=array())
     {
         global $_USER;
@@ -107,12 +107,12 @@ class internal extends \Paypal\IPN
 
 
     /**
-    *   Verify the transaction.
-    *   This just checks that a valid cart_id was received along with other
-    *   variables.
-    *
-    *   @return boolean         true if successfully validated, false otherwise
-    */
+     * Verify the transaction.
+     * This just checks that a valid cart_id was received along with other
+     * variables.
+     *
+     * @return  boolean         True if successfully validated, false otherwise
+     */
     private function Verify()
     {
         if ($this->Order === NULL) {
@@ -145,12 +145,12 @@ class internal extends \Paypal\IPN
 
 
     /**
-    *   Confirms that payment status is complete.
-    *   (not 'denied', 'failed', 'pending', etc.)
-    *
-    *   @param  string  $payment_status     Payment status to verify
-    *   @return boolean                     True if complete, False otherwise
-    */
+     * Confirms that payment status is complete.
+     * (not 'denied', 'failed', 'pending', etc.)
+     *
+     * @param   string  $payment_status     Payment status to verify
+     * @return  boolean                     True if complete, False otherwise
+     */
     private function isStatusCompleted($payment_status)
     {
         return ($payment_status == 'Completed');
@@ -158,12 +158,12 @@ class internal extends \Paypal\IPN
 
 
     /**
-    *   Checks if payment status is reversed or refunded.
-    *   For example, some sort of cancelation.
-    *
-    *   @param  string  $payment_status     Payment status to check
-    *   @return boolean                     True if reversed or refunded
-    */
+     * Checks if payment status is reversed or refunded.
+     * For example, some sort of cancelation.
+     *
+     * @param   string  $payment_status     Payment status to check
+     * @return  boolean                     True if reversed or refunded
+     */
     private function isStatusReversed($payment_status)
     {
         return ($payment_status == 'Reversed' || $payment_status == 'Refunded');
@@ -171,25 +171,25 @@ class internal extends \Paypal\IPN
 
 
     /**
-    *   Process an incoming IPN transaction
-    *   Do the following:
-    *       1. Verify IPN
-    *       2. Log IPN
-    *       3. Check that transaction is complete
-    *       4. Check that transaction is unique
-    *       5. Check for valid receiver email address
-    *       6. Process IPN
-    *
-    *   @uses   BaseIPN::AddItem()
-    *   @uses   BaseIPN::handleFailure()
-    *   @uses   BaseIPN::handlePurchase()
-    *   @uses   BaseIPN::isUniqueTxnId()
-    *   @uses   BaseIPN::isSufficientFunds()
-    *   @uses   BaseIPN::Log()
-    *   @uses   Verify()
-    *   @param  array   $in     POST variables of transaction
-    *   @return boolean true if processing valid and completed, false otherwise
-    */
+     * Process an incoming IPN transaction
+     * Do the following:
+     *  - Verify IPN
+     *  - Log IPN
+     *  - Check that transaction is complete
+     *  - Check that transaction is unique
+     *  - Check for valid receiver email address
+     *  - Process IPN
+     *
+     * @uses    BaseIPN::AddItem()
+     * @uses    BaseIPN::handleFailure()
+     * @uses    BaseIPN::handlePurchase()
+     * @uses    BaseIPN::isUniqueTxnId()
+     * @uses    BaseIPN::isSufficientFunds()
+     * @uses    BaseIPN::Log()
+     * @uses    self::Verify()
+     * @param   array   $in     POST variables of transaction
+     * @return  boolean True if processing valid and completed, false otherwise
+     */
     public function Process()
     {
         // If no data has been received, then there's nothing to do.
@@ -239,6 +239,6 @@ class internal extends \Paypal\IPN
         return $this->handlePurchase();
     }   // function Process
 
-}   // class paypal_ipn
+}   // class \Paypal\ipn\internal
 
 ?>

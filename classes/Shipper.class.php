@@ -1,13 +1,13 @@
 <?php
 /**
- *   Class to handle shipping costs based on quantity, total weight and class
- *   First iteration only allows for a number of "units" per product
+ * Class to handle shipping costs based on quantity, total weight and class
+ * First iteration only allows for a number of "units" per product
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
  * @package     paypal
- * @version     0.6.0
- * @since       0.6.0
+ * @version     v0.6.0
+ * @since       v0.6.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -15,28 +15,29 @@
 namespace Paypal;
 
 /**
-*   Class for product and category sales
-*   @package paypal
-*/
+ * Class for product and category sales.
+ * @package paypal
+ */
 class Shipper
 {
+    /** Base tag used for caching.
+     * @var string */
     static $base_tag = 'shipping';
 
     /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+     * @var array */
     var $properties;
 
     /** Indicate whether the current object is a new entry or not.
-    *   @var boolean */
+     * @var boolean */
     var $isNew;
 
 
     /**
-    *   Constructor.
-    *   Sets variables from the provided array
-    *
-    *   @param  array   DB record
-    */
+     * Constructor. Sets variables from the provided array.
+     *
+     * @param  array   DB record
+     */
     public function __construct($A=array())
     {
         $this->properties = array();
@@ -67,11 +68,11 @@ class Shipper
 
 
     /**
-    *   Read a single record based on the record ID
-    *
-    *   @param  integer $id     DB record ID
-    *   @return boolean     True on success, False on failure
-    */
+     * Read a single record based on the record ID.
+     *
+     * @param   integer $id     DB record ID
+     * @return  boolean     True on success, False on failure
+     */
     public function Read($id)
     {
         global $_TABLES;
@@ -100,11 +101,11 @@ class Shipper
 
 
     /**
-    *   Set the variables from a DB record into object properties
-    *
-    *   @param  array   $A      Array of properties
-    *   @param  boolean $fromDB True if reading from DB, False if from a form
-    */
+     * Set the variables from a DB record into object properties.
+     *
+     * @param   array   $A      Array of properties
+     * @param   boolean $fromDB True if reading from DB, False if from a form
+     */
     public function setVars($A, $fromDB=true)
     {
         $this->id = PP_getVar($A, 'id', 'integer');
@@ -133,10 +134,10 @@ class Shipper
 
 
     /**
-    *   Get all shipping options.
-    *
-    *   @return array   Array of all DB records
-    */
+     * Get all shipping options.
+     *
+     * @return  array   Array of all DB records
+     */
     public static function getAll()
     {
         global $_TABLES;
@@ -195,11 +196,11 @@ class Shipper
 
 
     /**
-    *   Get the single best shipper for a number of units
-    *
-    *   @param  integer $units      Number of units being shipped
-    *   @return object      Shipper object for the shipper with the lowest rate
-    */
+     * Get the single best shipper for a number of units.
+     *
+     * @param   integer $units      Number of units being shipped
+     * @return  object      Shipper object for the shipper with the lowest rate
+     */
     public static function getBestRate($units)
     {
         $shippers = self::getShippers($units);
@@ -217,6 +218,14 @@ class Shipper
     }
 
 
+    /**
+     * Calculate the best fit for items/packages.
+     * Not currently used.
+     *
+     * @param   object  $shipper    Shipper to use
+     * @param   float   $units      Total units being shipped
+     * @return  float       Shipping amount
+     */
     public static function calcBestFit($shipper, $units)
     {
         //var_dump($shipper->rates);die;
@@ -225,11 +234,11 @@ class Shipper
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value='')
     {
         global $_CONF;
@@ -269,11 +278,11 @@ class Shipper
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -285,11 +294,11 @@ class Shipper
 
 
     /**
-    *   Save the current or provided values to the database.
-    *
-    *   @param  array   $A      Optional array of values from $_POST
-    *   @return boolean         True if no errors, False otherwise
-    */
+     * Save the current or provided values to the database.
+     *
+     * @param   array   $A      Optional array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
+     */
     public function Save($A =NULL)
     {
         global $_TABLES, $_PP_CONF;
@@ -324,11 +333,11 @@ class Shipper
 
 
     /**
-    *   Delete a single shipper record from the database
-    *
-    *   @param  integer $id     Record ID
-    *   @return boolean     True on success, False on invalid ID
-    */
+     * Delete a single shipper record from the database.
+     *
+     * @param   integer $id     Record ID
+     * @return  boolean     True on success, False on invalid ID
+     */
     public static function Delete($id)
     {
         global $_TABLES;
@@ -343,11 +352,11 @@ class Shipper
 
 
     /**
-    *   Creates the edit form.
-    *
-    *   @param  integer $id Attributeal ID, current record used if zero
-    *   @return string      HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id Attributeal ID, current record used if zero
+     * @return  string      HTML for edit form
+     */
     public function Edit()
     {
         global $_CONF, $_PP_CONF, $LANG_PP;
@@ -380,13 +389,12 @@ class Shipper
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @uses   Attribute::_toggle()
-    *   @param  integer $oldvalue   Original field value
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Sets the "enabled" field to the opposite of the given value.
+     *
+     * @param   integer $oldvalue   Original field value
+     * @param   integer $id         ID number of element to modify
+     * @return         New value, or old value upon failure
+     */
     public static function toggleEnabled($oldvalue, $id)
     {
         global $_TABLES;
@@ -402,7 +410,7 @@ class Shipper
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) {
-            COM_errorLog("Shipper::_toggle() SQL error: $sql", 1);
+            COM_errorLog("Shipper::toggleEnabled() SQL error: $sql", 1);
             return $oldvalue;
         } else {
             Cache::clear(self::$base_tag);

@@ -1,41 +1,56 @@
 <?php
 /**
-*   Class to manage order processing statuses.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-
+ * Class to manage order processing statuses.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for order processing workflow items
-*   Order statuses are defined in the database and can be re-ordered and
-*   individually enabled or disabled.
-*   @package paypal
-*/
+ * Class for order processing workflow items.
+ * Order statuses are defined in the database and can be re-ordered and
+ * individually enabled or disabled.
+ * @package paypal
+ */
 class OrderStatus extends Workflow
 {
-    static $table = 'paypal.orderstatus';
+    /** Table name.
+     * @var string */
+    private static $table = 'paypal.orderstatus';
 
+    /** Status Name.
+     * @var string */
     private $name;
+
+    /** Enabled flag.
+     * @var integer */
     public $enabled;
+
+    /** Display and usage order.
+     * @var integer */
     public $orderby;
+
+    /** True to notify the buyer when an order changes to this status.
+     * @var boolean */
     private $notify_buyer;
+
+    /** True to notify the administrator when an order changes to this status.
+     * @var boolean */
     private $notify_admin;
 
     /**
-    *   Constructor.
-    *   Initializes the array of orderstatus.
-    *
-    *   @see    self::getAll()
-    *   @param  array   $A  Array of data from the DB
-    */
+     * Constructor.
+     * Initializes the array of orderstatus.
+     *
+     * @see     self::getAll()
+     * @param   array   $A  Array of data from the DB
+     */
     public function __construct($A=array())
     {
         if (is_array($A)) {
@@ -55,9 +70,9 @@ class OrderStatus extends Workflow
 
 
     /**
-    *   Get all order status objects into an array
-    */
-    public static function getAll($Cart = NULL)
+     * Get all order status objects into an array.
+     */
+    public static function getAll()
     {
         global $_TABLES;
         static $statuses = NULL;
@@ -78,7 +93,7 @@ class OrderStatus extends Workflow
 
 
     /**
-     * Get a single status instance
+     * Get a single status instance.
      *
      * @param   string  Name of status to get
      * @return  array   Array of status info
@@ -95,13 +110,13 @@ class OrderStatus extends Workflow
 
 
     /**
-    *   Creates the complete selection HTML for order status updates.
-    *
-    *   @param  string  $order_id   ID of order being edited
-    *   @param  integer $showlog    1 to add to the onscreen log, 0 to not
-    *   @param  string  $selected   Current order status
-    *   @return string      HTML for select block
-    */
+     * Creates the complete selection HTML for order status updates.
+     *
+     * @param   string  $order_id   ID of order being edited
+     * @param   integer $showlog    1 to add to the onscreen log, 0 to not
+     * @param   string  $selected   Current order status
+     * @return  string      HTML for select block
+     */
     public static function Selection($order_id, $showlog=0, $selected = '')
     {
         global $LANG_PP;
@@ -152,13 +167,13 @@ class OrderStatus extends Workflow
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @param  integer $id         ID number of element to modify
-    *   @param  string  $field      Database fieldname to change
-    *   @param  integer $oldvalue   Original value to change
-    *   @return         New value, or old value upon failure
-    */
+     * Toggles a DB field from the given value to the opposite.
+     *
+     * @param   integer $id         ID number of element to modify
+     * @param   string  $field      Database fieldname to change
+     * @param   integer $oldvalue   Original value to change
+     * @return  integer     New value, or old value upon failure
+     */
     public static function Toggle($id, $field, $oldvalue)
     {
         global $_TABLES;
@@ -187,11 +202,11 @@ class OrderStatus extends Workflow
 
 
     /**
-    *   Move a workflow up or down the admin list.
-    *
-    *   @param  string  $id     Workflow database ID
-    *   @param  string  $where  Direction to move (up or down)
-    */
+     * Move a workflow up or down the admin list.
+     *
+     * @param   string  $id     Workflow database ID
+     * @param   string  $where  Direction to move (up or down)
+     */
     public static function moveRow($id, $where)
     {
         global $_TABLES;
@@ -223,8 +238,8 @@ class OrderStatus extends Workflow
 
 
     /**
-     *   Reorder all workflow items.
-     *   Called after moveRow()
+     * Reorder all workflow items.
+     * Called after moveRow()
      */
     public static function ReOrder()
     {

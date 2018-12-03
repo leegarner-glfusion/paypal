@@ -1,28 +1,36 @@
 <?php
 /**
-*   Class to handle coupon operations
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*
-*   Based on https://github.com/joashp/simple-php-coupon-code-generator
-*/
+ * Class to handle coupon operations.
+ * Based on https://github.com/joashp/simple-php-coupon-code-generator
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @since       v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ *
+ */
 namespace Paypal;
 
 /**
-*   Class for coupons
-*   @package paypal
-*/
+ * Class for coupons.
+ * @package paypal
+ */
 class Coupon extends Product
 {
-    const MAX_EXP = '9999-12-31';   // Max expiration date
+    /** Maximum possible expiration date.
+     * Used as a default for purchased coupons.
+     * @const string */
+    const MAX_EXP = '9999-12-31';
 
+    /**
+     * Constructor. Set up local variables.
+     *
+     * @param   integer $prod_id    Product ID
+     */
     public function __construct($prod_id = 0)
     {
         parent::__construct($prod_id);
@@ -37,16 +45,16 @@ class Coupon extends Product
 
 
     /**
-    *   Generate a single coupon code based on options given.
-    *   Mask, if used, is "XXXX-XXXX" where "X" indicates a character and any
-    *   other character is passed through.
-    *
-    *   @author     Joash Pereira
-    *   @author     Alex Rabinovich
-    *   @see        https://github.com/joashp/simple-php-coupon-code-generator
-    *   @param array $options
-    *   @return string
-    */
+     * Generate a single coupon code based on options given.
+     * Mask, if used, is "XXXX-XXXX" where "X" indicates a character and any
+     * other character is passed through.
+     *
+     * @author      Joash Pereira
+     * @author      Alex Rabinovich
+     * @see         https://github.com/joashp/simple-php-coupon-code-generator
+     * @param   array   $options
+     * @return  string      Coupon code
+     */
     public static function generate($options = array())
     {
         global $_PP_CONF;
@@ -120,12 +128,12 @@ class Coupon extends Product
 
 
     /**
-    *   Generate a number of coupon codes.
-    *
-    *   @param  integer $num        Number of coupon codes
-    *   @param  array   $options    Options for code creation
-    *   @return array       Array of coupon codes
-    */
+     * Generate a number of coupon codes.
+     *
+     * @param   integer $num        Number of coupon codes
+     * @param   array   $options    Options for code creation
+     * @return  array       Array of coupon codes
+     */
     public static function generate_coupons($num = 1, $options = array())
     {
         $coupons = array();
@@ -137,12 +145,13 @@ class Coupon extends Product
 
 
     /**
-    *   Record a coupon purchase
-    *
-    *   @param  float   $amount     Coupon value
-    *   @param  integer $uid        User ID, default = current user
-    *   @return mixed       Coupon code, or false on error
-    */
+     * Record a coupon purchase.
+     *
+     * @param   float   $amount     Coupon value
+     * @param   integer $uid        User ID, default = current user
+     * @param   string  $exp        Expiration date
+     * @return  mixed       Coupon code, or false on error
+     */
     public static function Purchase($amount = 0, $uid = 0, $exp = self::MAX_EXP)
     {
         global $_TABLES, $_USER;
@@ -174,15 +183,15 @@ class Coupon extends Product
 
 
     /**
-    *   Apply a coupon to the user's account.
-    *   Adds the value to the gc_bal field in user info, and marks the coupon
-    *   as "redeemed" so it can't be used again.
-    *   Status code returned will be 0=success, 1=already done, 2=error
-    *
-    *   @param  string  $code   Coupon code
-    *   @param  integer $uid    Optional user ID, current user by default
-    *   @return array       Array of (Status code, Message)
-    */
+     * Apply a coupon to the user's account.
+     * Adds the value to the gc_bal field in user info, and marks the coupon
+     * as "redeemed" so it can't be used again.
+     * Status code returned will be 0=success, 1=already done, 2=error
+     *
+     * @param   string  $code   Coupon code
+     * @param   integer $uid    Optional user ID, current user by default
+     * @return  array       Array of (Status code, Message)
+     */
     public static function Redeem($code, $uid = 0)
     {
         global $_TABLES, $_USER, $LANG_PP, $_CONF;
@@ -227,13 +236,15 @@ class Coupon extends Product
 
 
     /**
-    *   Apply a coupon value against an order.
-    *   Does not update the coupon table, but deducts the maximum of the
-    *   coupon balance or the order value from the userinfo table.
-    *
-    *   @param  float   $amount     Amount to redeem (order value)
-    *   @return float               Remaining order value, if any
-    */
+     * Apply a coupon value against an order.
+     * Does not update the coupon table, but deducts the maximum of the
+     * coupon balance or the order value from the userinfo table.
+     *
+     * @param   float   $amount     Amount to redeem (order value)
+     * @param   integer $uid        User ID redeeming the coupon
+     * @param   object  $Order      Order object
+     * @return  float               Remaining order value, if any
+     */
     public static function Apply($amount, $uid = 0, $Order = NULL)
     {
         global $_TABLES, $_USER;
@@ -276,13 +287,13 @@ class Coupon extends Product
 
 
     /**
-    *   Handle the purchase of this item.
-    *
-    *   @param  object  $Item       Item object, to get options, etc.
-    *   @param  object  $Order      Order object
-    *   @param  array   $ipn_data   Paypal IPN data
-    *   @return integer     Zero or error value
-    */
+     * Handle the purchase of this item.
+     *
+     * @param  object  $Item       Item object, to get options, etc.
+     * @param  object  $Order      Order object
+     * @param  array   $ipn_data   Paypal IPN data
+     * @return integer     Zero or error value
+     */
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data=array())
     {
         global $LANG_PP;
@@ -306,13 +317,14 @@ class Coupon extends Product
 
 
     /**
-    *   Send a notification email to the recipient of the gift card.
-    *
-    *   @param  string  $gc_code    Gift Cart Code
-    *   @param  string  $recip      Recipient Email, from the custom text field
-    *   @param  float   $amount     Gift Card Amount
-    *   @param  string  $sender     Optional sender, from the custom text field
-    */
+     * Send a notification email to the recipient of the gift card.
+     *
+     * @param   string  $gc_code    Gift Cart Code
+     * @param   string  $recip      Recipient Email, from the custom text field
+     * @param   float   $amount     Gift Card Amount
+     * @param   string  $sender     Optional sender, from the custom text field
+     * @param   string  $exp        Expiration Date
+     */
     public static function Notify($gc_code, $recip, $amount, $sender='', $exp=self::MAX_EXP)
     {
         global $_CONF, $LANG_PP_EMAIL;
@@ -342,11 +354,12 @@ class Coupon extends Product
 
 
     /**
-    *   Get additional text to add to the buyer's recipt for a product
-    *
-    *   @param  object  $item   Order Item object, to get the code
-    *   @return string          Additional message to include in email
-    */
+     * Get additional text to add to the buyer's recipt for a product.
+     * For coupons, add links to redeem against an account.
+     *
+     * @param   object  $item   Order Item object, to get the code
+     * @return  string          Additional message to include in email
+     */
     public function EmailExtra($item)
     {
         global $LANG_PP;
@@ -363,13 +376,13 @@ class Coupon extends Product
 
 
     /**
-    *   Get the display price for the catalog.
-    *   Returns "See Details" if the price is zero, or the price if
-    *   one is set.
-    *
-    *   @param  mixed   $price  Fixed price override (not used)
-    *   @return string          Formatted price, or "See Details"
-    */
+     * Get the display price for the catalog.
+     * Returns "See Details" if the price is zero, or the price if
+     * one is set.
+     *
+     * @param   mixed   $price  Fixed price override (not used)
+     * @return  string          Formatted price, or "See Details"
+     */
     public function getDisplayPrice($price = NULL)
     {
         global $LANG_PP;
@@ -384,14 +397,14 @@ class Coupon extends Product
 
 
     /**
-    *   Get all the current Gift Card records for a user
-    *   If $all is true then all records are returned, if false then only
-    *   those that are not redeemed and not expired are returned.
-    *
-    *   @param  integer $uid    User ID, default = curent user
-    *   @param  boolean $all    True to get all, False to get currently usable
-    *   @return array           Array of gift card records
-    */
+     * Get all the current Gift Card records for a user.
+     * If $all is true then all records are returned, if false then only
+     * those that are not redeemed and not expired are returned.
+     *
+     * @param   integer $uid    User ID, default = curent user
+     * @param   boolean $all    True to get all, False to get currently usable
+     * @return  array           Array of gift card records
+     */
     public static function getUserCoupons($uid = 0, $all = false)
     {
         global $_TABLES, $_USER;
@@ -438,11 +451,11 @@ class Coupon extends Product
 
 
     /**
-    *   Get the current unused Gift Card balance for a user
-    *
-    *   @param  integer $uid    User ID, default = current user
-    *   @return float           User's gift card balance
-    */
+     * Get the current unused Gift Card balance for a user.
+     *
+     * @param   integer $uid    User ID, default = current user
+     * @return  float           User's gift card balance
+     */
     public static function getUserBalance($uid = 0)
     {
         global $_USER;
@@ -461,14 +474,13 @@ class Coupon extends Product
 
 
     /**
-    *   Verifies that the given user has sufficient Gift Card balances
-    *   to cover an amount.
-    *
-    *   @uses   self::getUserBalance()
-    *   @param  float   $amount     Amount to check
-    *   @param  integer $uid        User ID, default = current user
-    *   @return boolean             True if the GC balance is sufficient.
-    */
+     * Verifies that the given user has a sufficient balance to cover an amount.
+     *
+     * @uses    self::getUserBalance()
+     * @param   float   $amount     Amount to check
+     * @param   integer $uid        User ID, default = current user
+     * @return  boolean             True if the GC balance is sufficient.
+     */
     public static function verifyBalance($amount, $uid = 0)
     {
         $amount = (float)$amount;
@@ -478,7 +490,7 @@ class Coupon extends Product
 
 
     /**
-     * Write a log entry
+     * Write a log entry.
      *
      * @param   string  $code       Gift card code
      * @param   integer $uid        User ID
@@ -583,12 +595,12 @@ class Coupon extends Product
 
 
     /**
-    *   Determine if the current user has access to view this product.
-    *   Checks that gift cards are enabled in the configuration, then
-    *   checks the general product hasAccess() function.
-    *
-    *   @return boolean     True if access and purchase is allowed.
-    */
+     * Determine if the current user has access to view this product.
+     * Checks that gift cards are enabled in the configuration, then
+     * checks the general product hasAccess() function.
+     *
+     * @return  boolean     True if access and purchase is allowed.
+     */
     public function hasAccess()
     {
         global $_PP_CONF;
@@ -607,7 +619,7 @@ class Coupon extends Product
      * a quantity. If nonzero, then the input box is a hidden variable with
      * the value set to the fixed quantity
      *
-     * return   @integer    Fixed quantity number, zero for varible qty
+     * @return  integer    Fixed quantity number, zero for varible qty
      */
     public function getFixedQuantity()
     {
@@ -616,8 +628,7 @@ class Coupon extends Product
 
 
     /**
-     * Determine if like items can be accumulated in the cart under a single
-     * line item.
+     * Determine if like items can be accumulated in the cart as a single item.
      *
      * @return  boolean     True if items can be accumulated, False if not
      */

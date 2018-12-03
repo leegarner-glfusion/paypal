@@ -1,61 +1,94 @@
 <?php
 /**
-*   Class to manage products
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.5.7
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage products.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.5.7
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for product
-*   @package paypal
-*/
+ * Class for product.
+ * @package paypal
+ */
 class Product
 {
+    /** Minimum possible date available.
+     * @const string */
     const MIN_DATE = '1900-01-01';
+
+    /** Maximum possible date available.
+     * @const string */
     const MAX_DATE = '9999-12-31';
 
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Property fields accessed via `__set()` and `__get()`.
+     * @var array */
     protected $properties;
 
-    /** Product Attributes
-    *   @var array */
+    /** Product Attributes.
+     * @var array */
     public $options;
 
-    /** Indicate whether the current user is an administrator
-    *   @var boolean */
+    /** Indicate whether the current user is an administrator.
+     * @var boolean */
     public $isAdmin;
 
+    /** Indicate that this is a new record.
+     * @var boolean */
     public $isNew;
 
-    /** Array of error messages
-     *  @var mixed */
+    /** Array of error messages/
+     * @var array */
     var $Errors = array();
 
-    //var $buttons = array();
+    /** Array of buttons.
+     * @var array */
     public $buttons;
+
+    /** Special fields, created by adding text strings.
+     * @var array */
     protected $special_fields = array();
+
+    /** Fixed quantity that can be purchased, zero means use-selectable.
+     * @var integer */
     protected $_fixed_q = 0;
-    public $Cat;        // Category object
+
+    /** Category object related to this product.
+     * @var object */
+    public $Cat;
+
+    /** Indicate that the price can be overridden during purchase.
+     * Typically used by plugin items.
+     * @var boolean */
     public $override_price = false;
-    private $_uid = 0;  // user id, for pricing
-    private $_view = 'detail';  // type of button to create (list or detail)
+
+    /** User ID, used for pricing.
+     * @var integer */
+    private $_uid = 0;
+
+    /** Type of button to create depends on the current view- list or detail.
+     * @var string */
+    private $_view = 'detail';
+
+    /** Sale object associated with this product.
+     * @var object */
     private $Sale = NULL;
+
+    /** Product images objects.
+     * @var array */
     private $Images = array();
 
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero,
-     *  then a new entry is being created.
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
      *
-     *  @param integer $id Optional type ID
+     * @param   integer $id Optional type ID
      */
     public function __construct($id=0)
     {
@@ -117,15 +150,15 @@ class Product
 
 
     /**
-    *   Gets an instance of a product object.
-    *   Figures out the type of product (plugin, catalog, etc.)
-    *   and instantiates an object if necessary.
-    *   $A can be a single item id or an array (DB record) of values.
-    *
-    *   @param  mixed   $A      Single item ID or array of values
-    *   @param  array   $mods   Optional array of product modifiers
-    *   @return object          Product Object
-    */
+     * Gets an instance of a product object.
+     * Figures out the type of product (plugin, catalog, etc.)
+     * and instantiates an object if necessary.
+     * $A can be a single item id or an array (DB record) of values.
+     *
+     * @param   mixed   $A      Single item ID or array of values
+     * @param   array   $mods   Optional array of product modifiers
+     * @return  object          Product Object
+     */
     public static function getInstance($A, $mods=array())
     {
         global $_TABLES;
@@ -179,11 +212,11 @@ class Product
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value)
     {
         switch ($var) {
@@ -281,11 +314,11 @@ class Product
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -297,10 +330,10 @@ class Product
 
 
     /**
-     *  Sets all variables to the matching values from $rows.
+     * Sets all variables to the matching values from $rows.
      *
-     *  @param  array   $row        Array of values, from DB or $_POST
-     *  @param  boolean $fromDB     True if read from DB, false if from $_POST
+     * @param   array   $row        Array of values, from DB or $_POST
+     * @param   boolean $fromDB     True if read from DB, false if from $_POST
      */
     public function setVars($row, $fromDB=false)
     {
@@ -371,10 +404,10 @@ class Product
 
 
     /**
-     *  Read a specific record and populate the local values.
+     * Read a specific record and populate the local values.
      *
-     *  @param  integer $id Optional ID.  Current ID is used if zero.
-     *  @return boolean     True if a record was read, False on failure
+     * @param   integer $id Optional ID.  Current ID is used if zero.
+     * @return  boolean     True if a record was read, False on failure
      */
     public function Read($id = 0)
     {
@@ -411,8 +444,8 @@ class Product
 
 
     /**
-    *   Load the product attributs into the options array
-    */
+     * Load the product attributs into the options array.
+     */
     protected function loadAttributes()
     {
         global $_TABLES;
@@ -438,12 +471,12 @@ class Product
 
 
     /**
-     *  Save the current values to the database.
-     *  Does not save values from $this->Images.
-     *  Appends error messages to the $Errors property.
+     * Save the current values to the database.
+     * Does not save values from $this->Images.
+     * Appends error messages to the $Errors property.
      *
-     *  @param  array   $A      Optional array of values from $_POST
-     *  @return boolean         True if no errors, False otherwise
+     * @param   array   $A      Optional array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
      */
     public function Save($A = '')
     {
@@ -565,15 +598,15 @@ class Product
 
 
     /**
-    *   Delete the current product record from the database.
-    *   Deletes the item, item attributes, images and buttons. Does not
-    *   update the purchases or IPN log at all. Does not delete an item
-    *   that has orders associated with it.
-    *
-    *   @uses   deleteImage()
-    *   @uses   deleteButtons()
-    *   @return boolean     True when deleted, False if invalid ID
-    */
+     * Delete the current product record from the database.
+     * Deletes the item, item attributes, images and buttons. Does not
+     * update the purchases or IPN log at all. Does not delete an item
+     * that has orders associated with it.
+     *
+     * @uses    self::deleteImage()
+     * @uses    self::deleteButtons()
+     * @return  boolean     True when deleted, False if invalid ID
+     */
     public function Delete()
     {
         global $_TABLES, $_PP_CONF;
@@ -596,12 +629,12 @@ class Product
 
 
     /**
-    *   Delete all buttons for a product.
-    *   Called when a product is updated so the buttons will be recreated
-    *   when needed.
-    *
-    *   @param  integer $item_id    Product ID to delete
-    */
+     * Delete all buttons for a product.
+     * Called when a product is updated so the buttons will be recreated
+     * when needed.
+     *
+     * @param   integer $item_id    Product ID to delete
+     */
     private static function deleteButtons($item_id)
     {
         global $_TABLES;
@@ -611,14 +644,13 @@ class Product
 
 
     /**
-    *   Deletes a single image from disk.
-    *   Only needs the $img_id value, so this function may be called as a
-    *   standalone function.
-    *
-    *   @param  integer $img_id     DB ID of image to delete
-    *   @param  string  $filename   Filename, provided when called from Delete()
-    *   @param  string  $filename   Filename, if known
-    */
+     * Deletes a single image from disk.
+     * Only needs the $img_id value, so this function may be called as a
+     * standalone function.
+     *
+     * @param   integer $img_id     DB ID of image to delete
+     * @param   string  $filename   Filename, provided when called from Delete()
+     */
     public static function deleteImage($img_id, $filename='')
     {
         global $_TABLES, $_PP_CONF;
@@ -643,16 +675,16 @@ class Product
 
 
     /**
-    *   Determines if the current record is valid.
-    *   Checks various items that can't be empty or combinations that
-    *   don't make sense.
-    *   Accumulates all error messages in the Errors array.
-    *   As of version 0.5.0, the category is allowed to be empty.
-    *
-    *   @deprecated
-    *   @return boolean     True if ok, False when first test fails.
-    */
-    private function isValidRecord()
+     * Determines if the current record is valid.
+     * Checks various items that can't be empty or combinations that
+     * don't make sense.
+     * Accumulates all error messages in the Errors array.
+     * As of version 0.5.0, the category is allowed to be empty.
+     *
+     * @deprecated
+     * @return  boolean     True if ok, False when first test fails.
+     */
+    private function XisValidRecord()
     {
         global $LANG_PP;
 
@@ -689,18 +721,18 @@ class Product
 
 
     /**
-    *   Creates the product edit form.
-    *
-    *   Creates the form for editing a product.  If a product ID is supplied,
-    *   then that product is read and becomes the current product.  If not,
-    *   then the current product is edited.  If an empty product was created,
-    *   then a new product is created here.
-    *
-    *   @uses   PAYPAL_getDocUrl()
-    *   @uses   PAYPAL_errorMessage()
-    *   @param  integer $id     Optional ID, current record used if zero
-    *   @return string          HTML for edit form
-    */
+     * Creates the product edit form.
+     *
+     * Creates the form for editing a product.  If a product ID is supplied,
+     * then that product is read and becomes the current product.  If not,
+     * then the current product is edited.  If an empty product was created,
+     * then a new product is created here.
+     *
+     * @uses    PAYPAL_getDocUrl()
+     * @uses    PAYPAL_errorMessage()
+     * @param   integer $id     Optional ID, current record used if zero
+     * @return  string          HTML for edit form
+     */
     public function showForm($id = 0)
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $LANG24, $LANG_postmodes,
@@ -895,13 +927,13 @@ class Product
 
 
     /**
-    *   Sets a boolean field to the opposite of the supplied value
-    *
-    *   @param  integer $oldvalue   Old (current) value
-    *   @param  string  $varname    Name of DB field to set
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Sets a boolean field to the opposite of the supplied value.
+     *
+     * @param   integer $oldvalue   Old (current) value
+     * @param   string  $varname    Name of DB field to set
+     * @param   integer $id         ID number of element to modify
+     * @return  integer     New value, or old value upon failure
+     */
     private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
@@ -929,13 +961,13 @@ class Product
 
 
     /**
-    *   Toggles the "enabled field
-    *
-    *   @uses   _toggle()
-    *   @param  integer $oldvalue   Original value
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Toggles the "enabled field.
+     *
+     * @uses    self::_toggle()
+     * @param   integer $oldvalue   Original value
+     * @param   integer $id         ID number of element to modify
+     * @return  integer     New value, or old value upon failure
+     */
     public static function toggleEnabled($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'enabled', $id);
@@ -943,13 +975,13 @@ class Product
 
 
     /**
-    *   Toggles the "featured" field
-    *
-    *   @uses   _toggle()
-    *   @param  integer $oldvalue   Original value
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Toggles the "featured" field.
+     *
+     * @uses    self::_toggle()
+     * @param   integer $oldvalue   Original value
+     * @param   integer $id         ID number of element to modify
+     * @return  integer     New value, or old value upon failure
+     */
     public static function toggleFeatured($oldvalue, $id)
     {
         return self::_toggle($oldvalue, 'featured', $id);
@@ -958,13 +990,14 @@ class Product
 
 
     /**
-    *   Determine if this product is mentioned in any purchase records.
-    *   Typically used to prevent deletion of product records that have
-    *   dependencies.
-    *   Can be called as Product::isUsed($item_id)
-    *
-    *   @return boolean True if used, False if not
-    */
+     * Determine if this product is mentioned in any purchase records.
+     * Typically used to prevent deletion of product records that have
+     * dependencies.
+     * Can be called as Product::isUsed($item_id)
+     *
+     * @param   integer $item_id    ID of item to check
+     * @return  boolean     True if used, False if not
+     */
     public static function isUsed($item_id)
     {
         global $_TABLES;
@@ -979,10 +1012,10 @@ class Product
 
 
     /**
-    *   Display the detail page for the product.
-    *
-    *   @return string      HTML for the product page.
-    */
+     * Display the detail page for the product.
+     *
+     * @return  string      HTML for the product page.
+     */
     public function Detail()
     {
         global $_CONF, $_PP_CONF, $_TABLES, $LANG_PP, $_USER, $_SYSTEM;
@@ -1242,10 +1275,10 @@ class Product
 
 
     /**
-    *   Provide the file selector options for files already uploaded.
-    *
-    *   @return string      HTML for file selection dialog options
-    */
+     * Provide the file selector options for files already uploaded.
+     *
+     * @return  string      HTML for file selection dialog options
+     */
     public function FileSelector()
     {
         global $_PP_CONF;
@@ -1269,12 +1302,12 @@ class Product
 
 
     /**
-    *   Create a formatted display-ready version of the error messages.
-    *   Returns the errors as a set of list items to be displayed inside
-    *   <ul></ul> tags.
-    *
-    *   @return string      Formatted error messages.
-    */
+     * Create a formatted display-ready version of the error messages.
+     * Returns the errors as a set of list items to be displayed inside
+     * `<ul></ul>` tags.
+     *
+     * @return  string      Formatted error messages.
+     */
     public function PrintErrors()
     {
         $retval = array();
@@ -1286,11 +1319,12 @@ class Product
 
 
     /**
-    *   Gets the purchase links appropriate for the product.
-    *   May be Paypal buttons, login-required link, or download button.
-    *
-    *   @return array   Array of buttons as name=>html.
-    */
+     * Gets the purchase links appropriate for the product.
+     * May be Paypal buttons, login-required link, or download button.
+     *
+     * @param   string  $type   View type where the button will be shown
+     * @return  array   Array of buttons as name=>html.
+     */
     public function PurchaseLinks($type='detail')
     {
         global $_CONF, $_USER, $_PP_CONF, $_TABLES;
@@ -1357,10 +1391,10 @@ class Product
 
 
     /**
-    *   Determine if this product has any attributes.
-    *
-    *   @return boolean     True if attributes exist, False if not.
-    */
+     * Determine if this product has any attributes.
+     *
+     * @return  boolean     True if attributes exist, False if not.
+     */
     public function hasAttributes()
     {
         return empty($this->options) ? false : true;
@@ -1368,11 +1402,11 @@ class Product
 
 
     /**
-    *   Determine if this product has any quantity-based discounts.
-    *   Used to display "discounts available" message in the product liet.
-    *
-    *   @return boolean     True if attributes exist, False if not.
-    */
+     * Determine if this product has any quantity-based discounts.
+     * Used to display "discounts available" message in the product liet.
+     *
+     * @return  boolean     True if attributes exist, False if not.
+     */
     public function hasDiscounts()
     {
         // Have to assign to temp var to get empty() to work
@@ -1382,10 +1416,10 @@ class Product
 
 
     /**
-    *   Check if this product uses custom per-product text-input fields
-    *
-    *   @return boolean     True if custom fields are configured
-    */
+     * Check if this product uses custom per-product text-input fields
+     *
+     * @return  boolean     True if custom fields are configured
+     */
     public function hasCustomFields()
     {
         $cust = $this->custom;
@@ -1394,10 +1428,10 @@ class Product
 
 
     /**
-    *   Check if this product type uses special text-input fields
-    *
-    *   @return boolean     True if special fields are configured
-    */
+     * Check if this product type uses special text-input fields.
+     *
+     * @return  boolean     True if special fields are configured
+     */
     public function hasSpecialFields()
     {
         return empty($this->special_fields) ? false : true;
@@ -1405,17 +1439,18 @@ class Product
 
 
     /**
-    *   Add a special field to a product.
-    *   The field will not be added if $fld_name already exists for the
-    *   product.
-    *   The prompt string may be supplied or, if blank, then $fld_name is used
-    *   to find a string in $LANG_PP. Final fallback is to use the field name
-    *   as the prompt.
-    *   Plugins should be sure to set $fld_lang.
-    *
-    *   @param  string  $fld_name   Field Name
-    *   @param  stirng  $fld_lang   Field prompt, language string
-    */
+     * Add a special field to a product.
+     * The field will not be added if $fld_name already exists for the
+     * product.
+     * The prompt string may be supplied or, if blank, then $fld_name is used
+     * to find a string in $LANG_PP. Final fallback is to use the field name
+     * as the prompt.
+     * Plugins should be sure to set $fld_lang.
+     *
+     * @param   string  $fld_name   Field Name
+     * @param   string  $fld_lang   Field prompt, language string
+     * @param   array   $opts       Array of option name=>value
+     */
     public function addSpecialField($fld_name, $fld_lang = '', $opts=array())
     {
         global $LANG_PP, $LANG_PP_HELP;
@@ -1446,13 +1481,13 @@ class Product
 
 
     /**
-    *   Determine if a "Buy Now" button is allowed for this item.
-    *   Items with attributes or a quantity discount schedule must be
-    *   purchased through the shopping cart to allow for proper price
-    *   calculation.
-    *
-    *   @return boolean     True to allow Buy Now, False to disable
-    */
+     * Determine if a "Buy Now" button is allowed for this item.
+     * Items with attributes or a quantity discount schedule must be
+     * purchased through the shopping cart to allow for proper price
+     * calculation.
+     *
+     * @return  boolean     True to allow Buy Now, False to disable
+     */
     public function canBuyNow()
     {
         if ($this->hasAttributes()      // no attributes to select
@@ -1468,15 +1503,15 @@ class Product
 
 
     /**
-    *   Get the unit price of this product, considering the specified options.
-    *   Quantity discounts are considered, the return value is the effictive
-    *   price per unit.
-    *
-    *   @param  array   $options    Array of integer option values
-    *   @param  integer $quantity   Quantity, used to calculate discounts
-    *   @param  array   $override   Override elements (price, uid)
-    *   @return float       Product price, including option
-    */
+     * Get the unit price of this product, considering the specified options.
+     * Quantity discounts are considered, the return value is the effictive
+     * price per unit.
+     *
+     * @param   array   $options    Array of integer option values
+     * @param   integer $quantity   Quantity, used to calculate discounts
+     * @param   array   $override   Override elements (price, uid)
+     * @return  float       Product price, including option
+     */
     public function getPrice($options = array(), $quantity = 1, $override = array())
     {
         if (!is_array($options)) $options = explode(',', $options);
@@ -1514,12 +1549,12 @@ class Product
 
 
     /**
-    *   Get the formatted price for display.
-    *   Used mainly to allow child classes to override the displayed price.
-    *
-    *   @param  mixed   $price  Fixed price to use, NULL to use getPrice()
-    *   @return string          Formatted price for display
-    */
+     * Get the formatted price for display.
+     * Used mainly to allow child classes to override the displayed price.
+     *
+     * @param   mixed   $price  Fixed price to use, NULL to use getPrice()
+     * @return  string          Formatted price for display
+     */
     public function getDisplayPrice($price = NULL)
     {
         if ($price === NULL) $price = $this->getPrice();
@@ -1528,12 +1563,12 @@ class Product
 
 
     /**
-    *   Get the sales tax for this item based on the configured tax rate.
-    *
-    *   @param  float   $price  Unit price
-    *   @param  integer $qty    Item quantity
-    *   @return float           Sales tax ammount
-    */
+     * Get the sales tax for this item based on the configured tax rate.
+     *
+     * @param   float   $price  Unit price
+     * @param   integer $qty    Item quantity
+     * @return  float           Sales tax ammount
+     */
     public function getTax($price, $qty = 1)
     {
         if ($this->taxable) {
@@ -1545,14 +1580,14 @@ class Product
 
 
     /**
-    *   Get the options display to be shown in the cart and on the order
-    *   Returns a string like so:
-    *       -- option1: option1_value
-    *       -- option2: optoin2_value
-    *
-    *   @param  object  $item   Specific OrderItem object from the cart
-    *   @return string      Option display
-    */
+     * Get the options display to be shown in the cart and on the order.
+     * Returns a string like so:
+     *      -- option1: option1_value
+     *      -- option2: optoin2_value
+     *
+     * @param  object  $item   Specific OrderItem object from the cart
+     * @return string      Option display
+     */
     public function getOptionDisplay($item)
     {
         $retval = '';
@@ -1616,11 +1651,11 @@ class Product
 
 
     /**
-    *   Get the descriptive values for a specified set of options.
-    *
-    *   @param  array   $options    Array of integer option values
-    *   @return string      Comma-separate list of text values, or empty
-    */
+     * Get the descriptive values for a specified set of options.
+     *
+     * @param   array   $options    Array of integer option values
+     * @return  string      Comma-separate list of text values, or empty
+     */
     public function getOptionDesc($options = array())
     {
         $opts = array();
@@ -1645,12 +1680,13 @@ class Product
 
 
     /**
-    *   Get all the attributes for this product that appear in a list
-    *
-    *   @param  array   $options    Array of options
-    *   @return array       Array of a
-    */
-    public function getAttributes($options = array())
+     * Get all the attributes for this product that appear in a list.
+     *
+     * @deprecated
+     * @param   array   $options    Array of options
+     * @return  array       Array of a
+     */
+    public function XgetAttributes($options = array())
     {
         global $_TABLES;
 
@@ -1667,15 +1703,14 @@ class Product
 
 
     /**
-    *   Handle the purchase of this item.
-    *   1. Update qty on hand if track_onhand is set (min. value 0)
-    *
-    *   @param  integer $qty        Quantity ordered
-    *   @param  object  $Item       Item record, to get options, etc.
-    *   @param  object  $Order      Optional order (not used yet)
-    *   @param  array   $ipn_data   IPN data (not used in this class)
-    *   @return integer     Zero or error value
-    */
+     * Handle the purchase of this item.
+     *  - Update qty on hand if track_onhand is set (min. value 0)
+     *
+     * @param   object  $Item       Item record, to get options, etc.
+     * @param   object  $Order      Optional order (not used yet)
+     * @param   array   $ipn_data   IPN data (not used in this class)
+     * @return  integer     Zero or error value
+     */
     public function handlePurchase(&$Item, $Order=NULL, $ipn_data = array())
     {
         global $_TABLES;
@@ -1697,15 +1732,34 @@ class Product
     }
 
 
+    /**
+     * Handle a product refund.
+     *
+     * @param   object  $Order      Order object.
+     * @param   array   $ipn_data   IPN data received
+     */
     public function handleRefund($Order, $ipn_data = array())
     {
     }
 
-    public function cancelPurchase($qty, $order_id='')
+
+    /**
+     * Handle a "cancel purchase" message.
+     *
+     * @param   object  $Order      Order object.
+     * @param   array   $ipn_data   IPN data received
+     */
+    public function cancelPurchase($Order, $ipn_data = array())
     {
     }
 
 
+    /**
+     * Get an option from the `options` property.
+     *
+     * @param   string  $key    Option name to retrieve
+     * @return  mixed       Option value, False if not set
+     */
     public function getOption($key)
     {
         if (isset($this->options[$key])) {
@@ -1721,12 +1775,12 @@ class Product
 
 
     /**
-    *   Get the prompt for a custom field.
-    *   Returns "Undefined" if for some reason the field isn't defined.
-    *
-    *   @param  integer $key    Array key into the $custom fields
-    *   @return string      Custom field name, or "undefined"
-    */
+     * Get the prompt for a custom field.
+     * Returns "Undefined" if for some reason the field isn't defined.
+     *
+     * @param   integer $key    Array key into the $custom fields
+     * @return  string      Custom field name, or "undefined"
+     */
     public function getCustom($key)
     {
         static $custom = NULL;
@@ -1742,13 +1796,13 @@ class Product
 
 
     /**
-    *   Duplicate a product.
-    *   1 - Creates a new product record
-    *   2 - Copies all images
-    *   3 - Creates image records
-    *
-    *   @return boolean     True on success, False on failure
-    */
+     * Duplicate this product.
+     *  - Creates a new product record
+     *  - Copies all images
+     *  - Creates image records
+     *
+     * @return boolean     True on success, False on failure
+     */
     public function Duplicate()
     {
         global $_TABLES, $_PP_CONF;
@@ -1788,10 +1842,10 @@ class Product
 
 
     /**
-    *   Determine if this product is on sale
-    *
-    *   @return boolean True if on sale, false if not
-    */
+     * Determine if this product is on sale.
+     *
+     * @return  boolean True if on sale, false if not
+     */
     public function isOnSale()
     {
         $sp = $this->getSalePrice();
@@ -1800,15 +1854,15 @@ class Product
 
 
     /**
-    *   Get the sale price for this item, if any.
-    *   First checks for an item-specific sale price and sale period,
-    *   then traverses up the category tree to find the first parent
-    *   category with an effective sale price.
-    *   Prices are cached for repeated calls.
-    *
-    *   @see    self::isOnSale()
-    *   @return float   Sale price, normal price if not on sale
-    */
+     * Get the sale price for this item, if any.
+     * First checks for an item-specific sale price and sale period,
+     * then traverses up the category tree to find the first parent
+     * category with an effective sale price.
+     * Prices are cached for repeated calls.
+     *
+     * @see     self::isOnSale()
+     * @return  float   Sale price, normal price if not on sale
+     */
     public function getSalePrice()
     {
         return $this->getSale()->calcPrice($this->price);
@@ -1816,8 +1870,7 @@ class Product
 
 
     /**
-     * Sets and returns the private Sale object as the current effective
-     * sale.
+     * Sets and returns the private Sale object as the current effective sale.
      *
      * @return  object      Sale object
      */
@@ -1831,12 +1884,12 @@ class Product
 
 
     /**
-    *   Determine if a product is available for sale based on dates
-    *   Default availability dates are from 1900-01-01 to 9999-12-31
-    *
-    *   @param  boolean $isadmin    True if this is an admin, can view all
-    *   @return boolean True if on sale, false if not
-    */
+     * Determine if a product is available for sale based on dates.
+     * Default availability dates are from 1900-01-01 to 9999-12-31.
+     *
+     * @param   boolean $isadmin    True if this is an admin, can view all
+     * @return  boolean True if on sale, false if not
+     */
     public function isAvailable($isadmin = false)
     {
         global $_PP_CONF;
@@ -1853,12 +1906,11 @@ class Product
 
 
     /**
-    *   Check if tax should be charged on this item.
-    *   Checks both the product taxable flag and the configured tax
-    *   rate.
-    *
-    *   @return boolean     True if taxable and there is a tax rate
-    */
+     * Check if tax should be charged on this item.
+     * Checks both the product taxable flag and the configured tax rate.
+     *
+     * @return  boolean     True if taxable and there is a tax rate
+     */
     public function isTaxable()
     {
         global $_PP_CONF;
@@ -1867,11 +1919,11 @@ class Product
 
 
     /**
-    *   Display the date, if present, or a blank field if effectively null.
-    *
-    *   @param  string  $str    Date string, "0000-00-00" indicates empty
-    *   @return string      Supplied date string, or "" if zeroes
-    */
+     * Display the date, if present, or a blank field if effectively null.
+     *
+     * @param   string  $str    Date string, "0000-00-00" indicates empty
+     * @return  string      Supplied date string, or "" if zeroes
+     */
     private static function _InputDtFormat($str)
     {
         if ($str == '0000-00-00' || $str == self::MAX_DATE || $str == self::MIN_DATE)
@@ -1882,14 +1934,14 @@ class Product
 
 
     /**
-    *   Determine if a given item number belongs to a plugin.
-    *   Looks for a colon in the item number, which will indicate a plugin
-    *   item number formated as "pi_name:item_number:other_opts"
-    *
-    *   @since  0.6.0
-    *   @param  mixed   $item_number    Item Number to check
-    *   @return boolean     True if it's a plugin item, false if it's ours
-    */
+     * Determine if a given item number belongs to a plugin.
+     * Looks for a colon in the item number, which will indicate a plugin
+     * item number formated as "pi_name:item_number:other_opts"
+     *
+     * @since   v0.6.0
+     * @param   mixed   $item_number    Item Number to check
+     * @return  boolean     True if it's a plugin item, false if it's ours
+     */
     public static function isPluginItem($item_number)
     {
         if (strpos($item_number, ':') > 0) {
@@ -1901,12 +1953,12 @@ class Product
 
 
     /**
-    *   Get the text string and value for special fields.
-    *   Used when displaying cart info
-    *
-    *   @param  array   $values     Special field values
-    *   @return array       Array of text=>value
-    */
+     * Get the text string and value for special fields.
+     * Used when displaying cart info
+     *
+     * @param   array   $values     Special field values
+     * @return  array       Array of text=>value
+     */
     public function getSpecialFields($values = array())
     {
         global $LANG_PP;
@@ -1925,12 +1977,13 @@ class Product
 
 
     /**
-    *   Helper function to create the cache key.
-    *
-    *   @since  0.6.0
-    *   @param  string  $type   Optional item type
-    *   @return string  Cache key
-    */
+     * Helper function to create the cache key.
+     *
+     * @since   v0.6.0
+     * @param   string  $id     Item ID
+     * @param   string  $type   Optional item type
+     * @return  string      Cache key
+     */
     private static function _makeCacheKey($id, $type='')
     {
         $id = (int)$id;
@@ -1940,11 +1993,11 @@ class Product
 
 
     /**
-    *   Determine if the current user has access to view this product.
-    *   Checks the related category for access.
-    *
-    *   @return boolean     True if access and purchase is allowed.
-    */
+     * Determine if the current user has access to view this product.
+     * Checks the related category for access.
+     *
+     * @return  boolean     True if access and purchase is allowed.
+     */
     public function hasAccess()
     {
         // Make sure the category is set
@@ -1954,12 +2007,12 @@ class Product
 
 
     /**
-    *   Get the product name. Allows for an override.
-    *
-    *   @since  0.6.0
-    *   @param  string  $overrride  Optional name override
-    *   @return string              Product Name
-    */
+     * Get the product name. Allows for an override.
+     *
+     * @since   v0.6.0
+     * @param   string  $override  Optional name override
+     * @return  string              Product Name
+     */
     public function getName($override = '')
     {
         return $override == '' ? $this->name : $override;
@@ -1967,12 +2020,12 @@ class Product
 
 
     /**
-    *   Get the product short description. Allows for an override.
-    *
-    *   @since  0.6.0
-    *   @param  string  $overrride  Optional description override
-    *   @return string              Product sort description
-    */
+     * Get the product short description. Allows for an override.
+     *
+     * @since   v0.6.0
+     * @param   string  $override  Optional description override
+     * @return  string              Product sort description
+     */
     public function getDscp($override = '')
     {
         return $override == '' ? $this->short_description : $override;
@@ -1980,11 +2033,11 @@ class Product
 
 
     /**
-    *   Get the URL to the item detail page
-    *
-    *   @since  0.6.0
-    *   @return string      Item detail URL
-    */
+     * Get the URL to the item detail page.
+     *
+     * @since   v0.6.0
+     * @return  string      Item detail URL
+     */
     public function getLink()
     {
         return PAYPAL_URL . '/detail.php?id=' . $this->id;
@@ -1992,10 +2045,11 @@ class Product
 
 
     /**
-    *   Get additional text to add to the buyer's receipt for a product
-    *
-    *   @since  0.6.0
-    */
+     * Get additional text to add to the buyer's receipt for a product.
+     *
+     * @since   v0.6.0
+     * @param   object  $orderitem  Line item to check.
+     */
     public function EmailExtra($orderitem)
     {
         return '';
@@ -2003,7 +2057,7 @@ class Product
 
 
     /**
-     * Get the total shipping amount for this item based on quantity purchased
+     * Get the total shipping amount for this item based on quantity purchased/
      *
      * @param   integer $qty    Quantity purchased
      * @return  float           Total item fixed shipping charge

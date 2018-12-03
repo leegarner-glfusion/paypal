@@ -1,29 +1,29 @@
 <?php
 /**
-*   Class to manage payment by check.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2013 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.5.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-namespace Paypal\Gateway;
+ * Class to manage payment by check.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2013 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.5.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
+namespace Paypal\Gateways;
 
 /**
- *   Class for COD payments
- *   @since  0.5.1
- *   @package paypal
+ * Class for check payments.
+ * @since   v0.5.1
+ * @package paypal
  */
 class check extends \Paypal\Gateway
 {
 
     /**
-    *   Constructor
-    *   Sets gateway-specific variables and calls the parent constructor
-    */
+     * Constructor.
+     * Sets gateway-specific variables and calls the parent constructor.
+     */
     public function __construct()
     {
         global $_PP_CONF;
@@ -58,10 +58,10 @@ class check extends \Paypal\Gateway
 
 
     /**
-     *   Magic "setter" function.
+     * Magic "setter" function.
      *
-     *   @param  string  $key    Name of property to set
-     *   @param  mixed   $value  Value to set
+     * @param   string  $key    Name of property to set
+     * @param   mixed   $value  Value to set
      */
     public function __set($key, $value)
     {
@@ -86,10 +86,10 @@ class check extends \Paypal\Gateway
 
 
     /**
-     *   Get the main website URL for this payment gateway.
-     *   Used to tell the buyer where to log in to check their account.
+     * Get the main website URL for this payment gateway.
+     * Used to tell the buyer where to log in to check their account.
      *
-     *   @return string      Gateway's website URL
+     * @return  string      Gateway's website URL
      */
     private function getMainUrl()
     {
@@ -99,10 +99,10 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get the custom string properly formatted for the gateway.
-    *
-    *   @return string      Formatted custom string
-    */
+     * Get the custom string, properly formatted for the gateway.
+     *
+     * @return  string      Formatted custom string
+     */
     protected function PrepareCustom()
     {
         if (is_array($this->custom)) {
@@ -117,14 +117,15 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get a "buy now" button for a catalog item
-    *
-    *   @uses   _addItem()
-    *   @uses   _getButton()
-    *   @uses   getActionUrl()
-    *   @param  object  $P      Product Object
-    *   @return string          HTML for button
-    */
+     * Get a "buy now" button for a catalog item.
+     *
+     * @deprecated
+     * @uses    _addItem()
+     * @uses    _getButton()
+     * @uses    getActionUrl()
+     * @param   object  $P      Product Object
+     * @return  string          HTML for button
+     */
     public function XProductButton($P)
     {
         global $LANG_PP_check;
@@ -167,18 +168,18 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get a button for an external (plugin) item.
-    *   Only supports a "buy now" button since we don't necessarily know
-    *   what type of button the item uses.  Assumes a quantity of one.
-    *
-    *   @uses   _addItem()
-    *   @uses   _getButton()
-    *   @uses   getActionUrl()
-    *   @uses   PaymentGw::AddCustom()
-    *   @param  array   $attribs    Attribute array (item_number, price)
-    *   @param  string  $btn_type   Button type
-    *   @return string              HTML for button
-    */
+     * Get a button for an external (plugin) item.
+     * Only supports a "buy now" button since we don't necessarily know
+     * what type of button the item uses.  Assumes a quantity of one.
+     *
+     * @uses    _addItem()
+     * @uses    _getButton()
+     * @uses    getActionUrl()
+     * @uses    PaymentGw::AddCustom()
+     * @param   array   $attribs    Attribute array (item_number, price)
+     * @param   string  $btn_type   Button type
+     * @return  string              HTML for button
+     */
     public function ExternalButton($attribs = array(), $btn_type = 'buy_now')
     {
 
@@ -204,18 +205,15 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get a purchase button.
-    *   This takes separate parameters so it can be called directly or via
-    *   ExternalButton or ProductButton
-    *
-    *   @uses   PaymentGw::AddCustom()
-    *   @uses   PrepareCustom()
-    *   @param  mixed   $item_id        Item ID number
-    *   @param  float   $item_price     Item unit price
-    *   @param  string  $btn_type       Button Type (optional)
-    *   @param  string  $custom         Custom information
-    *   @return string                  HTML for button code
-    */
+     * Get a purchase button.
+     * This takes separate parameters so it can be called directly or via
+     * ExternalButton or ProductButton
+     *
+     * @uses    PaymentGw::AddCustom()
+     * @uses    PrepareCustom()
+     * @param   string  $btn_type       Button Type (optional)
+     * @return  string                  HTML for button code
+     */
     private function _getButton($btn_type)
     {
         global $_PP_CONF, $_USER;
@@ -248,11 +246,11 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get the action url for the payment button.
-    *   Overridden from the parent since we need to append to the url.
-    *
-    *   @return string      Payment URL
-    */
+     * Get the action url for the payment button.
+     * Overridden from the parent since we need to append to the url.
+     *
+     * @return  string      Payment URL
+     */
     public function getActionUrl()
     {
         return $this->gw_url . '/index.php';
@@ -260,14 +258,13 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables from the return URL to display a "thank-you"
-    *   message to the buyer.
-    *
-    *   @uses   getMainUrl()
-    *   @uses   PaymentGw::Description()
-    *   @param  array   $A      Optionally override the $_GET parameters
-    *   @return array           Array of standard name=>value pairs
-    */
+     * Get the variables from the return URL to display a "thank-you" message to the buyer.
+     *
+     * @uses    getMainUrl()
+     * @uses    PaymentGw::Description()
+     * @param   array   $A      Optionally override the $_GET parameters
+     * @return  array           Array of standard name=>value pairs
+     */
     public function thanksVars($A='')
     {
         if (empty($A)) {
@@ -287,11 +284,11 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Make sure that the button type is one of our valid types
-    *
-    *   @param  string  $btn_type   Button type, typically from product record
-    *   @return string              Valid button type
-    */
+     * Make sure that the button type is one of our valid types.
+     *
+     * @param   string  $btn_type   Button type, typically from product record
+     * @return  string              Valid button type
+     */
     private function gwButtonType($btn_type)
     {
         switch ($btn_type) {
@@ -308,10 +305,10 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get all the configuration fields specifiec to this gateway
-    *
-    *   @return array   Array of fields (name=>field_info)
-    */
+     * Get all the configuration fields specifiec to this gateway
+     *
+     * @return  array   Array of fields (name=>field_info)
+     */
     protected function getConfigFields()
     {
         global $LANG_PP;
@@ -352,11 +349,12 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Present the configuration form for this gateway.
-    *
-    *   @uses   PaymentGw::getServiceCheckboxes
-    *   @return string      HTML for the configuration form.
-    */
+     * Present the configuration form for this gateway.
+     *
+     * @deprecated
+     * @uses    PaymentGw::getServiceCheckboxes
+     * @return  string      HTML for the configuration form.
+     */
     public function XConfigure()
     {
         global $_CONF, $LANG_PP, $LANG_PP_check;
@@ -417,14 +415,14 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Prepare to save the configuraiton.
-    *   This copies the new config values into our local variables, then
-    *   calls the parent function to save to the database.
-    *
-    *   @uses   PaymentGw::SaveConfig()
-    *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
-    *   @return boolean         Results of parent SaveConfig function
-    */
+     * Prepare to save the configuraiton.
+     * This copies the new config values into our local variables, then
+     * calls the parent function to save to the database.
+     *
+     * @uses    PaymentGw::SaveConfig()
+     * @param   array   $A      Array of name=>value pairs (e.g. $_POST)
+     * @return  boolean         Results of parent SaveConfig function
+     */
     public function SaveConfig($A=NULL)
     {
         if (!is_array($A)) return false;
@@ -447,12 +445,12 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Add a single item to our item array
-    *
-    *   @param  mixed   $item_id    ID of item, including options
-    *   @param  float   $price      Item price
-    *   @param  integer $qty        Quantity
-    */
+     * Add a single item to our item array.
+     *
+     * @param   mixed   $item_id    ID of item, including options
+     * @param   float   $price      Item price
+     * @param   integer $qty        Quantity
+     */
     private function _addItem($item_id, $price, $qty=0)
     {
         if ($qty == 0) $qty = 1;
@@ -465,13 +463,13 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables to display with the IPN log
-    *   This gets the variables from the gateway's IPN data into standard
-    *   array values to be displayed in the IPN log view
-    *
-    *   @param  array   $data       Array of original IPN data
-    *   @return array               Name=>Value array of data for display
-    */
+     * Get the variables to display with the IPN log.
+     * This gets the variables from the gateway's IPN data into standard
+     * array values to be displayed in the IPN log view
+     *
+     * @param   array   $data       Array of original IPN data
+     * @return  array               Name=>Value array of data for display
+     */
     public function ipnlogVars($data)
     {
         if (!is_array($data)) {
@@ -489,6 +487,11 @@ class check extends \Paypal\Gateway
     }
 
 
+    /**
+     * Handle the prurchase of an item via this gateway.
+     *
+     * @param   array   $vals   IPN variables
+     */
     public function handlePurchase($vals = array())
     {
         global $LANG_PP_check, $_PP_CONF;
@@ -520,6 +523,11 @@ class check extends \Paypal\Gateway
     }
 
 
+    /**
+     * Handle the purchase of a product via this gateway.
+     *
+     * @param   array   $vals   IPN variables
+     */
     private function _handlePurchase($vals)
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP_check;
@@ -671,11 +679,11 @@ class check extends \Paypal\Gateway
 
 
     /**
-    *   Get the form variables for this checkout button
-    *
-    *   @param  object  $cart   Shopping cart
-    *   @return string          HTML for input vars
-    */
+     * Get the form variables for this checkout button.
+     *
+     * @param   object  $cart   Shopping cart
+     * @return  string          HTML for input vars
+     */
     public function gatewayVars($cart)
     {
         $gatewayVars = array(

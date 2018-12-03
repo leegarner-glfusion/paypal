@@ -1,51 +1,49 @@
 <?php
 /**
-*   Class to manage Authorize.Net Hosted Accept payments.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage Authorize.Net Hosted Accept payments.
+ *
+ * @author     Lee Garner <lee@leegarner.com>
+ * @copyright  Copyright (c) 2012-2018 Lee Garner <lee@leegarner.com>
+ * @package    paypal
+ * @version    v0.6.0
+ * @since      v0.6.0
+ * @license    http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\Gateways;
 
 /**
-*   Class for Authorize.Net payment gateway
-*   @since  0.5.3
-*   @package paypal
-*/
+ * Class for Authorize.Net Hosted Accept payment gateway.
+ * @since   v0.6.0
+ * @package paypal
+ */
 class authorizenet extends \Paypal\Gateway
 {
-    /**
-     * Authorize.net transaction key
-     * @var string
-     */
+    /** Authorize.net transaction key.
+     * @var string */
     private $trans_key;
 
-    /**
-     * Authorize.net api login
-     * @var string
-     */
+    /** Authorize.net api login.
+     * @var string */
     private $api_login;
 
     /** MD5 Hash key configured on Authorize.Net
-    *   @var string */
+     * @var string */
     private $hash_key;
 
-    /** Shopping cart object. We need to access this both from CheckoutButon()
-    *   and _getButton()
-    *   @var object */
+    /**
+     * Shopping cart object.
+     * We need to access this both from `CheckoutButon()`  and `_getButton()`.
+     * @var object
+     */
     private $cart;
 
 
     /**
-    *   Constructor
-    *   Sets gateway-specific variables and calls the parent constructor
-    */
+     * Constructor.
+     * Sets gateway-specific variables and calls the parent constructor.
+     */
     function __construct()
     {
         global $_PP_CONF;
@@ -98,11 +96,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Magic "setter" function.
-    *
-    *   @param  string  $key    Name of property to set
-    *   @param  mixed   $value  Value to set
-    */
+     * Magic "setter" function.
+     *
+     * @param   string  $key    Name of property to set
+     * @param   mixed   $value  Value to set
+     */
     function __set($key, $value)
     {
         switch ($key) {
@@ -127,11 +125,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the main website URL for this payment gateway.
-    *   Used to tell the buyer where to log in to check their account.
-    *
-    *   @return string      Gateway's website URL
-    */
+     * Get the main website URL for this payment gateway.
+     * Used to tell the buyer where to log in to check their account.
+     *
+     * @return  string      Gateway's website URL
+     */
     private function _getMainUrl()
     {
         return 'https://www.authorize.net';
@@ -139,10 +137,10 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-     *  Get the gateway variables to put in the checkout button.
+     * Get the gateway variables to put in the checkout button.
      *
-     *  @param  object      $cart   Shopping Cart Object
-     *  @return string      Gateay variable input fields
+     * @param   object      $cart   Shopping Cart Object
+     * @return  string      Gateay variable input fields
      */
     public function gatewayVars($cart)
     {
@@ -283,14 +281,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables from the return URL to display a "thank-you"
-    *   message to the buyer.
-    *
-    *   @uses   getMainUrl()
-    *   @uses   PaymentGw::Description()
-    *   @param  array   $A      Optionally override the $_GET parameters
-    *   @return array           Array of standard name=>value pairs
-    */
+     * Get the variables from the return URL to display a "thank-you" message to the buyer.
+     *
+     * @param   array   $A      Optionally override the $_GET parameters
+     * @return  array           Array of standard name=>value pairs
+     */
     public function thanksVars($A='')
     {
         $R = array(
@@ -301,10 +296,10 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get all the configuration fields specifiec to this gateway
-    *
-    *   @return array   Array of fields (name=>field_info)
-    */
+     * Get all the configuration fields specifiec to this gateway.
+     *
+     * @return  array   Array of fields (name=>field_info)
+     */
     protected function getConfigFields()
     {
         $fields = array();
@@ -335,14 +330,14 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Prepare to save the configuraiton.
-    *   This copies the new config values into our local variables, then
-    *   calls the parent function to save to the database.
-    *
-    *   @uses   PaymentGw::SaveConfig()
-    *   @param  array   $A      Array of name=>value pairs (e.g. $_POST)
-    *   @return boolean         Results of parent SaveConfig function
-    */
+     * Prepare to save the configuration.
+     * This copies the new config values into our local variables, then
+     * calls the parent function to save to the database.
+     *
+     * @uses    PaymentGw::SaveConfig()
+     * @param   array   $A      Array of name=>value pairs (e.g. $_POST)
+     * @return  boolean         Results of parent SaveConfig function
+     */
     public function SaveConfig($A=NULL)
     {
         if (!is_array($A)) return false;
@@ -361,13 +356,13 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the variables to display with the IPN log
-    *   This gets the variables from the gateway's IPN data into standard
-    *   array values to be displayed in the IPN log view
-    *
-    *   @param  array   $data       Array of original IPN data
-    *   @return array               Name=>Value array of data for display
-    */
+     * Get the variables to display with the IPN log.
+     * This gets the variables from the gateway's IPN data into standard
+     * array values to be displayed in the IPN log view.
+     *
+     * @param   array   $data       Array of original IPN data
+     * @return  array               Name=>Value array of data for display
+     */
     public function ipnlogVars($data)
     {
         if (!is_array($data)) {
@@ -386,11 +381,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the MD5 hash key.
-    *   Needed by the IPN processor
-    *
-    *   @return string  MD5 Hash Key
-    */
+     * Get the MD5 hash key.
+     * Needed by the IPN processor.
+     *
+     * @return  string  MD5 Hash Key
+     */
     public function getTransKey()
     {
         return $this->trans_key;
@@ -398,11 +393,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get the API Login
-    *   Needed by the IPN processor
-    *
-    *   @return string  API Login ID
-    */
+     * Get the API Login.
+     * Needed by the IPN processor.
+     *
+     * @return  string  API Login ID
+     */
     public function getApiLogin()
     {
         return $this->api_login;
@@ -410,11 +405,11 @@ class authorizenet extends \Paypal\Gateway
 
 
     /**
-    *   Get a logo image to show on the order as the payment method.
-    *
-    *   @since  0.6.0
-    *   @return string      HTML for logo image
-    */
+     * Get a logo image to show on the order as the payment method.
+     *
+     * @since   v0.6.0
+     * @return  string      HTML for logo image
+     */
     public function getLogo()
     {
         global $_CONF;

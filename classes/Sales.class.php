@@ -1,43 +1,50 @@
 <?php
 /**
-*   Class to manage product sale prices based on item or category
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage product sale prices based on item or category.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @since       v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for product and category sales
-*   @package paypal
-*/
+ * Class for product and category sales.
+ * @package paypal
+ */
 class Sales
 {
+    /** Minimim possible effective date/time.
+     * @const string */
     const MIN_DATETIME = '1970-01-01 00:00:00';
-    const MAX_DATETIME = '2037-12-31 23:59:59';
-    static $base_tag = 'sales';
 
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Maximum possible effective date/time.
+     * @const string */
+    const MAX_DATETIME = '2037-12-31 23:59:59';
+
+    /** Base tag to use in creating cache IDs.
+     * @var string */
+    private static $base_tag = 'sales';
+
+    /** Property fields accessed via `__set()` and `__get()`.
+     * @var array */
     var $properties;
 
     /** Indicate whether the current object is a new entry or not.
-    *   @var boolean */
+     * @var boolean */
     var $isNew;
 
 
     /**
-    *   Constructor.
-    *   Sets variables from the provided array
-    *
-    *   @param  array   DB record
-    */
+     * Constructor. Sets variables from the provided array.
+     *
+     * @param   array   DB record
+     */
     public function __construct($A=array())
     {
         $this->properties = array();
@@ -65,11 +72,11 @@ class Sales
 
 
     /**
-    *   Read a single record based on the record ID
-    *
-    *   @param  integer $id     DB record ID
-    *   @return boolean     True on success, False on failure
-    */
+     * Read a single record based on the record ID.
+     *
+     * @param   integer $id     DB record ID
+     * @return  boolean     True on success, False on failure
+     */
     public function Read($id)
     {
         global $_TABLES;
@@ -88,11 +95,11 @@ class Sales
 
 
     /**
-    *   Set the variables from a DB record into object properties
-    *
-    *   @param  array   $A      Array of properties
-    *   @param  boolean $fromDB True if reading from DB, False if from a form
-    */
+     * Set the variables from a DB record into object properties.
+     *
+     * @param   array   $A      Array of properties
+     * @param   boolean $fromDB True if reading from DB, False if from a form
+     */
     public function setVars($A, $fromDB=true)
     {
         $this->id = PP_getVar($A, 'id', 'integer');
@@ -126,12 +133,12 @@ class Sales
 
 
     /**
-    *   Get all sales records for the specified type and item
-    *
-    *   @param  string  $type       Item type (product or category)
-    *   @param  integer $item_id    Product or Category ID
-    *   @return array           Array of Sales objects
-    */
+     * Get all sales records for the specified type and item.
+     *
+     * @param   string  $type       Item type (product or category)
+     * @param   integer $item_id    Product or Category ID
+     * @return  array           Array of Sales objects
+     */
     private static function _getSales($type, $item_id)
     {
         global $_TABLES;
@@ -163,12 +170,12 @@ class Sales
 
 
     /**
-    *   Read all the sale prices for a category
-    *
-    *   @uses   self::_getSales()
-    *   @param  integer $cat_id     Category ID
-    *   @return array       Array of Sales objects
-    */
+     * Read all the sale prices for a category.
+     *
+     * @uses    self::_getSales()
+     * @param   integer $cat_id     Category ID
+     * @return  array       Array of Sales objects
+     */
     public static function getCategory($cat_id)
     {
         return self::_getSales('category', $cat_id);
@@ -176,12 +183,12 @@ class Sales
 
 
     /**
-    *   Read all the sale prices for a product
-    *
-    *   @uses   self::_getSales()
-    *   @param  integer $item_id    Product ID
-    *   @return array       Array of Sales objects
-    */
+     * Read all the sale prices for a product.
+     *
+     * @uses    self::_getSales()
+     * @param   integer $item_id    Product ID
+     * @return  array       Array of Sales objects
+     */
     public static function getProduct($item_id)
     {
         return self::_getSales('product', $item_id);
@@ -189,14 +196,14 @@ class Sales
 
 
     /**
-    *   Get the current active sales object for a product.
-    *   First check product sales, then categories.
-    *   Scans for the sale with the most recent start date. For example,
-    *   a long-term sale could have a short "flash sale" within it.
-    *
-    *   @param  object  $P  Product object
-    *   @return object      Sales object, empty object if not found
-    */
+     * Get the current active sales object for a product.
+     * First check product sales, then categories.
+     * Scans for the sale with the most recent start date. For example,
+     * a long-term sale could have a short "flash sale" within it.
+     *
+     * @param   object  $P  Product object
+     * @return  object      Sales object, empty object if not found
+     */
     public static function getEffective($P)
     {
         $now = Paypal_now()->toUnix();
@@ -231,11 +238,11 @@ class Sales
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value='')
     {
         global $_CONF;
@@ -281,11 +288,11 @@ class Sales
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     *   Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -297,11 +304,11 @@ class Sales
 
 
     /**
-    *   Save the current values to the database.
-    *
-    *   @param  array   $A      Array of values from $_POST
-    *   @return boolean         True if no errors, False otherwise
-    */
+     * Save the current values to the database.
+     *
+     * @param   array   $A      Array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
+     */
     public function Save($A = array())
     {
         global $_TABLES, $_PP_CONF;
@@ -339,11 +346,11 @@ class Sales
 
 
     /**
-    *   Delete a single sales record from the database
-    *
-    *   @param  integer $id     Record ID
-    *   @return boolean     True on success, False on invalid ID
-    */
+     * Delete a single sales record from the database.
+     *
+     * @param   integer $id     Record ID
+     * @return  boolean     True on success, False on invalid ID
+     */
     public static function Delete($id)
     {
         global $_TABLES;
@@ -358,9 +365,9 @@ class Sales
 
 
     /**
-    *   Clean out old sales records.
-    *   Called from runScheculedTask function
-    */
+     * Clean out old sales records.
+     * Called from runScheduledTask function.
+     */
     public static function Clean()
     {
         global $_TABLES;
@@ -373,11 +380,11 @@ class Sales
 
 
     /**
-    *   Creates the edit form.
-    *
-    *   @param  integer $id Attributeal ID, current record used if zero
-    *   @return string      HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id Attributeal ID, current record used if zero
+     * @return  string      HTML for edit form
+     */
     public function Edit()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
@@ -431,11 +438,11 @@ class Sales
 
 
     /**
-    *   Helper function to create the cache key.
-    *
-    *   @param  string  $id     Item ID, e.g. "category_1"
-    *   @return string  Cache key
-    */
+     * Helper function to create the cache key.
+     *
+     * @param   string  $id     Item ID, e.g. "category_1"
+     * @return  string  Cache key
+     */
     protected static function _makeCacheKey($id)
     {
         return self::$base_tag . '_' . $id;
@@ -443,12 +450,12 @@ class Sales
 
 
     /**
-    *   Calculate the salesed price.
-    *   Always returns at least zero.
-    *
-    *   @param  float   $price      Item base price
-    *   @return float               Salesed price
-    */
+     * Calculate the sales price.
+     * Always returns at least zero.
+     *
+     * @param  float   $price      Item base price
+     * @return float               Salesed price
+     */
     public function calcPrice($price)
     {
         switch ($this->discount_type) {

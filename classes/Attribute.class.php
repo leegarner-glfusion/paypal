@@ -63,11 +63,11 @@ class Attribute
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value='')
     {
         switch ($var) {
@@ -102,11 +102,11 @@ class Attribute
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -118,10 +118,10 @@ class Attribute
 
 
     /**
-    *   Sets all variables to the matching values from $row
-    *
-    *   @param array $row Array of values, from DB or $_POST
-    */
+     * Sets all variables to the matching values from $row.
+     *
+     * @param   array $row Array of values, from DB or $_POST
+     */
     public function setVars($row)
     {
         if (!is_array($row)) return;
@@ -136,11 +136,11 @@ class Attribute
 
 
     /**
-    *   Read a specific record and populate the local values.
-    *
-    *   @param  integer $id Attributeal ID.  Current ID is used if zero.
-    *   @return boolean     True if a record was read, False on failure
-    */
+     * Read a specific record and populate the local values.
+     *
+     * @param   integer $id Attributeal ID.  Current ID is used if zero.
+     * @return  boolean     True if a record was read, False on failure
+     */
     public function Read($id = 0)
     {
         global $_TABLES;
@@ -167,11 +167,11 @@ class Attribute
 
 
     /**
-    *   Save the current values to the database.
-    *
-    *   @param  array   $A      Array of values from $_POST
-    *   @return boolean         True if no errors, False otherwise
-    */
+     * Save the current values to the database.
+     *
+     * @param   array   $A      Array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
+     */
     public function Save($A = array())
     {
         global $_TABLES, $_PP_CONF;
@@ -232,12 +232,11 @@ class Attribute
 
 
     /**
-    *   Delete the current category record from the database.
-    *   Callable as a static function Attribute::Delete($attr_id)
-    *
-    *   @param  integer $attr_id    Attribute ID, empty for current object
-    *   @return boolean     True on success, False on invalid ID
-    */
+     * Delete the current category record from the database.
+     *
+     * @param   integer $attr_id    Attribute ID, empty for current object
+     * @return  boolean     True on success, False on invalid ID
+     */
     public static function Delete($attr_id)
     {
         global $_TABLES;
@@ -252,10 +251,10 @@ class Attribute
 
 
     /**
-    *   Determines if the current record is valid.
-    *
-    *   @return boolean     True if ok, False when first test fails.
-    */
+     * Determines if the current record is valid.
+     *
+     * @return  boolean     True if ok, False when first test fails.
+     */
     public function isValidRecord()
     {
         // Check that basic required fields are filled in
@@ -269,11 +268,11 @@ class Attribute
 
 
     /**
-    *   Creates the edit form.
-    *
-    *   @param  integer $id Attributeal ID, current record used if zero
-    *   @return string      HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id Attributeal ID, current record used if zero
+     * @return  string      HTML for edit form
+     */
     public function Edit()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP, $_SYSTEM;
@@ -322,13 +321,13 @@ class Attribute
 
 
     /**
-    *   Sets a boolean field to the specified value.
-    *
-    *   @param  integer $oldvalue   Original value of field
-    *   @param  integer $varname    Name of field to change
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Sets a boolean field to the specified value.
+     *
+     * @param   integer $oldvalue   Original value of field
+     * @param   integer $varname    Name of field to change
+     * @param   integer $id         ID number of element to modify
+     * @return  integer     New value, or old value upon failure
+     */
     private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
@@ -352,12 +351,12 @@ class Attribute
 
 
     /**
-     * Sets the "enabled" field to the specified value.
+     * Toggles the "enabled" field value.
      *
      * @uses    Attribute::_toggle()
      * @param   integer $oldvalue   Original field value
      * @param   integer $id         ID number of element to modify
-     * @return         New value, or old value upon failure
+     * @return  integer     New value, or old value upon failure
      */
      public static function toggleEnabled($oldvalue, $id=0)
      {

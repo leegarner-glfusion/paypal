@@ -1,32 +1,31 @@
 <?php
 /**
-*   This file contains the IPN processor for Authorize.Net.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2013 Lee Garner
-*   @package    paypal
-*   @version    0.5.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @license    Portions http://aws.amazon.com/apache2.0
-*               Apache License 2.0
-*   @filesource
-*/
+ * This file contains the IPN processor for Authorize.Net.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2013 Lee Garner
+ * @package     paypal
+ * @version     v0.5.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\ipn;
 
 use \Paypal\Cart;
 
 /**
-*   Authorize.Net SIM IPN Processor
-*   @since  0.5.3
-*   @package paypal
-*/
+ * Authorize.Net IPN Processor.
+ * @since   v0.5.3
+ * @package paypal
+ */
 class authorizenet extends \Paypal\IPN
 {
     /**
-    *   Constructor.
-    *   Set up the pp_data array.
-    */
+     * Constructor. Set up the pp_data array.
+     *
+     * @param   array   $A  Array of IPN data
+     */
     function __construct($A=array())
     {
         $this->gw_id = 'authorizenet';
@@ -99,14 +98,14 @@ class authorizenet extends \Paypal\IPN
 
 
     /**
-    *   Process the transaction.
-    *   Verifies that the transaction is valid, then records the purchase and
-    *   notifies the buyer and administrator
-    *
-    *   @uses   Verify()
-    *   @uses   BaseIPN::isUniqueTxnId()
-    *   @uses   BaseIPN::handlePurchase()
-    */
+     * Process the transaction.
+     * Verifies that the transaction is valid, then records the purchase and
+     * notifies the buyer and administrator
+     *
+     * @uses    self::Verify()
+     * @uses    BaseIPN::isUniqueTxnId()
+     * @uses    BaseIPN::handlePurchase()
+     */
     public function Process()
     {
         if (!$this->Verify()) {
@@ -135,13 +134,13 @@ class authorizenet extends \Paypal\IPN
 
 
     /**
-    *   Verify the transaction with Authorize.Net
-    *   Validate transaction by posting data back to the webserver.
-    *   Checks that a valid response is received and that key fields match the
-    *   IPN message.
-    *
-    *   @return boolean         true if successfully validated, false otherwise
-    */
+     * Verify the transaction with Authorize.Net
+     * Validate transaction by posting data back to the webserver.
+     * Checks that a valid response is received and that key fields match the
+     * IPN message.
+     *
+     * @return  boolean         true if successfully validated, false otherwise
+     */
     private function Verify()
     {
         return true;
@@ -210,7 +209,6 @@ class authorizenet extends \Paypal\IPN
         $this->pp_data['pmt_gross'] = 23.77;
         return $this->Verify();
     }
-
 
 }   // class AuthorizeNetIPN
 

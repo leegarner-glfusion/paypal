@@ -1,51 +1,51 @@
 <?php
 /**
-*   Class to manage product categories
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-
+ * Class to manage product categories.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for categories
-*   @package paypal
-*/
+ * Class for product categories.
+ * Each product belongs to one category.
+ * @package paypal
+ */
 class Category
 {
-    const DEF_DATE = '1900-01-01';
-
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Property fields accessed via `__set()` and `__get()`.
+     * @var array */
     var $properties = array();
 
-    /** Indicate whether the current user is an administrator
-    *   @var boolean */
+    /** Indicate whether the current user is an administrator.
+     * @var boolean */
     var $isAdmin;
 
-    /** Indicate whether this is a new record or not
-    *   @var boolean */
+    /** Indicate whether this is a new record or not.
+     * @var boolean */
     var $isNew;
 
     /** Array of error messages, to be accessible by the calling routines.
-     *  @var array */
+     * @var array */
     var $Errors = array();
 
-    private static $tag = 'ppcat_';     // Cache tag
+    /** Base tag for caching.
+     * @var string */
+    private static $tag = 'ppcat_';
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param integer $id Optional type ID
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer $id Optional type ID
+     */
     public function __construct($id=0)
     {
         global $_USER, $_VARS;
@@ -76,11 +76,11 @@ class Category
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value)
     {
         switch ($var) {
@@ -114,11 +114,11 @@ class Category
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -130,11 +130,11 @@ class Category
 
 
     /**
-    *   Sets all variables to the matching values from $rows
-    *
-    *   @param  array   $row    Array of values, from DB or $_POST
-    *   @param  boolean $fromDB True if read from DB, false if from form
-    */
+     * Sets all variables to the matching values from the supplied array.
+     *
+     * @param   array   $row    Array of values, from DB or $_POST
+     * @param   boolean $fromDB True if read from DB, false if from a form
+     */
     public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
@@ -155,12 +155,12 @@ class Category
 
 
     /**
-    *   Read a specific record and populate the local values.
-    *   Caches the object for later use.
-    *
-    *   @param  integer $id Optional ID.  Current ID is used if zero.
-    *   @return boolean     True if a record was read, False on failure
-    */
+     * Read a specific record and populate the local values.
+     * Caches the object for later use.
+     *
+     * @param   integer $id Optional ID.  Current ID is used if zero.
+     * @return  boolean     True if a record was read, False on failure
+     */
     public function Read($id = 0)
     {
         global $_TABLES;
@@ -188,12 +188,12 @@ class Category
 
 
     /**
-    *   Get a category instance.
-    *   Checks cache first and creates a new object if not found.
-    *
-    *   @param  integer $cat_id     Category ID
-    *   @return object              Category object
-    */
+     * Get a category instance.
+     * Checks cache first and creates a new object if not found.
+     *
+     * @param   integer $cat_id     Category ID
+     * @return  object              Category object
+     */
     public static function getInstance($cat_id)
     {
         static $cats = array();
@@ -209,10 +209,10 @@ class Category
 
 
     /**
-     *  Save the current values to the database.
+     * Save the current values to the database.
      *
-     *  @param  array   $A      Optional array of values from $_POST
-     *  @return boolean         True if no errors, False otherwise
+     * @param  array   $A      Optional array of values from $_POST
+     * @return boolean         True if no errors, False otherwise
      */
     public function Save($A = array())
     {
@@ -298,9 +298,10 @@ class Category
 
 
     /**
-    *   Propagate permissions to sub-categories
-    *
-    */
+     * Propagate permissions to sub-categories.
+     *
+     * @param   integer $grp_id     Group ID to allow permission
+     */
     private function _propagatePerms($grp_id)
     {
         global $_TABLES;
@@ -324,7 +325,7 @@ class Category
 
 
     /**
-     *  Delete the current category record from the database
+     *  Delete the current category record from the database.
      */
     public function Delete()
     {
@@ -343,13 +344,11 @@ class Category
 
 
     /**
-    *   Deletes a single image from disk.
-    *   Only needs the $img_id value, so this function may be called as a
-    *   standalone function.
-    *   $del_db is used to save a DB call if this is called from Save().
-    *
-    *   @param  boolean $del_db     True to update the database.
-    */
+     * Deletes a single image from disk.
+     * $del_db is used to save a DB call if this is called from Save().
+     *
+     * @param   boolean $del_db     True to update the database.
+     */
     public function deleteImage($del_db = true)
     {
         global $_TABLES, $_PP_CONF;
@@ -499,13 +498,13 @@ class Category
 
 
     /**
-    *   Sets a boolean field to the specified value.
-    *
-    *   @param  integer $oldvalue   Old value to change
-    *   @param  string  $varname    Field name to change
-    *   @param  integer $id ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
+     * Toogles a boolean value to the opposite of the current value.
+     *
+     * @param   integer $oldvalue   Old value to change
+     * @param   string  $varname    Field name to change
+     * @param   integer $id         ID number of element to modify
+     * @return  integer             New value, or old value upon failure
+     */
     private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
@@ -529,32 +528,25 @@ class Category
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @param  integer $id ID number of element to modify
-    *   @param  integer $value New value to set
-    *   @return         New value, or old value upon failure
-    */
-    public static function toggleEnabled($oldvalue, $id=0)
+     * Sets the "enabled" field to the specified value.
+     *
+     * @param   integer $oldvalue   Original value to be changed
+     * @param   integer $id         ID number of element to modify
+     * @return  integer         New value, or old value upon failure
+     */
+    public static function toggleEnabled($oldvalue, $id)
     {
-        $id = (int)$id;
-        if ($id == 0) {
-            if (is_object($this))
-                $id = $this->cat_id;
-            else
-                return $oldvalue;
-        }
         return self::_toggle($oldvalue, 'enabled', $id);
     }
 
 
     /**
-    *   Determine if this product is mentioned in any purchase records.
-    *   Typically used to prevent deletion of product records that have
-    *   dependencies.
-    *
-    *   @return boolean True if used, False if not
-    */
+     * Determine if a category is used by any products.
+     * Used to prevent deletion of a category if it would orphan a product.
+     *
+     *  @param  integer $cat_id     Category ID to check.
+     * @return  boolean     True if used, False if not
+     */
     public static function isUsed($cat_id=0)
     {
         global $_TABLES;
@@ -581,11 +573,11 @@ class Category
 
 
     /**
-    *   Add an error message to the Errors array.  Also could be used to
-    *   log certain errors or perform other actions.
-    *
-    *   @param  string  $msg    Error message to append
-    */
+     * Add an error message to the Errors array.
+     * Also could be used to log certain errors or perform other actions.
+     *
+     * @param   string  $msg    Error message to append
+     */
     public function AddError($msg)
     {
         $this->Errors[] = $msg;
@@ -593,10 +585,10 @@ class Category
 
 
     /**
-    *   Create a formatted display-ready version of the error messages.
-    *
-    *   @return string      Formatted error messages.
-    */
+     *  Create a formatted display-ready version of the error messages.
+     *
+     *  @return string      Formatted error messages.
+     */
     public function PrintErrors()
     {
         $retval = '';
@@ -609,10 +601,10 @@ class Category
 
 
     /**
-    *   Determine if the current user has access to this category.
-    *
-    *   @return boolean     True if user has access, False if not
-    */
+     * Determine if the current user has access to this category.
+     *
+     * @return  boolean     True if user has access, False if not
+     */
     public function hasAccess()
     {
         global $_GROUPS;
@@ -622,11 +614,11 @@ class Category
 
 
     /**
-    *   Get the URL to the category image.
-    *   Returns an empty string if no image defined or found.
-    *
-    *   @return string  URL of image
-    */
+     * Get the URL to the category image.
+     * Returns an empty string if no image defined or found.
+     *
+     * @return  string  URL of image
+     */
     public function ImageUrl()
     {
         global $_CONF, $_PP_CONF;
@@ -642,15 +634,15 @@ class Category
 
 
     /**
-    *   Create the breadcrumb display, with links.
-    *   Creating a static breadcrumb field in the category record won't
-    *   work because of the group access control. If a category is
-    *   encountered that the current user can't access, it is simply
-    *   skipped.
-    *
-    *   @param  integer $id ID of current category
-    *   @return string      Location string ready for display
-    */
+     * Create the breadcrumb display, with links.
+     * Creating a static breadcrumb field in the category record won't
+     * work because of the group access control. If a category is
+     * encountered that the current user can't access, it is simply
+     * skipped.
+     *
+     * @param   integer $id ID of current category
+     * @return  string      Location string ready for display
+     */
     public static function Breadcrumbs($id)
     {
         global $_TABLES, $LANG_PP;
@@ -697,10 +689,11 @@ class Category
 
 
     /**
-    *   Helper function to create the cache key.
-    *
-    *   @return string  Cache key
-    */
+     * Helper function to create the cache key.
+     *
+     * @param   string  $id     Unique cache ID
+     * @return  string  Cache key
+     */
     private static function _makeCacheKey($id)
     {
         return self::$tag . $id;
@@ -708,11 +701,12 @@ class Category
 
 
     /**
-    *   Read all the categories into a static array.
-    *
-    *   @param  integer $root   Root category ID
-    *   @return array           Array of category objects
-    */
+     * Read all the categories into a static array.
+     *
+     * @param   integer $root   Root category ID
+     * @param   string  $prefix Prefix to prepend to sub-categories
+     * @return  array           Array of category objects
+     */
     public static function getTree($root=0, $prefix='&nbsp;')
     {
         global $_TABLES;
@@ -751,12 +745,12 @@ class Category
 
 
     /**
-    *   Get the full path to a category, optionally including sub-categories
-    *
-    *   @param  integer $cat_id     Category ID
-    *   @param  boolean $incl_sub   True to include sub-categories
-    *   @return array       Array of category objects
-    */
+     * Get the full path to a category, optionally including sub-categories.
+     *
+     * @param   integer $cat_id     Category ID
+     * @param   boolean $incl_sub   True to include sub-categories
+     * @return  array       Array of category objects
+     */
     public static function getPath($cat_id, $incl_sub = true)
     {
         $key = 'cat_path_' . $cat_id . '_' . (int)$incl_sub;
@@ -791,16 +785,16 @@ class Category
 
 
     /**
-    *   Get the options for a selection list.
-    *   Used in the product form and to select a parent category.
-    *   $exclude indicates a category to disable, to prevent selecting a
-    *   category as its own parent.
-    *
-    *   @uses   self::getTree()
-    *   @param  integer $sel        Selected category ID
-    *   @param  integer $exclude    Category to disable in the list
-    *   @return string          Option elements for Select
-    */
+     * Get the options for a selection list.
+     * Used in the product form and to select a parent category.
+     * $exclude indicates a category to disable, to prevent selecting a
+     * category as its own parent.
+     *
+     * @uses    self::getTree()
+     * @param   integer $sel        Selected category ID
+     * @param   integer $exclude    Category to disable in the list
+     * @return  string          Option elements for Select
+     */
     public static function optionList($sel = 0, $exclude = 0)
     {
         $Cats = self::getTree(0, '-');
@@ -816,11 +810,11 @@ class Category
 
 
     /**
-    *   Get the root category.
-    *   Depending on how Paypal was installed or updated this might not be #1.
-    *
-    *   @return mixed   Category object
-    */
+     * Get the root category.
+     * Depending on how Paypal was installed or updated this might not be #1.
+     *
+     * @return  mixed   Category object
+     */
     public static function getRoot()
     {
         global $_TABLES;
@@ -832,12 +826,12 @@ class Category
 
 
     /**
-    *   Rebuild the MPT tree starting at a given parent and "left" value
-    *
-    *   @param  integer $parent     Starting category ID
-    *   @param  integer $left       Left value of the given category
-    *   @return integer         New Right value (only when called recursively)
-    */
+     * Rebuild the MPT tree starting at a given parent and "left" value.
+     *
+     * @param  integer $parent     Starting category ID
+     * @param  integer $left       Left value of the given category
+     * @return integer         New Right value (only when called recursively)
+     */
     public static function rebuildTree($parent = 0, $left = 1)
     {
         global $_TABLES;

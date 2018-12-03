@@ -1,16 +1,16 @@
 <?php
 /**
-*   Class to manage payment by gift card.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage payment by gift card.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @since       v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal\Gateways;
 
 use \Paypal\Cart;
@@ -18,14 +18,15 @@ use \Paypal\Coupon;
 use \Paypal\Currency;
 
 /**
- *  Coupon gateway class, just to provide checkout buttons for coupons
+ * Coupon gateway class, just to provide checkout buttons for coupons.
+ * @package paypal
  */
 class _coupon extends \Paypal\Gateway
 {
     /**
-    *   Constructor.
-    *   Set gateway-specific items and call the parent constructor.
-    */
+     * Constructor.
+     * Set gateway-specific items and call the parent constructor.
+     */
     public function __construct()
     {
         global $LANG_PP;
@@ -38,7 +39,7 @@ class _coupon extends \Paypal\Gateway
     }
 
 
-    /*
+    /**
      * Get the checkout selection for applying a gift card balance.
      * If the GC balance exceeds the order value, create a radio button
      * just like any other gateway to use the balance as payment in full.
@@ -108,11 +109,11 @@ class _coupon extends \Paypal\Gateway
 
 
     /**
-     *  Get the form variables for this checkout button.
-     *  Used if the entire order is being paid by the gift card balance.
+     * Get the form variables for this checkout button.
+     * Used if the entire order is being paid by the gift card balance.
      *
-     *  @param  object  $cart   Shopping cart
-     *  @return string          HTML for input vars
+     * @param   object  $cart   Shopping cart
+     * @return  string          HTML for input vars
      */
     public function gatewayVars($cart)
     {

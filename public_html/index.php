@@ -1,20 +1,20 @@
 <?php
 /**
-*   Public index page for users of the paypal plugin
-*
-*   By default displays available products along with links to purchase history
-*   and detailed product views
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     Vincent Furia <vinny01@users.sourceforge.net
-*   @copyright  Copyright (c) 2009-2018 Lee Garner
-*   @copyright  Copyright (c) 2005-2006 Vincent Furia
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Public index page for users of the paypal plugin.
+ *
+ * By default displays available products along with links to purchase history
+ * and detailed product views.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      Vincent Furia <vinny01@users.sourceforge.net
+ * @copyright   Copyright (c) 2009-2018 Lee Garner
+ * @copyright   Copyright (c) 2005-2006 Vincent Furia
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Require core glFusion code */
 require_once '../lib-common.php';

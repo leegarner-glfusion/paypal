@@ -1,26 +1,42 @@
 <?php
 /**
-*   Sitemap driver for the Paypal plugin
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2017-2018 Lee Garner
-*   @package    paypal
-*   @version    0.5.10
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Sitemap driver for the Paypal plugin
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2017-2018 Lee Garner
+ * @package     paypal
+ * @version     v0.5.10
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
+/**
+ * Sitemap driver class for Paypal
+ * @paackage paypal
+ */
 class sitemap_paypal extends sitemap_base
 {
+    /** Plugin name.
+     * @var string */
     protected $name = 'paypal';
 
+    /**
+     * Get the plugin main URL.
+     *
+     * @return  string  Entry URL
+     */
     public function getEntryPoint()
     {
         return PAYPAL_URL;
     }
 
- 
+
+    /**
+     * Get the plugin display name.
+     *
+     * @return  string  Display name
+     */
     public function getDisplayName()
     {
         global $LANG_PP;
@@ -28,6 +44,12 @@ class sitemap_paypal extends sitemap_base
     }
 
 
+    /**
+     * Get items for the sitemap under a specific category.
+     *
+     * @param   integer $cat_id     Category ID
+     * @return  array       Array of sitemap entries
+     */
     public function getItems($cat_id = 0)
     {
         global $_TABLES, $_USER;
@@ -52,6 +74,13 @@ class sitemap_paypal extends sitemap_base
         return $entries;
     }
 
+
+    /**
+     * Get the immediate child categories under a given base category.
+     *
+     * @param   integer $base   Category ID
+     * @return  array       Array of categories
+     */
     public function getChildCategories($base = false)
     {
         global $_TABLES;

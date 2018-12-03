@@ -1,44 +1,69 @@
 <?php
 /**
-*   Class to manage workflow.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-
+ * Class to manage order workflows.
+ * Workflows are the steps that a buyer goes through during the purchase process.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for workflow items
-*   Workflows are defined in the database and can be re-ordered and
-*   individually enabled or disabled.  The workflows determine which screens
-*   are displayed during checkout and in what order they appear.
-*   @package paypal
-*/
+ * Class for workflow items.
+ * Workflows are defined in the database and can be re-ordered and
+ * individually enabled or disabled. The workflows determine which screens
+ * are displayed during checkout and in what order they appear.
+ * @package paypal
+ */
 class Workflow
 {
+    /** Indicate that this workflow is disabled.
+     * @const integer */
     public const DISABLED = 0;
+
+    /** Indicate that this workflow is required for physical items.
+     * @const integer */
     public const REQ_PHYSICAL = 1;
+
+    /** Indicate that this workflow is required for virtual items.
+     * @const integer */
     public const REQ_VIRTUAL = 2;   // unused placeholder
+
+    /** Indicate that this workflow is required for all items.
+     * @const integer */
     public const REQ_ALL = 3;
 
+    /** Database table name.
+     * @var string */
     static $table = 'paypal.workflows';
+
+    /** Workflow Name.
+     * @var string */
     public $wf_name;
+
+    /** Workflow orderby numer.
+     * @var integer */
     public $orderby;
+
+    /** Database ID of the workflow record.
+     * @var integer */
     public $wf_id;
+
+    /** Flag to indicate that the workflow is enabled.
+     * @var boolean */
     public $enabled;
 
     /**
-    *   Constructor.
-    *   Initializes the array of workflows.
-    *
-    *   @uses   Load()
-    */
+     * Constructor.
+     * Initializes the array of workflows.
+     *
+     * @param   array   $A  Record array, form or DB
+     */
     public function __construct($A = array())
     {
         if (!empty($A)) {
@@ -51,8 +76,8 @@ class Workflow
 
 
     /**
-    *   Load the workflows into the global workflow array.
-    */
+     * Load the workflows into the global workflow array.
+     */
     public static function Load()
     {
         global $_TABLES, $_PP_CONF;
@@ -77,6 +102,7 @@ class Workflow
      * on the cart contents.
      * If the cart is NULL, get all workflows.
      *
+     * @param   object  $Cart   Shopping cart object.
      * @return  array   Array of workflow names
      */
     public static function getAll($Cart = NULL)
@@ -110,7 +136,7 @@ class Workflow
 
 
     /**
-     * Get an instance of a workflow step
+     * Get an instance of a workflow step.
      *
      * @uses    self::getall() to take advantage of caching
      * @param   integer $id     Workflow record ID
@@ -131,12 +157,13 @@ class Workflow
 
 
     /**
-    *   Set a boolean field to the specified value.
-    *
-    *   @param  integer $id ID number of element to modify
-    *   @param  integer $value New value to set
-    *   @return         New value, or old value upon failure
-    */
+     * Toggle a boolean value from the supplied original value.
+     *
+     * @param   integer $oldvalue   Original value to be changed
+     * @param   string  $varname    Field name to change
+     * @param   integer $id         ID number of element to modify
+     * @return  integer         New value, or old value upon failure
+     */
     protected static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
@@ -159,13 +186,13 @@ class Workflow
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @param  integer $id         ID number of element to modify
-    *   @param  string  $field      Database fieldname to change
-    *   @param  integer $oldvalue   Original value to change
-    *   @return         New value, or old value upon failure
-    */
+     * Sets the "enabled" field to the specified value.
+     *
+     * @param   integer $id         ID number of element to modify
+     * @param   string  $field      Database fieldname to change
+     * @param   integer $oldvalue   Original value to change
+     * @return  integer     New value, or old value upon failure
+     */
     public static function setValue($id, $field, $newvalue)
     {
         global $_TABLES;
@@ -194,9 +221,9 @@ class Workflow
 
 
     /**
-    *   Reorder all workflow items.
-    */
-    public static function ReOrder()
+     * Reorder all workflow items.
+     */
+    public static function reOrder()
     {
         global $_TABLES;
 
@@ -217,7 +244,7 @@ class Workflow
                     WHERE id = '{$A['id']}'";
                 DB_query($sql, 1);
                 if (DB_error()) {
-                    COM_errorLog("Workflow::ReOrder() SQL error: $sql", 1);
+                    COM_errorLog("Workflow::reOrder() SQL error: $sql", 1);
                 }
             }
             $order += $stepNumber;
@@ -227,11 +254,12 @@ class Workflow
 
 
     /**
-    *   Move a workflow up or down the admin list.
-    *
-    *   @param  string  $id     Workflow database ID
-    *   @param  string  $where  Direction to move (up or down)
-    */
+     * Move a workflow up or down the admin list.
+     *
+     * @uses    self::reOrder()
+     * @param   string  $id     Workflow database ID
+     * @param   string  $where  Direction to move (up or down)
+     */
     public static function moveRow($id, $where)
     {
         global $_TABLES;
@@ -255,7 +283,7 @@ class Workflow
         //echo $sql;die;
         DB_query($sql, 1);
         if (!DB_error()) {
-            self::ReOrder();
+            self::reOrder();
         } else {
             COM_errorLog("Workflow::moveRow() SQL error: $sql", 1);
         }
@@ -263,13 +291,13 @@ class Workflow
 
 
     /**
-    *   Get the next view in the workflow to be displayed.
-    *   This function receives the name of the current view, then looks
-    *   in it's array of views to return the next in line.
-    *
-    *   @param  string  $currview   Current view
-    *   @return string              Next view in line
-    */
+     * Get the next view in the workflow to be displayed.
+     * This function receives the name of the current view, then looks
+     * in it's array of views to return the next in line.
+     *
+     * @param   string  $currview   Current view
+     * @return  string              Next view in line
+     */
     public static function getNextView($currview = '')
     {
         global $_PP_CONF;

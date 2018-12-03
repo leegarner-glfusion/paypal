@@ -1,25 +1,25 @@
 <?php
 /**
-*   Base class for handling IPN messages.
-*   Each IPN handler receives its data in a unique way, which it is responsible
-*   for putting into this class's pp_data array which holds common, standard
-*   data elements.
-*
-*   The derived class may implement a "Process" function, or other master
-*   control.  The protected functions here are available for derived classes,
-*   or they may implement their own methods for handlePurchase(),
-*   createOrder(), etc.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     Vincent Furia <vinny01@users.sourceforge.net>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner
-*   @copyright  Copyright (c) 2005-2006 Vincent Furia
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Base class for handling IPN messages.
+ * Each IPN handler receives its data in a unique way, which it is responsible
+ * for putting into this class's pp_data array which holds common, standard
+ * data elements.
+ *
+ * The derived class may implement a "Process" function, or other master
+ * control.  The protected functions here are available for derived classes,
+ * or they may implement their own methods for handlePurchase(),
+ * createOrder(), etc.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      Vincent Furia <vinny01@users.sourceforge.net>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner
+ * @copyright   Copyright (c) 2005-2006 Vincent Furia
+ * @package     paypal
+ * @version     v0.6.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 // this file can't be used on its own
@@ -40,55 +40,58 @@ define('IPN_FAILURE_FUNDS', 5);
 
 
 /**
-*   Interface to deal with IPN transactions from a payment gateway.
-*
-*   @package paypal
-*/
+ * Class to deal with IPN transactions from a payment gateway.
+ * @package paypal
+ */
 class IPN
 {
     /** Standard IPN data items required for all IPN types.
-    *   @var array */
+     * @var array */
     var $pp_data = array();
 
-    /** Holder for the complete IPN data array.  Used only for recording
-    *   the raw data; no processing is done on this data by the base class.
-    *   @var array */
+    /**
+     * Holder for the complete IPN data array.
+     * Used only for recording the raw data; no processing is done on this data
+     * by the base class.
+     * @var array
+     * */
     var $ipn_data = array();
 
-    /** Array of items purchased.  Extracted from $ipn_data by the derived
-    *   IPN processor class.
-    *   @var array */
+    /** Array of items purchased.
+     * Extracted from $ipn_data by the derived IPN processor class.
+     * @var array */
     var $items = array();
 
-    /** ID of payment gateway, e.g. 'paypal' or 'amazon'
-    *   @var string */
+    /** ID of payment gateway, e.g. 'paypal' or 'amazon'.
+     * @var string */
     var $gw_id;
 
-    /** Instance of the appropriate gateway object
-    *   @var object */
+    /** Instance of the appropriate gateway object.
+    * @var object */
     var $gw;
 
-    /** This is just a holder for the current date in SQL format,
-    *   so we don't have to rely on the database's NOW() function.
-    *   @var string */
+    /**
+     * This is just a holder for the current date in SQL format,
+     * so we don't have to rely on the database's NOW() function.
+     * @var string */
     var $sql_date;
 
-    /** Order object
-    *   @var object */
+    /** Order object.
+     * @var object */
     protected $Order;
 
-    /** Cart object
-    *   @var object */
+    /** Cart object.
+    * @var object */
     protected $Cart;
 
     /**
-    *   Constructor.
-    *   Set up variables received in the IPN message. Stores the complete
-    *   IPN message in ipn_data, and initializes a pp_data for standard
-    *   values to be filled in by the gateway's IPN processor.
-    *
-    *   @param  array   $A      $_POST'd variables from the gateway
-    */
+     * Constructor.
+     * Set up variables received in the IPN message. Stores the complete
+     * IPN message in ipn_data, and initializes a pp_data for standard
+     * values to be filled in by the gateway's IPN processor.
+     *
+     * @param   array   $A      $_POST'd variables from the gateway
+     */
     function __construct($A=array())
     {
         global $_PP_CONF;
@@ -123,10 +126,10 @@ class IPN
 
 
     /**
-    *   Add an item from the IPN message to our $items array.
-    *
-    *   @param  array   $args   Array of arguments
-    */
+     * Add an item from the IPN message to our $items array.
+     *
+     * @param   array   $args   Array of arguments
+     */
     protected function AddItem($args)
     {
         // Minimum required arguments: item, quantity, unit price
@@ -170,16 +173,16 @@ class IPN
 
 
     /**
-    *   Log an instant payment notification.
-    *
-    *   Logs the incoming IPN (serialized) along with the time it arrived,
-    *   the originating IP address and whether or not it has been verified
-    *   (caller specified).  Also inserts the txn_id separately for
-    *   look-up purposes.
-    *
-    *   @param  boolean $verified   true if verified, false otherwise
-    *   @return integer             Database ID of log record
-    */
+     * Log an instant payment notification.
+     *
+     * Logs the incoming IPN (serialized) along with the time it arrived,
+     * the originating IP address and whether or not it has been verified
+     * (caller specified).  Also inserts the txn_id separately for
+     * look-up purposes.
+     *
+     * @param   boolean $verified   true if verified, false otherwise
+     * @return  integer             Database ID of log record
+     */
     protected function Log($verified = false)
     {
         global $_SERVER, $_TABLES;
@@ -209,11 +212,11 @@ class IPN
 
 
     /**
-    *   Checks that the transaction id is unique to prevent double counting.
-    *
-    *   @param  string  $txn_id     Transaction id to verify
-    *   @return boolean             True if unique, False otherwise
-    */
+     * Checks that the transaction id is unique to prevent double counting.
+     *
+     * @param   array   $data   Array of data, includes txn_id to verify
+     * @return  boolean             True if unique, False otherwise
+     */
     protected function isUniqueTxnId($data)
     {
         global $_TABLES, $_PP_CONF;
@@ -231,11 +234,10 @@ class IPN
 
 
     /**
-    *   Check that provided funds are sufficient to cover the cost of
-    *   the purchase.
-    *
-    *   @return boolean                 True for sufficient funds, False if not
-    */
+     * Check that provided funds are sufficient to cover the cost of the purchase.
+     *
+     * @return boolean                 True for sufficient funds, False if not
+     */
     protected function isSufficientFunds()
     {
         // Get the amount paid along with any gift card balance used and
@@ -266,14 +268,14 @@ class IPN
 
 
     /**
-    *   Handles the item purchases.
-    *   The purchase should already have been validated; this function simply
-    *   records the purchases.  Purchased files will be emailed to the
-    *   customer by Order::Notify().
-    *
-    *   @uses   createOrder()
-    *   @return boolean     True if processed successfully, False if not
-    */
+     * Handles the item purchases.
+     * The purchase should already have been validated; this function simply
+     * records the purchases.  Purchased files will be emailed to the
+     * customer by Order::Notify().
+     *
+     * @uses    self::createOrder()
+     * @return  boolean     True if processed successfully, False if not
+     */
     protected function handlePurchase()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
@@ -353,17 +355,17 @@ class IPN
 
 
     /**
-    *   Create and populate an Order record for this purchase.
-    *   Gets the billto and shipto addresses from the cart, if any.
-    *   Items are saved in the purchases table by handlePurchase().
-    *   The order is not saved to the database here. Only after checking
-    *   for sufficient funds is the records saved.
-    *
-    *   This function is called only by our own handlePurchase() function,
-    *   but is made "protected" so a derived class can use it if necessary.
-    *
-    *   @return integer     Zero for success, non-zero on error
-    */
+     * Create and populate an Order record for this purchase.
+     * Gets the billto and shipto addresses from the cart, if any.
+     * Items are saved in the purchases table by handlePurchase().
+     * The order is not saved to the database here. Only after checking
+     * for sufficient funds is the records saved.
+     *
+     * This function is called only by our own handlePurchase() function,
+     * but is made "protected" so a derived class can use it if necessary.
+     *
+     * @return  integer     Zero for success, non-zero on error
+     */
     protected function createOrder()
     {
         global $_TABLES, $_PP_CONF;
@@ -496,13 +498,13 @@ class IPN
 
 
     /**
-    *   Process a refund.
-    *   If a purchase is completely refunded, then call the plugins to
-    *   handle the refund.  Otherwise, do nothing; partial refunds need to
-    *   be handled manually.
-    *
-    *   @todo: handle partial refunds
-    */
+     * Process a refund.
+     * If a purchase is completely refunded, then call the plugins to
+     * handle the refund.  Otherwise, do nothing; partial refunds need to
+     * be handled manually.
+     *
+     * @todo: handle partial refunds
+     */
     protected function handleRefund()
     {
         global $_TABLES, $_CONF, $_PP_CONF, $LANG_PP;
@@ -548,10 +550,10 @@ class IPN
 
 
     /**
-    *   Handle a subscription payment. (Not implemented yet)
-    *
-    *   @todo Implement handleSubscription
-    */
+     * Handle a subscription payment. (Not implemented yet).
+     *
+     * @todo Implement handleSubscription
+     */
     /*private function handleSubscription()
     {
         $this->handleFailure(IPN_FAILURE_UNKNOWN, "Subscription not handled");
@@ -559,10 +561,10 @@ class IPN
 
 
     /**
-    *   Handle a Donation payment (Not implemented)
-    *
-    *   @todo Implement handleDonation
-    */
+     * Handle a Donation payment (Not implemented).
+     *
+     * @todo Implement handleDonation
+     */
     /*private function handleDonation()
     {
         $this->handleFailure(IPN_FAILURE_UNKNOWN, "Donation not handled");
@@ -570,14 +572,14 @@ class IPN
 
 
     /**
-    *   Handle what to do in the event of a purchase/IPN failure.
-    *
-    *   This method does some basic failure handling.  For anything more
-    *   advanced it is recommend you override this method.
-    *
-    *   @param  integer $type   Type of failure that occurred
-    *   @param  string  $msg    Failure message
-    */
+     * Handle what to do in the event of a purchase/IPN failure.
+     *
+     * This method does some basic failure handling.  For anything more
+     * advanced it is recommend you override this method.
+     *
+     * @param   integer $type   Type of failure that occurred
+     * @param   string  $msg    Failure message
+     */
     protected function handleFailure($type = IPN_FAILURE_UNKNOWN, $msg = '')
     {
         // Log the failure to glFusion's error log
@@ -586,10 +588,10 @@ class IPN
 
 
     /**
-    *   Debugging function.  Dumps variables to error log
-    *
-    *   @param  mixed   $var    Data to log
-    */
+     * Debugging function. Dumps variables to error log.
+     *
+     * @param   mixed   $var    Data to log
+     */
     protected function debug($var)
     {
         $msg = print_r($var, true);
@@ -598,11 +600,11 @@ class IPN
 
 
     /**
-    *   Log an error message.
-    *   This just formats the message to indicate the gateway ID.
-    *
-    *   @param  string  $str    Error message to log
-    */
+     * Log an error message.
+     * This just formats the message to indicate the gateway ID.
+     *
+     * @param   string  $str    Error message to log
+     */
     protected function Error($str)
     {
         COM_errorLog($this->gw_id. ' IPN Exception: ' . $str, 1);
@@ -610,12 +612,12 @@ class IPN
 
 
     /**
-    *   Instantiate and return an IPN class
-    *
-    *   @param  string  $name   Gateway name, e.g. paypal
-    *   @param  array   $vars   Gateway variables to be passed to the IPN
-    *   @return object          IPN handler object
-    */
+     * Instantiate and return an IPN class.
+     *
+     * @param   string  $name   Gateway name, e.g. paypal
+     * @param   array   $vars   Gateway variables to be passed to the IPN
+     * @return  object          IPN handler object
+     */
     public static function getInstance($name, $vars=array())
     {
         static $ipns = array();

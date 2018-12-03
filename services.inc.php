@@ -1,17 +1,17 @@
 <?php
 /**
-*   Web service functions for the PayPal plugin.
-*   This is used to supply PayPal functions to other plugins.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @since      0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Web service functions for the PayPal plugin.
+ * This is used to supply PayPal functions to other plugins.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.0
+ * @since       v0.5.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
@@ -19,29 +19,29 @@ if (!defined ('GVERSION')) {
 
 
 /**
-*   Create the payment buttons for an external item.
-*   Creates the requested buy_now button type and, if requested,
-*   an add_cart button.
-*
-*   All gateways that have the 'external' service enabled as well as the
-*   requested button type will provide a button.
-*
-*   $args['btn_type'] can be empty or not set, to create only an Add to Cart
-*   button.  $args['add_cart'] must still be set in this case.  If neither
-*   button type is requested, an empty array is returned.
-*
-*   Provided $args should include at least:
-*       'item_number', 'item_name', 'price', 'quantity', and 'item_type'
-*   $args['btn_type'] should reflect the type of immediate-purchase button
-*   desired.  $args['add_cart'] simply needs to be set to get an add-to-cart
-*   button.
-*
-*   @uses   Gateway::ExternalButton()
-*   @param  array   $args       Array of item information
-*   @param  array   &$output    Pointer to output array
-*   @param  array   &$svc_msg   Unused
-*   @return integer             Status code
-*/
+ * Create the payment buttons for an external item.
+ * Creates the requested buy_now button type and, if requested,
+ * an add_cart button.
+ *
+ * All gateways that have the 'external' service enabled as well as the
+ * requested button type will provide a button.
+ *
+ * $args['btn_type'] can be empty or not set, to create only an Add to Cart
+ * button.  $args['add_cart'] must still be set in this case.  If neither
+ * button type is requested, an empty array is returned.
+ *
+ * Provided $args should include at least:
+ *      'item_number', 'item_name', 'price', 'quantity', and 'item_type'
+ * $args['btn_type'] should reflect the type of immediate-purchase button
+ * desired.  $args['add_cart'] simply needs to be set to get an add-to-cart
+ * button.
+ *
+ * @uses    Gateway::ExternalButton()
+ * @param   array   $args       Array of item information
+ * @param   array   &$output    Pointer to output array
+ * @param   array   &$svc_msg   Unused
+ * @return  integer             Status code
+ */
 function service_genButton_paypal($args, &$output, &$svc_msg)
 {
     global $_CONF, $_PP_CONF;
@@ -100,12 +100,15 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
 
 
 /**
-*   Return the configured currency.
-*   This is an API function to allow other plugins to find out what
-*   currency we accept.
-*
-*   @return string      Our configured currency code.
-*/
+ * Return the configured currency.
+ * This is service function to allow other plugins to find out what
+ * currency we accept. Sets `$output` to the currency string.
+ *
+ * @param   array   $args       Array of args (not used)
+ * @param   string  $output     Variable to receive output
+ * @param   string  $svc_msg    Not used
+ * @return  integer     PLG_RET_OK value
+ */
 function service_getCurrency_paypal($args, &$output, &$svc_msg)
 {
     global $_PP_CONF;
@@ -113,6 +116,15 @@ function service_getCurrency_paypal($args, &$output, &$svc_msg)
     $output = $_PP_CONF['currency'];
     return PLG_RET_OK;
 }
+
+
+/**
+ * Return the configured currency.
+ * This is an API function to allow other plugins to find out what
+ * currency we accept. Sets `$output` to the currency string.
+ *
+ * @return  string      Our configured currency code.
+ */
 function plugin_getCurrency_paypal()
 {
     global $_PP_CONF;
@@ -121,16 +133,16 @@ function plugin_getCurrency_paypal()
 
 
 /**
-*   API function to return the url to a Paypal item.
-*   This returns the url to a Paypal-controlled item, such as the
-*   IPN transaction data.  This is meant to provide a backlink for other
-*   plugins to use with their products.
-*
-*   @param  array   $args       Array of item information, at least 'type'
-*   @param  array   &$output    Pointer to output array
-*   @param  array   &$svc_msg   Unused
-*   @return integer             Status code
-*/
+ * API function to return the url to a Paypal item.
+ * This returns the url to a Paypal-controlled item, such as the
+ * IPN transaction data.  This is meant to provide a backlink for other
+ * plugins to use with their products.
+ *
+ * @param   array   $args       Array of item information, at least 'type'
+ * @param   array   &$output    Pointer to output array
+ * @param   array   &$svc_msg   Unused
+ * @return  integer             Status code
+ */
 function service_getUrl_paypal($args, &$output, &$svc_msg)
 {
     if (!is_array($args)) {
@@ -165,16 +177,16 @@ function service_getUrl_paypal($args, &$output, &$svc_msg)
 
 
 /**
-*   Allow a plugin to push an item into the cart.
-*   If $args['unique'] is not True, the item will be added to the cart
-*   or the quantity updated if the item already exists. Setting the unique
-*   flag prevents the item from being updated at all if it exists in the cart.
-*
-*   @param  array   $args   Array of item information
-*   @param  mixed   &$output    Output data
-*   @param  mixed   &$svc_msg   Service message
-*   @return integer     Status code
-*/
+ * Allow a plugin to push an item into the cart.
+ * If $args['unique'] is not True, the item will be added to the cart
+ * or the quantity updated if the item already exists. Setting the unique
+ * flag prevents the item from being updated at all if it exists in the cart.
+ *
+ * @param   array   $args   Array of item information
+ * @param   mixed   &$output    Output data
+ * @param   mixed   &$svc_msg   Service message
+ * @return  integer     Status code
+ */
 function service_addCartItem_paypal($args, &$output, &$svc_msg)
 {
     if (!is_array($args) || !isset($args['item_number']) || empty($args['item_number'])) {
@@ -247,14 +259,14 @@ function service_addCartItem_paypal($args, &$output, &$svc_msg)
 
 
 /**
-*   Return a simple "checkout" button.
-*   Take optional "text" and "color" arguments.
-*
-*   @param  array   $args       Array of options.
-*   @param  mixed   &$output    Output data
-*   @param  mixed   &$svc_msg   Service message
-*   @return integer     Status code
-*/
+ * Return a simple "checkout" button.
+ * Take optional "text" and "color" arguments.
+ *
+ * @param   array   $args       Array of options.
+ * @param   mixed   &$output    Output data
+ * @param   mixed   &$svc_msg   Service message
+ * @return  integer     Status code
+ */
 function service_btnCheckout_paypal($args, &$output, &$svc_msg)
 {
     global $LANG_PP;
@@ -268,15 +280,16 @@ function service_btnCheckout_paypal($args, &$output, &$svc_msg)
 }
 
 
-/*
-*   Return a formatted amount according to the configured currency
-*   Accepts an array of "amount" => value, or single value as first argument.
-*
-*   @param  array   $args   Array of "amount" => amount value
-*   @param  mixed   &$output    Output data
-*   @param  mixed   &$svc_msg   Service message
-*   @return integer     Status code
-*/
+/**
+ * Get a formatted amount according to the configured currency.
+ * Accepts an array of "amount" => value, or single value as first argument.
+ * Sets $output to the formatted amount.
+ *
+ * @param   array   $args   Array of "amount" => amount value
+ * @param   mixed   &$output    Output data
+ * @param   mixed   &$svc_msg   Service message
+ * @return  integer     Status code
+ */
 function service_formatAmount_paypal($args, &$output, &$svc_msg)
 {
     global $_PP_CONF;
@@ -289,6 +302,15 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
     $output = \Paypal\Currency::getInstance()->Format($amount);
     return PLG_RET_OK;
 }
+
+
+/**
+ * Return a formatted amount according to the configured currency.
+ * Accepts an array of "amount" => value, or single value as first argument.
+ *
+ * @param   float   $amount     Amount to format
+ * @return  string      Formatted amount according to the currency in use
+ */
 function plugin_formatAmount_paypal($amount)
 {
     return \Paypal\Currency::getInstance()->Format((float)$amount);
