@@ -32,8 +32,6 @@
           <div class="ItemImage">
 {!if small_pic}
             <img src="{small_pic}" alt="{name}" />
-{!else}
-            &nbsp;
 {!endif}
           </div>
           <div class="ItemUrl">
