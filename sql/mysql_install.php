@@ -931,5 +931,8 @@ $PP_UPGRADE['0.6.0'] = array(
         PRIMARY KEY (`id`)
     ) ENGINE=MyIsam",
 );
+$PP_UPGRADE['0.6.1'] = array(
+    "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE orderby orderby int(3)",
+);
 
 ?>

@@ -1,15 +1,15 @@
 <?php
 /**
-*   Upgrade routines for the Paypal plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.6.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Upgrade routines for the Paypal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 global $_CONF, $_PP_CONF;
 
@@ -17,11 +17,12 @@ global $_CONF, $_PP_CONF;
 require_once __DIR__ . "/sql/mysql_install.php";
 
 /**
-*   Perform the upgrade starting at the current version.
-*
-*   @since  version 0.4.0
-*   @return integer                 Error code, 0 for success
-*/
+ * Perform the upgrade starting at the current version.
+ *
+ * @since   v0.4.0
+ * @param   boolean $dvlp   True for development update, ignore errors
+ * @return  boolean     True on success, False on failure
+ */
 function PAYPAL_do_upgrade($dvlp = false)
 {
     global $_TABLES, $_CONF, $_PP_CONF, $paypalConfigData, $PP_UPGRADE, $_PLUGIN_INFO, $_DB_name;
@@ -591,6 +592,13 @@ function PAYPAL_do_upgrade($dvlp = false)
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }
 
+
+    if (!COM_checkVersion($current_ver, '0.6.1')) {
+        $current_ver = '0.6.1';
+        if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!PAYPAL_do_set_version($current_ver)) return false;
+    }
+
     PAYPAL_update_config();
     if (!COM_checkVersion($current_ver, $installed_ver)) {
         if (!PAYPAL_do_set_version($installed_ver)) return false;
@@ -606,15 +614,16 @@ function PAYPAL_do_upgrade($dvlp = false)
 
 
 /**
-*   Actually perform any sql updates.
-*   Gets the sql statements from the $UPGRADE array defined (maybe)
-*   in the SQL installation file.
-*
-*   @since  version 0.4.0
-*   @param  string  $version    Version being upgraded TO
-*   @param  boolean $ignore_error   True to ignore SQL errors.
-*   @param  array   $sql        Array of SQL statement(s) to execute
-*/
+ * Actually perform any sql updates.
+ * Gets the sql statements from the $UPGRADE array defined (maybe)
+ * in the SQL installation file.
+ *
+ * @since   v0.4.0
+ * @param   string  $version    Version being upgraded TO
+ * @param   boolean $ignore_error   True to ignore SQL errors.
+ * @param   array   $sql        Array of SQL statement(s) to execute
+ * @return  boolean     True on success, False on failure
+ */
 function PAYPAL_do_upgrade_sql($version, $ignore_error = false)
 {
     global $_TABLES, $_PP_CONF, $PP_UPGRADE;
@@ -645,13 +654,13 @@ function PAYPAL_do_upgrade_sql($version, $ignore_error = false)
 
 
 /**
-*   Update the plugin version number in the database.
-*   Called at each version upgrade to keep up to date with
-*   successful upgrades.
-*
-*   @param  string  $ver    New version to set
-*   @return boolean         True on success, False on failure
-*/
+ * Update the plugin version number in the database.
+ * Called at each version upgrade to keep up to date with
+ * successful upgrades.
+ *
+ * @param   string  $ver    New version to set
+ * @return  boolean         True on success, False on failure
+ */
 function PAYPAL_do_set_version($ver)
 {
     global $_TABLES, $_PP_CONF, $_PLUGIN_INFO;
@@ -690,8 +699,8 @@ function PAYPAL_update_config()
 
 
 /**
- *   Remove deprecated files
- *   Errors in unlink() and rmdir() are ignored.
+ * Remove deprecated files
+ * Errors in unlink() and rmdir() are ignored.
  */
 function PAYPAL_remove_old_files()
 {

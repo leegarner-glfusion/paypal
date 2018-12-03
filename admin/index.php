@@ -45,7 +45,8 @@ $expected = array(
     // Actions to perform
     'deleteproduct', 'deletecatimage', 'deletecat', 'delete_img',
     'saveproduct', 'savecat', 'saveopt', 'deleteopt', 'resetbuttons',
-    'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete', 'attrcopy',
+    'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete',
+    'attrcopy', 'attrmove',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
     'deldiscount', 'savediscount', 'purgecarts', 'saveshipping',
     // Views to display
@@ -201,6 +202,15 @@ case 'gwsave':
         $status = $gw->SaveConfig($_POST);
     }
     $view = 'gwadmin';
+    break;
+
+case 'attrmove':
+    $attr_id = PP_getVar($_GET, 'id', 'integer');
+    if ($attr_id > 0) {
+        $Attr = new \Paypal\Attribute($attr_id);
+        $Attr->moveRow($actionval);
+    }
+    $view = 'attributes';
     break;
 
 case 'gwmove':
@@ -1223,9 +1233,10 @@ function PAYPAL_adminlist_Attributes()
             'sort' => true,
         ),
         array(
-            'text' => $LANG_PP['order'],
+            'text'  => $LANG_PP['orderby'],
             'field' => 'orderby',
-            'sort' => true,
+            'align' => 'center',
+            'sort'  => true,
         ),
         array(
             'text' => $LANG_PP['attr_price'],
@@ -1391,6 +1402,17 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
         );
         break;
 
+    case 'orderby':
+        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-up pp-icon-info"></i>',
+                PAYPAL_ADMIN_URL . '/index.php?attrmove=up&id=' . $A['attr_id']
+            ) .
+            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
+                    '-arrow-down pp-icon-info"></i>',
+                PAYPAL_ADMIN_URL . '/index.php?attrmove=down&id=' . $A['attr_id']
+            );
+        break;
+
     case 'enabled':
         if ($fieldvalue == '1') {
                 $switch = ' checked="checked"';
@@ -1501,22 +1523,40 @@ function PAYPAL_adminList_Gateway()
     $to_install = \Paypal\Gateway::getUninstalled();
 
     $header_arr = array(
-        array('text' => $LANG_ADMIN['edit'],
-                'field' => 'edit', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_PP['orderby'],
-                'field' => 'orderby', 'sort' => false,
-                'align' => 'center'),
-        array('text' => 'ID',
-                'field' => 'id', 'sort' => true),
-        array('text' => $LANG_PP['description'],
-                'field' => 'description', 'sort' => true),
-        array('text' => $LANG_PP['enabled'],
-                'field' => 'enabled', 'sort' => false,
-                'align' => 'center'),
-        array('text' => $LANG_ADMIN['delete'],
-                'field' => 'delete', 'sort' => 'false',
-                'align' => 'center'),
+        array(
+            'text'  => $LANG_ADMIN['edit'],
+            'field' => 'edit',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_PP['orderby'],
+            'field' => 'orderby',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => 'ID',
+            'field' => 'id',
+            'sort'  => true,
+        ),
+        array(
+            'text'  => $LANG_PP['description'],
+            'field' => 'description',
+            'sort'  => true,
+        ),
+        array(
+            'text'  => $LANG_PP['enabled'],
+            'field' => 'enabled',
+            'sort'  => false,
+            'align' => 'center',
+        ),
+        array(
+            'text'  => $LANG_ADMIN['delete'],
+            'field' => 'delete',
+            'sort'  => 'false',
+            'align' => 'center',
+        ),
     );
 
     $defsort_arr = array('field' => 'orderby',

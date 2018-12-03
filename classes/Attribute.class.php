@@ -1,43 +1,43 @@
 <?php
 /**
-*  Class to manage product options
-*
-*  @author     Lee Garner <lee@leegarner.com>
-*  @copyright  Copyright (c) 2010-2018 Lee Garner <lee@leegarner.com>
-*  @package    paypal
-*  @version    0.6.0
-*  @license    http://opensource.org/licenses/gpl-2.0.php
-*              GNU Public License v2 or later
-*  @filesource
-*/
+ * Class to manage product options.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2018 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Paypal;
 
 /**
-*   Class for product attributes - color, size, etc.
-*   @package paypal
-*/
+ * Class for product attributes - color, size, etc.
+ * @package paypal
+ */
 class Attribute
 {
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Property fields accessed via `__set()` and `__get()`.
+     * @var array */
     var $properties;
 
     /** Indicate whether the current object is a new entry or not.
-    *   @var boolean */
+     * @var boolean */
     var $isNew;
 
     /** Array of error messages, to be accessible by the calling routines.
-     *  @var array */
+     * @var array */
     var $Errors = array();
 
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param  integer $id Attributeal type ID
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer $id Attributeal type ID
+     */
     public function __construct($id=0)
     {
         $this->properties = array();
@@ -122,10 +122,9 @@ class Attribute
     *
     *   @param array $row Array of values, from DB or $_POST
     */
-    public function SetVars($row)
+    public function setVars($row)
     {
         if (!is_array($row)) return;
-
         $this->attr_id = $row['attr_id'];
         $this->item_id = $row['item_id'];
         $this->attr_name = $row['attr_name'];
@@ -160,7 +159,7 @@ class Attribute
             return false;
         } else {
             $row = DB_fetchArray($result, false);
-            $this->SetVars($row);
+            $this->setVars($row);
             $this->isNew = false;
             return true;
         }
@@ -182,7 +181,7 @@ class Attribute
             if (empty($A['orderby']))
                 $A['orderby'] = 65535;
 
-            $this->SetVars($A);
+            $this->setVars($A);
         }
 
         // Get the option group in from the text field, or selection
@@ -220,9 +219,10 @@ class Attribute
             if ($this->isNew) {
                 $this->attr_id = DB_insertID();
             }
-            $this->ReOrder();
+            self::reOrder($this->item_id);
             //Cache::delete('prod_attr_' . $this->item_id);
             Cache::clear('products');
+            Cache::clear('attributes');
             return true;
         } else {
             $this->AddError($err);
@@ -352,25 +352,25 @@ class Attribute
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @uses   Attribute::_toggle()
-    *   @param  integer $oldvalue   Original field value
-    *   @param  integer $id         ID number of element to modify
-    *   @return         New value, or old value upon failure
-    */
-    public static function toggleEnabled($oldvalue, $id=0)
-    {
-        return self::_toggle($oldvalue, 'enabled', $id);
-    }
+     * Sets the "enabled" field to the specified value.
+     *
+     * @uses    Attribute::_toggle()
+     * @param   integer $oldvalue   Original field value
+     * @param   integer $id         ID number of element to modify
+     * @return         New value, or old value upon failure
+     */
+     public static function toggleEnabled($oldvalue, $id=0)
+     {
+         return self::_toggle($oldvalue, 'enabled', $id);
+     }
 
 
     /**
-    *   Add an error message to the Errors array.  Also could be used to
-    *   log certain errors or perform other actions.
-    *
-    *   @param  string  $msg    Error message to append
-    */
+     * Add an error message to the Errors array.
+     * Also could be used to log certain errors or perform other actions.
+     *
+     * @param  string  $msg    Error message to append
+     */
     public function AddError($msg)
     {
         $this->Errors[] = $msg;
@@ -378,29 +378,71 @@ class Attribute
 
 
     /**
-    *   Reorder all option items
-    */
-    public function ReOrder()
+     * Reorder all attribute items with the same product ID and attribute name.
+     */
+    private function reOrder()
     {
         global $_TABLES;
 
+        $attr_name = DB_escapeString($this->attr_name);
         $sql = "SELECT attr_id, orderby
                 FROM {$_TABLES['paypal.prod_attr']}
-                WHERE item_id = '" . $this->item_id . "'
-                AND attr_name = '" . DB_escapeString($this->attr_name) . "'
+                WHERE item_id = '{$this->item_id}'
+                AND attr_name = '$attr_name'
                 ORDER BY orderby ASC;";
         $result = DB_query($sql);
 
-        $order = 10;
-        $stepNumber = 10;
+        $order = 10;        // First orderby value
+        $stepNumber = 10;   // Increment amount
+        $changed = false;   // Assume no changes
         while ($A = DB_fetchArray($result, false)) {
+            COM_errorLog("checking item {$A['attr_id']}");
+            COM_errorLog("Order by is {$A['orderby']}, should be $order");
             if ($A['orderby'] != $order) {  // only update incorrect ones
+                $changed = true;
                 $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
                     SET orderby = '$order'
                     WHERE attr_id = '{$A['attr_id']}'";
+COM_ErrorLog($sql);
                 DB_query($sql);
             }
             $order += $stepNumber;
+        }
+        if ($changed) {
+            Cache::clear();
+        }
+    }
+
+
+    /**
+     * Move a calendar up or down the admin list, within its product.
+     * Product ID is needed to pass through to reOrder().
+     *
+     * @param   string  $where  Direction to move (up or down)
+     */
+    public function moveRow($where)
+    {
+        global $_TABLES;
+
+        switch ($where) {
+        case 'up':
+            $oper = '-';
+            break;
+        case 'down':
+            $oper = '+';
+            break;
+        default:
+            $oper = '';
+            break;
+        }
+
+        if (!empty($oper)) {
+            $sql = "UPDATE {$_TABLES['paypal.prod_attr']}
+                    SET orderby = orderby $oper 11
+                    WHERE attr_id = '{$this->attr_id}'";
+            //echo $sql;die;
+            DB_query($sql);
+            $this->reOrder();
         }
     }
 
