@@ -807,14 +807,8 @@ class Order
             $ext = (float)$item->quantity * (float)$item->price;
             $item_total += $ext;
             $item_descr = $item->getShortDscp();
+            $options_text = $P->getOptionDisplay($item);
 
-            $options_text = '';
-            $opts = $item->options_text;
-            if (is_array($opts)) {
-                foreach ($opts as $opt_text) {
-                    $options_text .= "&nbsp;&nbsp;--&nbsp;$opt_text<br />";
-                }
-            }
             $T->set_block('msg_body', 'ItemList', 'List');
             $T->set_var(array(
                 'qty'   => $item->quantity,
