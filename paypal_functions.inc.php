@@ -131,7 +131,7 @@ function listOrders($admin = false, $uid = 0)
         'has_paging' => true,
     );
 
-    $filter = "select_event: <select name=\"filt_status\">" . LB .
+    $filter = "{$LANG_PP['status']}: <select name=\"filt_status\">" . LB .
         '<option value=""';
     if ($filt_status == '') $filter .= ' selected="selected"';
     $filter .= '>All Statuses</option>' . LB;
