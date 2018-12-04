@@ -155,7 +155,7 @@ class headlines
                 $T->parse('hl', 'headlines', true);
             }
             $retval = $T->finish($T->parse('output', 'page'));
-            //\Paypal\Cache::set($cacheID, $retval, array('products', 'categories'));
+            \Paypal\Cache::set($cacheID, $retval, array('products', 'categories'));
         }
         return $retval;
     }
