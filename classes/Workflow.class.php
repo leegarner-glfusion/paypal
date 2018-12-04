@@ -24,19 +24,19 @@ class Workflow
 {
     /** Indicate that this workflow is disabled.
      * @const integer */
-    public const DISABLED = 0;
+    const DISABLED = 0;
 
     /** Indicate that this workflow is required for physical items.
      * @const integer */
-    public const REQ_PHYSICAL = 1;
+    const REQ_PHYSICAL = 1;
 
     /** Indicate that this workflow is required for virtual items.
      * @const integer */
-    public const REQ_VIRTUAL = 2;   // unused placeholder
+    const REQ_VIRTUAL = 2;   // unused placeholder
 
     /** Indicate that this workflow is required for all items.
      * @const integer */
-    public const REQ_ALL = 3;
+    const REQ_ALL = 3;
 
     /** Database table name.
      * @var string */
@@ -190,7 +190,7 @@ class Workflow
      *
      * @param   integer $id         ID number of element to modify
      * @param   string  $field      Database fieldname to change
-     * @param   integer $oldvalue   Original value to change
+     * @param   integer $newvalue   New value to set
      * @return  integer     New value, or old value upon failure
      */
     public static function setValue($id, $field, $newvalue)
