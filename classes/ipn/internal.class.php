@@ -58,6 +58,7 @@ class internal extends \Paypal\IPN
         $billto = $this->Order->getAddress('billto');
         $shipto = $this->Order->getAddress('shipto');
         if (empty($shipto)) $shipto = $billto;
+        if (COM_isAnonUser()) $_USER['email'] = '';
 
         $this->pp_data['payer_email'] = PP_getVar($A, 'payer_email', 'string', $_USER['email']);
         $this->pp_data['payer_name'] = trim(PP_getVar($A, 'name') .' '. PP_getVar($A, 'last_name'));
