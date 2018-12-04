@@ -1,0 +1,52 @@
+{# begin {templatelocation} #}
+{!!if {columns} == 6 !!}
+<ul class="uk-grid uk-grid-width-small-1-4 uk-grid-width-medium-1-5 uk-grid-width-large-1-6 uk-text-center" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!else}
+{!!if {columns} == 5 !!}
+<ul class="uk-grid uk-grid-width-small-1-3 uk-grid-width-medium-1-4 uk-grid-width-large-1-5" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!else}
+{!!if {columns} == 4 !!}
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-4" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!else}
+{!!if {columns} == 3 !!}
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!else}
+{!!if {columns} == 2 !!}
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-2 uk-grid-width-large-1-2" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!else}
+{!!if {columns} == 1 !!}
+<ul class="uk-grid uk-grid-width-1-1" data-uk-grid-margin>
+{!else}
+<ul class="uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3" data-uk-grid-match="{target:'.uk-panel'}" data-uk-grid-margin>
+{!endif}
+{!endif}
+{!endif}
+{!endif}
+{!endif}
+{!endif}
+<!-- BEGIN headlines -->
+    <li class="uk-vertical-align-top">
+        <div class="uk-panel uk-panel-box">
+{!if large_url}
+            <div class="uk-panel-teaser">
+                <a href="{url}">
+                    <img src="{large_url}" alt="">
+                </a>
+            </div>
+{!endif}
+            <p>
+                <a class="uk-text" href="{url}">
+                    {title}
+                </a>
+            </p>
+{!if large_url}
+{!else}
+<div>{text}</div>
+{!endif}
+
+        </div>
+    </li>
+<!-- END headlines -->
+</ul>
+<div class="uk-margin-bottom uk-clearfix"></div>
+{# end {templatelocation} #}

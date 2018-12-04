@@ -2,6 +2,11 @@
 
 ## Ver 0.6.1
 Release TBD
+- Implement `paypal_headlines` (and paypal:headlines) autotag.
+- Fix issue where anonymous cart ID is not cleared properly after order is places.
+- Order view and notifications weren't showing selected product attributes.
+- Fix handling of orderby option in product attribute list.
+- When editing an existing attribute the related product wasn't preselected.
 - Set `is_final` flag when printing an order.
 
 ## Ver 0.6.0

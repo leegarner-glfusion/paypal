@@ -507,11 +507,25 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
 
     $pi_name = $_PP_CONF['pi_name'];
     if ($op == 'tagname' ) {
-        return array($pi_name, $pi_name . '_cat');
+        return array($pi_name, $pi_name . '_cat', $pi_name . '_headlines');
     } else if ($op == 'parse') {
+        $t1 = explode(' ', $autotag['parm2']);
+        $opts = array();
+        foreach ($t1 as $tmp) {
+            $t2 = explode(':', $tmp);
+            $opts[$t2[0]] = isset($t2[1]) ? $t2[1] : '';
+        }
         switch ($autotag['tag']) {
         case $pi_name:
             $id = COM_applyFilter($autotag['parm1'], true);
+            if ($id == 'headlines') {
+                $AT = new \Paypal\Autotags\headlines;
+                $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
+                if ($repl !== false) {
+                    $content = str_replace($autotag['tagstr'], $repl, $content);
+                }
+                break;
+            }
             $url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
 
             // Allow the author to use different text for the link.  Default
@@ -537,6 +551,13 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
             }
             $link = '<a href="' . $url . '">' . $linktext . '</a>';
             $content = str_replace ($autotag['tagstr'], $link, $content);
+            break;
+        case $pi_name . '_headlines':
+            $AT = new \Paypal\Autotags\headlines;
+            $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
+            if ($repl !== false) {
+                $content = str_replace($autotag['tagstr'], $repl, $content);
+            }
             break;
         }
         return $content;
