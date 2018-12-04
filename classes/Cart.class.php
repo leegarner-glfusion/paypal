@@ -43,6 +43,7 @@ class Cart extends Order
         if (empty($cart_id)) {
             $cart_id = self::getCart();
         }
+
         parent::__construct($cart_id);
         if ($this->isNew) {
             $this->status = 'cart';
@@ -554,6 +555,12 @@ class Cart extends Order
         $uid = $uid > 0 ? (int)$uid : (int)$_USER['uid'];
         if (COM_isAnonUser()) {
             $cart_id = self::getAnonCartID();
+            // Check if the order exists but is not a cart.
+            $status = DB_getItem($_TABLES['paypal.orders'], 'status',
+                "order_id = '" . DB_escapeString($cart_id) . "'");
+            if ($status != NULL && $status != 'cart') {
+                $cart_id = NULL;
+            }
         } else {
             $cart_id = DB_getItem($_TABLES['paypal.orders'], 'order_id',
                 "uid = $uid AND status = 'cart' ORDER BY last_mod DESC limit 1");
@@ -712,7 +719,7 @@ class Cart extends Order
         $Order->Save();
         self::setSession('order_id', $cart_id);
 
-        if ($newstatus == 'pending') {
+        if ($newstatus != 'cart') {
             // Make sure the cookie gets deleted also
             self::_expireCookie();
         } else {
@@ -721,7 +728,8 @@ class Cart extends Order
             // delete all open user carts except this one
             self::deleteUser(0, $cart_id);
         }
-        $Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));
+        // Is it really necessary to log that it changed from a cart to pending?
+        //$Order->Log(sprintf($LANG_PP['status_changed'], $oldstatus, $newstatus));
         return;
     }
 
@@ -811,13 +819,16 @@ class Cart extends Order
 
 
     /**
-     * Helper function to set a cookie with no expiration
+     * Helper function to set a cookie that expires after days_purge_cart days.
      *
      * @param   mixed   $value      Value to set
      */
     private static function _setCookie($value)
     {
-        SEC_setCookie(self::$session_var, $value, 0, '/');
+        global $_PP_CONF;
+
+        $exp = time() + ($_PP_CONF['days_purge_cart'] * 86400);
+        SEC_setCookie(self::$session_var, $value, $exp, '/');
     }
 
 
