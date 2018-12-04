@@ -22,7 +22,7 @@ class OrderStatus extends Workflow
 {
     /** Table name.
      * @var string */
-    private static $table = 'paypal.orderstatus';
+    public static $table = 'paypal.orderstatus';
 
     /** Status Name.
      * @var string */
@@ -71,8 +71,10 @@ class OrderStatus extends Workflow
 
     /**
      * Get all order status objects into an array.
+     *
+     * @param   object  $Cart   Not used, for compatibility with Workflow::getAll()
      */
-    public static function getAll()
+    public static function getAll($Cart=NULL)
     {
         global $_TABLES;
         static $statuses = NULL;
