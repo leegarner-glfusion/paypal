@@ -108,7 +108,14 @@ class headlines
             $where .= ' AND featured = 1';
         }
         if ($category > 0) {
-            $where .= ' AND p.cat_id = ' . $category;
+            $objects = \Paypal\Category::getTree($category);
+            foreach ($objects as $Obj) {
+                $cats[] = $Obj->cat_id;
+            }
+            if (!empty($cats)) {
+                $cats = DB_escapeString(implode(',', $cats));
+                $where .= ' AND p.cat_id IN (' . $cats . ')';
+            }
         }
 
         // The "c.enabled IS NULL" is to allow products which have
