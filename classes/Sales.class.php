@@ -134,7 +134,11 @@ class Sales
 
     /**
      * Get all sales records for the specified type and item.
+     * To facilitate caching, all sales records are retrieved and the requester
+     * is responsible for selecting the currently-active sale.
      *
+     * @see     self::getProduct()
+     * @see     self::getCategory()
      * @param   string  $type       Item type (product or category)
      * @param   integer $item_id    Product or Category ID
      * @return  array           Array of Sales objects
@@ -173,6 +177,7 @@ class Sales
      * Read all the sale prices for a category.
      *
      * @uses    self::_getSales()
+     * @see     self::getEffective()
      * @param   integer $cat_id     Category ID
      * @return  array       Array of Sales objects
      */
@@ -186,6 +191,7 @@ class Sales
      * Read all the sale prices for a product.
      *
      * @uses    self::_getSales()
+     * @see     self::getEffective()
      * @param   integer $item_id    Product ID
      * @return  array       Array of Sales objects
      */
@@ -201,6 +207,8 @@ class Sales
      * Scans for the sale with the most recent start date. For example,
      * a long-term sale could have a short "flash sale" within it.
      *
+     * @uses    self::getProduct()
+     * @uses    self::getCategory()
      * @param   object  $P  Product object
      * @return  object      Sales object, empty object if not found
      */
@@ -223,7 +231,7 @@ class Sales
         $cats = Category::getPath($P->cat_id, false);
         $cats = array_reverse($cats);
         foreach ($cats as $cat) {
-            $sales = Sales::getCategory($cat->cat_id);
+            $sales = self::getCategory($cat->cat_id);
             foreach ($sales as $obj) {
                 if ($obj->start->toUnix() < $now && $obj->end->toUnix() > $now) {
                     $SaleObj = $obj;
