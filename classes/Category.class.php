@@ -703,28 +703,25 @@ class Category
     /**
      * Read all the categories into a static array.
      *
-     * @param   integer $root   Root category ID
-     * @param   string  $prefix Prefix to prepend to sub-categories
+     * @param   integer $root_id    Root category ID
+     * @param   string  $prefix     Prefix to prepend to sub-category display names
      * @return  array           Array of category objects
      */
-    public static function getTree($root=0, $prefix='&nbsp;')
+    public static function getTree($root_id=0, $prefix='&nbsp;')
     {
         global $_TABLES;
 
         if (!PP_isMinVersion()) return array();
 
         $between = '';
-        $root = (int)$root;
+        $root_id = (int)$root_id;
         $p = $prefix == '&nbsp;' ? 'x_' : $prefix . '_';
-        $cache_key = self::_makeCacheKey('cat_tree_' . $p . (string)$root);
+        $cache_key = self::_makeCacheKey('cat_tree_' . $p . (string)$root_id);
         $All = Cache::get($cache_key);
         if (!$All) {        // not found in cache, build the tree
-            if ($root > 0) {
-                $result = DB_query("SELECT lft, rgt FROM {$_TABLES['paypal.categories']}
-                            WHERE cat_id = $root");
-                $row = DB_fetchArray($result, false);
-                $between = ' AND parent.lft BETWEEN ' . (int)$row['lft'] .
-                        ' AND ' . (int)$row['rgt'];
+            if ($root_id > 0) {
+                $Root = self::getInstance($root_id);
+                $between = " AND parent.lft BETWEEN {$Root->lft} AND {$Root->rgt}";
             }
             $prefix = DB_escapeString($prefix);
             $sql = "SELECT node.*, CONCAT( REPEAT( '$prefix', (COUNT(parent.cat_name) - 1) ), node.cat_name) AS disp_name
