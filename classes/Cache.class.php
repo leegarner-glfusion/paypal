@@ -51,7 +51,7 @@ class Cache
             $tags = array_merge($tags, $tag);
         }
         $key = self::makeKey($key);
-        return \glFusion\Cache::getInstance()
+        return \glFusion\Cache\Cache::getInstance()
             ->set($key, $data, $tags, $ttl);
     }
 
@@ -68,7 +68,7 @@ class Cache
             return;     // glFusion version doesn't support caching
         }
         $key = self::makeKey($key);
-        return \glFusion\Cache::getInstance()->delete($key);
+        return \glFusion\Cache\Cache::getInstance()->delete($key);
     }
 
 
@@ -89,7 +89,7 @@ class Cache
             if (!is_array($tag)) $tag = array($tag);
             $tags = array_merge($tags, $tag);
         }
-        return \glFusion\Cache::getInstance()->deleteItemsByTagsAll($tags);
+        return \glFusion\Cache\Cache::getInstance()->deleteItemsByTagsAll($tags);
     }
 
 
@@ -105,7 +105,7 @@ class Cache
     {
         if ($incl_sechash) {
             // Call the parent class function to use the security hash
-            $key = \glFusion\Cache::getInstance()->createKey(self::TAG . '_' . $key);
+            $key = \glFusion\Cache\Cache::getInstance()->createKey(self::TAG . '_' . $key);
         } else {
             // Just generate a simple string key
             $key = self::TAG . '_' . $key;
@@ -126,8 +126,8 @@ class Cache
             return NULL;     // glFusion version doesn't support caching
         }
         $key = self::makeKey($key);
-        if (\glFusion\Cache::getInstance()->has($key)) {
-            return \glFusion\Cache::getInstance()->get($key);
+        if (\glFusion\Cache\Cache::getInstance()->has($key)) {
+            return \glFusion\Cache\Cache::getInstance()->get($key);
         } else {
             return NULL;
         }
