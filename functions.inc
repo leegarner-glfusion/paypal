@@ -1532,13 +1532,13 @@ function plugin_runScheduledTask_paypal()
 
 
 /**
- * Return false since this plugin doesn't support webservices.
+ * Return true to enable service functions.
  *
  * @return  boolean     True, if webservices are supported
  */
 function plugin_wsEnabled_paypal()
 {
-    return false;
+    return true;
 }
 
 
