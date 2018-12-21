@@ -2,6 +2,7 @@
 
 ## Ver 0.6.1
 Release TBD
+- Enable web services to allow `PLG_invokeService()` to work.
 - Implement `paypal_headlines` (and paypal:headlines) autotag.
 - Fix issue where anonymous cart ID is not cleared properly after order is places.
 - Order view and notifications weren't showing selected product attributes.
@@ -92,7 +93,7 @@ Released 2016-12-08
 - Allow custom text fields for products, e.g. monogram or engraving info
 - Change Paypal IPN to use cart fields for product info
 - Fully implement new template types for product list and detail view
-- Add paypal_cat autotag. Usage: [paypal_cat:ID Optional Text]
+- Add `paypal_cat autotag`. Usage: `[paypal_cat:ID Optional Text]`
 
 ## PayPal - 0.4.5 (Released 2010-06-02)
 - 0000603: [General] Add a method for anonymous buyers to download files
