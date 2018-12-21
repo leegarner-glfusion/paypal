@@ -1,17 +1,16 @@
 <?php
 /**
-*   English language file
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @author     John Toro <john.toro@newroute.net>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.5.9
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
-
+ * Spanish-Columbian language file for the Paypal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @author      John Toro <john.toro@newroute.net>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Global array to hold all plugin-specific configuration items. */
 $LANG_PP = array (
@@ -398,6 +397,7 @@ $LANG_PP = array (
 'new_ship_method' => 'New Shipment Method',
 'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
 'mnu_wfadmin' => 'Workflows/Statuses',
+'edit_order' => 'Edit Order',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

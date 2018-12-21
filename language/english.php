@@ -1,15 +1,15 @@
 <?php
 /**
-*   English language file
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.5.9
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * English language file for the Paypal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     v0.6.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 global $_PP_CONF;
 
@@ -161,7 +161,7 @@ $LANG_PP = array (
 'fixed'             => 'Fixed',
 'pp_profile'        => 'Use Gateway Profile',
 'shipping_type'     => 'Shipping',
-'shipping_amt'      => 'Amount',
+'shipping_amt'      => 'Fixed Amount',
 'per_item'          => 'Per Item',
 'storefront'        => 'Go to Store',
 'options_msg'       => 'Adding options will prevent encrypted buttons from being created.',
@@ -302,7 +302,7 @@ $LANG_PP = array (
 'msg_item_added' => 'Item has been added to your cart',
 'all' => 'All',
 'print' => 'Print',
-'resetbuttons' => 'Clear Encrypted Button',
+'resetbuttons' => 'Clear Encrypted Buttons',
 'orderhist_item' => 'View the order history for this item',
 'notify_email' => 'Notification Email',
 'recipient_email' => 'Recipient Email',
@@ -326,12 +326,12 @@ $LANG_PP = array (
 'code' => 'Code',
 'coupons' => 'Coupons',
 'gc_bal' => 'Gift Card Balance',
-'hlp_gw_select' => 'Select your payment method below. You will be able to confirm your order on the next page.',
+'hlp_gw_select' => 'Select your payment method below.<br />You will be able to confirm your order on the next page.',
 'confirm_order' => 'Confirm Order',
 'coupon_apply_msg0' => 'The coupon amount of %s has been applied to your account.',
-'coupon_apply_msg1' => 'This coupon has already been applied.',
-'coupon_apply_msg2' => 'There was an error applying this coupon. Contact %s for assistance.',
-'coupon_apply_msg3' => 'An invalid coupon code was supplied. If you believe this is an error, contact %s for assistance.',
+'coupon_apply_msg1' => 'This code has already been applied.',
+'coupon_apply_msg2' => 'There was an error applying this code. Contact %s for assistance.',
+'coupon_apply_msg3' => 'An invalid code was supplied. If you believe this is an error, contact %s for assistance.',
 'see_details' => 'See Details',
 'send_giftcards' => 'Send Gift Cards',
 'my_account' => 'My Shopping Account',
@@ -340,13 +340,13 @@ $LANG_PP = array (
 'sendgc_header' => 'Select a group and/or individual users to receive gift cards.',
 'err_gc_amt' => 'Must supply a positive amount for the gift cards.',
 'err_gc_nousers' => 'No users specified, or none are in the specified group.',
-'enter_gc' => 'Enter a Gift Code',
+'enter_gc' => 'Enter a Gift Code to Apply',
 'update' => 'Update',
 'apply_gc_title' => 'Apply a Gift Card to Your Account',
 'apply_gc_help' => 'Enter the gift card code below and click the &quot;Update&quot; button to apply to your account.',
 'apply_gc_email' => 'You may apply the gift card to your account by clicking <a href="%s">here</a>, or by visiting <a href="%s">%s</a> and entering the coupon code manually.<br />' . LB . 'NOTE: Do not apply this code to your account if this is a gift or the recipient will not be able to apply it.',
 'subj_email_admin' => $_CONF['site_name'] . ': Order Notification',
-'subj_email_user' => $_CONF['site_name'] . ': Purchase Receipt',
+'subj_email_user' => $_CONF['site_name'] . ': Order Update',
 'sale_prices' => 'Sale Prices',
 'new_sale' => 'New Sale',
 'apply_disc_to' => 'Apply Discount To',
@@ -403,6 +403,7 @@ $LANG_PP = array (
 'new_ship_method' => 'New Shipment Method',
 'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
 'mnu_wfadmin' => 'Workflows/Statuses',
+'edit_order' => 'Edit Order',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
@@ -445,10 +446,6 @@ $LANG_configsections['paypal'] = array(
 $LANG_confignames['paypal'] = array(
     'currency'      => 'Currency',
     'anon_buy'      => 'Anonymous users can buy?',
-    'purch_email_user' => 'Email User upon purchase?',
-    'purch_email_user_attach' => 'Attach files to user\'s email message?',
-    'purch_email_anon' => 'Email anonymous buyer upon purchase?',
-    'purch_email_anon_attach' => 'Attach files to anonymous buyer email?',
     'prod_per_page' => 'Max products displayed per page',
     'order'         => 'Default sort order for product display',
     'menuitem'      => 'Add to main menu?',
@@ -460,7 +457,6 @@ $LANG_confignames['paypal'] = array(
     'img_max_height' => 'Max Image Height (px)',
     'max_image_size' => 'Max. Product Image Size',
     'max_file_size' => 'Max size for downloadable files, in MB',
-    'download_path' => 'Full path to downloadable files',
     'commentsupport' => 'Comments Supported?',
     'tmpdir'        => 'Temporary Working Directory',
     'ena_comments'  => 'Enable Comments?',

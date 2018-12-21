@@ -201,25 +201,22 @@
   <div style="clear:both;">
   {!if checkout}
     <div id="orderPmtMethod">{pmt_logo}</div>
-    <div>
+    <div style="float:left;">
 {!if is_uikit}
       <button class="uk-button uk-button-primary" type="submit" name="viewcart"
-        value="{$LANG_PP['update_cart']}"
-        onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['update_cart']}</button>
-      <button type="submit" class="uk-button uk-button-danger" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart=x';">{$LANG_PP['empty_cart']}</button>
+        value="{$LANG_PP['viewcart']}"
+        onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['edit_order']}</button>
 {!else}
       <input class="paypalButton blue" type="submit" name="viewcart"
-        value="{$LANG_PP['update_cart']}"
+        value="{$LANG_PP['edit_order']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';" />
-  <input type="submit" class="paypalButton red" name="emptycart"
-        value="{$LANG_PP['empty_cart']}" onclick="document.location.href='{pi_url}/index.php?emptycart=x';" />
 {!endif}
     </div>
     <div class="paypalOrderButtons">
       {gateway_vars}
     </div>
-  {!if pmt_method}
+    <div style="clear:both;"></div>
+{!if pmt_method}
     <p id="orderPaymentMethod">
         {$LANG_PP['pmt_method']}: {pmt_method}<br />
         {$LANG_PP['notify_email']}: {payer_email}
