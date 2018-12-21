@@ -34,7 +34,7 @@
         <option value="0">--{$LANG_PP['none']}--</option>
         {product_select}
       </select>
-      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="{iconset}-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -47,7 +47,7 @@
         <option value="0">--{$LANG_PP['none']}--</option>
         {category_select}
       </select>
-      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="{iconset}-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -69,7 +69,7 @@
     </label>
     <div class="uk-form-controls">
       <input type="text" name="amount" value="{amount}" size="10" maxlength="10" />
-      <i class="{iconset}-warning pp-icon-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="{iconset}-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -112,7 +112,7 @@
       <input type="text" id="start_time" name="start_time" value="{start_time}" size="12" maxlength="12"
             data-uk-timepicker title="{$LANG_PP['timepicker']}" placeholder="00:00"
             data-uk-tooltip />
-      <i class="uk-icon uk-icon-trash-o pp-icon-danger"
+      <i class="uk-icon uk-icon-trash-o uk-text-danger"
         onclick='PP_resetSaleDates("start");'></i>
     </div>
   </div>
@@ -130,7 +130,7 @@
             data-uk-timepicker title="{$LANG_PP['timepicker']}"
             placeholder="23:59"
             data-uk-tooltip />
-      <i class="uk-icon uk-icon-trash-o pp-icon-danger"
+      <i class="uk-icon uk-icon-trash-o uk-text-danger"
         onclick='PP_resetSaleDates("end");'></i>
     </div>
   </div>

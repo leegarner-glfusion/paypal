@@ -108,7 +108,7 @@ function removeAddress(id)
     <label class="uk-form-label" for="name">{$LANG_PP['fullname']}</label>
     <div class="uk-form-controls">
       <input required type="text" id="name" name="name" value="{name}" size="60" maxlength="255" />
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
     </div>
   </div>
 
@@ -129,7 +129,7 @@ function removeAddress(id)
 {!endif}
       type="text" id="address1" name="address1" size="60" value="{address1}" />
 {!if req_street}
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
 {!endif}
     </div>
   </div>
@@ -157,7 +157,7 @@ function removeAddress(id)
             onchange='updateState(this.id)' class="paypalStateSelect">
       </select>
 {!if req_country}
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
 {!endif}
     </div>
   </div>
@@ -175,7 +175,7 @@ function removeAddress(id)
 {!endif}
       type="text" id="city" name="city" size="60" value="{city}" />
 {!if req_city}
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
 {!endif}
     </div>
   </div>
@@ -191,7 +191,7 @@ function removeAddress(id)
         id="stateSelect" name="state" class="paypalStateSelect"">
       </select>
 {!if req_state}
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
 {!endif}
     </div>
   </div>
@@ -209,7 +209,7 @@ function removeAddress(id)
 {!endif}
         type="text" id="zip" name="zip" size="60" value="{zip}" />
 {!if req_postal}
-      <i class="uk-icon uk-icon-warning pp-icon-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+      <i class="uk-icon uk-icon-warning uk-text-warning" data-uk-tooltip title="{$LANG_PP['required']}"></i>
 {!endif}
     </div>
   </div>

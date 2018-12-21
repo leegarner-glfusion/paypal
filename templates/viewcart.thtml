@@ -30,17 +30,17 @@
           <input type="hidden" name="quantity[{cart_item_id}]" value="{item_quantity}" />
           {item_quantity}
 {!else}
-          <i class="uk-icon uk-icon-minus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', -1);"></i>
+          <i class="uk-icon uk-icon-minus uk-text-success" onclick="updateQty('f_qty_{cart_item_id}', -1);"></i>
           <input style="text-align:right;width:32px;" type="text" id="f_qty_{cart_item_id}"
                 onchange="mustUpdateCart();return false;"
                 name="quantity[{cart_item_id}]" value="{item_quantity}" size="3" maxlength="3" />
-          <i class="uk-icon uk-icon-plus pp-icon-ok" onclick="updateQty('f_qty_{cart_item_id}', 1);"></i>
+          <i class="uk-icon uk-icon-plus uk-text-success" onclick="updateQty('f_qty_{cart_item_id}', 1);"></i>
 {!endif}
         </td>
         <td class="alignright">{item_total}</td>
         <td class="aligncenter">
           <a href="{pi_url}/index.php?delcartitem=x&id={cart_item_id}"><i
-              class="{iconset}-trash pp-icon-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
+              class="{iconset}-trash uk-text-danger tooltip" title="{$LANG_PP['delete']}"></i></a>
         </td>
 {!if taxable}
         <td class="aligncenter">
@@ -122,7 +122,7 @@
     <div class="uk-width-1-1 uk-margin">
       <div class="uk-width-2-3 uk-margin floatleft">
         <div class="gwRadiosOuter">
-          <i class="{iconset}-exclamation-triangle pp-icon-warning"></i>&nbsp;&nbsp;
+          <i class="{iconset}-exclamation-triangle uk-text-warning"></i>&nbsp;&nbsp;
           {$LANG_PP['hlp_gw_select']}<br />
 {!if gateway_radios}
           {gateway_radios}
@@ -141,7 +141,7 @@
           <span class="ppGatewayRadios">{$LANG_PP['enter_email']}:</span>
           <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_PP_HELP['enter_email']}"></i>
           <br /><input class="ppGatewayRadios" required type="text" name="payer_email" size="40" value="{payer_email}"/>
-          <i class="uk-icon uk-icon-exclamation-triangle pp-icon-warning tooltip" title="{$LANG_PP['required']}"></i>
+          <i class="uk-icon uk-icon-exclamation-triangle uk-text-warning tooltip" title="{$LANG_PP['required']}"></i>
         </div>
       </div>
     
