@@ -365,7 +365,12 @@ case 'pidetail':
     // Show detail for a plugin item wrapped in the catalog layout
     $item = explode(':', $actionval);
     $status = LGLIB_invokeService($item[0], 'getDetailPage',
-                array('item_id' => $actionval), $output, $svc_msg);
+        array(
+            'item_id' => $actionval,
+        ),
+        $output,
+        $svc_msg
+    );
     if ($status != PLG_RET_OK) {
         $output = $LANG_PP['item_not_found'];
     }
@@ -399,7 +404,7 @@ case 'viewcart':
     if ($Cart->hasItems() && $Cart->canView()) {
         $content .= $Cart->getView(0);
     } else {
-        LGLIB_storeMessage($LANG_PP['cart_empty']);
+        COM_setMsg($LANG_PP['cart_empty']);
         COM_refresh(PAYPAL_URL . '/index.php');
         exit;
     }

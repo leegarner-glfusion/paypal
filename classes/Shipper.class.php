@@ -1,7 +1,7 @@
 <?php
 /**
- * Class to handle shipping costs based on quantity, total weight and class
- * First iteration only allows for a number of "units" per product
+ * Class to handle shipping costs based on quantity, total weight and class.
+ * First iteration only allows for a number of "units" per product.
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
