@@ -509,6 +509,7 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
     if ($op == 'tagname' ) {
         return array($pi_name, $pi_name . '_cat', $pi_name . '_headlines');
     } else if ($op == 'parse') {
+        $repl = false;      // assume no replacement to start off
         $t1 = explode(' ', $autotag['parm2']);
         $opts = array();
         foreach ($t1 as $tmp) {
@@ -517,48 +518,52 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
         }
         switch ($autotag['tag']) {
         case $pi_name:
-            $id = COM_applyFilter($autotag['parm1'], true);
-            if ($id == 'headlines') {
+            $id = $autotag['parm1'];
+            switch ($id) {
+            case 'headlines':
                 $AT = new \Paypal\Autotags\headlines;
                 $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
-                if ($repl !== false) {
-                    $content = str_replace($autotag['tagstr'], $repl, $content);
+                break;
+            default:
+                // Default tag [paypal:prod_id]is a product link
+                $P  = \Paypal\Product::getInstance($id);
+                if (!$P->isNew) {
+                    $url = $P->getLink();
+                    //$url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
+                    // Allow the author to use different text for the link.  Default
+                    // is the stored product name.
+                    if (empty($autotag['parm2'])) {
+                        $linktext = $P->getDscp();
+                    } else {
+                        $linktext = $autotag['parm2'];
+                    }
+                    $repl = '<a href="' . $url . '">' . $linktext . '</a>';
                 }
                 break;
             }
-            $url = COM_buildUrl(PAYPAL_URL . '/detail.php?id=' . $id);
-
-            // Allow the author to use different text for the link.  Default
-            // is the stored product name.
-            if (empty($autotag['parm2'])) {
-                $linktext = DB_getItem($_TABLES['paypal.products'],
-                        'name', "id = '$id'");
-            } else {
-                $linktext = $autotag['parm2'];
-            }
-            $link = '<a href="' . $url . '">' . $linktext . '</a>';
-            $content = str_replace ($autotag['tagstr'], $link, $content);
             break;
 
         case $pi_name . '_cat':
             $id = COM_applyFilter($autotag['parm1'], true);
-            $url = COM_buildUrl(PAYPAL_URL.'/index.php?category='.$id);
-            if (empty($autotag['parm2'])) {
-                $linktext = DB_getItem($_TABLES['paypal.categories'],
+            $Cat = \Paypal\Category::getInstance($id);
+            if (!$Cat->isNew) {
+                $url = COM_buildUrl(PAYPAL_URL.'/index.php?category='.$id);
+                if (empty($autotag['parm2'])) {
+                    $linktext = DB_getItem($_TABLES['paypal.categories'],
                         'cat_name', "cat_id = '$id'");
-            } else {
-                $linktext = $autotag['parm2'];
+                } else {
+                    $linktext = $autotag['parm2'];
+                }
+                $repl = '<a href="' . $url . '">' . $linktext . '</a>';
             }
-            $link = '<a href="' . $url . '">' . $linktext . '</a>';
-            $content = str_replace ($autotag['tagstr'], $link, $content);
             break;
         case $pi_name . '_headlines':
             $AT = new \Paypal\Autotags\headlines;
             $repl = $AT->parse($autotag['parm1'], $opts, $autotag['tagstr']);
-            if ($repl !== false) {
-                $content = str_replace($autotag['tagstr'], $repl, $content);
-            }
             break;
+        }
+        if ($repl !== false) {
+            $content = str_replace($autotag['tagstr'], $repl, $content);
         }
         return $content;
     }
@@ -1847,7 +1852,7 @@ function PP_getIcon($name, $style='info')
     global $_PP_CONF;
 
     if ($style != '')
-        $style = ' pp-icon-' . $style;
+        $style = ' uk-text-' . $style;
     return $_PP_CONF['_iconset'] . '-' . $name . $style;
 }
 

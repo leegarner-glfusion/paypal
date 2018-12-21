@@ -44,13 +44,13 @@ class PluginProduct extends Product
         global $_USER;
 
         $this->pi_info = array();
-        $item = explode('|', $id);
+        $item = explode('|', $id);  // separate full item ID from option string
         $item_id = $item[0];
         $this->properties = array();
         $this->currency = Currency::getInstance();
         $this->item_id = $item_id;  // Full item id
         $this->id = $item_id;       // TODO: convert Product class to use item_id
-        $item_parts = explode(':', $item_id);
+        $item_parts = explode(':', $item_id);   // separate the plugin name and item ID
         $this->pi_name = $item_parts[0];
         array_shift($item_parts);         // Remove plugin name
         $this->pi_info['item_id'] = $item_parts;
@@ -65,7 +65,10 @@ class PluginProduct extends Product
 
         // Try to call the plugin's function to get product info.
         $status = LGLIB_invokeService($this->pi_name, 'productinfo',
-            $this->pi_info, $A, $svc_msg);
+            $this->pi_info,
+            $A,
+            $svc_msg
+        );
         if ($status == PLG_RET_OK) {
             $this->price = PP_getVar($A, 'price', 'float', 0);
             $this->item_name = PP_getVar($A, 'name');
@@ -78,6 +81,7 @@ class PluginProduct extends Product
             $this->btn_text = PP_getVar($A, 'btn_text');
             $this->_have_detail_svc = PP_getVar($A, 'have_detail_svc', 'boolean', false);
             $this->_fixed_q = PP_getVar($A, 'fixed_q', 'integer', 0);
+            $this->isNew = false;
          } else {
             // probably an invalid product ID
             $this->price = 0;
