@@ -547,7 +547,7 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
             $id = COM_applyFilter($autotag['parm1'], true);
             $Cat = \Paypal\Category::getInstance($id);
             if (!$Cat->isNew) {
-                $url = COM_buildUrl(PAYPAL_URL.'/index.php?category='.$id);
+                $url = PAYPAL_URL.'/index.php?category='.$id;
                 if (empty($autotag['parm2'])) {
                     $linktext = DB_getItem($_TABLES['paypal.categories'],
                         'cat_name', "cat_id = '$id'");
