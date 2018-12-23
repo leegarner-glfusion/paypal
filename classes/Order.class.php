@@ -1153,8 +1153,9 @@ class Order
      */
     public function Contains($item_id, $extras=array())
     {
+        $id_parts = PAYPAL_explode_opts($item_id, true);
+        if (!isset($id_parts[1])) $id_parts[1] = '';
         foreach ($this->items as $id=>$info) {
-            $id_parts = PAYPAL_explode_opts($item_id, true);
             if ($info->product_id == $id_parts[0] && $info->options == $id_parts[1]) {
                 // Found a matching item, now check for extra text field values
                 if ($info->extras == $extras) {

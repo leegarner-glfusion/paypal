@@ -67,7 +67,8 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
         if (!isset($args['item_type'])) $args['item_type'] = PP_PROD_VIRTUAL;
         $btn_cls = 'orange';
         $btn_disabled = '';
-        if (isset($args['unique'])) {
+        $unique = isset($args['unique']) ? 1 : 0;
+        if ($unique) {
             // If items may only be added to the cart once, check that
             // this one isn't already there
             if ($Cart->Contains($args['item_number']) !== false) {
@@ -87,7 +88,7 @@ function service_genButton_paypal($args, &$output, &$svc_msg)
                 'tax'           => isset($args['tax']) ? $args['tax'] : 0,
                 'quantity'      => isset($args['quantity']) ? $args['quantity'] : '',
                 '_ret_url'      => isset($args['_ret_url']) ? $args['_ret_url'] : '',
-                '_unique'       => isset($args['unique']) ? 1 : 0,
+                '_unique'       => $unique,
                 'frm_id'        => md5($args['item_name'] . rand()),
                 'btn_cls'       => $btn_cls,
                 'btn_disabled'  => $btn_disabled,
