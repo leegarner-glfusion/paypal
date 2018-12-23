@@ -12,7 +12,7 @@
   <input type="hidden" name="_unique" value='{_unique}' />
 {!endif}
   {!if have_tax}
-    <input type="hidden" name="options[tax]" value="{tax}" />
+   <input type="hidden" name="tax" value="{tax}" />
   {!endif}
 {!if quantity}
     <!--{$LANG_PP['qty']}: {quantity}-->

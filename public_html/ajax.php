@@ -56,7 +56,7 @@ case 'addcartitem':
         'price'         => $P->getPrice(),
         'options'       => PP_getVar($_POST, 'options', 'array'),
         'extras'        => PP_getVar($_POST, 'extras', 'array'),
-        //'tax'           => PP_getVar($_POST, 'tax', 'float'),
+        'tax'           => PP_getVar($_POST, 'tax', 'float'),
     );
     $Cart->addItem($args);
     $A = array(
