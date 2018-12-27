@@ -903,7 +903,6 @@ class Gateway
             'action'    => $this->getActionUrl(),
             'method'    => $this->getMethod(),
             'gateway_vars' => $gateway_vars,
-            'is_uikit'  => $_PP_CONF['_is_uikit'],
             'button_url' => $this->getCheckoutButton(),
             'cart_id'   => $cart->cartID(),
             'uid'       => $_USER['uid'],

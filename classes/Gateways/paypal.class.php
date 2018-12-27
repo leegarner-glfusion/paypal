@@ -622,7 +622,6 @@ class paypal extends \Paypal\Gateway
             'action_url'    => $this->getActionUrl(),
             'btn_text'      => $btn_text,
             'gateway_vars'  => $gateway_vars,
-            'iconset'       => $_PP_CONF['_iconset'],
             'method'        => $this->getMethod(),
         ) );
         $retval = $T->parse('', 'btn');
@@ -756,7 +755,6 @@ class paypal extends \Paypal\Gateway
             'btn_text'      => $btn_text,
             'gateway_vars'  => $gateway_vars,
             'method'        => $this->getMethod(),
-            'iconset'       => $_PP_CONF['_iconset'],
         ) );
         $retval = $T->parse('', 'btn');
         return $retval;

@@ -680,26 +680,20 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'copy':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                '-clone tooltip" title="' . $LANG_ADMIN['copy'] . '"></i>',
-                //'-clone pp-icon-info tooltip" title="' . $LANG_ADMIN['copy'] . '"></i>',
+        $retval .= COM_createLink('<i class="uk-icon uk-icon-clone tooltip" title="' . $LANG_ADMIN['copy'] . '"></i>',
                 PAYPAL_ADMIN_URL . "/index.php?dup_product=x&amp;id={$A['id']}"
         );
         break;
 
     case 'edit':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-            //'-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-            '-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+        $retval .= COM_createLink('<i class="uk-icon uk-icon-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
             PAYPAL_ADMIN_URL . "/index.php?editproduct=x&amp;id={$A['id']}"
         );
         break;
 
     case 'delete':
         if (!\Paypal\Product::isUsed($A['id'])) {
-            $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    '-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
-                    //'-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
                 array(
                     'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1118,9 +1112,7 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-            //'-edit pp-icon-info tooltip" title="' . $LANG_PP['edit'] . '"></i>',
-            '-edit tooltip" title="' . $LANG_PP['edit'] . '"></i>',
+        $retval .= COM_createLink('<i class="uk-icon uk-icon-edit tooltip" title="' . $LANG_PP['edit'] . '"></i>',
             PAYPAL_ADMIN_URL . "/index.php?editcat=x&amp;id={$A['cat_id']}"
         );
         break;
@@ -1150,9 +1142,7 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         if (!\Paypal\Category::isUsed($A['cat_id'])) {
-            $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-trash-o pp-icon-danger tooltip"></i>',
-                    '-trash-o uk-text-danger tooltip"></i>',
+            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip"></i>',
                 PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
                 array(
                     'onclick'=>"return confirm('{$LANG_PP['q_del_item']}');",
@@ -1397,22 +1387,18 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-                    '-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-                PAYPAL_ADMIN_URL . "/index.php?editattr=x&amp;attr_id={$A['attr_id']}"
+        $retval .= COM_createLink(
+            '<i class="uk-icon uk-icon-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL . "/index.php?editattr=x&amp;attr_id={$A['attr_id']}"
         );
         break;
 
     case 'orderby':
-        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-up pp-icon-info"></i>',
-                    '-arrow-up"></i>',
+        $retval = COM_createLink(
+                '<i class="uk-icon uk-icon-arrow-up"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?attrmove=up&id=' . $A['attr_id']
             ) .
-            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-down pp-icon-info"></i>',
-                    '-arrow-down"></i>',
+            COM_createLink('<i class="uk-icon uk-icon-arrow-down"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?attrmove=down&id=' . $A['attr_id']
             );
         break;
@@ -1432,9 +1418,8 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                //'-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
-                '-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+        $retval .= COM_createLink(
+            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1473,10 +1458,9 @@ function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-                    '-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-                PAYPAL_ADMIN_URL . "/index.php?editshipping={$A['id']}"
+        $retval .= COM_createLink(
+            '<i class="uk-icon uk-icon-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL . "/index.php?editshipping={$A['id']}"
         );
         break;
 
@@ -1495,9 +1479,8 @@ function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                //'-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
-                '-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+        $retval .= COM_createLink(
+            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?delshipping=x&amp;id=' . $A['id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1620,11 +1603,9 @@ function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                //'-edit pp-icon-info tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-                '-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
-            PAYPAL_ADMIN_URL .
-                "/index.php?gwedit=x&amp;gw_id={$A['id']}"
+        $retval .= COM_createLink(
+            '<i class="uk-icon uk-icon-edit tooltip" title="' . $LANG_ADMIN['edit'] . '"></i>',
+            PAYPAL_ADMIN_URL . "/index.php?gwedit=x&amp;gw_id={$A['id']}"
         );
         break;
 
@@ -1643,22 +1624,19 @@ function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'orderby':
-        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-up pp-icon-info"></i>',
-                    '-arrow-up"></i>',
+        $retval = COM_createLink(
+                '<i class="uk-icon uk-icon-arrow-up"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?gwmove=up&id=' . $A['id']
             ) .
-            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-down pp-icon-info"></i>',
-                    '-arrow-down"></i>',
+            COM_createLink(
+                '<i class="uk-icon uk-icon-arrow-down"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?gwmove=down&id=' . $A['id']
             );
         break;
 
     case 'delete':
-        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                //'-trash-o pp-icon-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
-                '-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+        $retval = COM_createLink(
+            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?gwdelete=x&amp;id=' . $A['id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1926,13 +1904,13 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval = COM_createLink('<i class="' . PP_getIcon('edit') . '"></i>',
+        $retval = COM_createLink('<i class="uk-icon uk-icon-edit"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?editdiscount&id=' . $A['id']
         );
         break;
 
     case 'delete':
-        $retval = COM_createLink('<i class="' . PP_getIcon('trash-o', 'danger') . '"></i>',
+        $retval = COM_createLink('<i class="uk-icon uk-icon-trash-o uk-icon-danger"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?deldiscount&id=' . $A['id'],
                 array(
                     'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -2040,14 +2018,10 @@ function getAdminField_Workflow($fieldname, $fieldvalue, $A, $icon_arr)
     case 'orderby':
         $url = PAYPAL_ADMIN_URL .
             "/index.php?id={$A['id']}&amp;type={$A['rec_type']}&amp;wfmove=";
-        $retval = COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-up pp-icon-info"></i>',
-                    '-arrow-up"></i>',
+        $retval = COM_createLink('<i class="uk-icon uk-icon-arrow-up"></i>',
                 $url . 'up'
             ) .
-            COM_createLink('<i class="' . $_PP_CONF['_iconset'] .
-                    //'-arrow-down pp-icon-info"></i>',
-                    '-arrow-down"></i>',
+            COM_createLink('<i class="uk-icon uk-icon-arrow-down"></i>',
                 $url . 'down'
             );
         break;

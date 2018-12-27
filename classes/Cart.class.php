@@ -357,9 +357,6 @@ class Cart extends Order
         global $_PP_CONF, $_USER;
 
         $T = PP_getTemplate('btn_checkout', 'checkout', 'buttons');
-        $T->set_var(array(
-            'is_uikit' => $_PP_CONF['_is_uikit'],
-        ) );
         $by_gc = (float)$this->getInfo('apply_gc');
         $net_total = $this->total - $by_gc;
         // Special handling if there is a zero total due to discounts

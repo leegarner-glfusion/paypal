@@ -22,7 +22,7 @@
 {!endif}
       &nbsp;&nbsp;<button type="submit" class="paypalButton orange" border="0"
         onclick='ppAddToCart("add_cart_{item_number}");return false;'>
-        <i class="{iconset}-shopping-cart">&nbsp;</i>{$LANG_PP['add_to_cart']}
+        <i class="uk-icon uk-icon-shopping-cart">&nbsp;</i>{$LANG_PP['add_to_cart']}
       </button>
     </div>
   </div>

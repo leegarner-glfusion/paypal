@@ -401,9 +401,6 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
                     'target' => '_new',
                 )
         );
-        if (!$_PP_CONF['_is_uikit']) {
-            $retval .= '(print)';
-        }
         $retval .= '</a>';
         break;
 
@@ -697,7 +694,6 @@ function ProductList($cat_id = 0)
         'currency'      => $_PP_CONF['currency'],
         'breadcrumbs'   => $breadcrumbs,
         'search_text'   => $search,
-        'uikit'         => $_PP_CONF['_is_uikit'] ? 'true' : '',
         'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
         'sortby_options' => $sortby_options,
         'sortby'        => $sortby,
@@ -890,11 +886,7 @@ function ProductList($cat_id = 0)
 
     // Display a "not found" message if count == 0
     if ($prodrows == 0) {
-        if ($_PP_CONF['_is_uikit']) {
-            $display .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
-        } else {
-            $display .= '<span class="alert">' . $LANG_PP['no_products_match'] . '</span>';
-        }
+        $display .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['no_products_match'] . '</div>';
     }
 
     $display .= $T->parse('', 'end');

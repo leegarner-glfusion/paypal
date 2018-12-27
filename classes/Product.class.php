@@ -821,7 +821,6 @@ class Product
             'custom' => $this->custom,
             'avail_beg'     => self::_InputDtFormat($this->avail_beg),
             'avail_end'     => self::_InputDtFormat($this->avail_end),
-            'iconset'       => $_PP_CONF['_iconset'],
             //'limit_availability_chk' => $this->limit_availability ? 'checked="checked"' : '',
         ) );
 
@@ -1078,7 +1077,6 @@ class Product
                 }
                 $T->set_block('product', 'Thumbnail', 'PBlock');
                 $T->set_var(array(
-                    'is_uikit' => $_PP_CONF['_is_uikit'],
                     'img_file'      => $prow['filename'],
                     'disp_img'      => PAYPAL_ImageUrl($prow['filename'], 0, 0),
                     'lg_img'        => PAYPAL_URL.'/images/products/'.$prow['filename'],
@@ -1163,7 +1161,6 @@ class Product
             $shipping_txt = '';
         }
         $T->set_var(array(
-            'is_uikit' => $_PP_CONF['_is_uikit'],
             'have_attributes'   => $this->hasAttributes(),
             //'currency'          => $_PP_CONF['currency'],
             'id'                => $prod_id,
@@ -1381,7 +1378,6 @@ class Product
                 'form_url'  => $this->_view == 'list' ? true : false,
                 'tpl_ver'   => $_PP_CONF['product_tpl_ver'],
                 'frm_id'    => md5($this->id . rand()),
-                'iconset'   => $_PP_CONF['_iconset'],
                 'quantity'  => $this->getFixedQuantity(),
             ) );
             $buttons['add_cart'] = $T->parse('', 'cart');

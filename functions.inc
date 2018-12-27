@@ -120,11 +120,6 @@ function USES_paypal_functions()
 function USES_paypal_reports()
 {   require_once __DIR__ . '/reports.inc.php';  }
 
-// Mark whether this is a uikit theme. Save to global conf var
-// so it's available where needed.
-$_PP_CONF['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? true : false;
-$_PP_CONF['_iconset'] = $_PP_CONF['_is_uikit'] ? 'uk-icon uk-icon' : 'fa fa';
-
 /**
  * Import a specific report class.
  *
@@ -197,7 +192,7 @@ function plugin_getmenuitems_paypal()
             $_PP_CONF['menuitem']) {
         $a = preg_replace(
             '/\{(.*)\}/i',
-            '<i class="' . PP_getIcon('${1}', '') . '"></i>',
+            '<i class="uk-icon-${1}"></i>',
             $LANG_PP['mnu_paypal']);
         $menuitems[$a] = PAYPAL_URL . '/index.php';
     }
@@ -1839,23 +1834,6 @@ function PAYPAL_timezone()
     return $tz;
 }
 
-
-/**
- * Get an icon from the CSS icon set, either UIkit or FontAwesome.
- *
- * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
- * @param   string  $style  Style name from local CSS
- * @return  string      Class names for icon
- */
-function PP_getIcon($name, $style='info')
-{
-    global $_PP_CONF;
-
-    if ($style != '')
-        $style = ' uk-text-' . $style;
-    return $_PP_CONF['_iconset'] . '-' . $name . $style;
-}
-
 require_once __DIR__ . '/services.inc.php';
 
 /**
@@ -2173,13 +2151,8 @@ function PP_getTemplate($name, $id='', $path='')
     }
 
     // May use "switch" later, for now there are only two options
-    $tpltype = $_PP_CONF['_is_uikit'] ? '.uikit' : '';
     foreach ($templates as $t_id =>$t_name) {
-        if (file_exists(__DIR__ . "/$path/$t_name$tpltype.thtml")) {
-            $templates[$t_id] = "$t_name$tpltype.thtml";
-        } else {
-            $templates[$t_id] = "$t_name.thtml";
-        }
+        $templates[$t_id] = "$t_name.thtml";
     }
     $T = new Template(__DIR__ . '/' . $path);
     $T->set_file($templates);

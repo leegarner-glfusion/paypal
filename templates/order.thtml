@@ -14,7 +14,7 @@
 {!else}
   <div class="floatright">
     <a href="{site_url}/paypal/index.php?printorder={order_number}&token={token}" target="_blank"
-        title="{$LANG_PP['print']}"><i class="{iconset}-print tooltip" title="{$LANG_PP['print_order']}"></i>
+        title="{$LANG_PP['print']}"><i class="uk-icon uk-icon-print tooltip" title="{$LANG_PP['print_order']}"></i>
     </a>
   </div>
 {!endif}
@@ -117,7 +117,7 @@
             </a>
 {!endif}
 {!if is_file}
-            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}&token={token}" class="{iconset}-download tooltip" title="{$LANG_PP['download']}"></a>
+            &nbsp;&nbsp;<a href="{site_url}/paypal/download.php?id={item_id}&token={token}" class="uk-icon uk-icon-download tooltip" title="{$LANG_PP['download']}"></a>
 {!endif}
         {item_options}
         <!-- BEGIN ItemOptions -->
@@ -202,15 +202,9 @@
   {!if checkout}
     <div id="orderPmtMethod">{pmt_logo}</div>
     <div style="float:left;">
-{!if is_uikit}
       <button class="uk-button uk-button-primary" type="submit" name="viewcart"
         value="{$LANG_PP['viewcart']}"
         onclick="document.location.href='{pi_url}/index.php?view=cart';">{$LANG_PP['edit_order']}</button>
-{!else}
-      <input class="paypalButton blue" type="submit" name="viewcart"
-        value="{$LANG_PP['edit_order']}"
-        onclick="document.location.href='{pi_url}/index.php?view=cart';" />
-{!endif}
     </div>
     <div class="paypalOrderButtons">
       {gateway_vars}

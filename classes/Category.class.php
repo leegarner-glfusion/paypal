@@ -427,7 +427,6 @@ class Category
             'old_grp'       => $this->grp_access,
             'group_sel'     => SEC_getGroupDropdown($this->grp_access, 3, 'grp_access'),
             'doc_url'       => PAYPAL_getDocURL('category_form'),
-            'iconset'   => $_PP_CONF['_iconset'],
         ) );
 
         if ($this->image != '') {

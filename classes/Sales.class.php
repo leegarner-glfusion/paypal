@@ -437,7 +437,6 @@ class Sales
             'end_date'      => $end_dt,
             'start_time'    => $st_tm,
             'end_time'      => $end_tm,
-            'iconset'       => $_PP_CONF['_iconset'],
         ) );
         $retval .= $T->parse('output', 'form');
         $retval .= COM_endBlock();

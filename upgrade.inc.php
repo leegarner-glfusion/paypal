@@ -723,6 +723,14 @@ function PAYPAL_remove_old_files()
             'classes/ipn/paypal_ipn.class.php',
             'classes/ipn/authorizenet_sim.class.php',
             'classes/ipn/BaseIPN.class.php',
+            // 0.6.1
+            'templates/address.uikit.thtml',
+            'templates/attribute_form.uikit.thtml',
+            'templates/category_form.uikit.thtml',
+            'templates/gateway_edit.uikit.thtml',
+            'templates/product_form.uikit.thtml',
+            'templates/sales_form.uikit.thtml',
+            'templates/sales_table.uikit.thtml',
         ),
         // public_html/paypal
         $_CONF['path_html'] . 'paypal' => array(

@@ -24,19 +24,12 @@
   </div>
   <div class="paypalProductSearch">
     <form method="get" class="uk-form" action="{pi_url}/index.php">
-{!if uikit}
-<fieldset data-uk-margin>
-{!endif}
-    <input type="search" id="query" name="query" value="{search_text}" placeholder="{$LANG_PP['search_catalog']}" />
-{!if uikit}
-    <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG09[10]}</button>
-    <button type="submit" class="uk-button" name="clearsearch" ><i class="uk-icon-remove"></i></button>
-</fieldset>
-{!else}
-    <input type="submit" class="lgButton green" value="{$LANG09[10]}" name="submit" />
-    <input type="submit" class="lgButton grey" value="X" name="clearsearch" />
-{!endif}
-  </form>
+      <fieldset data-uk-margin>
+        <input type="search" id="query" name="query" value="{search_text}" placeholder="{$LANG_PP['search_catalog']}" />
+        <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG09[10]}</button>
+        <button type="submit" class="uk-button" name="clearsearch" ><i class="uk-icon-remove"></i></button>
+      </fieldset>
+    </form>
   </div>
 </div>
 {!if anon_and_empty}

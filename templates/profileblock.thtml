@@ -1,16 +1,10 @@
 {# begin {templatelocation} #}
 <div id="pe_paypal" class="jsenabled_hide">
-{!if is_uikit}
 <nav class="uk-navbar uk-margin-top">
   <div class="uk-navbar-content">
   {$LANG_PP['my_account']}
   </div>
 </nav>
-{!else}
-<div class="profile-header">
-  {$LANG_PP['block_title']}
-</div>
-{!endif}
 {!if gc_bal}
 <h3>{$LANG_PP['gc_bal']}:&nbsp;&nbsp;{gc_bal}</h3>
 <div class="uk-form-row">

@@ -7,10 +7,8 @@
   {gateway_vars}
 {!if button_url}
   {button_url}
-{!elseif is_uikit}
-  <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['confirm_order']}</button>
 {!else}
-  <button type="submit" class="lgButton green" name="submit">{$LANG_PP['confirm_order']}</button>
+  <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['confirm_order']}</button>
 {!endif}
 </form>
 {# end {templatelocation} #}
