@@ -1,0 +1,209 @@
+{# begin {templatelocation} #}
+<form class="uk-form uk-form-horizontal" action="{site_admin_url}/plugins/paypal/index.php" method="post"
+    onsubmit="return PP_validateSalesForm(this)">
+  <input type="hidden" name="id" value="{disc_id}" />
+  <fieldset>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['name']}:
+      <span id="sale_name" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input type="text" name="name" value="{name}" size="40" maxlength="40" />
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['apply_disc_to']}:
+      <span id="item_type" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input type="radio" name="item_type" value="product" {it_sel_product}
+            onclick="PP_updateItemType(this.value);" />&nbsp;Product
+      <input type="radio" name="item_type" value="category" {it_sel_category}
+            onclick="PP_updateItemType(this.value);" />&nbsp;Category
+    </div>
+  </div>
+
+  <div class="uk-form-row" id="prod_sel">
+    <label class="uk-form-label">{$LANG_PP['product']}:
+      <span id="item_id" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <select name="item_id" id="item_id">
+        <option value="0">--{$LANG_PP['none']}--</option>
+        {product_select}
+      </select>
+      <i class="uk-icon uk-icon-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+    </div>
+  </div>
+
+  <div class="uk-form-row" id="cat_sel">
+    <label class="uk-form-label">{$LANG_PP['category']}:
+      <span id="cat_id" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <select name="cat_id" id="cat_id">
+        <option value="0">--{$LANG_PP['none']}--</option>
+        {category_select}
+      </select>
+      <i class="uk-icon uk-icon-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['disc_type']}:
+      <span id="discount_type" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <select name="discount_type" id="discount_type">
+        <option value="percent" {start_sel_percent}>{$LANG_PP['percent']}</option>
+        <option value="amount" {start_sel_amount}>{$LANG_PP['amount']}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['amount']}/{$LANG_PP['percent']}:
+      <span id="amount" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input type="text" name="amount" value="{amount}" size="10" maxlength="10" />
+      <i class="uk-icon uk-icon-warning uk-text-danger" data-uk-tooltip title="{$LANG_PP['required']}"></i>
+    </div>
+  </div>
+
+{!if 0}
+    <div class="uk-form-row" id="qty_discounts">
+      <label class="uk-form-label">{$LANG_PP['qty_discounts']}:
+        <span id="qty_discounts" class="tooltip_cfg tooltipstered"></span> 
+      </label>
+      <div class="uk-form-controls">
+      <table>
+      <tr>
+        <th>{$LANG_PP['min_purch']}</th><th>{$LANG_PP['discount']} %</th>
+      </tr>
+      <tr>
+        <td align="center"><input type="text" size="5" name="disc_qty[0]" value="{disc_qty0}" /></td>
+        <td align="center"><input type="text" size="5" name="disc_amt[0]" value="{disc_amt0}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[1]" value="{disc_qty1}" /></td>
+        <td><input type="text" size="5" name="disc_amt[1]" value="{disc_amt1}" /></td>
+      </tr>
+      <tr>
+        <td><input type="text" size="5" name="disc_qty[2]" value="{disc_qty2}" /></td>
+        <td><input type="text" size="5" name="disc_amt[2]" value="{disc_amt2}" /></td>
+      </tr>
+      </table>
+      </div>
+    </div>
+{!endif}
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['start']}:
+      <span id="start" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input type="text" id="start_dt" name="start" value="{start_date}" size="12" maxlength="12"
+            data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
+            placeholder="1970-01-01"
+            data-uk-tooltip />
+      <input type="text" id="start_time" name="start_time" value="{start_time}" size="12" maxlength="12"
+            data-uk-timepicker title="{$LANG_PP['timepicker']}" placeholder="00:00"
+            data-uk-tooltip />
+      <i class="uk-icon uk-icon-trash-o uk-text-danger"
+        onclick='PP_resetSaleDates("start");'></i>
+    </div>
+  </div>
+
+  <div class="uk-form-row">
+    <label class="uk-form-label">{$LANG_PP['end']}:
+      <span id="end" class="tooltip_cfg tooltipstered"></span>
+    </label>
+    <div class="uk-form-controls">
+      <input type="text" id="end_dt" name="end" value="{end_date}" size="12" maxlength="12"
+            data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{$LANG_PP['datepicker']}"
+            placeholder="2037-12-31"
+            data-uk-tooltip />
+      <input type="text" id="end_time" name="end_time" value="{end_time}" size="12" maxlength="12"
+            data-uk-timepicker title="{$LANG_PP['timepicker']}"
+            placeholder="23:59"
+            data-uk-tooltip />
+      <i class="uk-icon uk-icon-trash-o uk-text-danger"
+        onclick='PP_resetSaleDates("end");'></i>
+    </div>
+  </div>
+
+  <div class="uk-form-row" align="center">
+    <button class="uk-button uk-button-success type="submit" name="savediscount" value="{$LANG_PP['saveopt']}">{$LANG_PP['saveopt']}</button>
+    <button class="uk-button" type="reset" />{$LANG_PP['clearform']}</button>
+    <button class="uk-button uk-button-danger" type="submit" name="deletediscount" value="{$LANG_PP['deleteopt']}"
+        onclick="return confirm('{$LANG_PP['q_del_item']}');">{$LANG_PP['deleteopt']}</button>
+    <button class="uk-button uk-button-primary" type="submit" name="attributes" value="{$LANG_ADMIN['cancel']}">{$LANG_ADMIN['cancel']}</button>
+  </div>
+
+</form>
+<script type="text/javascript">
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    //var a = $(data).find('a[name=desc_' + confVar + ']');
+                    //var tds = a.parent().parent().children("td");
+                    //var desc = tds.eq(1).html();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+                continueTooltip();
+            });
+        }
+    });
+});
+function PP_updateItemType(type)
+{
+    if (type == "category") {
+        document.getElementById("prod_sel").style.display = "none";
+        document.getElementById("cat_sel").style.display = "";
+    } else {
+        document.getElementById("prod_sel").style.display = "";
+        document.getElementById("cat_sel").style.display = "none";
+    }
+}
+function PP_resetSaleDates(type)
+{
+    document.getElementById(type + '_dt').value = '';
+    document.getElementById(type + '_time').value = '';
+}
+
+$(document).ready(function() {
+  PP_updateItemType("{item_type}");
+}); 
+
+function PP_validateSalesForm(form)
+{
+    if (form.item_type.value == 'product' && form.item_id.value == 0) {
+        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
+        return false;
+    }
+    if (form.item_type.value == 'category' && form.cat_id.value == 0) {
+        $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
+        return false;
+    }
+    return true;
+}
+</script>
+{# end {templatelocation} #}
