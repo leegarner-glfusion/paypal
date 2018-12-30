@@ -6,7 +6,7 @@
  * @copyright   Copyright (c) 2014-2018 Lee Garner <lee@leegarner.com>
  * @package     paypal
  * @version     v0.6.0
- * @license     http://opensource.org/licenses/gpl-2.0.php 
+ * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
@@ -58,8 +58,8 @@ class Currency
         global $_PP_CONF;
         static $currencies = array();
 
-        if ($code === NULL) $code = $_PP_CONF['currency'];
-        
+        if (empty($code)) $code = $_PP_CONF['currency'];
+
         if (!isset($currencies[$code])) {
             $key = 'currency_' . $code;
             $currencies[$code] = Cache::get($key);
@@ -202,17 +202,22 @@ class Currency
         return $postfix;
     }
 
- 
+
     /**
      * Get the formatted string for an amount, e.g. "$ 125.00".
      *
      * @param   float   $amount Dollar amount
+     * @param   boolean $symbol True to format as "$1.00", False for "1.00 USD"
      * @return  string      Formatted string for display
      */
-    public function Format($amount)
+    public function Format($amount, $symbol = true)
     {
         $val = $this->_Format($amount);
-        return $val[0] . $val[1] . $val[2];
+        if ($symbol) {
+            return $val[0] . $val[1] . $val[2];
+        } else {
+            return $val[1] . ' ' . $this->code;
+        }
     }
 
 
@@ -236,15 +241,15 @@ class Currency
      * @param   string  $code   The three character code of the currency.
      * @return  array   Array of prefix, number, postfix
      */
-    private function _Format($amount, $code='')
+    private function _Format($amount)
     {
         static $amounts = array();
 
         $key = (string)$amount;
         if (!array_key_exists($key, $amounts)) {
             // Format the price as a number.
-            $price = number_format($this->currencyRound(abs($amount)), 
-                    $this->decimals, 
+            $price = number_format($this->currencyRound(abs($amount)),
+                    $this->decimals,
                     $this->decimal_sep,
                     $this->thousands_sep);
             $negative = $amount < 0 ? '-' : '';
@@ -330,7 +335,7 @@ class Currency
         return (float)$data;
     }
 
- 
+
     /**
      * Get all currency info.
      * Used by the plugin configuration to create a dropdown list of currencies.

@@ -296,10 +296,12 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
 
     if (is_array($args)) {
         $amount = PP_getVar($args, 'amount', 'float');
+        $symbol = PP_getVar($args, 'symbol', 'boolean', true);
     } else {
         $amount = (float)$args;
+        $symbol = true;
     }
-    $output = \Paypal\Currency::getInstance()->Format($amount);
+    $output = \Paypal\Currency::getInstance()->Format($amount, $symbol);
     return PLG_RET_OK;
 }
 
