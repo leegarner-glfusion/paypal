@@ -109,20 +109,21 @@ function listOrders($admin = false, $uid = 0)
         $options = '';
     }
 
-    $query_arr = array('table' => 'paypal.orders',
-            'sql' => $sql,
-            'query_fields' => array(
-                    'billto_name', 'billto_company', 'billto_address1',
-                    'billto_address2','billto_city', 'billto_state',
-                    'billto_country', 'billto_zip',
-                    'shipto_name', 'shipto_company', 'shipto_address1',
-                    'shipto_address2','shipto_city', 'shipto_state',
-                    'shipto_country', 'shipto_zip',
-                    'phone', 'buyer_email', 'ord.order_id',
-            ),
-            'default_filter' => $where,
-            'group_by' => 'ord.order_id',
-        );
+    $query_arr = array(
+        'table' => 'paypal.orders',
+        'sql' => $sql,
+        'query_fields' => array(
+            'billto_name', 'billto_company', 'billto_address1',
+            'billto_address2','billto_city', 'billto_state',
+            'billto_country', 'billto_zip',
+            'shipto_name', 'shipto_company', 'shipto_address1',
+            'shipto_address2','shipto_city', 'shipto_state',
+            'shipto_country', 'shipto_zip',
+            'phone', 'buyer_email', 'ord.order_id',
+        ),
+        'default_filter' => $where,
+        'group_by' => 'ord.order_id',
+    );
 
     $text_arr = array(
         'has_extras' => $admin ? true : false,
@@ -318,7 +319,8 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
         list($item_id, $item_opts) = PAYPAL_explode_opts($A['product_id']);
         if (is_numeric($item_id)) {
             // One of our catalog items, so link to it
-            $retval = COM_createLink($fieldvalue,
+            $retval = COM_createLink(
+                $fieldvalue,
                 PAYPAL_URL . '/index.php?detail=x&amp;id=' . $item_id);
         } else {
             // Probably came from a plugin, just show the product name
@@ -386,20 +388,22 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'order_id':
         $base_url = $A['isAdmin'] ? PAYPAL_ADMIN_URL : PAYPAL_URL;
-        $retval = COM_createLink($fieldvalue,
-                $base_url. '/index.php?order=' . $fieldvalue,
-                array(
-                    'class' => 'tooltip',
-                    'title' => $LANG_PP['vieworder'],
-                )
+        $retval = COM_createLink(
+            $fieldvalue,
+            $base_url. '/index.php?order=' . $fieldvalue,
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_PP['vieworder'],
+            )
         );
-        $retval .= '&nbsp;&nbsp;' . COM_createLink('<i class="uk-icon-mini uk-icon-print gl_mootip"></i>',
-                PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
-                array(
-                    'class' => 'tooltip',
-                    'title' => $LANG_PP['print'],
-                    'target' => '_new',
-                )
+        $retval .= '&nbsp;&nbsp;' . COM_createLink(
+            '<i class="uk-icon-mini uk-icon-print gl_mootip"></i>',
+            PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_PP['print'],
+                'target' => '_new',
+            )
         );
         $retval .= '</a>';
         break;
@@ -452,7 +456,7 @@ function ProductList($cat_id = 0)
 
     // If a cat ID is requested but doesn't exist or the user can't access
     // it, redirect to the homepage.
-    if ($cat_id > 0 && ($Cat->isNew || !$Cat->hasAccess())) {
+    if ($Cat->cat_id > 0 && ($Cat->isNew || !$Cat->hasAccess())) {
         echo COM_refresh(PAYPAL_URL);
         exit;
     }
