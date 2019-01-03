@@ -88,6 +88,7 @@ class Order
         $this->uid = (int)$_USER['uid'];
         $this->instructions = '';
         $this->tax_rate = PP_getTaxRate();
+        $this->currency = $_PP_CONF['currency'];
         if (!empty($id)) {
             $this->order_id = $id;
             if (!$this->Load($id)) {
@@ -304,7 +305,7 @@ class Order
      */
     function SetVars($A)
     {
-        global $_USER, $_CONF;
+        global $_USER, $_CONF, $_PP_CONF;
 
         if (!is_array($A)) return false;
         $tzid = COM_isAnonUser() ? $_CONF['timezone'] : $_USER['tzid'];
@@ -313,6 +314,7 @@ class Order
         $this->status   = PP_getVar($A, 'status');
         $this->pmt_method = PP_getVar($A, 'pmt_method');
         $this->pmt_txn_id = PP_getVar($A, 'pmt_txn_id');
+        $this->currency = PP_getVar($A, 'currency', 'string', $_PP_CONF['currency']);
         $this->order_date = PP_getVar($A, 'order_date', 'integer');
         if ($this->order_date > 0) {
             $this->order_date = new \Date($this->order_date, $tzid);
@@ -432,6 +434,7 @@ class Order
                 "buyer_email = '" . DB_escapeString($this->buyer_email) . "'",
                 "info = '" . DB_escapeString(@serialize($this->m_info)) . "'",
                 "tax_rate = '{$this->tax_rate}'",
+                "currency = '{$this->currency}'",
         );
         foreach (array('billto', 'shipto') as $type) {
             $fld = $type . '_id';
@@ -500,7 +503,7 @@ class Order
 
         $T->set_block('order', 'ItemRow', 'iRow');
 
-        $Currency = Currency::getInstance();
+        $Currency = Currency::getInstance($this->currency);
         $this->no_shipping = 1;   // no shipping unless physical item ordered
         $this->subtotal = 0;
         foreach ($this->items as $item) {
@@ -568,6 +571,7 @@ class Order
             'total_num'     => $Currency->FormatValue($this->total),
             'cur_decimals'  => $Currency->Decimals(),
             'item_subtotal' => $Currency->FormatValue($this->subtotal),
+            'return_url'    => PP_getUrl(),
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
