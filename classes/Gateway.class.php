@@ -114,6 +114,7 @@ class Gateway
      * @var array */
     private static $gateways = array();
 
+
     /**
      * Constructor. Initializes variables.
      * Derived classes should set the gw_name, gw_desc and config values
@@ -602,7 +603,7 @@ class Gateway
      */
     public function Supports($btn_type)
     {
-        return isset($this->services[$btn_type]) ? true : false;
+        return PP_getVar($this->services, $btn_type, 'integer', 0) ? true : false;
     }
 
 
@@ -1171,7 +1172,6 @@ class Gateway
             }
             Cache::set($cache_key, $tmp, 'gateways');
         }
-
         // For each available gateway, load its class file and add it
         // to the static array. Check that a valid object is
         // returned from getInstance()
