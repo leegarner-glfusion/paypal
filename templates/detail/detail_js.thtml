@@ -25,57 +25,31 @@ function isValidField(obj)
     return true;
 }
 
-function ProcessForm(opt)
+function ProcessForm()
 {
-    var rec,i,j;
+    var rec,i;
     var price, frm;
-    var on_elem, os_elem;
-
-    if (typeof(opt) === "undefined") {
-        return;
-    }
 
     emsg="";
     frm = document.getElementById("add_cart_{id}");
     if (frm === null) return;
-    //price = {price};
-    price = frm.amount.value;
-    //options = frm.elements['options[]'];
-    options = opt;
 
-    // If there's only one option selection, then 'options' will be an array
-    // of all it's option items.  We need to handle them differently than if
-    // there are multiple option selections.
-    if (typeof(options.value) === "undefined") {
-        for (i = 0; i < options.length; i++) {
-            if (!isValidField(options[i])) {
-                break;
-            }
-
-            // Expecting value as "id|desc|price"
-            rec = options[i].value.split("|");
-            if (typeof(rec[2]) != "undefined") {
-                price = (price * 1) + (rec[2]*1);
-            }
-            //frm["os"+i].value = rec[0];
+    price = {price};
+    options = frm.elements['options[]'];
+    for (i = 0; i < options.length; i++) {
+        if (!isValidField(options[i])) {
+            continue;
         }
-    } else {
-        rec = options.value.split("|");
+
+        // Expecting value as "id|desc|price"
+        rec = options[i].value.split("|");
         if (typeof(rec[2]) != "undefined") {
-            // convert to a number
-            adjustment = rec[2] * 1
-            // look for an "=" sign for fixed prices
-            if (typeof(rec[3]) != "undefined" && rec[3] == "=") {
-                price = adjustment
-            } else {
-                price = (price * 1) + (rec[2]*1);
-            }
+            price += (rec[2]*1);
         }
     }
-
     price = price.toFixed({cur_decimals});
-    if (typeof(frm.amount) != "undefined") {
-        frm.amount.value = price;
+    if (typeof(frm.price) != "undefined") {
+        frm.price.value = price;
     }
     document.getElementById('price').innerHTML = price;
     return;

@@ -61,7 +61,7 @@
       <div class="uk-form-row">
         <label class="uk-form-label" for="options{opt_id}">{attr_name}:</label>
         <div class="uk-form-controls">
-          <select class="uk-contrast uk-form" id="options{opt_id}" name="options[]" onchange="ProcessForm(this);">
+          <select class="uk-contrast uk-form" id="options{opt_id}" name="options[]" onchange="ProcessForm();">
             {attr_options}
           </select>
         </div>
