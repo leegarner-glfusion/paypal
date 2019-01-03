@@ -391,6 +391,7 @@ $LANG_PP = array (
 'admin_hdr_shipping' => 'Create and update shipping methods based on a number of product &quot;units&quot; shipped. Units provide a rough method of combining products into single shipments but do not consider weight, size or distance.',
 'mnu_wfadmin' => 'Workflows/Statuses',
 'edit_order' => 'Edit Order',
+'go_back' => 'Go Back',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

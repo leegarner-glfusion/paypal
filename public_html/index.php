@@ -308,6 +308,7 @@ case 'couponlog':
 case 'orderhist':
 case 'history':
     if (COM_isAnonUser()) COM_404();
+    PP_setUrl($_SERVER['request_uri']);
     $content .= \Paypal\PAYPAL_userMenu($view);
     $content .= \Paypal\listOrders();
     $menu_opt = $LANG_PP['purchase_history'];
@@ -394,6 +395,7 @@ case 'cart':
 case 'viewcart':
     // If a cart ID is supplied, probably coming from a cancelled purchase.
     // Restore cart since the payment was not processed.
+    PP_setUrl($_SERVER['request_uri']);
     $cid = PP_getVar($_REQUEST, 'cid');
     if (!empty($cid)) {
         \Paypal\Cart::setFinal($cid, false);
@@ -417,6 +419,7 @@ case 'checkoutcart':
 
 case 'productlist':
 default:
+    PP_setUrl($_SERVER['request_uri']);
     $cat_id = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
     $content .= \Paypal\ProductList($cat_id);
     $menu_opt = $LANG_PP['product_list'];

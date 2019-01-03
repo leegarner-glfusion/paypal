@@ -1,17 +1,17 @@
 <?php
 /**
-*   Product detail display for the PayPal plugin.
-*   This page's only job is to display the product detail.  This is to help
-*   with SEO and uses rewritten urls.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
-*   @package    paypal
-*   @version    0.5.0
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Product detail display for the PayPal plugin.
+ * This page's only job is to display the product detail.  This is to help
+ * with SEO and uses rewritten urls.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2011 Lee Garner <lee@leegarner.com>
+ * @package     paypal
+ * @version     0.5.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Require core glFusion code */
 require_once '../lib-common.php';
@@ -56,10 +56,19 @@ if (!empty($id)) {
 }
 if (empty($content)) {
     COM_setMsg($LANG_PP['item_not_found']);
-    COM_refresh(PAYPAL_URL);
+    COM_refresh(PP_getUrl());
 }
 if (empty($breadcrumbs)) {
-    $breadcrumbs = COM_createLink($LANG_PP['back_to_catalog'], PAYPAL_URL . '/index.php');
+    // Hack to change the link text depending on the return URL
+    $url = PP_getUrl('xxx');
+    if ($url == 'xxx') {
+        $url = PAYPAL_URL;
+        $text = $LANG_PP['back_to_catalog'];
+    } else {
+        // use the url obtained from PP_getUrl()
+        $text = $LANG_PP['go_back'];
+    }
+    $breadcrumbs = COM_createLink($text, $url);
 }
 
 $display .= $breadcrumbs;

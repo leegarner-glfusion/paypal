@@ -3,7 +3,7 @@
 {!if is_admin}
 {!else}
   <p>
-    <div style="display:inline-block;"><a href="{site_url}/paypal/index.php">{$LANG_PP['back_to_catalog']}</a></div>
+    <div style="display:inline-block;"><a href="{return_url}">{$LANG_PP['go_back']}</a></div>
 {!if not_anon}
     <div style="display:inline-block;float:right;"><a href="{site_url}/paypal/index.php?orderhist=x">{$LANG_PP['my_account']}</a></div>
 {!endif}

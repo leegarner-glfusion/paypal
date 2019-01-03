@@ -396,9 +396,11 @@ function plugin_getadminoption_paypal()
     global $_TABLES, $_PP_CONF;
 
     if (plugin_ismoderator_paypal()) {
-        return array($_PP_CONF['pi_display_name'],
-                    PAYPAL_ADMIN_URL . '/index.php',
-                    DB_count($_TABLES['paypal.products']));
+        return array(
+            $_PP_CONF['pi_display_name'],
+            PAYPAL_ADMIN_URL . '/index.php',
+            DB_count($_TABLES['paypal.products']),
+        );
     }
 }
 
@@ -2205,6 +2207,44 @@ function PP_dateTooltip($Dt)
 {
     return '<span class="tooltip" title="' . $Dt->toMySQL(false) . ' UTC">'
             . $Dt->toMySQL(true) . '</span>';
+}
+
+
+/**
+ * Set a url in the session to indicate where to return after taking an action.
+ *
+ * @param   string  $url    URL to save
+ */
+function PP_setUrl($url='')
+{
+    if ($url == '') {
+        $url = "{$_SERVER['REQUEST_SCHEME']}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+    }
+    SESS_setVar('pp_ret_url', $url);
+}
+
+
+/**
+ * Get the URL previously set in the session variable.
+ *
+ * @param   string  $def_url    Default url if one is not set in the session
+ * @return  string  URL
+ */
+function PP_getUrl($def_url = '')
+{
+    $url = SESS_getVar('pp_ret_url');
+    if (!$url) {
+        if ($def_url !== '') {
+            $url = $def_url;
+        } else {
+            // final failsafe
+            $url = PAYPAL_URL;
+        }
+    } else {
+        // This is a one-time use value
+        SESS_unSet('ipp_ret_url');
+    }
+    return $url;
 }
 
 ?>
