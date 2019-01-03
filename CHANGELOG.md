@@ -2,6 +2,7 @@
 
 ## Ver 0.6.1
 Release TBD
+- Fix onscreen price update with multiple price-changing attributes.
 - Retire non-UIkit templates.
 - Handle plugin product IDs in the `paypal:` autotag.
 - Enable web services to allow `PLG_invokeService()` to work.
