@@ -839,12 +839,17 @@ function _PPcolumnType($table, $col_name)
 {
     global $_TABLES, $_DB_name;
 
-    $col_name = DB_escapeString($col_name);
-    $col_type = DB_getItem('INFORMATION_SCHEMA.COLUMNS', 'DATA_TYPE',
-            "table_schema = '{$_DB_name}'
-            AND table_name = '{$_TABLES[$table]}'
-            AND COLUMN_NAME = '$col_name'");
-    return $col_type;
+    $retval = '';
+    $sql = "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE table_schema = '{$_DB_name}'
+        AND table_name = '{$_TABLES[$table]}'
+        AND COLUMN_NAME = '$col_name'";
+    $res = DB_query($sql,1);
+    if ($res) {
+        $A = DB_fetchArray($res, false);
+        $retval = $A['DATA_TYPE'];
+    }
+    return $retval;
 }
 
 ?>
