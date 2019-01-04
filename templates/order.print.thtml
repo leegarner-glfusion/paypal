@@ -1,7 +1,13 @@
 {# begin {templatelocation} #}
 <link rel="stylesheet" type="text/css" href="{site_url}/paypal/css/style.css" />
 <div class="paypalOrderContainer print">
-  <h1 class="aligncenter">{$LANG_PP['order_summary']}</h1>
+  <h1 class="aligncenter">
+{!if packing_list}
+{$LANG_PP['packinglist']}
+{!else}
+{$LANG_PP['order_summary']}
+{!endif}
+</h1>
   <div class="paypalOrder">
   <div id="paypalShopInfo">
     <span class="name">{shop_name}</span><br />{shop_addr}<br />
@@ -82,9 +88,12 @@
       <table>
         <tr>
           <th class="aligncenter">{$LANG_PP['description']}</th>
-          <th class="alignright">{$LANG_PP['price']}</th>
           <th class="alignright">{$LANG_PP['quantity']}</th>
+{!if packing_list}
+{!else}
+          <th class="alignright">{$LANG_PP['price']}</th>
           <th class="alignright">{$LANG_PP['total']}</th>
+{!endif}
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
@@ -97,12 +106,17 @@
             <div class="ItemOptions">{option_dscp}</div>
         <!-- END ItemOptions -->
           </td>
-          <td class="alignright">{item_price}</td>
           <td class="alignright">{item_quantity}</td>
+{!if packing_list}
+{!else}
+          <td class="alignright">{item_price}</td>
           <td class="alignright">{item_total}</td>
+{!endif}
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
+{!if packing_list}
+{!else}
 {!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
@@ -131,6 +145,7 @@
           <td colspan="3" class="alignright"><b>{$LANG_PP['total']}</b></td>
           <td class="alignright"><b>{total}</b></td>
         </tr>
+{!endif}
       </table>
     </div>
   </div>

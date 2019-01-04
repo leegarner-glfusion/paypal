@@ -2,6 +2,8 @@
 
 ## Ver 0.6.1
 Release TBD
+- Add option to print a packing list from the admin order list.
+- Add currency code to each order record for historical use.
 - Fix onscreen price update with multiple price-changing attributes.
 - Retire non-UIkit templates.
 - Handle plugin product IDs in the `paypal:` autotag.

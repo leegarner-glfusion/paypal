@@ -469,6 +469,7 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
         $this->is_final = false;
+        $packing_list = false;    // normal view/printing view
 
         switch ($view) {
         case 'order':
@@ -480,7 +481,11 @@ class Order
         case 'viewcart':
             $tplname = 'viewcart';
             break;
+        case 'packinglist':
+            // Print a packing list. Same as print view but no prices or fees shown.
+            $packing_list = true;
         case 'print':
+        case 'printorder':
             $this->is_final = true;
             $tplname = 'order.print';
             break;
@@ -529,6 +534,7 @@ class Order
                 'item_options'  => $P->getOptionDisplay($item),
                 'item_link'     => $P->getLink(),
                 'pi_url'        => PAYPAL_URL,
+                'packing_list'  => $packing_list,
             ) );
             if ($P->isPhysical()) {
                 $this->no_shipping = 0;
@@ -572,6 +578,7 @@ class Order
             'cur_decimals'  => $Currency->Decimals(),
             'item_subtotal' => $Currency->FormatValue($this->subtotal),
             'return_url'    => PP_getUrl(),
+            'packing_list'  => $packing_list,
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(

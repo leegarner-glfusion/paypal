@@ -392,6 +392,7 @@ $LANG_PP = array (
 'mnu_wfadmin' => 'Workflows/Statuses',
 'edit_order' => 'Edit Order',
 'go_back' => 'Go Back',
+'packinglist' => 'Packing List',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

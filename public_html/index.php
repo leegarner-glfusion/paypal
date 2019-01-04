@@ -47,7 +47,7 @@ $view = '';
         'redeem',
         // 'setshipper',
         // Views
-        'order', 'view', 'detail', 'printorder', 'orderhist',
+        'order', 'view', 'detail', 'printorder', 'orderhist', 'packinglist',
         'couponlog',
         'cart', 'pidetail', 'apply_gc', 'viewcart',
     );
@@ -340,11 +340,12 @@ case 'order':
     }
     break;
 
+case 'packinglist':
 case 'printorder':
     if ($_PP_CONF['anon_buy'] == 1 || !COM_isAnonUser()) {
         $order = \Paypal\Order::getInstance($actionval);
         if ($order->canView()) {
-            echo $order->View('print');
+            echo $order->View($view);
             exit;
         }
     }

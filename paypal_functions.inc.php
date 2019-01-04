@@ -98,12 +98,14 @@ function listOrders($admin = false, $uid = 0)
 
     if ($admin) {
         $options = array(
-            'chkdelete' => false, 'chkselect' => true, 'chkfield' => 'order_id',
+            'chkdelete' => false,
+            'chkselect' => true,
+            'chkfield' => 'order_id',
             'chkname' => 'upd_orders',
             'chkactions' => '<input name="updateorderstatus" type="image" src="'
-            . PAYPAL_URL . '/images/update.png'
-            . '" style="vertical-align:text-bottom;" title="' . $LANG_PP['update_status']
-            . '" class="gl_mootip" />&nbsp;' . $LANG_PP['update_status'],
+                . PAYPAL_URL . '/images/update.png'
+                . '" style="vertical-align:text-bottom;" title="' . $LANG_PP['update_status']
+                . '" class="tooltip" />&nbsp;' . $LANG_PP['update_status'],
         );
     } else {
         $options = '';
@@ -330,13 +332,18 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'username':
         if ($A['isAdmin']) {
-            $retval = COM_createLink($fieldvalue,
-                PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $A['uid']);
+            $url = PAYPAL_ADMIN_URL . '/index.php?orderhist=x&uid=' . $A['uid'];
         } else {
-            $retval = COM_createLink($fieldvalue,
-                $_CONF['site_url'] . '/users.php?mode=profile&uid=' .
-                $A['uid']);
+            $url = $_CONF['site_url'] . '/users.php?mode=profile&uid=' .$A['uid'];
         }
+        $retval = COM_createLink(
+            $fieldvalue,
+            $url,
+            array(
+                'title' => COM_getDisplayName($A['uid']),
+                'class' => 'tooltip',
+            )
+        );
         break;
 
     case 'quantity':
@@ -397,7 +404,7 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
             )
         );
         $retval .= '&nbsp;&nbsp;' . COM_createLink(
-            '<i class="uk-icon-mini uk-icon-print gl_mootip"></i>',
+            '<i class="uk-icon-mini uk-icon-print"></i>',
             PAYPAL_URL . '/index.php?printorder=' . $fieldvalue,
             array(
                 'class' => 'tooltip',
@@ -405,6 +412,17 @@ function getPurchaseHistoryField($fieldname, $fieldvalue, $A, $icon_arr)
                 'target' => '_new',
             )
         );
+        if ($A['isAdmin']) {
+            $retval .= '&nbsp;&nbsp;' . COM_createLink(
+                '<i class="uk-icon-mini uk-icon-list"></i>',
+                PAYPAL_URL . '/index.php?packinglist=' . $fieldvalue,
+                array(
+                    'class' => 'tooltip',
+                    'title' => $LANG_PP['packinglist'],
+                    'target' => '_new',
+                )
+            );
+        }
         $retval .= '</a>';
         break;
 
