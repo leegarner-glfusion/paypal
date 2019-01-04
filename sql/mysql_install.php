@@ -933,6 +933,7 @@ $PP_UPGRADE['0.6.0'] = array(
 );
 $PP_UPGRADE['0.6.1'] = array(
     "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE orderby orderby int(3)",
+    "ALTER TABLE {$_TALBES['paypal.orders']} ADD currency varchar(5) NOT NULL DEFAULT 'USD'",
 );
 
 ?>
