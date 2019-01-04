@@ -20,6 +20,8 @@
   </div>
   <div style="clear:both;"></div>
   <div id="paypalAddr">
+{!if packing_list}
+{!else}
 {!if have_billto}
     <div id="paypalBilling">
       <b>{$LANG_PP['bill_to']}:</b>
@@ -47,6 +49,7 @@
       {billto_country}
   {!endif}
     </div>
+{!endif}
 {!endif}
 
 {!if have_shipto}
