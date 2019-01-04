@@ -985,7 +985,7 @@ function phpblock_paypal_cart_contents()
     $T->set_file('shopping_cart_contents', 'blk_cart_contents.thtml');
     $T->set_block('shopping_cart_contents', 'CartRow', 'cRow');
     $total = 0;
-    $Cur = \Paypal\Currency::getInstance();
+    $Cur = \Paypal\Currency::getInstance($cart->currency);
     foreach ($cart->Cart() as $id=>$item) {
         $item_id = $item->product_id;
         if ($item->options != '') $item_id .= '|' . $item->options;
@@ -1474,14 +1474,26 @@ function plugin_runScheduledTask_paypal()
 
     $sql = array();
     if ($_PP_CONF['ena_cart'] == 1) {
-        // Delete carts not updated in a while
+        // Delete empty carts over 2 days old, no need to keep them around
+        $sql[] = "DELETE FROM {$_TABLES['paypal.orders']} WHERE order_id in (
+            SELECT * FROM (
+                SELECT ord.order_id FROM {$_TABLES['paypal.orders']} ord
+                LEFT JOIN {$_TABLES['paypal.purchases']} pur
+                    ON ord.order_id = pur.order_id
+                WHERE ord.status='cart'
+                AND ord.last_mod < DATE_SUB(NOW(), INTERVAL 2 DAY)
+                AND pur.order_id IS NULL
+                ) as tmp
+            )";
+
+        // Delete all carts not updated in a while
         $days = PP_getVar($_PP_CONF, 'days_purge_cart', 'integer');
         if ($days > 0) {
             $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
                 WHERE status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)";
         }
 
-        // Delete orders not updated in a while
+        // Delete pending orders not updated in a while
         $days = PP_getVar($_PP_CONF, 'days_purge_pending', 'integer');
         if ($days > 0) {
             $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
@@ -1511,9 +1523,8 @@ function plugin_runScheduledTask_paypal()
 
     // Treat disabled and expired products as "deleted" to get them out of
     // search results, etc.
-    $where = " WHERE enabled = 1 AND avail_end < '" .
-            PAYPAL_now()->format('Y-m-d', true) . "'";
-    $sql = "SELECT id, prod_type FROM {$_TABLES['paypal.products']} $where";
+    $sql = "SELECT id, prod_type FROM {$_TABLES['paypal.products']} 
+            WHERE enabled = 1 AND avail_end < '" . PAYPAL_now()->format('Y-m-d', true) . "'";
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         PLG_itemDeleted($A['id'], $A['prod_type']);

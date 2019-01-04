@@ -166,8 +166,8 @@ class Currency
      */
     public function Pre()
     {
-        static $prefix = NULL;  // cache for repeated use
-        if ($prefix === NULL) {
+        static $prefixes = array();
+        if (!isset($prefixes[$this->code])) {
             $prefix = '';
             if ($this->symbol_placement == 'before') {
                 $prefix .= $this->symbol . $this->symbol_spacer;
@@ -176,8 +176,9 @@ class Currency
             if ($this->code_placement == 'before') {
                 $prefix .= $this->code . $this->code_spacer;
             }
+            $prefixes[$this->code] = $prefix;
         }
-        return $prefix;
+        return $prefixes[$this->code];
     }
 
 
@@ -188,8 +189,8 @@ class Currency
      */
     public function Post()
     {
-        static $postfix = NULL;     // cache for repeated use
-        if ($postfix === NULL) {
+        static $postfixes = array();
+        if (!isset($postfixes[$this->code])) {
             $postfix = '';
             if ($this->symbol_placement == 'after') {
                 $postfix .= $this->symbol . $this->symbol_spacer;
@@ -198,8 +199,9 @@ class Currency
             if ($this->code_placement == 'after') {
                 $postfix .= $this->code . $this->code_spacer;
             }
+            $postfixes[$this->code] = $postfix;
         }
-        return $postfix;
+        return $postfixes[$this->code];
     }
 
 
@@ -245,7 +247,7 @@ class Currency
     {
         static $amounts = array();
 
-        $key = (string)$amount;
+        $key = $this->code . (string)$amount;
         if (!array_key_exists($key, $amounts)) {
             // Format the price as a number.
             $price = number_format($this->currencyRound(abs($amount)),
