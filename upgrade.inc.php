@@ -595,6 +595,13 @@ function PAYPAL_do_upgrade($dvlp = false)
 
     if (!COM_checkVersion($current_ver, '0.6.1')) {
         $current_ver = '0.6.1';
+        if (!_PPtableHasColumn('paypal.orders', 'order_seq')) {
+            // Add sql to create sequence numbers. Sequence field is already included
+            $PP_UPGRADE[$current_ver][] = "SET @i:=0";
+            $PP_UPGRADE[$current_ver][] = "UPDATE {$_TABLES['paypal.orders']}
+                SET order_seq = @i:=@i+1
+                WHERE status NOT IN ('cart','pending') ORDER BY order_date ASC";
+        }
         if (!PAYPAL_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!PAYPAL_do_set_version($current_ver)) return false;
     }

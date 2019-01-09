@@ -1,14 +1,15 @@
 {# begin {templatelocation} #}
 <form style="display:inline;" class="frm_checkout" name="frm_checkout"
-{!if set_final}
-    onsubmit="return finalizeCart('{cart_id}','{uid}');"
-{!endif}
     action="{action}" method="{method}">
   {gateway_vars}
 {!if button_url}
   {button_url}
 {!else}
-  <button type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['confirm_order']}</button>
+  <button
+{!if set_final}
+    onclick="return finalizeCart('{cart_id}','{uid}');"
+{!endif}
+type="submit" class="uk-button uk-button-success" name="submit">{$LANG_PP['confirm_order']}</button>
 {!endif}
 </form>
 {# end {templatelocation} #}

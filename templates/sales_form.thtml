@@ -1,6 +1,5 @@
 {# begin {templatelocation} #}
-<form class="uk-form uk-form-horizontal" action="{site_admin_url}/plugins/paypal/index.php" method="post"
-    onsubmit="return PP_validateSalesForm(this)">
+<form id="ppsalesform" class="uk-form uk-form-horizontal" action="{site_admin_url}/plugins/paypal/index.php" method="post">
   <input type="hidden" name="id" value="{disc_id}" />
   <fieldset>
 
@@ -136,9 +135,9 @@
   </div>
 
   <div class="uk-form-row" align="center">
-    <button class="uk-button uk-button-success type="submit" name="savediscount" value="{$LANG_PP['saveopt']}">{$LANG_PP['saveopt']}</button>
+    <button onclick="return PP_validateSalesForm();" class="uk-button uk-button-success type="submit" name="savediscount" value="{$LANG_PP['saveopt']}">{$LANG_PP['saveopt']}</button>
     <button class="uk-button" type="reset" />{$LANG_PP['clearform']}</button>
-    <button class="uk-button uk-button-danger" type="submit" name="deletediscount" value="{$LANG_PP['deleteopt']}"
+    <button class="uk-button uk-button-danger" type="submit" name="deldiscount" value="{$LANG_PP['deleteopt']}"
         onclick="return confirm('{$LANG_PP['q_del_item']}');">{$LANG_PP['deleteopt']}</button>
     <button class="uk-button uk-button-primary" type="submit" name="attributes" value="{$LANG_ADMIN['cancel']}">{$LANG_ADMIN['cancel']}</button>
   </div>
@@ -193,8 +192,9 @@ $(document).ready(function() {
   PP_updateItemType("{item_type}");
 }); 
 
-function PP_validateSalesForm(form)
+function PP_validateSalesForm()
 {
+    form = document.getElementById("ppsalesform");
     if (form.item_type.value == 'product' && form.item_id.value == 0) {
         $.UIkit.notify("<i class='uk-icon uk-icon-exclamation-triangle'></i>&nbsp;{$LANG_PP['msg_itemcat_req']}", {timeout: 3000,pos:'top-center'});
         return false;
