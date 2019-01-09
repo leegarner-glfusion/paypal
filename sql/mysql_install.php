@@ -364,6 +364,7 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `token` varchar(20) DEFAULT NULL,
   `tax_rate` decimal(7,5) NOT NULL DEFAULT '0.00000',
   `info` text,
+  `currency` varchar(5) NOT NULL DEFAULT 'USD',
   PRIMARY KEY (`order_id`),
   KEY (`order_date`)
 ) ENGINE=MyISAM";
