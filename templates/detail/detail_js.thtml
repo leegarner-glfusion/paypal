@@ -36,17 +36,34 @@ function ProcessForm()
 
     price = {price};
     options = frm.elements['options[]'];
-    for (i = 0; i < options.length; i++) {
-        if (!isValidField(options[i])) {
-            continue;
-        }
+    if (typeof(options) == "undefined") {
+        return;
+    }
 
-        // Expecting value as "id|desc|price"
-        rec = options[i].value.split("|");
+    // If there's only one option selection, then 'options' will be an array
+    // of all it's option items.  We need to handle them differently than if
+    // there are multiple option selections.
+    if (NodeList.prototype.isPrototypeOf(options)) {
+        // There are multiple options
+        for (i = 0; i < options.length; i++) {
+            if (!isValidField(options[i])) {
+                continue;
+            }
+
+            // Expecting value as "id|desc|price"
+            rec = options[i].value.split("|");
+            if (typeof(rec[2]) != "undefined") {
+                price += (rec[2]*1);
+            }
+        }
+    } else {
+        // There is a single option, check the value
+        rec = options.value.split("|");
         if (typeof(rec[2]) != "undefined") {
             price += (rec[2]*1);
         }
     }
+
     price = price.toFixed({cur_decimals});
     if (typeof(frm.price) != "undefined") {
         frm.price.value = price;
