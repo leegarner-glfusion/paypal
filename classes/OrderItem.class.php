@@ -356,6 +356,27 @@ class OrderItem
         return $this->product->shipping_amt * $this->quantity;
     }
 
+
+    /**
+     * Convert from one currency to another.
+     *
+     * @param   string  $old    Original currency
+     * @param   string  $new    New currency
+     * @return  boolean     True on success, False on error
+     */
+    public function convertCurrency($old, $new)
+    {
+        // If already set, return OK. Nothing to do.
+        if ($new == $old) return true;
+
+        foreach (array('price') as $fld) {
+            $this->$fld = Currency::Convert($this->$fld, $new, $old);
+        }
+        $this->Save();
+        return true;
+    }
+
+
 }
 
 ?>
