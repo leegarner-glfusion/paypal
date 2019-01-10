@@ -2,10 +2,10 @@
 <link rel="stylesheet" type="text/css" href="{site_url}/paypal/css/style.css" />
 <div class="paypalOrderContainer print">
   <h1 class="aligncenter">
-{!if packing_list}
-{$LANG_PP['packinglist']}
-{!else}
+{!if is_invoice}
 {$LANG_PP['order_summary']}
+{!else}
+{$LANG_PP['packinglist']}
 {!endif}
 </h1>
   <div class="paypalOrder">
@@ -20,8 +20,7 @@
   </div>
   <div style="clear:both;"></div>
   <div id="paypalAddr">
-{!if packing_list}
-{!else}
+{!if is_invoice}
 {!if have_billto}
     <div id="paypalBilling">
       <b>{$LANG_PP['bill_to']}:</b>
@@ -92,8 +91,7 @@
         <tr>
           <th class="aligncenter">{$LANG_PP['description']}</th>
           <th class="alignright">{$LANG_PP['quantity']}</th>
-{!if packing_list}
-{!else}
+{!if is_invoice}
           <th class="alignright">{$LANG_PP['price']}</th>
           <th class="alignright">{$LANG_PP['total']}</th>
 {!endif}
@@ -110,16 +108,19 @@
         <!-- END ItemOptions -->
           </td>
           <td class="alignright">{item_quantity}</td>
-{!if packing_list}
-{!else}
+{!if is_invoice}
           <td class="alignright">{item_price}</td>
           <td class="alignright">{item_total}</td>
+          <td class="aligncenter">
+{!if taxable}
+            {tax_icon}*
+{!endif}
+          </td>
 {!endif}
         </tr>
         <!-- END ItemRow -->
         <tr><td>&nbsp;</td></tr>
-{!if packing_list}
-{!else}
+{!if is_invoice}
 {!if subtotal}
         <tr>
           <td colspan="3" class="alignright">{$LANG_PP['item_total']}</td>
@@ -191,5 +192,10 @@
     </p>
 {!endif}
   </div>
+{!if is_invoice}
+{!if icon_dscp}
+  <div>*&nbsp;{icon_dscp}</div>
+{!endif}
+{!endif}
 </div>
 {# end {templatelocation} #}

@@ -104,7 +104,11 @@
           <th style="width:10%" class="alignright">{$LANG_PP['price']}</th>
           <th style="width:10%" class="alignright">{$LANG_PP['quantity']}</th>
           <th style="width:10%" class="alignright">{$LANG_PP['total']}</th>
-          <th style="width:5%">&nbsp;</th>
+          <th style="width:5%;" class="aligncenter">
+{!if icon_dscp}
+            <i class="uk-icon uk-icon-question-circle tooltip" title="{icon_dscp}"></i>
+{!endif}
+          </th>
         </tr>
         <!-- BEGIN ItemRow -->
         <tr>
