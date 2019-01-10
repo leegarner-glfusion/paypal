@@ -422,7 +422,7 @@ function plugin_getuseroption_paypal()
         );
     }
     // View cart option is available to anonymous users
-    if (\Paypal\Cart::getInstance()->hasItems()) {
+    if (\Paypal\Cart::getCart() && \Paypal\Cart::getInstance()->hasItems()) {
         $retval[] = array($LANG_PP['viewcart'],
                 PAYPAL_URL . '/index.php?view=cart');
     }
@@ -789,9 +789,6 @@ function PAYPAL_getDocURL($file='', $doclang='english')
     $doc_path = __DIR__ . "/docs/$doclang/";
     $doc_url = '';
 
-    if (version_compare(GVERSION, '1.6.0', '<')) {
-        $file .= '.legacy';
-    }
     $file .= '.html';
 
     if ($file != '') {
@@ -814,53 +811,57 @@ function PAYPAL_getDocURL($file='', $doclang='english')
  *
  * @return  array   Array of items to be removed.
  */
-function plugin_autouninstall_paypal ()
+function plugin_autouninstall_paypal()
 {
     $out = array (
         // Give the name of the tables, without $_TABLES[]
         'tables' => array(
-                'paypal.address',
-                'paypal.buttons',
-                'paypal.categories',
-                'paypal.currency',
-                'paypal.gateways',
-                'paypal.images',
-                'paypal.ipnlog',
-                'paypal.order_log',
-                'paypal.orderstatus',
-                'paypal.orders',
-                'paypal.prod_attr',
-                'paypal.products',
-                'paypal.purchases',
-                'paypal.userinfo',
-                'paypal.workflows',
-                'paypal.coupons',
-                'paypal.coupon_log',
-                'paypal.sales',
-                'paypal.shipping',
-                // deprecated, leave here to facilitate rollbacks
-                'paypal.cart',
+            'paypal.address',
+            'paypal.buttons',
+            'paypal.categories',
+            'paypal.currency',
+            'paypal.gateways',
+            'paypal.images',
+            'paypal.ipnlog',
+            'paypal.order_log',
+            'paypal.orderstatus',
+            'paypal.orders',
+            'paypal.prod_attr',
+            'paypal.products',
+            'paypal.purchases',
+            'paypal.userinfo',
+            'paypal.workflows',
+            'paypal.coupons',
+            'paypal.coupon_log',
+            'paypal.sales',
+            'paypal.shipping',
+            // deprecated, leave here to facilitate rollbacks
+            'paypal.cart',
         ),
         // Give the full name of the group, as in the db
-        'groups' => array('paypal Admin'),
+        'groups' => array(
+            'paypal Admin',
+        ),
         // Give the full name of the feature, as in the db
         'features' => array(
-                'paypal.admin',
-                'paypal.user',
-                'paypal.view'
+            'paypal.admin',
+            'paypal.user',
+            'paypal.view'
         ),
         // Give the full name of the block, including 'phpblock_', etc
         'php_blocks' => array(
-                'phpblock_paypal_random',
-                'phpblock_paypal_featured',
-                'phpblock_paypal_categories',
-                'phpblock_paypal_popular',
-                'phpblock_paypal_cart',
-                'phpblock_paypal_recent',
-                'phpblock_paypal_search',
+            'phpblock_paypal_random',
+            'phpblock_paypal_featured',
+            'phpblock_paypal_categories',
+            'phpblock_paypal_popular',
+            'phpblock_paypal_cart',
+            'phpblock_paypal_recent',
+            'phpblock_paypal_search',
         ),
         // List all vars by name
-        'vars'=> array('paypal_gid'),
+        'vars'=> array(
+            'paypal_gid',
+        ),
     );
     \Paypal\Cache::clear();  // clear everything from cache
     return $out;
@@ -885,18 +886,6 @@ function plugin_enablestatechange_paypal($enabled)
     if ($enabled && !in_array('lglib', $_PLUGINS)) {
         // Re-disable the plugin
         DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', $_PP_CONF['pi_name']);
-        $enabled = 0;
-    }
-
-    if ($enabled == 0) {
-        $blockfns = array('phpblock_paypal_');
-
-        foreach ($blockfns as $blockfn) {
-            DB_query("UPDATE {$_TABLES['blocks']}
-                    SET is_enabled=$enabled
-                    WHERE phpblockfn like '{$blockfn}%'"
-                    );
-        }
     }
 }
 
@@ -1472,38 +1461,51 @@ function plugin_runScheduledTask_paypal()
 {
     global $_PP_CONF, $_TABLES, $_CONF;
 
-    $sql = array();
+    $orders = array();
     if ($_PP_CONF['ena_cart'] == 1) {
-        // Delete empty carts over 2 days old, no need to keep them around
-        $sql[] = "DELETE FROM {$_TABLES['paypal.orders']} WHERE order_id in (
-            SELECT * FROM (
-                SELECT ord.order_id FROM {$_TABLES['paypal.orders']} ord
+        // Get empty carts over 2 days old, no need to keep them around
+        $res = DB_query("SELECT ord.order_id FROM {$_TABLES['paypal.orders']} ord
                 LEFT JOIN {$_TABLES['paypal.purchases']} pur
                     ON ord.order_id = pur.order_id
                 WHERE ord.status='cart'
+                AND order_seq IS NULL
                 AND ord.last_mod < DATE_SUB(NOW(), INTERVAL 2 DAY)
-                AND pur.order_id IS NULL
-                ) as tmp
-            )";
-
-        // Delete all carts not updated in a while
-        $days = PP_getVar($_PP_CONF, 'days_purge_cart', 'integer');
-        if ($days > 0) {
-            $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
-                WHERE status = 'cart' AND last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)";
+                AND pur.order_id IS NULL");
+        $A = DB_fetchAll($res, false);
+        foreach ($A as $B) {
+            $orders[] = DB_escapeString($B['order_id']);
         }
 
-        // Delete pending orders not updated in a while
+        // Get all carts not updated in a while
+        $days = PP_getVar($_PP_CONF, 'days_purge_cart', 'integer');
+        if ($days > 0) {
+            $res = DB_query("SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE
+                status = 'cart' AND
+                order_seq IS NULL AND
+                last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)");
+            $A = DB_fetchAll($res, false);
+            foreach ($A as $B) {
+                $orders[] = DB_escapeString($B['order_id']);
+            }
+        }
+
+        // Get pending (unpaid) orders not updated in a while
         $days = PP_getVar($_PP_CONF, 'days_purge_pending', 'integer');
         if ($days > 0) {
-            $sql[] = "DELETE FROM {$_TABLES['paypal.orders']}
-                WHERE status = 'pending' AND last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)";
+            $res = DB_Query("SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE
+                status = 'pending' AND
+                order_seq IS NULL AND
+                last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)");
+            $A = DB_fetchAll($res, false);
+            foreach ($A as $B) {
+                $orders[] = DB_escapeString($B['order_id']);
+            }
         }
     }
 
-    if (!empty($sql)) {
-        foreach ($sql as $stmt) {
-            DB_query($stmt);
+    if (!empty($orders)) {
+        foreach ($orders as $order_id) {
+            \Paypal\Order::Delete($order_id);
         }
     }
 
@@ -1523,7 +1525,7 @@ function plugin_runScheduledTask_paypal()
 
     // Treat disabled and expired products as "deleted" to get them out of
     // search results, etc.
-    $sql = "SELECT id, prod_type FROM {$_TABLES['paypal.products']} 
+    $sql = "SELECT id, prod_type FROM {$_TABLES['paypal.products']}
             WHERE enabled = 1 AND avail_end < '" . PAYPAL_now()->format('Y-m-d', true) . "'";
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
