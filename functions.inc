@@ -964,7 +964,10 @@ function phpblock_paypal_cart_contents()
 {
     global $_PP_CONF, $LANG_PP;
 
-    if ($_PP_CONF['ena_cart'] == 0) return '';
+    // If the cart is not enabled, or there is no cart, return
+    if ($_PP_CONF['ena_cart'] == 0 || !\Paypal\Cart::getCart()) {
+        return '';
+    }
 
     $cart = \Paypal\Cart::getInstance();
     // If the cart is empty, the block isn't shown
@@ -1462,44 +1465,40 @@ function plugin_runScheduledTask_paypal()
     global $_PP_CONF, $_TABLES, $_CONF;
 
     $orders = array();
+    $conds = array();
+    $sql = "SELECT ord.order_id FROM {$_TABLES['paypal.orders']} ord
+        LEFT JOIN {$_TABLES['paypal.purchases']} pur
+            ON ord.order_id = pur.order_id WHERE ";
+
     if ($_PP_CONF['ena_cart'] == 1) {
         // Get empty carts over 2 days old, no need to keep them around
-        $res = DB_query("SELECT ord.order_id FROM {$_TABLES['paypal.orders']} ord
-                LEFT JOIN {$_TABLES['paypal.purchases']} pur
-                    ON ord.order_id = pur.order_id
-                WHERE ord.status='cart'
+        $conds[] = "(ord.status='cart'
                 AND order_seq IS NULL
                 AND ord.last_mod < DATE_SUB(NOW(), INTERVAL 2 DAY)
-                AND pur.order_id IS NULL");
-        $A = DB_fetchAll($res, false);
-        foreach ($A as $B) {
-            $orders[] = DB_escapeString($B['order_id']);
-        }
+                AND pur.order_id IS NULL)";
 
         // Get all carts not updated in a while
         $days = PP_getVar($_PP_CONF, 'days_purge_cart', 'integer');
         if ($days > 0) {
-            $res = DB_query("SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE
-                status = 'cart' AND
-                order_seq IS NULL AND
-                last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)");
-            $A = DB_fetchAll($res, false);
-            foreach ($A as $B) {
-                $orders[] = DB_escapeString($B['order_id']);
-            }
+            $conds[] = "(ord.status = 'cart' AND
+                ord.order_seq IS NULL AND
+                ord.last_mod < DATE_SUB(NOW(), INTERVAL $days DAY))";
         }
+    }
 
-        // Get pending (unpaid) orders not updated in a while
-        $days = PP_getVar($_PP_CONF, 'days_purge_pending', 'integer');
-        if ($days > 0) {
-            $res = DB_Query("SELECT order_id FROM {$_TABLES['paypal.orders']} WHERE
-                status = 'pending' AND
-                order_seq IS NULL AND
-                last_mod < DATE_SUB(NOW(), INTERVAL $days DAY)");
-            $A = DB_fetchAll($res, false);
-            foreach ($A as $B) {
-                $orders[] = DB_escapeString($B['order_id']);
-            }
+    // Get pending (unpaid) orders not updated in a while
+    $days = PP_getVar($_PP_CONF, 'days_purge_pending', 'integer');
+    if ($days > 0) {
+        $conds[] = "(ord.status = 'pending' AND
+                ord.order_seq IS NULL AND
+                ord.last_mod < DATE_SUB(NOW(), INTERVAL $days DAY))";
+    }
+
+    if (!empty($conds)) {
+        $res = DB_query($sql . implode(' OR ', $conds));
+        $A = DB_fetchAll($res, false);
+        foreach ($A as $B) {
+            $orders[] = DB_escapeString($B['order_id']);
         }
     }
 
