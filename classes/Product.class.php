@@ -79,7 +79,7 @@ class Product
      * @var object */
     private $Sale = NULL;
 
-    /** Product images objects.
+    /** Product image objects.
      * @var array */
     private $Images = array();
 
@@ -611,8 +611,11 @@ class Product
     {
         global $_TABLES, $_PP_CONF;
 
-        if ($this->id <= 0 || self::isUsed($this->id))
+        if ($this->id <= 0 ||
+            self::isUsed($this->id) ||
+            self::isPluginItem($this->id)) {
             return false;
+        }
 
         foreach ($this->Images as $prow) {
             self::deleteImage($prow['img_id'], $prow['filename']);
@@ -746,8 +749,12 @@ class Product
             }
         }
         $id = $this->id;
-        $T = PP_getTemplate('product_form', 'product');
 
+        SEC_setCookie ($_CONF['cookie_name'].'adveditor', SEC_createTokenGeneral('advancededitor'),
+                        time() + 1200, $_CONF['cookie_path'],
+                        $_CONF['cookiedomain'], $_CONF['cookiesecure'],false);
+
+        $T = PP_getTemplate('product_form', 'product');
         // Set up the wysiwyg editor, if available
         $tpl_var = $_PP_CONF['pi_name'] . '_entry';
         switch (PLG_getEditorType()) {
@@ -1793,9 +1800,10 @@ class Product
 
     /**
      * Duplicate this product.
-     *  - Creates a new product record
-     *  - Copies all images
-     *  - Creates image records
+     *  - Save the original product ID
+     *  - Creates a new product record and get the new ID
+     *  - Copies all images from oldid_x to newid_x
+     *  - Creates records in the images table
      *
      * @return boolean     True on success, False on failure
      */
@@ -1803,8 +1811,13 @@ class Product
     {
         global $_TABLES, $_PP_CONF;
 
+        if ($this->id == 0 || self::isPluginItem($this->id)) {
+            // Don't handle new items or plugin products
+            return false;
+        }
+
+        // Save the original ID, needed to copy image files
         $old_id = $this->id;
-        if ($old_id < 1) return false;      // nothing to do
 
         // Set product variables to indicate a new product and save it.
         $this->isNew = true;
