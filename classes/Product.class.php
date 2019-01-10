@@ -1274,6 +1274,7 @@ class Product
 
         $retval .= COM_endBlock();
         //CACHE_create_instance($cacheInstance, $retval, 0);
+        $retval = PLG_outputFilter($retval, 'paypal');
         return $retval;
     }
 
