@@ -1,3 +1,67 @@
+<table width="90%">
+  <tr>
+{!if have_billto}
+    <td width="50%">
+      <b>{$LANG_PP['bill_to']}:</b><br />
+{!if billto_name}
+      {billto_name}<br />
+{!endif}
+{!if billto_company}
+      {billto_company}<br />
+{!endif}
+{!if billto_address1}
+      {billto_address1}<br />
+{!endif}
+{!if billto_address2}
+      {billto_address2}<br />
+{!endif}
+{!if billto_city}
+{!if billto_state}
+          {billto_city},&nbsp;
+{!else}
+          {billto_city}
+{!endif}
+{!endif}
+      {billto_state} {billto_zip}<br />
+{!if billto_country}
+      {billto_country}
+{!endif}
+    </td>
+{!endif}
+
+{!if have_shipto}
+    <td width="50%">
+      <b>{$LANG_PP['ship_to']}:</b><br />
+{!if shipto_name}
+      {shipto_name}<br />
+{!endif}
+{!if shipto_company}
+      {shipto_company}<br />
+{!endif}
+{!if shipto_address1}
+      {shipto_address1}<br />
+{!endif}
+{!if shipto_city}
+{!if shipto_state}
+      {shipto_city},&nbsp;
+{!else}
+      {shipto_city}
+{!endif}
+      {shipto_state} {shipto_zip}<br />
+{!endif}
+{!if shipto_country}
+      {shipto_country}
+{!endif}
+    </td>
+{!endif}
+  </tr>
+</table>
+
+<p>
+  {$LANG_PP['order_number']}:&nbsp;&nbsp;{order_id}<br />
+  {$LANG_PP['order_date']}:&nbsp;&nbsp;{order_date}</span>
+</p>
+
 <table border="0" cellpadding="2">
 <tr>
   <th>Qty.</th><th>Item</th><th style="text-align:right">Price</th><th style="text-align:right">Extension</th>
