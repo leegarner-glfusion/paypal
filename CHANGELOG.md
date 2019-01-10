@@ -2,6 +2,8 @@
 
 ## Ver 0.6.1
 Release TBD
+- Fix image browser error when editing products.
+- Add sequence number to order records.
 - Delete empty carts over 2 days old.
 - Fix currency caching in static vars if multiple currencies are used.
 - Add option to print a packing list from the admin order list.
