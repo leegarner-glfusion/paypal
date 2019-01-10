@@ -56,7 +56,6 @@ $LANG_PP = array (
 'admin_hdr_editattr' => '<ul><li>Erstelle oder aktualisiere hier Produk-Optionen wie z.B. Farb-, oder Größen-Optionen.</li></ul>',
 'admin_hdr_catlist' => '<ul><li>Bearbeite Produktkategorien, oder wähle "Neue Kategorie", um eine neue Kategorie zu erstellen.</li><li>Eine Kategorie kann nur gelöscht werden, wenn sie nicht mit Produkten verknüpft ist.</li></ul>',
 'admin_hdr_ipnlog'  => '<ul><li>Dies ist eine Liste der empfangenen IPN-Protokolle. (IPN=Instant Payment Notification)</li><li>Klicke auf die ID oder die Txn-ID, um weiter Details anzuzeigen.</li></ul>',
-'admin_hdr_other'   => '<ul><li>Hier kannst Du zusätzliche, selten genutzte Funktionen ausführen.</li><li>Klicke auf "Alle Schaltflächen zurücksetzen", um alle PayPal-Schaltflächen wiederherzustellen.</li></ul>',
 'admin_hdr_history' => '<ul><li>Dies ist eine Liste aller Käufe in der Datenbank.</li><li>Klicke auf einen Link für weitere Informationen zu diesem Kauf</li></ul>',
 'admin_hdr_attributes' => '<ul><li>Produkt-Optionen können mit Produkten verknüpft werden.</li><li>Du kannst z.B. kleine, mittlere und große Größen anbieten, wobei diese unterschiedlich viel kosten.</li><li>Produkte mit Produkt-Optionen können nicht direkt über die Schaltflächen "Jetzt kaufen" erworben werden.</li><li>Der Warenkorb muss aktiviert sein.</li></ul>',
 'admin_hdr_wfadmin' => '<ul><li>Aktiviere, Deaktiviere und Sortiere die Elemente, die vor der Kauf-Bestätigung abgeschlossen sein müssen.</li><li>Elemente des Bestell-Ablaufes können nicht gelöscht werden.</li><li>"Auftrag bestätigen" ist immer das letzte Element im Bestell-Ablauf.</li></ul>',
@@ -373,9 +372,11 @@ $LANG_PP = array (
 'cache_purged' => 'The data cache has been cleared.',
 'carts_purged' => 'All shopping carts have been deleted.',
 'q_purge_carts' => 'Are you sure you want to delete all active shopping carts?',
-'dscp_purge_buttons' => 'Delete all of the stored enrypted buttons in the database. This will force the buttons to be recreated the next time they are needed',
+'dscp_purge_buttons' => 'Delete all of the stored enrypted buttons in the database. This will force the buttons to be recreated the next time they are needed.',
 'dscp_purge_cache' => 'Purge all of the cached orders, items, logs, etc. This is typically needed if the database has been restored from a backup or changed manuallly and the cache is out of sync.',
 'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><br>This will impact the guest experience and should not normally be necessary.</b>',
+'dscp_update_currency' => 'Update the currency code for all outstanding shopping carts to the configured currency.<br />Note that converting back and forth between currencies may result in rounding errors.',
+'dscp_convert_cart_currency' => 'Check this box to convert the amounts to the new currency',
 'include' => 'Include',
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$s%%',
@@ -393,6 +394,8 @@ $LANG_PP = array (
 'edit_order' => 'Edit Order',
 'go_back' => 'Go Back',
 'packinglist' => 'Packing List',
+'q_update_currency' => 'Are you sure you want to update the currency code for all outstanding carts?',
+'x_carts_updated' => 'Updated %d carts',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';

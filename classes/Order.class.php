@@ -74,6 +74,9 @@ class Order
      * @var object */
     protected $Currency;
 
+    /** Statuses that indicate an order is still in a "cart" phase.
+     * @var array */
+    protected static $cart_statuses = array('cart', 'pending');
 
     /**
      * Set internal variables and read the existing order if an id is provided.
@@ -210,7 +213,7 @@ class Order
                     $items[$A['id']] = $A;
                 }
             }
-            Cache::set('items_order_' . $this->order_id, $items, array('items'));
+            Cache::set('items_order_' . $this->order_id, $items, array('items','orders'));
         }
         // Now load the arrays into objects
         foreach ($items as $item) {
@@ -356,8 +359,12 @@ class Order
 
     /**
      * API function to delete an entire order record.
+     * Only orders that have a status of "cart" or "pending" can be deleted.
+     * Finalized (paid, shipped, etc.) orders cannot  be removed.
+     * Trying to delete a nonexistant order returns true.
      *
-     * @param   stirng  $order_id       Order ID, taken from $_SESSION if empty
+     * @param   string  $order_id       Order ID, taken from $_SESSION if empty
+     * @return  boolean     True on success, False on error.
      */
     public static function Delete($order_id = '')
     {
@@ -366,21 +373,28 @@ class Order
         if ($order_id == '') {
             $order_id = Cart::getSession('order_id');
         }
-        if (!$order_id) return;
+        if (!$order_id) return true;
 
         $order_id = DB_escapeString($order_id);
+
+        // Just get an instance of this order since there are a couple of values to check.
+        $Ord = self::getInstance($order_id);
+        if ($Ord->isNew) return true;
+
+        // Only orders with no sequence number can be deleted.
         // Only orders with certain status values can be deleted.
-        $allowed_statuses = array('cart', 'pending');
-        $status = DB_getItem($_TABLES['paypal.orders'], 'status', "order_id='$order_id'");
-        if (!in_array($status, $allowed_statuses)) {
+        if ($Ord->order_seq !== NULL || !$Ord->isFinal()) {
             return false;
         }
 
         // Checks passed, delete the order and items
-        DB_delete($_TABLES['paypal.purchases'], 'order_id', $order_id);
-        DB_delete($_TABLES['paypal.orders'], 'order_id', $order_id);
+        $sql = "START TRANSACTION;
+            DELETE FROM {$_TABLES['paypal.purchases']} WHERE order_id = '$order_id';
+            DELETE FROM {$_TABLES['paypal.orders']} WHERE order_id = '$order_id';
+            COMMIT;";
+        DB_query($sql);
         Cache::deleteOrder($order_id);
-        return true;
+        return DB_error() ? false : true;
     }
 
 
@@ -469,7 +483,8 @@ class Order
         // canView should be handled by the caller
         if (!$this->canView()) return '';
         $this->is_final = false;
-        $packing_list = false;    // normal view/printing view
+        $is_invoice = true;    // normal view/printing view
+        $icon_tooltips = array();
 
         switch ($view) {
         case 'order':
@@ -483,7 +498,7 @@ class Order
             break;
         case 'packinglist':
             // Print a packing list. Same as print view but no prices or fees shown.
-            $packing_list = true;
+            $is_invoice = false;
         case 'print':
         case 'printorder':
             $this->is_final = true;
@@ -534,7 +549,7 @@ class Order
                 'item_options'  => $P->getOptionDisplay($item),
                 'item_link'     => $P->getLink(),
                 'pi_url'        => PAYPAL_URL,
-                'packing_list'  => $packing_list,
+                'is_invoice'    => $is_invoice,
             ) );
             if ($P->isPhysical()) {
                 $this->no_shipping = 0;
@@ -543,7 +558,12 @@ class Order
             $T->clear_var('iOpts');
         }
 
+        if ($this->tax_items > 0) {
+            $icon_tooltips[] = $LANG_PP['taxable'][0] . ' = ' . $LANG_PP['taxable'];
+        }
         $this->total = $this->getTotal();     // also calls calcTax()
+
+        $icon_tooltips = implode('<br />', $icon_tooltips);
 
         $by_gc = (float)$this->getInfo('apply_gc');
         $T->set_var(array(
@@ -578,7 +598,8 @@ class Order
             'cur_decimals'  => $Currency->Decimals(),
             'item_subtotal' => $Currency->FormatValue($this->subtotal),
             'return_url'    => PP_getUrl(),
-            'packing_list'  => $packing_list,
+            'is_invoice'    => $is_invoice,
+            'icon_dscp'     => $icon_tooltips,
         ) );
         if ($this->isAdmin) {
             $T->set_var(array(
@@ -675,10 +696,24 @@ class Order
         //COM_errorLog("updateStatus from $oldstatus to $newstatus");
         if ($oldstatus == $newstatus) return true;
 
-        $sql = "UPDATE {$_TABLES['paypal.orders']}
+        // If promoting from a cart status to a real order, add the sequence number.
+        if (!$this->isFinal($oldstatus) && $this->isFinal()) {
+            $sql = "START TRANSACTION;
+                SELECT COALESCE(MAX(order_seq)+1,1) FROM {$_TABLES['paypal.orders']} INTO @seqno FOR UPDATE;
+                UPDATE {$_TABLES['paypal.orders']}
+                    SET status = '". DB_escapeString($newstatus) . "',
+                    order_seq = @seqno
+                WHERE order_id = '$db_order_id';
+                COMMIT;";
+        } else {
+            // Update the status but leave the sequence alone
+            $sql = "UPDATE {$_TABLES['paypal.orders']}
                 SET status = '". DB_escapeString($newstatus) . "'
-                WHERE order_id = '$db_order_id'";
+                $seq_sql
+                WHERE order_id = '$db_order_id';";
+        }
         //echo $sql;die;
+        //COM_errorLog($sql);
         DB_query($sql);
         if (DB_error()) return false;
         $this->status = $newstatus;     // update in-memory object
@@ -863,7 +898,11 @@ class Order
             'order_id'          => $this->order_id,
             'token'             => $this->token,
             'email_extras'      => implode('<br />' . LB, $email_extras),
+            'order_date'        => $this->order_date->format($_PP_CONF['datetime_fmt'], true),
         ) );
+
+        $this->_setAddressTemplate($T);
+        COM_errorLog(print_r($T,true));
 
         // If any part of the order is paid by gift card, indicate that and
         // calculate the net amount paid by paypal, etc.
@@ -1002,7 +1041,7 @@ class Order
                     $this->tax_items += 1;
                 }
             }
-            $this->tax = round($this->tax_rate * $tax_amt, 2);
+            $this->tax = Currency::getInstance()->RoundVal($this->tax_rate * $tax_amt);
         }
         return $this->tax;
     }
@@ -1110,7 +1149,7 @@ class Order
         } else {
             $total += $this->calcTotalCharges();
         }
-        return round($total, Currency::getInstance()->Decimals());
+        return Currency::getInstance()->RoundVal($total);
     }
 
 
@@ -1181,11 +1220,10 @@ class Order
     /**
      * Get the requested address array.
      *
-     * @deprecated
      * @param   string  $type   Type of address, billing or shipping
      * @return  array           Array of name=>value address elements
      */
-    public function XgetAddress($type)
+    public function getAddress($type)
     {
         if ($type != 'billto') $type = 'shipto';
         $fields = array();
@@ -1433,6 +1471,76 @@ class Order
         $T->set_var('shipper_json', json_encode($ship_rates));
         $T->parse('output', 'form');
         return  $T->finish($T->get_var('output'));
+    }
+
+
+    /**
+     * Set all the billing and shipping address vars into the template.
+     *
+     * @param   object  $T      Template object
+     */
+    private function _setAddressTemplate(&$T)
+    {
+        // Set flags in the template to indicate which address blocks are
+        // to be shown.
+        foreach (Workflow::getAll($this) as $key => $wf) {
+            $T->set_var('have_' . $wf->wf_name, 'true');
+        }
+        foreach (array('billto', 'shipto') as $type) {
+            foreach ($this->_addr_fields as $name) {
+                $fldname = $type . '_' . $name;
+                COM_errorLog("$fldname  =  {$this->$fldname}");
+                $T->set_var($fldname, $this->$fldname);
+            }
+        }
+    }
+
+
+    /**
+     * Determine if an order is final, that is, cannot be updated or deleted.
+     *
+     * @param   string  $status     Status to check, if not the current status
+     * @return  boolean     True if order is final, False if still a cart or pending
+     */
+    public function isFinal($status = NULL)
+    {
+        if ($status === NULL) {     // checking current status
+            $status = $this->status;
+        }
+        return !in_array($status, self::$cart_statuses);
+    }
+
+
+    /**
+     * Convert from one currency to another.
+     *
+     * @param   string  $new    New currency, configured currency by default
+     * @param   string  $old    Original currency, $this->currency by default
+     * @return  boolean     True on success, False on error
+     */
+    public function convertCurrency($new ='', $old='')
+    {
+        global $_PP_CONF;
+
+        if ($new == '') $new = $_PP_CONF['currency'];
+        if ($old == '') $old = $this->currency;
+        // If already set, return OK. Nothing to do.
+        if ($new == $old) return true;
+
+        // Update each item's pricing
+        foreach ($this->items as $Item) {
+            $Item->convertCurrency($old, $new);
+        }
+
+        // Update the currency amounts stored with the order
+        foreach (array('tax', 'shipping', 'handling') as $fld) {
+            $this->$fld = Currency::Convert($this->$fld, $new, $old);
+        }
+
+        // Set the order's currency code to the new value and save.
+        $this->currency = $new;
+        $this->Save();
+        return true;
     }
 
 }

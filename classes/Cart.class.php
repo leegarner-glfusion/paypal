@@ -91,6 +91,28 @@ class Cart extends Order
 
 
     /**
+     * Get all active carts.
+     *
+     * @return  array   Array of cart objects
+     */
+    public static function getAll()
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $sql = "SELECT order_id FROM {$_TABLES['paypal.orders']}
+            WHERE status = 'cart'";
+        $res = DB_query($sql);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $retval[$A['order_id']] = new self($A['order_id']);
+            }
+        }
+        return $retval;
+    }
+
+
+    /**
      * Get the cart contents as an array of items.
      *
      * @return  array   Current cart contents
@@ -272,6 +294,10 @@ class Cart extends Order
         if (isset($_POST['shipper_id'])) {
             $this->setShipper($_POST['shipper_id']);
         }
+        if (isset($A['payer_email']) && COM_isEmail($A['payer_email'])) {
+            $this->buyer_email = $A['payer_email'];
+        }
+
         $this->Save();  // Save cart vars, if changed, and update the timestamp
         return $this->m_cart;
     }
@@ -448,7 +474,7 @@ class Cart extends Order
                 // Select the first if there's one, otherwise select none.
                 $gw_sel = '';
             }
-            foreach ($gateways as $gw) {
+            foreach ($gateways as $gw_id=>$gw) {
                 if (is_null($gw)) {
                     continue;
                 }

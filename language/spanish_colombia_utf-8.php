@@ -53,7 +53,6 @@ $LANG_PP = array (
 'admin_hdr_editattr' => 'Create or update a product attribute.',
 'admin_hdr_catlist' => 'Edit product categories, or select "New Category" to create a new one.  A category may be deleted only if it is not associated with any products.',
 'admin_hdr_ipnlog'  => 'This is a list of IPN messages that have been received.  Click on either the ID or the Txn ID to view the message detail.',
-'admin_hdr_other'   => 'Here you can perform extra, seldom-used functions.  Click "Reset All Buttons" to regenerate all PayPal buttons.',
 'admin_hdr_history' => 'This is a list of all purchases in the database.  Click on a link for more information about that item',
 'admin_hdr_attributes' => 'Attributes can be associated with products.  For instance, you may wish to offer small, medium and large sizes, and charge extra for large.<br /><span class="pluginPaypalAlertText">Note:  Products with attributes cannot be purchased via "Buy-Now" buttons.  The shopping cart must be enabled.</span>',
 'admin_hdr_wfadmin' => 'Enable, Disable, and Re-order the items that must be completed before checkout. Workflow items cannot be deleted. &quot;Confirm Order&quot; is always the last item in the workflow.',
@@ -380,9 +379,11 @@ $LANG_PP = array (
 'cache_purged' => 'The data cache has been cleared.',
 'carts_purged' => 'All shopping carts have been deleted.',
 'q_purge_carts' => 'Are you sure you want to delete all active shopping carts?',
-'dscp_purge_buttons' => 'Delete all of the stored enrypted buttons in the database. This will force the buttons to be recreated the next time they are needed',
+'dscp_purge_buttons' => 'Delete all of the stored enrypted buttons in the database. This will force the buttons to be recreated the next time they are needed.',
 'dscp_purge_cache' => 'Purge all of the cached orders, items, logs, etc. This is typically needed if the database has been restored from a backup or changed manuallly and the cache is out of sync.',
 'dscp_purge_carts' => 'Delete all customer shopping carts that have not been finalized as orders.<br /><b>This will impact the guest experience and should not normally be necessary.</b>',
+'dscp_update_currency' => 'Update the currency code for all outstanding shopping carts to the configured currency.<br />Note that converting back and forth between currencies may result in rounding errors.',
+'dscp_convert_cart_currency' => 'Check this box to convert the amounts to the new currency',
 'include' => 'Include',
 'exclude' => 'Exclude',
 'buy_x_save' => 'Buy %1$d, save %2$s%%',
@@ -400,6 +401,8 @@ $LANG_PP = array (
 'edit_order' => 'Edit Order',
 'go_back' => 'Go Back',
 'packinglist' => 'Packing List',
+'q_update_currency' => 'Are you sure you want to update the currency code for all outstanding carts?',
+'x_carts_updated' => 'Updated %d carts',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
