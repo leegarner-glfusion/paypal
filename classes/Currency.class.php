@@ -250,7 +250,7 @@ class Currency
         $key = $this->code . (string)$amount;
         if (!array_key_exists($key, $amounts)) {
             // Format the price as a number.
-            $price = number_format($this->currencyRound(abs($amount)),
+            $price = number_format($this->RoundVal(abs($amount)),
                     $this->decimals,
                     $this->decimal_sep,
                     $this->thousands_sep);
@@ -272,7 +272,7 @@ class Currency
      * @param   float   $amount The numeric amount value of the price to be rounded.
      * @return  string          The rounded numeric amount value for the price.
      */
-    private function currencyRound($amount)
+    public function RoundVal($amount)
     {
         if ($this->rounding_step < .01) {
             return round($amount, $this->decimals);
@@ -296,7 +296,8 @@ class Currency
      */
     public function Convert($amount, $toCurrency, $fromCurrency='')
     {
-       return $amount * $this->ConversionRate($toCurrency, $fromCurrency);
+        $retval = $amount * self::ConversionRate($toCurrency, $fromCurrency);
+        return self::getInstance($toCurrency)->RoundVal($retval);
     }
 
 
@@ -314,27 +315,34 @@ class Currency
         static $rates = array();
 
         if (empty($fromCurrency)) $fromCurrency = $_PP_CONF['currency'];
+        if (!isset($rates[$fromCurrency])) $rates[$fromCurrency] = array();
 
         // check if this conversion has already been done this session
-        if (!isset($rates[$fromCurrency][$toCurrency])) {
-            $amount = urlencode($amount);
-            $from_Currency = urlencode($fromCurrency);
-            $to_Currency = urlencode($toCurrency);
-
-            $url = "http://download.finance.yahoo.com/d/quotes.csv?s={$from_Currency}{$to_Currency}=X&f=l1";
-            $timeout = 0;
-            $ch = curl_init();
-            curl_setopt ($ch, CURLOPT_URL, $url);
-            curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt ($ch, CURLOPT_USERAGENT,
-                 "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)");
-            curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-            $data = curl_exec($ch);
-            curl_close($ch);
-            if (!isset($rates[$fromCurrency])) $rates[$fromCurrency] = array();
-            $rates[$fromCurrency][$toCurrency] = trim($data);
+        if (isset($rates[$fromCurrency][$toCurrency])) {
+            $rate = $rates[$fromCurrency][$toCurrency];
+        } else {
+            $fldname = "{$fromCurrency}_{$toCurrency}";
+            $cache_key = 'curr_conv_' . $fldname;
+            $rate = Cache::get($cache_key);
+            if ($rate === NULL) {
+                $amount = urlencode($amount);
+                $url = "https://free.currencyconverterapi.com/api/v6/convert?q={$fldname}&compact=ultra";
+                $ch = curl_init();
+                curl_setopt ($ch, CURLOPT_URL, $url);
+                curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt ($ch, CURLOPT_USERAGENT,
+                     "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)");
+                curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 0);
+                $data = curl_exec($ch);
+                curl_close($ch);
+                $data = json_decode($data);
+                $rate = $data->$fldname;
+                // Cache for an hour
+                Cache::set($cache_key, $rate, 'currency', 3600);
+            }
+            $rates[$fromCurrency][$toCurrency] = $rate;
         }
-        return (float)$data;
+        return $rate;
     }
 
 

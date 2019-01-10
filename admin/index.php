@@ -48,7 +48,7 @@ $expected = array(
     'gwmove', 'gwsave', 'wfmove', 'gwinstall', 'gwdelete',
     'attrcopy', 'attrmove',
     'dup_product', 'runreport', 'configreport', 'sendcards', 'purgecache',
-    'deldiscount', 'savediscount', 'purgecarts', 'saveshipping',
+    'deldiscount', 'savediscount', 'purgecarts', 'saveshipping', 'updcartcurrency',
     // Views to display
     'history', 'orderhist', 'ipnlog', 'editproduct', 'editcat', 'catlist',
     'attributes', 'editattr', 'other', 'productlist', 'gwadmin', 'gwedit',
@@ -158,6 +158,27 @@ case 'deleteopt':
 case 'resetbuttons':
     DB_query("TRUNCATE {$_TABLES['paypal.buttons']}");
     COM_setMsg($LANG_PP['buttons_purged']);
+    COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
+    break;
+
+case 'updcartcurrency':
+    $updated = 0;
+    $Carts = \Paypal\Cart::getAll();    // get all carts
+    $convert = PP_getVar($_POST, 'conv_cart_curr', 'integer', 0);
+    foreach ($Carts as $Cart) {         // loop through all
+        if ($Cart->currency == $_PP_CONF['currency']) {
+            continue;
+        }
+        if ($convert == 1) {
+            $Cart->convertCurrency();
+        } else {
+            // Just changing the currency code.
+            $Cart->currency = $_PP_CONF['currency'];
+            $Cart->Save();
+        }
+        $updated++;
+    }
+    COM_setMsg(sprintf($LANG_PP['x_carts_updated'], $updated));
     COM_refresh(PAYPAL_ADMIN_URL . '/index.php?other=x');
     break;
 
@@ -346,7 +367,7 @@ case 'savediscount':
     break;
 
 case 'deldiscount':
-    $id = PP_getVar($_GET, 'id', 'integer', 0);
+    $id = PP_getVar($_REQUEST, 'id', 'integer', 0);
     if ($id > 0) {
         \Paypal\Sales::Delete($id);
     }
@@ -693,7 +714,7 @@ function getAdminField_Product($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         if (!\Paypal\Product::isUsed($A['id'])) {
-            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
                     PAYPAL_ADMIN_URL. '/index.php?deleteproduct=x&amp;id=' . $A['id'],
                 array(
                     'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -816,7 +837,7 @@ function PAYPAL_adminMenu($view='')
         !empty($LANG_PP['admin_hdr_' . $view])) {
         $hdr_txt = $LANG_PP['admin_hdr_' . $view];
     } else {
-        $hdr_txt = $LANG_PP['admin_hdr'];
+        $hdr_txt = '';
     }
 
     $menu_arr = array(
@@ -1142,7 +1163,7 @@ function getAdminField_Category($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         if (!\Paypal\Category::isUsed($A['cat_id'])) {
-            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip"></i>',
+            $retval .= COM_createLink('<i class="uk-icon uk-icon-trash uk-text-danger tooltip"></i>',
                 PAYPAL_ADMIN_URL. '/index.php?deletecat=x&amp;cat_id=' . $A['cat_id'],
                 array(
                     'onclick'=>"return confirm('{$LANG_PP['q_del_item']}');",
@@ -1419,7 +1440,7 @@ function getAdminField_Attribute($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         $retval .= COM_createLink(
-            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            '<i class="uk-icon uk-icon-trash uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?deleteopt=x&amp;attr_id=' . $A['attr_id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1480,7 +1501,7 @@ function getAdminField_Shipper($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         $retval .= COM_createLink(
-            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            '<i class="uk-icon uk-icon-trash uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?delshipping=x&amp;id=' . $A['id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1636,7 +1657,7 @@ function getAdminField_Gateway($fieldname, $fieldvalue, $A, $icon_arr)
 
     case 'delete':
         $retval = COM_createLink(
-            '<i class="uk-icon uk-icon-trash-o uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
+            '<i class="uk-icon uk-icon-trash uk-text-danger tooltip" title="' . $LANG_ADMIN['delete'] . '"></i>',
             PAYPAL_ADMIN_URL. '/index.php?gwdelete=x&amp;id=' . $A['id'],
             array(
                 'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',
@@ -1910,7 +1931,7 @@ function getAdminField_Sales($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        $retval = COM_createLink('<i class="uk-icon uk-icon-trash-o uk-icon-danger"></i>',
+        $retval = COM_createLink('<i class="uk-icon uk-icon-trash uk-text-danger"></i>',
                 PAYPAL_ADMIN_URL . '/index.php?deldiscount&id=' . $A['id'],
                 array(
                     'onclick'=>'return confirm(\'' . $LANG_PP['q_del_item'] . '\');',

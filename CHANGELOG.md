@@ -2,6 +2,8 @@
 
 ## Ver 0.6.1
 Release TBD
+- Delete empty carts over 2 days old.
+- Fix currency caching in static vars if multiple currencies are used.
 - Add option to print a packing list from the admin order list.
 - Add currency code to each order record for historical use.
 - Fix onscreen price update with multiple price-changing attributes.
