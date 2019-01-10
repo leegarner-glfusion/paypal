@@ -783,6 +783,7 @@ function ProductList($cat_id = 0)
             'orig_price'    => $P->getDisplayPrice($P->price),
             'on_sale'       => $P->isOnSale(),
             'small_pic'     => $pic_filename ? PAYPAL_ImageUrl($pic_filename) : '',
+            'onhand'        => $P->track_onhand ? $P->onhand : '',
             'tpl_ver'       => $_PP_CONF['list_tpl_ver'],
         ) );
 
