@@ -101,7 +101,7 @@ class Cache
      * @param   boolean $incl_sechash   True to include the security hash
      * @return  string          Encoded key string to use as a cache ID
      */
-    public static function makeKey($key, $incl_sechash = false)
+    public static function makeKey($key, $incl_sechash = true)
     {
         if ($incl_sechash) {
             // Call the parent class function to use the security hash
