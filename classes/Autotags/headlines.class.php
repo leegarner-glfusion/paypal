@@ -125,9 +125,9 @@ class headlines
             LEFT JOIN {$_TABLES['paypal.categories']} c
             ON p.cat_id=c.cat_id
             WHERE
-                p.enabled=1 AND (c.enabled=1 OR c.enabled IS NULL) " .
+                p.enabled=1 AND (c.enabled=1 OR c.enabled IS NULL) AND
+                (p.track_onhand = 0 OR p.onhand > 0 OR p.oversell < 2) $where " .
             SEC_buildAccessSql('AND', 'c.grp_access') . "
-            $where
             ORDER BY $sortby $orderby
             $limit";
         $res = DB_query($sql);
