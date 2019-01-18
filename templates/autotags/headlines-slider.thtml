@@ -30,28 +30,24 @@
 
 <!-- BEGIN headlines -->
             <li>
-                <div class="uk-panel uk-panel-box">
-
+                <a href="{url}">
+                    <div class="uk-panel uk-panel-box">
 {!if large_url}
-                    <div class="uk-panel-teaser">
-                        <a href="{url}">
+                        <div class="uk-panel-teaser">
                             <img src="{large_url}" alt="">
-                        </a>
-                    </div>
+                        </div>
 {!endif}
-                    <a href="{url}">
                         <h4 class="uk-margin-remove" style="font-weight:700;">
                             {title}
                         </h4>
-                    </a>
 {!if large_url}
 {!else}
-                    <div>
-                        {text}
-                    </div>
+                        <div>
+                            {text}
+                        </div>
 {!endif}
-
-                </div>
+                    </div>
+                </a>
                 <div class="uk-article-divider"></div>
             </li>
             <!-- END headlines -->
