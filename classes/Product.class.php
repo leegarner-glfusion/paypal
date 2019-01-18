@@ -1726,6 +1726,7 @@ class Product
             $sql = "UPDATE {$_TABLES['paypal.products']} SET
                     onhand = GREATEST(0, onhand - {$Item->quantity})
                     WHERE id = '{$this->id}'";
+            Cache::clear('products');
             DB_query($sql, 1);
             if (DB_error()) {
                 COM_errorLog("Product::handlePurchase() SQL errror: $sql", 1);
