@@ -902,7 +902,6 @@ class Order
         ) );
 
         $this->_setAddressTemplate($T);
-        COM_errorLog(print_r($T,true));
 
         // If any part of the order is paid by gift card, indicate that and
         // calculate the net amount paid by paypal, etc.
@@ -1489,7 +1488,6 @@ class Order
         foreach (array('billto', 'shipto') as $type) {
             foreach ($this->_addr_fields as $name) {
                 $fldname = $type . '_' . $name;
-                COM_errorLog("$fldname  =  {$this->$fldname}");
                 $T->set_var($fldname, $this->$fldname);
             }
         }
