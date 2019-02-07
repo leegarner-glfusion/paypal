@@ -487,7 +487,7 @@ $_SQL['paypal.sales'] = "CREATE TABLE {$_TABLES['paypal.sales']} (
 ) ENGINE=MyIsam";
 
 // since 0.6.0+
-$_SQL['paypal.shipping'] = "CREATE TABLE `gl_pp_shipping` (
+$_SQL['paypal.shipping'] = "CREATE TABLE `{$_TABLES['paypal.shipping']}` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL DEFAULT '',
   `min_units` int(11) unsigned NOT NULL DEFAULT '0',
