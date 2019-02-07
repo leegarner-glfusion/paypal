@@ -17,6 +17,7 @@ if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
 }
 
+if (!function_exists('service_genButton_paypal')) {
 
 /**
  * Create the payment buttons for an external item.
@@ -316,6 +317,7 @@ function service_formatAmount_paypal($args, &$output, &$svc_msg)
 function plugin_formatAmount_paypal($amount)
 {
     return \Paypal\Currency::getInstance()->Format((float)$amount);
+}
 }
 
 ?>

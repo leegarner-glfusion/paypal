@@ -2,6 +2,7 @@
 
 ## Ver 0.6.1
 Release TBD
+- Conditionally define service functions, avoid conflict with Shop plugin.
 - Fix image browser error when editing products.
 - Add sequence number to order records.
 - Delete empty carts over 2 days old.
