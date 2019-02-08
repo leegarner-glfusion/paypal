@@ -504,6 +504,7 @@ $LANG_confignames['paypal'] = array(
     'days_purge_pending' => 'Days before purging unpaid orders',
     'purge_sale_prices' => 'Purge Expired Sale Prices?',
     'catalog_columns' => 'Catalog Columns',
+    'enable_svc_funcs' => 'Enable Service Functions',
 );
 
 /** Language strings for the subgroup names in the config section */

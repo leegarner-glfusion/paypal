@@ -504,7 +504,11 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
 
     $pi_name = $_PP_CONF['pi_name'];
     if ($op == 'tagname' ) {
-        return array($pi_name, $pi_name . '_cat', $pi_name . '_headlines');
+        return array(
+            $pi_name,
+            $pi_name . '_cat',
+            $pi_name . '_headlines',
+        );
     } else if ($op == 'parse') {
         $repl = false;      // assume no replacement to start off
         $t1 = explode(' ', $autotag['parm2']);
@@ -1848,7 +1852,6 @@ function PAYPAL_timezone()
     return $tz;
 }
 
-require_once __DIR__ . '/services.inc.php';
 
 /**
  * Provides the getItemInfo function for products.
@@ -2257,6 +2260,11 @@ function PP_getUrl($def_url = '')
         SESS_unSet('ipp_ret_url');
     }
     return $url;
+}
+
+// Enable the service functions if so configured.
+if ($_PP_CONF['enable_svc_funcs']) {
+    require_once __DIR__ . '/services.inc.php';
 }
 
 ?>

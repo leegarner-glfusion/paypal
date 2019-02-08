@@ -275,6 +275,17 @@ $paypalConfigData = array(
         'set' => true,
         'group' => 'paypal',
     ),
+    array(
+        'name' => 'enable_svc_funcs',
+        'default_value' => 1,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 2,
+        'sort' => 220,
+        'set' => true,
+        'group' => 'paypal',
+    ),
 
     array(
         'name' => 'fs_paths',               // Paths fieldset
