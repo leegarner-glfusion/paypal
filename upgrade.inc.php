@@ -595,6 +595,10 @@ function PAYPAL_do_upgrade($dvlp = false)
 
     if (!COM_checkVersion($current_ver, '0.6.1')) {
         $current_ver = '0.6.1';
+        if (_PPtableHasColumn('paypal.orders', 'order_date_old')) {
+            // This may have been left over from the 0.6.0 upgrade
+            $PP_UPGRADE[$current_ver][] = "ALTER TABLE {$_TABLES['paypal.orders']} DROP order_date_old";
+        }
         if (!_PPtableHasColumn('paypal.orders', 'order_seq')) {
             // Add sql to create sequence numbers. Sequence field is already included
             $PP_UPGRADE[$current_ver][] = "SET @i:=0";

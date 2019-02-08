@@ -331,7 +331,6 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `order_id` varchar(40) NOT NULL,
   `uid` int(11) NOT NULL DEFAULT '0',
   `order_date` int(11) unsigned NOT NULL DEFAULT '0',
-  `order_date_old` datetime DEFAULT NULL,
   `last_mod` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `billto_id` int(11) unsigned NOT NULL DEFAULT '0',
   `billto_name` varchar(255) DEFAULT NULL,
