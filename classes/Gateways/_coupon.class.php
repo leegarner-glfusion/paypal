@@ -35,6 +35,14 @@ class _coupon extends \Paypal\Gateway
         $this->gw_name = '_coupon';
         $this->gw_desc = $LANG_PP['apply_gc'];
         $this->gw_url = PAYPAL_URL . '/ipn/internal.php';
+        $this->services = array(
+            'buy_now'   => 0,
+            'donation'  => 1,
+            'pay_now'   => 0,
+            'subscribe' => 1,
+            'checkout'  => 1,
+            'external'  => 1,
+        );
         parent::__construct();
     }
 
