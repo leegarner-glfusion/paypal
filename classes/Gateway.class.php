@@ -114,6 +114,10 @@ class Gateway
      * @var array */
     private static $gateways = array();
 
+    /** Currency code.
+     * @var string */
+    protected $currency_code = 'USD';
+
 
     /**
      * Constructor. Initializes variables.
