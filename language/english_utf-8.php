@@ -410,7 +410,7 @@ $LANG_PP = array (
 'packinglist' => 'Packing List',
 'q_update_currency' => 'Are you sure you want to update the currency code for all outstanding carts?',
 'x_carts_updated' => 'Updated %d carts',
-'shop_closed'   => 'The Shop plugin is only available to administrators.',
+'shop_closed'   => 'The Paypal plugin is only available to administrators.',
 );
 if (isset($_PP_CONF['ena_ratings']) && $_PP_CONF['ena_ratings']) {
     $LANG_PP['list_sort_options']['top_rated'] = 'Top Rated';
