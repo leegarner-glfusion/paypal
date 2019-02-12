@@ -2,6 +2,7 @@
 
 ## Ver 0.6.1
 Release TBD
+- Allow admins to hide the shop from the public for testing.
 - Conditionally define service functions, avoid conflict with Shop plugin.
 - Fix image browser error when editing products.
 - Add sequence number to order records.

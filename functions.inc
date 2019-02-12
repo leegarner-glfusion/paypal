@@ -188,8 +188,7 @@ function plugin_getmenuitems_paypal()
     global $_CONF, $_PP_CONF, $LANG_PP;
 
     $menuitems = array();
-    if (SEC_hasRights('paypal.user,paypal.admin,paypal.view', 'OR') &&
-            $_PP_CONF['menuitem']) {
+    if ( $_PP_CONF['menuitem'] && PAYPAL_access_check()) {
         $a = preg_replace(
             '/\{(.*)\}/i',
             '<i class="uk-icon-${1}"></i>',
@@ -575,20 +574,29 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
  * Checks to see if the user has sufficient rights to view the page.
  *
  * Check if the current user has rights (at least one of) specified by
- * $rights.  If not log the error, display a generic access denied message
- * and exit.
+ * $rights.
  *
  * @param   string  $rights     Comma-separated list of allowable rights
+ * @return  boolean     True if user has access, False if not
  */
 function PAYPAL_access_check($rights = 'paypal.user,paypal.admin,paypal.view')
 {
-    global $_PLUGINS;
+    global $_PLUGINS, $_PP_CONF;
+    static $access = array();
 
-    // If this plugin or a required plugin isn't available, abort gracefully
-    if (!in_array('lglib', $_PLUGINS) || !SEC_hasRights($rights, 'OR')) {
-        COM_404();
-        exit;
+    if (!array_key_exists($rights, $access)) {
+        $acc = true;
+        if (!$_PP_CONF['shop_enabled'] && !SEC_inGroup('root')) {
+            $acc = false;
+        }
+        // If this plugin or a required plugin isn't available, abort gracefully
+        if (!in_array('lglib', $_PLUGINS) || !SEC_hasRights($rights, 'OR')) {
+            $acc = false;
+        }
+
+        $access[$rights] = $acc;
     }
+    return $access[$rights];
 }
 
 
@@ -939,7 +947,7 @@ function plugin_getcommenturlid_paypal()
  */
 function phpblock_paypal_cart()
 {
-    if (!PP_isMinVersion()) return '';
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
 
     $T = new Template(__DIR__ . '/templates');
     $T->set_file('shopping_cart', 'blk_cart.thtml');
@@ -1018,6 +1026,8 @@ function phpblock_paypal_search()
 {
     global $_TABLES;
 
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
+
     $T = new Template(__DIR__ . '/templates/');
     $T->set_file('search', 'blk_search.thtml');
 
@@ -1051,6 +1061,8 @@ function phpblock_paypal_random($cat='')
 {
     global $_PP_CONF;
 
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
+
     $limit = (int)$_PP_CONF['blk_random_limit'];
     if ($limit < 1)
         $limit = 1;
@@ -1076,6 +1088,8 @@ function phpblock_paypal_featured($cat='')
 {
     global $_PP_CONF;
 
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
+
     $limit = (int)$_PP_CONF['blk_featured_limit'];
     if ($limit < 1)
         $limit = 1;
@@ -1099,6 +1113,8 @@ function phpblock_paypal_featured($cat='')
 function phpblock_paypal_categories()
 {
     global $_TABLES;
+
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
 
     $parents = '0, ' . \Paypal\Category::getRoot()->cat_id;
     $sql = "SELECT c.cat_id, c.cat_name, count(p.id) AS cnt
@@ -1154,6 +1170,8 @@ function phpblock_paypal_popular()
 {
     global $_TABLES, $_PP_CONF;
 
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
+
     $limit = (int)$_PP_CONF['blk_popular_limit'];
     if ($limit < 1)
         $limit = 1;
@@ -1190,6 +1208,8 @@ function phpblock_paypal_popular()
 function phpblock_paypal_recent($cat='')
 {
     global $_TABLES, $_PP_CONF;
+
+    if (!PAYPAL_access_check() || !PP_isMinVersion()) return '';
 
     $limit = (int)$_PP_CONF['blk_popular_limit'];
     if ($limit < 1)

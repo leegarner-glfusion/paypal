@@ -25,7 +25,10 @@ if (!isset($_PP_CONF) || !in_array($_PP_CONF['pi_name'], $_PLUGINS)) {
 }
 
 // Ensure sufficient privs and dependencies to read this page
-PAYPAL_access_check();
+if (!PAYPAL_access_check()) {
+    COM_404();
+    exit;
+}
 
 // Import plugin-specific functions
 USES_paypal_functions();
@@ -276,7 +279,7 @@ case 'view':            // "?view=" url passed in
 case 'processorder':
     // Process the order, similar to what an IPN would normally do.
     // This is for internal, manual processes like C.O.D. or Prepayment orders
-    $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : 'check';
+    $gw_name = isset($_POST['gateway']) ? $_POST['gateway'] : $actionval;
     $gw = \Paypal\Gateway::getInstance($gw_name);
     if ($gw !== NULL) {
         $output = $gw->handlePurchase($_POST);
@@ -286,7 +289,7 @@ case 'processorder':
             break;
         }
         $view = 'thanks';
-        \Paypal\Cart::getInstance()->Clear(false);
+        //\Paypal\Cart::getInstance()->Clear(false);
     }
     $view = 'productlist';
     break;

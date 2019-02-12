@@ -1091,6 +1091,9 @@ function siteHeader($title='', $meta='')
         break;
     }
 
+    if (!$_PP_CONF['shop_enabled']) {
+        $retval .= '<div class="uk-alert uk-alert-danger">' . $LANG_PP['shop_closed'] . '</div>';
+    }
     return $retval;
 }
 

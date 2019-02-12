@@ -25,7 +25,10 @@ if (!isset($_PP_CONF) || !in_array($_PP_CONF['pi_name'], $_PLUGINS)) {
 require_once('../../auth.inc.php');
 
 // Check for required permissions
-PAYPAL_access_check('paypal.admin');
+if (!PAYPAL_access_check('paypal.admin')) {
+    COM_404();
+    exit;
+}
 
 USES_paypal_functions();
 USES_lib_admin();
