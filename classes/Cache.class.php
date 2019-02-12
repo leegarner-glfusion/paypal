@@ -103,12 +103,12 @@ class Cache
      */
     public static function makeKey($key, $incl_sechash = true)
     {
-        if ($incl_sechash) {
-            // Call the parent class function to use the security hash
-            $key = \glFusion\Cache\Cache::getInstance()->createKey(self::TAG . '_' . $key);
-        } else {
+        if (!$incl_sechash || version_compare(GVERSION, self::MIN_GVERSION, '<')) {
             // Just generate a simple string key
             $key = self::TAG . '_' . $key;
+        } else {
+            // Call the parent class function to use the security hash
+            $key = \glFusion\Cache\Cache::getInstance()->createKey(self::TAG . '_' . $key);
         }
         return $key;
     }
