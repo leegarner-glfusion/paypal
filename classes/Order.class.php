@@ -103,7 +103,7 @@ class Order
         }
         if ($this->isNew) {
             $this->order_id = self::_createID();
-            $this->order_date = PAYPAL_now()->toUnix();
+            $this->order_date = PAYPAL_now();
             $this->token = self::_createToken();
             $this->shipping = 0;
             $this->handling = 0;
@@ -318,9 +318,9 @@ class Order
         $this->pmt_method = PP_getVar($A, 'pmt_method');
         $this->pmt_txn_id = PP_getVar($A, 'pmt_txn_id');
         $this->currency = PP_getVar($A, 'currency', 'string', $_PP_CONF['currency']);
-        $this->order_date = PP_getVar($A, 'order_date', 'integer');
-        if ($this->order_date > 0) {
-            $this->order_date = new \Date($this->order_date, $tzid);
+        $dt = PP_getVar($A, 'order_date', 'integer');
+        if ($dt > 0) {
+            $this->order_date = new \Date($dt, $tzid);
         }
         $this->order_id = PP_getVar($A, 'order_id');
         $this->shipping = PP_getVar($A, 'shipping', 'float');
@@ -425,7 +425,7 @@ class Order
             // Set field values that can only be set once and not updated
             $sql1 = "INSERT INTO {$_TABLES['paypal.orders']} SET
                     order_id='{$this->order_id}',
-                    order_date = '{$this->order_date}',
+                    order_date = '{$this->order_date->toUnix()}',
                     token = '" . DB_escapeString($this->token) . "',
                     uid = '" . (int)$this->uid . "', ";
             $sql2 = '';
