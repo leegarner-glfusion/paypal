@@ -509,6 +509,9 @@ function plugin_autotags_paypal ($op, $content = '', $autotag = '')
             $pi_name . '_headlines',
         );
     } else if ($op == 'parse') {
+        // Do nothing if the user can't view the catalog
+        if (!PAYPAL_access_check() || !PP_isMinVersion()) return $content;
+
         $repl = false;      // assume no replacement to start off
         $t1 = explode(' ', $autotag['parm2']);
         $opts = array();
