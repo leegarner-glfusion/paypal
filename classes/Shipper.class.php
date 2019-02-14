@@ -181,7 +181,7 @@ class Shipper
                 // Skip shippers that don't handle this number of units
                 continue;
             } else {
-                $shipper->best_rate = 1000000;
+                $shipper->best_rate = 1000000;  // crazy high amount to start, then work down
                 foreach ($shipper->rates as $r_id=>$rate) {
                     $rate = $rate->rate * ceil($units / $rate->units);
                     if ($shipper->best_rate > $rate) {

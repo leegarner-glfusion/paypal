@@ -555,7 +555,9 @@ class paypal extends \Paypal\Gateway
                 $vars['no_shipping'] = '1';
                 break;
             case 2:
-                $vars['shipping'] = $P->shipping_amt;
+                $shipping = \Shop\Shipper::getBestRate($P->shipping_units)->best_rate;
+                $shipping += $P->getShipping();
+                $vars['shipping'] = $shipping;
                 $vars['no_shipping'] = '1';
                 break;
             case 1:
