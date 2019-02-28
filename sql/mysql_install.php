@@ -364,8 +364,10 @@ $_SQL['paypal.orders'] = "CREATE TABLE `{$_TABLES['paypal.orders']}` (
   `tax_rate` decimal(7,5) NOT NULL DEFAULT '0.00000',
   `info` text,
   `currency` varchar(5) NOT NULL DEFAULT 'USD',
+  `order_seq` int(11) UNSIGNED,
   PRIMARY KEY (`order_id`),
-  KEY (`order_date`)
+  KEY (`order_date`),
+  UNIQUE (order_seq)
 ) ENGINE=MyISAM";
 
 // since 0.5.0
@@ -932,10 +934,12 @@ $PP_UPGRADE['0.6.0'] = array(
     ) ENGINE=MyIsam",
 );
 $PP_UPGRADE['0.6.1'] = array(
-    "ALTER TABLE {$_TABLES['paypal.prod_attr']} CHANGE orderby orderby int(3)",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD currency varchar(5) NOT NULL DEFAULT 'USD'",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD order_seq int(11) UNSIGNED",
     "ALTER TABLE {$_TABLES['paypal.orders']} ADD UNIQUE (order_seq)",
+    "SET @i:=0",
+    "UPDATE {$_TABLES['paypal.orders']} SET order_seq = @i:=@i+1
+        WHERE status NOT IN ('cart','pending') ORDER BY order_date ASC",
 );
 
 ?>
