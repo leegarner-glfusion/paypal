@@ -1,7 +1,7 @@
 # Paypal plugin for glFusion - Changelog
 
 ## Ver 0.6.1
-Release TBD
+Released 2019-03-06
 - Fix setting order date in the Order class, wasn't always getting a Date object.
 - Allow admins to hide the shop from the public for testing.
 - Conditionally define service functions, avoid conflict with Shop plugin.
@@ -21,6 +21,7 @@ Release TBD
 - Fix handling of orderby option in product attribute list.
 - When editing an existing attribute the related product wasn't preselected.
 - Set `is_final` flag when printing an order.
+- Fix missing selectShipper() function in Order class.
 
 ## Ver 0.6.0
 Released 2018-11-04
