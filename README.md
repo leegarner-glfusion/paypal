@@ -1,6 +1,8 @@
 # Paypal
 Shopping plugin for glFusion. Supports Paypal and other gateways.
 
+DEPRECATED, See the Shop plugin
+
 This plugin provides a product catalog and shopping cart for physical
 and virtual products. The following payment gateways are supported:
 - Paypal
